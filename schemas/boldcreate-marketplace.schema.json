@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/saravananmadhesh/BoldCreate-Plugins/schemas/boldcreate-marketplace.schema.json",
+  "title": "BoldCreate Connect marketplace index",
+  "description": ".boldcreate-plugin/marketplace.json. Enough per plugin for ingestion and the marketplace UI to filter without opening each manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "owner", "plugins"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string", "minLength": 1 },
+    "owner": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" }, "email": { "type": "string" } } },
+    "metadata": {
+      "type": "object",
+      "properties": { "description": { "type": "string" }, "formatVersion": { "type": "integer", "minimum": 1 } }
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "description", "source", "components", "transports", "auth", "requiresSecrets", "rollout", "supportedByGateway"],
+        "properties": {
+          "name": { "type": "string" },
+          "displayName": { "type": "string" },
+          "version": { "type": "string" },
+          "description": { "type": "string" },
+          "source": { "type": "string", "pattern": "^plugins/[a-z0-9.-]+$" },
+          "category": { "type": "string" },
+          "components": { "type": "array", "items": { "enum": ["mcp", "skills", "rules", "hooks", "agents", "commands"] } },
+          "transports": { "type": "array", "items": { "enum": ["streamable-http", "stdio", "sse", "websocket"] } },
+          "auth": { "type": "array", "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] } },
+          "requiresSecrets": { "type": "boolean" },
+          "rollout": { "type": "object", "required": ["phase"], "properties": { "phase": { "type": "integer" }, "wave": { "enum": ["A", "B"] } } },
+          "supportedByGateway": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

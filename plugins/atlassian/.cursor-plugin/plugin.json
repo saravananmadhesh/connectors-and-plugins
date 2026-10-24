@@ -1,0 +1,26 @@
+{
+  "name": "atlassian",
+  "displayName": "Atlassian (Jira + Confluence)",
+  "version": "0.1.0",
+  "description": "Search and update Jira issues and Confluence pages.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://github.com/atlassian/atlassian-mcp-server",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "keywords": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "issues",
+    "wiki",
+    "mcp"
+  ],
+  "category": "project-management",
+  "tags": [
+    "project-management",
+    "mcp",
+    "http"
+  ],
+  "mcpServers": "./mcp.json"
+}
