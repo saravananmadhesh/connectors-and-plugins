@@ -34,6 +34,14 @@ BoldCreate Connect supports only streamable HTTP today, so every Phase 1 plugin 
 | [Sentry](plugins/sentry/README.md) | Investigate Sentry errors, stack traces, and issues for a project. | OAuth | `SENTRY_ORG`, `SENTRY_PROJECT` | B |
 | [Vercel](plugins/vercel/README.md) | Inspect Vercel projects, deployments, and build logs, and search Vercel docs. | OAuth | none | B |
 
+## First-party Syncfusion plugins
+
+These bundle skills and rules as well as an MCP server. Syncfusion's MCP servers run locally over **stdio**, so BoldCreate Connect can list them but not route them through the gateway until stdio support lands.
+
+| Plugin | What it does | Components | Transport | Install-time variables |
+| --- | --- | --- | --- | --- |
+| [Syncfusion Document SDK](plugins/syncfusion-document-sdk/README.md) | Generate and run code that creates, edits, converts, and extracts data from PDF, Word, Excel, and PowerPoint files. | MCP server, 16 skills, 1 rule | stdio | `SYNCFUSION_API_KEY` |
+
 Next: [Phase 2 list](docs/phase-2.md) · [Transport catalogue](catalog/transports.md) · [Keeping plugins updated (proposal)](docs/maintenance-proposal.md)
 
 ## Layout
@@ -45,7 +53,8 @@ Next: [Phase 2 list](docs/phase-2.md) · [Transport catalogue](catalog/transport
 plugins/<name>/
   .cursor-plugin/plugin.json         source: metadata + install-time variables
   mcp.json                           source: endpoint, headers with ${VARIABLES}
-  boldcreate.json                    source: transport, auth, phase, wave, docs link
+  boldcreate.json                    source: transport, auth, phase, wave, docs link, upstream sources
+  skills/<skill>/SKILL.md  rules/*.mdc  optional: other components, listed in the BoldCreate manifest
   .boldcreate-plugin/plugin.json     generated from the three source files
   .claude-plugin/plugin.json         generated from the three source files
   README.md  CHANGELOG.md

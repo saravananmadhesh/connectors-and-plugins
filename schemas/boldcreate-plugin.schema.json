@@ -32,7 +32,7 @@
     "supportedByGateway": { "type": "boolean", "description": "True when every MCP component uses a transport the gateway supports today." },
     "variables": {
       "type": "object",
-      "description": "Install-time values. Secrets are sealed and injected by the gateway; they replace ${KEY} in url and headers.",
+      "description": "Install-time values. Secrets are sealed and injected by the gateway; they replace ${KEY} in url, headers, args and env.",
       "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
       "additionalProperties": {
         "type": "object",
@@ -62,14 +62,17 @@
               "name": { "type": "string" },
               "transport": { "enum": ["streamable-http", "stdio", "sse", "websocket"] },
               "url": { "type": "string" },
+              "command": { "type": "string", "description": "stdio only: executable to launch." },
+              "args": { "type": "array", "items": { "type": "string" }, "description": "stdio only: arguments." },
+              "env": { "type": "object", "additionalProperties": { "type": "string" }, "description": "stdio only: environment variables, may reference ${KEY}." },
               "headers": { "type": "object", "additionalProperties": { "type": "string" } },
               "auth": {
                 "type": "object",
                 "additionalProperties": false,
                 "required": ["type"],
                 "properties": {
-                  "type": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] },
-                  "alternatives": { "type": "array", "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] } }
+                  "type": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth", "env"] },
+                  "alternatives": { "type": "array", "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth", "env"] } }
                 }
               }
             }

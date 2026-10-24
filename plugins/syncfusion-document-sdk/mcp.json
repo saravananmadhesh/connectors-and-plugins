@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "sf-documentsdk-mcp": {
+      "type": "stdio",
+      "command": "dnx",
+      "args": [
+        "Syncfusion.DocumentSdk.MCP",
+        "--yes"
+      ],
+      "env": {
+        "Syncfusion_API_Key": "${SYNCFUSION_API_KEY}"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+---
+description: Conventions for code that uses the Syncfusion Document SDK (PDF, Word/DocIO, Excel/XlsIO, PowerPoint, Markdown) in .NET projects.
+globs: "**/*.cs,**/*.csx,**/*.csproj,**/*.razor"
+alwaysApply: false
+---
+
+# Syncfusion Document SDK
+
+- Before writing Document SDK code, look up the API with the `search_docs` tool of the `sf-documentsdk-mcp` server, or load the matching `syncfusion-*` skill. Do not guess class or method names.
+- Use the Syncfusion NuGet packages for document work. Never use Office interop, OpenXML SDK, iText, or other libraries in a project that already uses Syncfusion for the same format.
+- In .NET Core, .NET 5+ and cross-platform apps, use the `.Net.Core` packages (for example `Syncfusion.Pdf.Net.Core`, `Syncfusion.DocIO.Net.Core`, `Syncfusion.XlsIO.Net.Core`, `Syncfusion.Presentation.Net.Core`) and the `Syncfusion.Drawing` types (`Color`, `PointF`, `RectangleF`, `SizeF`), not `System.Drawing`.
+- Keep all Syncfusion package versions in a project on the same release.
+- Register the license once at startup, before any Syncfusion type is used, and read the key from configuration or the `SYNCFUSION_LICENSE_KEY` environment variable. Never hard-code a license key or API key in source:
+
+  ```csharp
+  var key = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
+  if (!string.IsNullOrEmpty(key))
+      Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(key);
+  ```
+
+- Dispose or close documents and streams (`using` declarations) as soon as the work is done.
+- For AI agents that must edit documents at runtime, use the `Syncfusion.DocumentSDK.AI.AgentTools` package (Microsoft Agent Framework). Use in-memory mode for desktop and console apps, and storage mode (`IDocumentStorage`) for web APIs and stateless services. Keep an agent at 128 tools or fewer.

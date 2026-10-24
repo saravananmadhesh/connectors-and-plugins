@@ -18,6 +18,6 @@ Fallbacks: if Figma or Vercel refuse the BoldCreate gateway as an OAuth client, 
 ## Beyond MCP
 
 - **Skill and rule packs** with no server: code review, commit-message and PR conventions, C# and .NET rules, secure-coding rules. These test skill, rule and hook delivery.
-- **Syncfusion's own plugins**: the Syncfusion component coding assistants (Blazor, React, MAUI and others) run locally (stdio) today. Wrapping them as plugins with matching rules and skills is the strongest demo for Syncfusion customers, but needs stdio support or a hosted HTTP version.
+- **Syncfusion's own plugins**: started with [Syncfusion Document SDK](../plugins/syncfusion-document-sdk/README.md) (stdio MCP server, 16 skills, 1 rule). The Syncfusion component coding assistants (Blazor, React, MAUI and others) run locally (stdio) today. Wrapping them as plugins with matching rules and skills is the strongest demo for Syncfusion customers, but needs stdio support or a hosted HTTP version.
 - **Bundles**: for example "Starter for .NET teams" (GitHub, Microsoft Learn, Azure DevOps, Context7, C# rules), installed as Required or Default On for an org, like Cursor team marketplaces.
 - **Token variants** of OAuth plugins where the vendor allows it, such as Atlassian with an API token.

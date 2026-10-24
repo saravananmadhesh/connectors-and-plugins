@@ -6,7 +6,7 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { listPlugins, expectedFiles } from "./build.mjs";
+import { listPlugins, expectedFiles, listComponents } from "./build.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const readJSON = (p) => JSON.parse(readFileSync(join(root, p), "utf-8"));
@@ -86,13 +86,41 @@ for (const name of names) {
       if (!literal.startsWith("https://")) fail(`${where}: url must use https`);
       for (const m of server.url.matchAll(VAR_REF)) used.add(m[1]);
     }
-    for (const [h, value] of Object.entries(server.headers ?? {})) {
-      const refs = [...String(value).matchAll(VAR_REF)].map((m) => m[1]);
-      refs.forEach((r) => used.add(r));
-      if (/authorization|key|token|secret/i.test(h) && refs.length === 0) {
-        fail(`${where}: header "${h}" looks like a literal credential; use a \${VARIABLE}`);
+    if (meta?.transport === "stdio") {
+      if (server.type && server.type !== "stdio") fail(`${where}: type must be "stdio" for stdio`);
+      if (!server.command) fail(`${where}: command is required`);
+      if (server.url) fail(`${where}: a stdio server has no url`);
+    }
+    for (const a of server.args ?? []) for (const m of String(a).matchAll(VAR_REF)) used.add(m[1]);
+    for (const [kind, map] of [["header", server.headers], ["env", server.env]]) {
+      for (const [h, value] of Object.entries(map ?? {})) {
+        const refs = [...String(value).matchAll(VAR_REF)].map((m) => m[1]);
+        refs.forEach((r) => used.add(r));
+        if (/authorization|key|token|secret|password/i.test(h) && refs.length === 0) {
+          fail(`${where}: ${kind} "${h}" looks like a literal credential; use a \${VARIABLE}`);
+        }
       }
     }
+  }
+
+  // Skills: folder name must match the SKILL.md name, and a description is required.
+  for (const skill of listComponents(join(root, base)).skills) {
+    const text = readFileSync(join(root, base, skill, "SKILL.md"), "utf-8");
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fm) {
+      fail(`${base}/${skill}/SKILL.md has no frontmatter`);
+      continue;
+    }
+    const nameLine = fm[1].match(/^name:\s*["']?([^"'\r\n]+?)["']?\s*$/m);
+    const folder = skill.split("/")[1];
+    if (!nameLine) fail(`${base}/${skill}/SKILL.md frontmatter has no name`);
+    else if (nameLine[1] !== folder) fail(`${base}/${skill}: SKILL.md name "${nameLine[1]}" must match folder "${folder}"`);
+    if (!/^description:/m.test(fm[1])) fail(`${base}/${skill}/SKILL.md frontmatter has no description`);
+  }
+  for (const rule of listComponents(join(root, base)).rules) {
+    const text = readFileSync(join(root, base, rule), "utf-8");
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fm || !/^description:/m.test(fm[1])) fail(`${base}/${rule} needs frontmatter with a description`);
   }
 
   for (const v of used) if (!declared.has(v)) fail(`${base}: \${${v}} is used in mcp.json but not declared in variables`);

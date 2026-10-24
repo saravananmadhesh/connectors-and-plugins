@@ -87,6 +87,32 @@ export function claudeManifest(name) {
   return manifest;
 }
 
+// Non-MCP components found in the plugin folder, using the default layout
+// Cursor and Claude Code both discover: skills/<name>/SKILL.md,
+// rules/*.mdc, agents/*.md, commands/*.md, hooks/hooks.json.
+export function listComponents(dir) {
+  const files = (sub, ext) =>
+    existsSync(join(dir, sub))
+      ? readdirSync(join(dir, sub), { withFileTypes: true })
+          .filter((d) => d.isFile() && d.name.endsWith(ext))
+          .map((d) => `${sub}/${d.name}`)
+          .sort()
+      : [];
+  const skills = existsSync(join(dir, "skills"))
+    ? readdirSync(join(dir, "skills"), { withFileTypes: true })
+        .filter((d) => d.isDirectory() && existsSync(join(dir, "skills", d.name, "SKILL.md")))
+        .map((d) => `skills/${d.name}`)
+        .sort()
+    : [];
+  return {
+    skills,
+    rules: files("rules", ".mdc"),
+    hooks: existsSync(join(dir, "hooks/hooks.json")) ? ["hooks/hooks.json"] : [],
+    agents: files("agents", ".md"),
+    commands: files("commands", ".md"),
+  };
+}
+
 // Self-contained manifest BoldCreate ingests: metadata, components with
 // transport and auth, typed variables with a secret flag, rollout info.
 export function boldcreateManifest(name) {
@@ -106,8 +132,12 @@ export function boldcreateManifest(name) {
   );
 
   const mcpComponents = Object.entries(mcp.mcpServers).map(([key, server]) => {
-    const c = { name: key, transport: meta.transport, url: server.url };
+    const c = { name: key, transport: meta.transport };
+    if (server.url) c.url = server.url;
     if (server.headers) c.headers = server.headers;
+    if (server.command) c.command = server.command;
+    if (server.args) c.args = server.args;
+    if (server.env) c.env = server.env;
     c.auth = { type: meta.auth, alternatives: meta.alternativeAuth ?? [] };
     return c;
   });
@@ -128,7 +158,7 @@ export function boldcreateManifest(name) {
     rollout: { phase: meta.phase, ...(meta.wave ? { wave: meta.wave } : {}) },
     supportedByGateway: meta.transport === "streamable-http",
     variables,
-    components: { mcp: mcpComponents, skills: [], rules: [], hooks: [], agents: [], commands: [] },
+    components: { mcp: mcpComponents, ...listComponents(dir) },
     endpointCheck: meta.endpointCheck ?? null,
   };
 }

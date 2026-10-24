@@ -332,6 +332,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "syncfusion-document-sdk",
+      "displayName": "Syncfusion Document SDK",
+      "version": "0.1.0",
+      "description": "Generate and run code that creates, edits, converts, and extracts data from PDF, Word, Excel, and PowerPoint files with the Syncfusion Document SDK.",
+      "source": "plugins/syncfusion-document-sdk",
+      "category": "developer-tools",
+      "components": [
+        "mcp",
+        "skills",
+        "rules"
+      ],
+      "transports": [
+        "stdio"
+      ],
+      "auth": [
+        "env"
+      ],
+      "requiresSecrets": true,
+      "rollout": {
+        "phase": 2
+      },
+      "supportedByGateway": false
+    },
+    {
       "name": "vercel",
       "displayName": "Vercel",
       "version": "0.1.0",

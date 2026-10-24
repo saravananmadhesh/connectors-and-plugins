@@ -1,0 +1,89 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "syncfusion-document-sdk",
+  "displayName": "Syncfusion Document SDK",
+  "version": "0.1.0",
+  "description": "Generate and run code that creates, edits, converts, and extracts data from PDF, Word, Excel, and PowerPoint files with the Syncfusion Document SDK.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://www.syncfusion.com/explore/ai-agent-tools-for-document-sdk/",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "category": "developer-tools",
+  "keywords": [
+    "syncfusion",
+    "pdf",
+    "word",
+    "docx",
+    "excel",
+    "xlsx",
+    "powerpoint",
+    "pptx",
+    "dotnet",
+    "document-processing",
+    "mcp",
+    "skills"
+  ],
+  "hostedBy": "local",
+  "docs": "https://help.syncfusion.com/document-processing/mcp-server/overview",
+  "rollout": {
+    "phase": 2
+  },
+  "supportedByGateway": false,
+  "variables": {
+    "SYNCFUSION_API_KEY": {
+      "title": "Syncfusion API key",
+      "description": "API key from https://www.syncfusion.com/account/api-key. Needs an active Syncfusion license (commercial, community, or trial).",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "sf-documentsdk-mcp",
+        "transport": "stdio",
+        "command": "dnx",
+        "args": [
+          "Syncfusion.DocumentSdk.MCP",
+          "--yes"
+        ],
+        "env": {
+          "Syncfusion_API_Key": "${SYNCFUSION_API_KEY}"
+        },
+        "auth": {
+          "type": "env",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [
+      "skills/syncfusion-dotnet-calculate",
+      "skills/syncfusion-dotnet-document-chunking",
+      "skills/syncfusion-dotnet-excel",
+      "skills/syncfusion-dotnet-markdown",
+      "skills/syncfusion-dotnet-pdf",
+      "skills/syncfusion-dotnet-pdf-to-image",
+      "skills/syncfusion-dotnet-powerpoint",
+      "skills/syncfusion-dotnet-smart-data-extraction",
+      "skills/syncfusion-dotnet-word",
+      "skills/syncfusion-flutter-excel",
+      "skills/syncfusion-flutter-pdf",
+      "skills/syncfusion-java-word",
+      "skills/syncfusion-javascript-docx",
+      "skills/syncfusion-javascript-excel",
+      "skills/syncfusion-javascript-pdf",
+      "skills/syncfusion-javascript-powerpoint"
+    ],
+    "rules": [
+      "rules/syncfusion-document-sdk.mdc"
+    ],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

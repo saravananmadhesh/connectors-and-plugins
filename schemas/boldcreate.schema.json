@@ -14,15 +14,31 @@
       "enum": ["streamable-http", "stdio", "sse", "websocket"],
       "description": "MCP transport. BoldCreate Connect supports streamable-http only today."
     },
-    "auth": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"], "description": "Auth this package is configured for." },
+    "auth": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth", "env"], "description": "Auth this package is configured for. env = credential passed to a local (stdio) server as an environment variable." },
     "alternativeAuth": {
       "type": "array",
-      "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] },
+      "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth", "env"] },
       "uniqueItems": true,
       "description": "Other auth methods the server supports."
     },
     "hostedBy": { "enum": ["vendor", "boldcreate", "local"], "description": "Who runs the MCP server." },
     "docs": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "upstream": {
+      "type": "array",
+      "description": "Where vendored or launched components come from, so updates can be traced.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["component", "ref"],
+        "properties": {
+          "component": { "enum": ["mcp", "skills", "rules", "hooks", "agents", "commands"] },
+          "repository": { "type": "string", "format": "uri", "pattern": "^https://" },
+          "package": { "type": "string", "description": "Package the component runs, as <registry>:<name>, e.g. nuget:Foo or npm:@scope/foo." },
+          "ref": { "type": "string", "description": "Commit SHA, tag, or package version." },
+          "path": { "type": "string" }
+        }
+      }
+    },
     "endpointCheck": {
       "type": "object",
       "additionalProperties": false,

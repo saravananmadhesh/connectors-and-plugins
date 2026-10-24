@@ -1,0 +1,25 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "transport": "stdio",
+  "auth": "env",
+  "hostedBy": "local",
+  "docs": "https://help.syncfusion.com/document-processing/mcp-server/overview",
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  },
+  "upstream": [
+    {
+      "component": "skills",
+      "repository": "https://github.com/syncfusion/document-sdk-skills",
+      "ref": "c46c067f22c222deb824093f51a235c0bf2f4832",
+      "path": "skills"
+    },
+    {
+      "component": "mcp",
+      "package": "nuget:Syncfusion.DocumentSdk.MCP",
+      "ref": "latest"
+    }
+  ]
+}

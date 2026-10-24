@@ -78,6 +78,11 @@
       "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project."
     },
     {
+      "name": "syncfusion-document-sdk",
+      "source": "./plugins/syncfusion-document-sdk",
+      "description": "Generate and run code that creates, edits, converts, and extracts data from PDF, Word, Excel, and PowerPoint files with the Syncfusion Document SDK."
+    },
+    {
       "name": "vercel",
       "source": "./plugins/vercel",
       "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs."

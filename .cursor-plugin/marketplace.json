@@ -78,6 +78,11 @@
       "source": "plugins/supabase"
     },
     {
+      "name": "syncfusion-document-sdk",
+      "description": "Generate and run code that creates, edits, converts, and extracts data from PDF, Word, Excel, and PowerPoint files with the Syncfusion Document SDK.",
+      "source": "plugins/syncfusion-document-sdk"
+    },
+    {
       "name": "vercel",
       "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
       "source": "plugins/vercel"
