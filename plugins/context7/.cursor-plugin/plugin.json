@@ -1,0 +1,39 @@
+{
+  "name": "context7",
+  "displayName": "Context7",
+  "version": "0.1.0",
+  "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://context7.com/docs/resources/all-clients",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "keywords": [
+    "docs",
+    "libraries",
+    "frameworks",
+    "code-examples",
+    "mcp"
+  ],
+  "category": "documentation",
+  "tags": [
+    "documentation",
+    "mcp",
+    "http"
+  ],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "CONTEXT7_API_KEY": {
+        "type": "string",
+        "title": "Context7 API key",
+        "description": "API key from https://context7.com/dashboard.",
+        "x-sensitive": true
+      }
+    },
+    "required": [
+      "CONTEXT7_API_KEY"
+    ]
+  },
+  "mcpServers": "./mcp.json"
+}

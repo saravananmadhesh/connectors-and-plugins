@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "wave": "A",
+  "transport": "streamable-http",
+  "auth": "bearer",
+  "alternativeAuth": [
+    "oauth"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://linear.app/docs/mcp",
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}
