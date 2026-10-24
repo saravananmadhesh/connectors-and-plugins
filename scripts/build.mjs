@@ -3,8 +3,10 @@
 //   plugins/<name>/.claude-plugin/plugin.json   (Claude Code manifest)
 //   .cursor-plugin/marketplace.json             (Cursor marketplace index)
 //   .claude-plugin/marketplace.json             (Claude Code marketplace index)
+//   plugins/<name>/.boldcreate-plugin/plugin.json  (BoldCreate Connect manifest)
+//   .boldcreate-plugin/marketplace.json            (BoldCreate Connect marketplace index)
 //
-// Source of truth per plugin: .cursor-plugin/plugin.json + mcp.json.
+// Source of truth per plugin: .cursor-plugin/plugin.json + mcp.json + boldcreate.json.
 // Usage: node scripts/build.mjs          write the files
 //        node scripts/build.mjs --check  fail if any file is out of date
 
@@ -85,6 +87,52 @@ export function claudeManifest(name) {
   return manifest;
 }
 
+// Self-contained manifest BoldCreate ingests: metadata, components with
+// transport and auth, typed variables with a secret flag, rollout info.
+export function boldcreateManifest(name) {
+  const dir = join(root, "plugins", name);
+  const cursor = readJSON(join(dir, ".cursor-plugin/plugin.json"));
+  const mcp = readJSON(join(dir, "mcp.json"));
+  const meta = readJSON(join(dir, "boldcreate.json"));
+  const props = cursor.variables?.properties ?? {};
+  const required = new Set(cursor.variables?.required ?? []);
+
+  const variables = Object.fromEntries(
+    Object.entries(props).map(([key, p]) => {
+      const v = { title: p.title, description: p.description, required: required.has(key), secret: p["x-sensitive"] !== false };
+      if (p.default !== undefined) v.default = p.default;
+      return [key, v];
+    })
+  );
+
+  const mcpComponents = Object.entries(mcp.mcpServers).map(([key, server]) => {
+    const c = { name: key, transport: meta.transport, url: server.url };
+    if (server.headers) c.headers = server.headers;
+    c.auth = { type: meta.auth, alternatives: meta.alternativeAuth ?? [] };
+    return c;
+  });
+
+  return {
+    $schema: "../../../schemas/boldcreate-plugin.schema.json",
+    name: cursor.name,
+    displayName: cursor.displayName,
+    version: cursor.version,
+    description: cursor.description,
+    author: cursor.author,
+    homepage: cursor.homepage,
+    repository: cursor.repository,
+    category: cursor.category,
+    keywords: cursor.keywords,
+    hostedBy: meta.hostedBy,
+    docs: meta.docs,
+    rollout: { phase: meta.phase, ...(meta.wave ? { wave: meta.wave } : {}) },
+    supportedByGateway: meta.transport === "streamable-http",
+    variables,
+    components: { mcp: mcpComponents, skills: [], rules: [], hooks: [], agents: [], commands: [] },
+    endpointCheck: meta.endpointCheck ?? null,
+  };
+}
+
 export function marketplaces(names) {
   const entries = names.map((name) => {
     const m = readJSON(join(root, "plugins", name, ".cursor-plugin/plugin.json"));
@@ -102,7 +150,31 @@ export function marketplaces(names) {
     metadata: { description: MARKETPLACE.description },
     plugins: entries.map((e) => ({ name: e.name, source: `./plugins/${e.name}`, description: e.description })),
   };
-  return { cursor, claude };
+  const boldcreate = {
+    $schema: "../schemas/boldcreate-marketplace.schema.json",
+    name: MARKETPLACE.name,
+    owner: MARKETPLACE.owner,
+    metadata: { description: MARKETPLACE.description, formatVersion: 1 },
+    plugins: names.map((name) => {
+      const m = boldcreateManifest(name);
+      const mcp = m.components.mcp;
+      return {
+        name: m.name,
+        displayName: m.displayName,
+        version: m.version,
+        description: m.description,
+        source: `plugins/${m.name}`,
+        category: m.category,
+        components: Object.entries(m.components).filter(([, v]) => v.length).map(([k]) => k),
+        transports: [...new Set(mcp.map((c) => c.transport))],
+        auth: [...new Set(mcp.map((c) => c.auth.type))],
+        requiresSecrets: Object.values(m.variables).some((v) => v.secret),
+        rollout: m.rollout,
+        supportedByGateway: m.supportedByGateway,
+      };
+    }),
+  };
+  return { cursor, claude, boldcreate };
 }
 
 export function expectedFiles() {
@@ -110,10 +182,12 @@ export function expectedFiles() {
   const files = {};
   for (const name of names) {
     files[`plugins/${name}/.claude-plugin/plugin.json`] = toText(claudeManifest(name));
+    files[`plugins/${name}/.boldcreate-plugin/plugin.json`] = toText(boldcreateManifest(name));
   }
-  const { cursor, claude } = marketplaces(names);
+  const { cursor, claude, boldcreate } = marketplaces(names);
   files[".cursor-plugin/marketplace.json"] = toText(cursor);
   files[".claude-plugin/marketplace.json"] = toText(claude);
+  files[".boldcreate-plugin/marketplace.json"] = toText(boldcreate);
   return files;
 }
 

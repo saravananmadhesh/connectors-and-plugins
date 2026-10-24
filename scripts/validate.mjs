@@ -17,6 +17,8 @@ const schemas = {
   plugin: ajv.compile(readJSON("schemas/cursor-plugin.schema.json")),
   marketplace: ajv.compile(readJSON("schemas/cursor-marketplace.schema.json")),
   boldcreate: ajv.compile(readJSON("schemas/boldcreate.schema.json")),
+  boldcreatePlugin: ajv.compile(readJSON("schemas/boldcreate-plugin.schema.json")),
+  boldcreateMarketplace: ajv.compile(readJSON("schemas/boldcreate-marketplace.schema.json")),
 };
 
 let errors = 0;
@@ -98,6 +100,8 @@ for (const name of names) {
 }
 
 validate("marketplace", ".cursor-plugin/marketplace.json");
+validate("boldcreateMarketplace", ".boldcreate-plugin/marketplace.json");
+for (const name of names) validate("boldcreatePlugin", `plugins/${name}/.boldcreate-plugin/plugin.json`);
 
 // Generated files must match their sources.
 for (const [rel, text] of Object.entries(expectedFiles())) {
