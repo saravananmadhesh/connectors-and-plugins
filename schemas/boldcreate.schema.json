@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/saravananmadhesh/BoldCreate-Plugins/schemas/boldcreate.schema.json",
+  "title": "BoldCreate plugin metadata",
+  "description": "Extra metadata BoldCreate Connect needs that the Cursor and Claude manifests have no field for.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phase", "transport", "auth", "hostedBy", "docs"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "phase": { "type": "integer", "minimum": 1, "description": "Rollout phase this plugin belongs to." },
+    "wave": { "enum": ["A", "B"], "description": "Test wave. A = token or no auth, B = OAuth." },
+    "transport": {
+      "enum": ["streamable-http", "stdio", "sse", "websocket"],
+      "description": "MCP transport. BoldCreate Connect supports streamable-http only today."
+    },
+    "auth": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"], "description": "Auth this package is configured for." },
+    "alternativeAuth": {
+      "type": "array",
+      "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] },
+      "uniqueItems": true,
+      "description": "Other auth methods the server supports."
+    },
+    "hostedBy": { "enum": ["vendor", "boldcreate", "local"], "description": "Who runs the MCP server." },
+    "docs": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "endpointCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lastLiveCheck": { "type": ["string", "null"], "format": "date" },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}

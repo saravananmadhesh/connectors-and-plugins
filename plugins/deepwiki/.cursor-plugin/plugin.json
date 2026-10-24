@@ -1,0 +1,25 @@
+{
+  "name": "deepwiki",
+  "displayName": "DeepWiki",
+  "version": "0.1.0",
+  "description": "Ask questions about any public GitHub repository and read its generated wiki.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://docs.devin.ai/work-with-devin/deepwiki-mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "keywords": [
+    "github",
+    "docs",
+    "codebase",
+    "wiki",
+    "mcp"
+  ],
+  "category": "documentation",
+  "tags": [
+    "documentation",
+    "mcp",
+    "http"
+  ],
+  "mcpServers": "./mcp.json"
+}

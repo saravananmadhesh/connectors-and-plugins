@@ -1,0 +1,25 @@
+{
+  "name": "notion",
+  "displayName": "Notion",
+  "version": "0.1.0",
+  "description": "Search, read, and update Notion pages and databases.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://developers.notion.com/docs/mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "keywords": [
+    "notion",
+    "docs",
+    "wiki",
+    "knowledge-base",
+    "mcp"
+  ],
+  "category": "documentation",
+  "tags": [
+    "documentation",
+    "mcp",
+    "http"
+  ],
+  "mcpServers": "./mcp.json"
+}
