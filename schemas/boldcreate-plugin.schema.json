@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/saravananmadhesh/BoldCreate-Plugins/schemas/boldcreate-plugin.schema.json",
+  "title": "BoldCreate Connect plugin manifest",
+  "description": "plugins/<name>/.boldcreate-plugin/plugin.json. Self-contained: everything BoldCreate needs to ingest, review and install the plugin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "version", "description", "rollout", "variables", "components", "supportedByGateway"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string", "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$" },
+    "displayName": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$" },
+    "description": { "type": "string", "minLength": 1 },
+    "author": {
+      "type": "object",
+      "required": ["name"],
+      "properties": { "name": { "type": "string" }, "email": { "type": "string" }, "url": { "type": "string" } }
+    },
+    "homepage": { "type": "string", "format": "uri" },
+    "repository": { "type": "string", "format": "uri" },
+    "category": { "type": "string" },
+    "keywords": { "type": "array", "items": { "type": "string" } },
+    "hostedBy": { "enum": ["vendor", "boldcreate", "local"] },
+    "docs": { "type": "string", "format": "uri" },
+    "rollout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase"],
+      "properties": { "phase": { "type": "integer", "minimum": 1 }, "wave": { "enum": ["A", "B"] } }
+    },
+    "supportedByGateway": { "type": "boolean", "description": "True when every MCP component uses a transport the gateway supports today." },
+    "variables": {
+      "type": "object",
+      "description": "Install-time values. Secrets are sealed and injected by the gateway; they replace ${KEY} in url and headers.",
+      "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "description", "required", "secret"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "required": { "type": "boolean" },
+          "secret": { "type": "boolean" },
+          "default": { "type": "string" }
+        }
+      }
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mcp", "skills", "rules", "hooks", "agents", "commands"],
+      "properties": {
+        "mcp": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "transport", "auth"],
+            "properties": {
+              "name": { "type": "string" },
+              "transport": { "enum": ["streamable-http", "stdio", "sse", "websocket"] },
+              "url": { "type": "string" },
+              "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+              "auth": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type"],
+                "properties": {
+                  "type": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] },
+                  "alternatives": { "type": "array", "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] } }
+                }
+              }
+            }
+          }
+        },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "rules": { "type": "array", "items": { "type": "string" } },
+        "hooks": { "type": "array", "items": { "type": "string" } },
+        "agents": { "type": "array", "items": { "type": "string" } },
+        "commands": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "endpointCheck": {
+      "type": ["object", "null"],
+      "properties": { "lastLiveCheck": { "type": ["string", "null"] }, "source": { "type": "string" } }
+    }
+  }
+}

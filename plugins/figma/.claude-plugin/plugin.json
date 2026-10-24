@@ -1,0 +1,24 @@
+{
+  "name": "figma",
+  "displayName": "Figma",
+  "version": "0.1.0",
+  "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "keywords": [
+    "figma",
+    "design",
+    "design-to-code",
+    "ui",
+    "mcp"
+  ],
+  "mcpServers": {
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
+    }
+  }
+}

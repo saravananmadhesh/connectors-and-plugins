@@ -1,0 +1,86 @@
+{
+  "name": "boldcreate-plugins",
+  "owner": {
+    "name": "BoldCreate Connect"
+  },
+  "metadata": {
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day."
+  },
+  "plugins": [
+    {
+      "name": "atlassian",
+      "description": "Search and update Jira issues and Confluence pages.",
+      "source": "plugins/atlassian"
+    },
+    {
+      "name": "aws-knowledge",
+      "description": "Search AWS documentation, API references, and regional availability.",
+      "source": "plugins/aws-knowledge"
+    },
+    {
+      "name": "context7",
+      "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
+      "source": "plugins/context7"
+    },
+    {
+      "name": "deepwiki",
+      "description": "Ask questions about any public GitHub repository and read its generated wiki.",
+      "source": "plugins/deepwiki"
+    },
+    {
+      "name": "figma",
+      "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+      "source": "plugins/figma"
+    },
+    {
+      "name": "github",
+      "description": "Manage repos, issues, pull requests, and Actions.",
+      "source": "plugins/github"
+    },
+    {
+      "name": "linear",
+      "description": "Find, create, and update Linear issues, projects, and cycles.",
+      "source": "plugins/linear"
+    },
+    {
+      "name": "microsoft-learn",
+      "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
+      "source": "plugins/microsoft-learn"
+    },
+    {
+      "name": "neon",
+      "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
+      "source": "plugins/neon"
+    },
+    {
+      "name": "notion",
+      "description": "Search, read, and update Notion pages and databases.",
+      "source": "plugins/notion"
+    },
+    {
+      "name": "posthog",
+      "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
+      "source": "plugins/posthog"
+    },
+    {
+      "name": "sentry",
+      "description": "Investigate Sentry errors, stack traces, and issues for a project.",
+      "source": "plugins/sentry"
+    },
+    {
+      "name": "stripe",
+      "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
+      "source": "plugins/stripe"
+    },
+    {
+      "name": "supabase",
+      "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
+      "source": "plugins/supabase"
+    },
+    {
+      "name": "vercel",
+      "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+      "source": "plugins/vercel"
+    }
+  ]
+}

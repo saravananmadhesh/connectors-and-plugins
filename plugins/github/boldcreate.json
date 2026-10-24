@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "wave": "A",
+  "transport": "streamable-http",
+  "auth": "bearer",
+  "alternativeAuth": [
+    "oauth"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.github.com/en/copilot/how-tos/context/use-mcp/use-the-github-mcp-server",
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}
