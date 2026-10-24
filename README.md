@@ -2,7 +2,15 @@
 
 A plugin marketplace for **BoldCreate Connect**. Each plugin packages a remote MCP server so a team can install it once and every member's agent gets it, with secrets entered at install time.
 
-The same folders install in **Cursor** (`.cursor-plugin/`) and **Claude Code** (`.claude-plugin/`), and BoldCreate Connect reads both, plus a small `boldcreate.json` for the things neither format has a field for (transport, auth, rollout phase).
+The same folders install in **Cursor** (`.cursor-plugin/`), **Claude Code** (`.claude-plugin/`) and **BoldCreate Connect** (`.boldcreate-plugin/`). Each of the three has a marketplace index at the repo root and a manifest in every plugin folder.
+
+| Client | Marketplace index | Per-plugin manifest |
+| --- | --- | --- |
+| BoldCreate Connect | `.boldcreate-plugin/marketplace.json` | `plugins/<name>/.boldcreate-plugin/plugin.json` |
+| Cursor | `.cursor-plugin/marketplace.json` | `plugins/<name>/.cursor-plugin/plugin.json` |
+| Claude Code | `.claude-plugin/marketplace.json` | `plugins/<name>/.claude-plugin/plugin.json` |
+
+The BoldCreate manifest is self-contained: metadata, each MCP component with its transport and auth type, typed install-time variables with a `secret` flag, rollout phase and wave, and `supportedByGateway`. The BoldCreate marketplace index carries enough per plugin (transports, auth, whether secrets are needed, rollout) for ingestion and the marketplace UI to filter without opening each manifest.
 
 ## Phase 1: 15 streamable HTTP plugins
 
@@ -31,13 +39,15 @@ Next: [Phase 2 list](docs/phase-2.md) · [Transport catalogue](catalog/transport
 ## Layout
 
 ```
+.boldcreate-plugin/marketplace.json  generated: plugin index for BoldCreate Connect
 .cursor-plugin/marketplace.json      generated: plugin index for Cursor
 .claude-plugin/marketplace.json      generated: plugin index for Claude Code
 plugins/<name>/
-  .cursor-plugin/plugin.json         source of truth: metadata + install-time variables
-  mcp.json                           source of truth: endpoint, headers with ${VARIABLES}
-  .claude-plugin/plugin.json         generated from the two files above
-  boldcreate.json                    transport, auth, phase, wave, docs link
+  .cursor-plugin/plugin.json         source: metadata + install-time variables
+  mcp.json                           source: endpoint, headers with ${VARIABLES}
+  boldcreate.json                    source: transport, auth, phase, wave, docs link
+  .boldcreate-plugin/plugin.json     generated from the three source files
+  .claude-plugin/plugin.json         generated from the three source files
   README.md  CHANGELOG.md
 schemas/                             JSON schemas used by the validator
 scripts/build.mjs                    regenerates the generated files
@@ -50,11 +60,11 @@ Secrets are never committed. `mcp.json` references them as `${VARIABLE}`, and `p
 
 - **Cursor** asks for `variables` at install and fills `${VARIABLE}`.
 - **Claude Code** gets the same list as `userConfig` (secrets with `"sensitive": true`, stored in the OS keychain) and fills `${user_config.VARIABLE}`. `scripts/build.mjs` does this conversion.
-- **BoldCreate Connect** should ask for them at install, seal them, and inject them at the gateway.
+- **BoldCreate Connect** reads them from `.boldcreate-plugin/plugin.json` (`variables`, each with `required` and `secret`), asks at install, seals the secrets, and injects them into `${VARIABLE}` at the gateway.
 
 ## Adding or changing a plugin
 
-1. Create or edit `plugins/<name>/.cursor-plugin/plugin.json`, `mcp.json`, `boldcreate.json`, `README.md`.
+1. Create or edit the source files: `plugins/<name>/.cursor-plugin/plugin.json`, `mcp.json`, `boldcreate.json`, `README.md`. Never edit generated files by hand.
 2. Bump `version` and add a `CHANGELOG.md` entry.
 3. Run `npm install` once, then `npm run build` and `npm run validate`.
 4. Optional: `claude plugin validate plugins/<name>` for Anthropic's own check.
