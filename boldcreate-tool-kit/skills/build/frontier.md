@@ -23,7 +23,7 @@ If two ready slices plan to change the same files, run them one after the other.
 2. On conflicts, resolve them using the spec and both slices' intent, then run the `verify` skill. Done when `VERIFIED`.
 3. Set the slice's status to `done` in `docs/product/roadmap.md`, and stage it with the slice's changes.
 4. Commit with the subject `<slice-id>: <slice title>`. The body lists what changed in one to three lines.
-5. Fill the `Commit` column with the short hash at the next roadmap write: the next slice commit or the milestone review commit. The integration branch log is the record of truth; the subject prefix identifies each slice.
+5. Write the new short hash into the slice's `Commit` column. A commit cannot hold its own hash, so this edit is committed with the next slice or the milestone review commit. On resume, the integration branch log is the record of truth: the subject prefix identifies each slice.
 6. Remove the slice's worktree, if one was used. Keep the slice branch.
 
 Done when the integration branch has one new commit for the slice and the roadmap shows it as `done`.

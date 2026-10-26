@@ -24,7 +24,7 @@ Turn an approved architecture into a repository that builds and passes its tests
 5. **Record the project settings.** Run the `setup` skill. It reads the real commands and writes `.boldcreate/project.yml` and `.boldcreate/principles.md`. Files that already exist, such as the glossary, keep their content; setup only adds what is missing. Done when `project.yml` has `build` and `test` commands.
 6. **Create CI.** Follow `ci.md` in this folder. Done when the CI file exists and every command in it matches `project.yml`.
 7. **Verify.** Run the `verify` skill. The gate is `VERIFIED`. On `NOT VERIFIED`, fix the cause and run it again. After two failed attempts, show the evidence and ask the user how to proceed.
-8. **Commit.** Create the integration branch `feat/<slug>` for milestone 1, where `<slug>` comes from the product name in the PRD. If the repository has no commits yet, first commit a minimal default branch (README only) so the integration branch has a base. Commit the scaffold on it as one commit, `Scaffold <stack> project`. Do not push; the `ship` skill does that.
+8. **Commit.** Create the integration branch named on milestone 1's `Integration branch:` line in the roadmap. If the repository has no commits yet, first commit a minimal default branch (README only) so the integration branch has a base. Commit the scaffold on it as one commit, `Scaffold <stack> project`. Do not push; the `ship` skill does that.
 9. **Preview deployment (optional).** Ask whether the user wants a preview deployment. Only on a yes, follow `preview-deploy.md` in this folder.
 
 ## Gate
