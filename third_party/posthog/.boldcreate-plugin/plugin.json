@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "posthog",
+  "displayName": "PostHog",
+  "version": "0.2.0",
+  "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://posthog.com/docs/model-context-protocol",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "analytics",
+  "keywords": [
+    "posthog",
+    "analytics",
+    "feature-flags",
+    "errors",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://posthog.com/docs/model-context-protocol",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "POSTHOG_API_KEY": {
+      "title": "PostHog personal API key",
+      "description": "Create one in PostHog under Settings > Personal API keys, using the MCP Server preset.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "posthog",
+        "transport": "streamable-http",
+        "url": "https://mcp.posthog.com/mcp",
+        "headers": {
+          "Authorization": "Bearer ${POSTHOG_API_KEY}"
+        },
+        "auth": {
+          "type": "bearer",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

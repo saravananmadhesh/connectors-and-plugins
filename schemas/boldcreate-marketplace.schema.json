@@ -19,13 +19,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "version", "description", "source", "components", "transports", "auth", "requiresSecrets", "rollout", "supportedByGateway"],
+        "required": ["name", "version", "description", "source", "logo", "components", "transports", "auth", "requiresSecrets", "rollout", "supportedByGateway"],
         "properties": {
           "name": { "type": "string" },
           "displayName": { "type": "string" },
           "version": { "type": "string" },
           "description": { "type": "string" },
-          "source": { "type": "string", "pattern": "^plugins/[a-z0-9.-]+$" },
+          "source": { "type": "string", "pattern": "^third_party/[a-z0-9.-]+$" },
+          "logo": { "type": "string", "description": "Logo path relative to the repo root." },
           "category": { "type": "string" },
           "components": { "type": "array", "items": { "enum": ["mcp", "skills", "rules", "hooks", "agents", "commands"] } },
           "transports": { "type": "array", "items": { "enum": ["streamable-http", "stdio", "sse", "websocket"] } },

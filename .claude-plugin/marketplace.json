@@ -9,77 +9,77 @@
   "plugins": [
     {
       "name": "atlassian",
-      "source": "./plugins/atlassian",
+      "source": "./third_party/atlassian",
       "description": "Search and update Jira issues and Confluence pages."
     },
     {
       "name": "aws-knowledge",
-      "source": "./plugins/aws-knowledge",
+      "source": "./third_party/aws-knowledge",
       "description": "Search AWS documentation, API references, and regional availability."
     },
     {
       "name": "context7",
-      "source": "./plugins/context7",
+      "source": "./third_party/context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt."
     },
     {
       "name": "deepwiki",
-      "source": "./plugins/deepwiki",
+      "source": "./third_party/deepwiki",
       "description": "Ask questions about any public GitHub repository and read its generated wiki."
     },
     {
       "name": "figma",
-      "source": "./plugins/figma",
+      "source": "./third_party/figma",
       "description": "Turn Figma frames into code and read design tokens, components, and variables."
     },
     {
       "name": "github",
-      "source": "./plugins/github",
+      "source": "./third_party/github",
       "description": "Manage repos, issues, pull requests, and Actions."
     },
     {
       "name": "linear",
-      "source": "./plugins/linear",
+      "source": "./third_party/linear",
       "description": "Find, create, and update Linear issues, projects, and cycles."
     },
     {
       "name": "microsoft-learn",
-      "source": "./plugins/microsoft-learn",
+      "source": "./third_party/microsoft-learn",
       "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more."
     },
     {
       "name": "neon",
-      "source": "./plugins/neon",
+      "source": "./third_party/neon",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations."
     },
     {
       "name": "notion",
-      "source": "./plugins/notion",
+      "source": "./third_party/notion",
       "description": "Search, read, and update Notion pages and databases."
     },
     {
       "name": "posthog",
-      "source": "./plugins/posthog",
+      "source": "./third_party/posthog",
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog."
     },
     {
       "name": "sentry",
-      "source": "./plugins/sentry",
+      "source": "./third_party/sentry",
       "description": "Investigate Sentry errors, stack traces, and issues for a project."
     },
     {
       "name": "stripe",
-      "source": "./plugins/stripe",
+      "source": "./third_party/stripe",
       "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs."
     },
     {
       "name": "supabase",
-      "source": "./plugins/supabase",
+      "source": "./third_party/supabase",
       "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project."
     },
     {
       "name": "vercel",
-      "source": "./plugins/vercel",
+      "source": "./third_party/vercel",
       "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs."
     }
   ]
