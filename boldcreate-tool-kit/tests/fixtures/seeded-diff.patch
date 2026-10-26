@@ -1,0 +1,79 @@
+diff --git a/src/routes/plots.js b/src/routes/plots.js
+new file mode 100644
+index 0000000..d80e997
+--- /dev/null
++++ b/src/routes/plots.js
+@@ -0,0 +1,23 @@
++const express = require("express");
++const { listPlots, bookingsForSeason } = require("../services/plots");
++const { uploadReport } = require("../services/reports");
++
++const router = express.Router();
++
++router.get("/plots", async (req, res) => {
++  const plots = await listPlots(req.db);
++  res.json(plots);
++});
++
++router.get("/plots/bookings", async (req, res) => {
++  const bookings = await bookingsForSeason(req.db, req.query.season);
++  res.json(bookings);
++});
++
++router.post("/plots/bookings/export", async (req, res) => {
++  const bookings = await bookingsForSeason(req.db, req.body.season);
++  const url = await uploadReport(`bookings-${req.body.season}.csv`, bookings);
++  res.status(201).json({ url });
++});
++
++module.exports = router;
+diff --git a/src/services/plots.js b/src/services/plots.js
+new file mode 100644
+index 0000000..622aa50
+--- /dev/null
++++ b/src/services/plots.js
+@@ -0,0 +1,13 @@
++async function listPlots(db) {
++  return db.query("SELECT id, name, size_m2 FROM plots ORDER BY name");
++}
++
++async function bookingsForSeason(db, season) {
++  return db.query(
++    "SELECT plot_id, member_name, starts_on, ends_on FROM bookings WHERE season = '" +
++      season +
++      "' ORDER BY starts_on"
++  );
++}
++
++module.exports = { listPlots, bookingsForSeason };
+diff --git a/src/services/reports.js b/src/services/reports.js
+new file mode 100644
+index 0000000..f833646
+--- /dev/null
++++ b/src/services/reports.js
+@@ -0,0 +1,25 @@
++const REPORT_STORE_URL = "https://reports.example.test/upload";
++const REPORT_STORE_TOKEN = "rst_FAKE_EXAMPLE_7f3a9c2e4b1d8f60";
++
++function toCsv(rows) {
++  const header = Object.keys(rows[0] || {}).join(",");
++  const lines = rows.map((row) => Object.values(row).join(","));
++  return [header, ...lines].join("\n");
++}
++
++async function uploadReport(name, rows) {
++  const response = await fetch(`${REPORT_STORE_URL}/${name}`, {
++    method: "PUT",
++    headers: {
++      Authorization: `Bearer ${REPORT_STORE_TOKEN}`,
++      "Content-Type": "text/csv",
++    },
++    body: toCsv(rows),
++  });
++  if (!response.ok) {
++    throw new Error(`Report upload failed with status ${response.status}`);
++  }
++  return response.headers.get("Location");
++}
++
++module.exports = { uploadReport };

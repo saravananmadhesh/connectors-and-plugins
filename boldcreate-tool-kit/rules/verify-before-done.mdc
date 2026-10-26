@@ -1,0 +1,6 @@
+---
+description: Report work as done only with evidence from a passing build or test run
+alwaysApply: true
+---
+
+Call work done, fixed or passing only after the project's build and test commands from `.boldcreate/project.yml` have passed in this session. Otherwise show the evidence you have, and say which checks were not run.

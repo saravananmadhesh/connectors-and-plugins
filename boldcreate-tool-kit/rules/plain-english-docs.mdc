@@ -1,0 +1,13 @@
+---
+description: Writing style for Markdown documentation
+globs: "**/*.md"
+alwaysApply: false
+---
+
+- Use short, direct sentences in the active voice.
+- Explain how a thing works and why, not only what it is.
+- Define each term once, in `GLOSSARY.md` when the project has one, and use it with one meaning.
+- Give each heading a name that says what the section contains, and keep one idea per paragraph.
+- Prefer a concrete example over an abstract description. Keep code examples complete enough to run.
+- Leave out promotional words such as "powerful", "seamless", "robust" or "cutting-edge", and leave out emojis.
+- Remove sentences that do not change what the reader knows or does.
