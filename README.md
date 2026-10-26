@@ -95,13 +95,11 @@ boldcreate-tool-kit/                  # First-party plugin
 ├── boldcreate.json                   # BoldCreate Connect metadata
 ├── skills/<name>/SKILL.md            # Skills
 ├── agents/                           # Agents
-├── lenses/                           # Review checklists used by doc-reviewer
 ├── rules/                            # Cursor rules
+├── lenses/                           # Reviewer checklists
 ├── hooks/claude-hooks.json           # Claude Code hooks
 ├── instructions.md                   # Always-on rules for Claude Code
-├── templates/                        # Project file templates
 ├── tests/scenarios/<skill>.md        # One scenario per skill
-├── tests/fixtures/                   # Seeded documents for reviewer checks
 ├── assets/logo.svg
 ├── README.md
 ├── CHANGELOG.md
