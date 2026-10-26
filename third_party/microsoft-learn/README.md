@@ -35,7 +35,7 @@ This server needs no account or key.
 
 ## Logo
 
-Placeholder tile. Replace it with the vendor's official logo once we have permission to use it.
+Neutral tile with the product's initials.
 
 ## License
 
