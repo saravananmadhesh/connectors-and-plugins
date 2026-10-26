@@ -1,0 +1,76 @@
+{
+  "mcpServers": {
+    "agent-platform-generate": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/generate",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-predict": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/predict",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-models": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/models",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-endpoints": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/endpoints",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-tuning": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/tuning",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-evaluation": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/evaluation",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-prompts": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/prompts",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-retrieval": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/retrieval",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    },
+    "agent-platform-notebook": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/notebook",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    }
+  }
+}

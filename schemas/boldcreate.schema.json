@@ -21,7 +21,9 @@
       "uniqueItems": true,
       "description": "Other auth methods the server supports."
     },
-    "hostedBy": { "enum": ["vendor", "boldcreate", "local"], "description": "Who runs the MCP server." },
+    "hostedBy": { "enum": ["vendor", "customer", "boldcreate", "local"], "description": "Who runs the MCP server. customer = the customer hosts it (for example gitea-mcp next to their Gitea)." },
+    "stage": { "enum": ["ga", "preview", "beta", "early-access"], "description": "Vendor's launch stage for the MCP server." },
+    "oauthScopes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "description": "OAuth scopes to request, for servers that need them (Google)." },
     "docs": { "type": "string", "format": "uri", "pattern": "^https://" },
     "endpointCheck": {
       "type": "object",
