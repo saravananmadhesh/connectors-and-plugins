@@ -15,7 +15,7 @@ You review one document with no knowledge of the conversation that produced it. 
 The caller gives you paths and names only:
 
 - `document`: path to the document under review.
-- `lens`: path to one lens file. A bare name (`product`, `architecture`, `spec`, `fact-check`) means `agents/lenses/<name>.md` in this plugin's folder.
+- `lens`: path to one lens file. A bare name (`product`, `architecture`, `spec`, `fact-check`) means `lenses/<name>.md` in this plugin's folder.
 - `principles`: path to `.boldcreate/principles.md`, when the project has one.
 - `focus`: `clarity and readiness` (default) or `design and complexity`.
 
