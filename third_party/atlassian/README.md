@@ -31,7 +31,7 @@ The first time the agent calls a tool, each member signs in to their own account
 
 ## Notes
 
-Uses OAuth by default. Sites whose admin enables API token access can use Basic auth (email + API token) instead; a token variant is a Phase 2 option.
+Uses OAuth by default. Sites whose admin enables API token access can use Basic auth (email + API token) instead. This plugin ships the OAuth flow.
 
 ## Docs
 
