@@ -30,7 +30,7 @@ Redact keys, tokens, passwords, connection strings and personal data from every 
 
 7. **Clean up.** Remove every temporary log, assertion and debug change from step 5. Keep the loop as a regression test. Done when the diff contains only the fix and the regression test.
 
-8. **Hand off.** Run the `verify` skill, then the `code-review` skill.
+8. **Hand off.** Run the `code-review` skill, using the `verify` verdict from tdd.
 
 ## Report
 

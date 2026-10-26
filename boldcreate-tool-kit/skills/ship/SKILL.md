@@ -15,7 +15,7 @@ Get finished work into a pull request that a reviewer can approve quickly, then 
 - `.boldcreate/project.yml`: `git.host`, `git.default_branch`, `git.protected_branches`, `thresholds.pr_split_lines`.
 - `docs/product/roadmap.md` and the spec, for slice IDs and links.
 
-The commands below use `gh`. When `git.host` is `gitlab`, use the equivalents in `gitlab.md` in this folder.
+The commands below use `gh`. When `git.host` is `gitlab`, use the equivalents in `gitlab.md` in this folder. When it is `other`, push the branch, give the user the compare link to open the PR, and skip the CI watch unless the user names a command for it.
 
 ## Steps
 
@@ -24,14 +24,14 @@ The commands below use `gh`. When `git.host` is `gitlab`, use the equivalents in
 3. **Choose the PR shape.** Measure the diff against the default branch: `git diff --shortstat <default_branch>...<branch>`.
    - Changed lines (insertions plus deletions) at or under `pr_split_lines`: one PR from the branch into the default branch.
    - Over `pr_split_lines`: one PR per slice into the integration branch, as `open-pr.md` describes.
-4. **Push.** `git push -u origin <branch>`. Never push to a branch in `protected_branches`. If the push is rejected as non-fast-forward, follow `conflicts.md`; never force-push without the user's confirmation in this session.
+4. **Push.** On the one-PR path, run `git push -u origin <branch>`. On the per-slice path, skip this step; `open-pr.md` does every push. Never push to a branch in `protected_branches`. If the push is rejected as non-fast-forward, follow `conflicts.md`; never force-push without the user's confirmation in this session.
 5. **Open or update the PR.** Follow `open-pr.md`. If a PR for this branch already exists, update its body instead of opening another. Done when the PR URL is known.
 6. **Watch CI.** Run `gh pr checks <number> --watch`. When a check fails, follow `ci.md`. Done when every required check passes, or the user stops.
 7. **Handle review.** When the PR has unanswered review comments, follow `comments.md`. When GitHub reports the PR cannot merge cleanly, follow `conflicts.md`. After either, return to step 6.
 
 ## Finish
 
-Report in at most 120 words: the PR URL, check status, comments answered and still open, and what the human needs to do next.
+Report in at most 120 words: the PR URL, check status, comments answered and still open, and what the human needs to do next. After the human merges, suggest the `report` skill for release notes and the `retro` skill.
 
 Merging is the human's decision. If the user asks this session to merge, confirm the PR number, the target branch and the merge method first, then run `gh pr merge <number>` with that method.
 

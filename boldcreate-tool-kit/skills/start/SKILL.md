@@ -57,6 +57,8 @@ Classify the request, show the path in one line, let the user change it, then ha
 
    Done when the first skill has started.
 
+5. **Continue the path.** When a skill returns without handing off, start the next skill on the confirmed path, until `ship` has run. Done when `ship` reports or the user stops the work.
+
 ## Which skill when
 
 Any skill can also be run on its own. Use this table when the user asks what to run.

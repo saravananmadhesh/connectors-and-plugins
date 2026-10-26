@@ -1,4 +1,4 @@
-# BoldCreate Tool Kit rules
+# BoldCreate-tool-kit rules
 
 - Follow `.boldcreate/principles.md` when it exists. Check each change against it before calling the change finished. When a request or existing code conflicts with a principle, name the principle and the conflict, and ask the user before going against it.
 - Call work done, fixed or passing only after the project's build and test commands from `.boldcreate/project.yml` have passed in this session. Otherwise show the evidence you have, and say which checks were not run.
