@@ -6,7 +6,8 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { listPlugins, expectedFiles, PLUGINS_DIR } from "./build.mjs";
+import { listPlugins, expectedFiles, isMcpPlugin } from "./build.mjs";
+import { checkKit } from "./check-kit.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const readJSON = (p) => JSON.parse(readFileSync(join(root, p), "utf-8"));
@@ -46,23 +47,22 @@ function validate(kind, file) {
 const VAR_REF = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
 const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
 
-const names = listPlugins();
-for (const name of names) {
-  const base = `${PLUGINS_DIR}/${name}`;
+const plugins = listPlugins();
+const summaries = [];
+for (const { name, dir: base } of plugins) {
   const manifest = validate("plugin", `${base}/.cursor-plugin/plugin.json`);
   const meta = validate("boldcreate", `${base}/boldcreate.json`);
   if (!manifest) continue;
 
   if (manifest.name !== name) fail(`${base}: manifest name "${manifest.name}" must match folder name`);
   if (!SEMVER.test(manifest.version ?? "")) fail(`${base}: version "${manifest.version}" is not semver`);
-  if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
 
   if (manifest.license !== "MIT") fail(`${base}: license must be set (MIT, like cursor/plugins)`);
   if (!manifest.logo) fail(`${base}: logo must be set, e.g. "assets/logo.svg"`);
   else if (!/^assets\/[^/]+\.(svg|png)$/.test(manifest.logo)) fail(`${base}: logo must be an .svg or .png under assets/`);
   else if (!existsSync(join(root, base, manifest.logo))) fail(`${base}/${manifest.logo} does not exist`);
 
-  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "mcp.json"]) {
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE"]) {
     if (!existsSync(join(root, base, f))) fail(`${base}/${f} is missing`);
   }
   const changelog = existsSync(join(root, base, "CHANGELOG.md"))
@@ -72,7 +72,31 @@ for (const name of names) {
     fail(`${base}/CHANGELOG.md has no entry for version ${manifest.version}`);
   }
 
-  if (!existsSync(join(root, base, "mcp.json"))) continue;
+  if (!isMcpPlugin(manifest)) {
+    if (base.startsWith("third_party/")) fail(`${base}: plugins under third_party/ must declare mcpServers`);
+    if (existsSync(join(root, base, "mcp.json"))) fail(`${base}/mcp.json exists but the manifest declares no mcpServers`);
+    for (const key of ["transport", "auth", "alternativeAuth", "oauthScopes", "wave"]) {
+      if (meta && meta[key] !== undefined) fail(`${base}/boldcreate.json: ${key} applies only to MCP plugins`);
+    }
+    if (manifest.variables) fail(`${base}: variables apply only to MCP plugins`);
+    for (const [key, path] of [["skills", "./skills/"], ["agents", "./agents/"], ["rules", "./rules/"]]) {
+      if (manifest[key] !== path) fail(`${base}: ${key} must be "${path}"`);
+    }
+    if (manifest.hooks !== undefined) fail(`${base}: hooks must not be set; hooks/hooks.json is for Claude Code only`);
+    const { errors: kitErrors, summary } = checkKit(base);
+    kitErrors.forEach(fail);
+    summaries.push(summary);
+    continue;
+  }
+
+  if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
+  for (const key of ["transport", "auth", "hostedBy"]) {
+    if (meta && meta[key] === undefined) fail(`${base}/boldcreate.json: ${key} is required for MCP plugins`);
+  }
+  if (!existsSync(join(root, base, "mcp.json"))) {
+    fail(`${base}/mcp.json is missing`);
+    continue;
+  }
   const mcp = readJSON(`${base}/mcp.json`);
   const servers = Object.entries(mcp.mcpServers ?? {});
   if (!servers.length) fail(`${base}/mcp.json declares no servers`);
@@ -113,7 +137,7 @@ for (const name of names) {
 
 validate("marketplace", ".cursor-plugin/marketplace.json");
 validate("boldcreateMarketplace", ".boldcreate-plugin/marketplace.json");
-for (const name of names) validate("boldcreatePlugin", `${PLUGINS_DIR}/${name}/.boldcreate-plugin/plugin.json`);
+for (const { dir } of plugins) validate("boldcreatePlugin", `${dir}/.boldcreate-plugin/plugin.json`);
 
 // Generated files must match their sources.
 for (const [rel, text] of Object.entries(expectedFiles())) {
@@ -127,4 +151,5 @@ if (errors) {
   console.error(`\n${errors} problem(s) found.`);
   process.exit(1);
 }
-console.log(`All ${names.length} plugins are valid.`);
+summaries.forEach((s) => console.log(s));
+console.log(`All ${plugins.length} plugins are valid.`);
