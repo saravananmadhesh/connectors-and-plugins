@@ -50,6 +50,9 @@ export function listPlugins() {
   return [...firstParty, ...vendor].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+// Cursor auto-loads hooks/hooks.json in its own format, so Claude Code hooks live in a separate file.
+export const CLAUDE_HOOKS = "hooks/claude-hooks.json";
+
 export const isMcpPlugin = (cursor) => cursor.mcpServers !== undefined;
 
 // Skill, agent, rule and hook names found in a first-party plugin.
@@ -58,7 +61,7 @@ export function kitComponents(dir) {
   const skills = subdirs(join(base, "skills")).filter((n) => existsSync(join(base, "skills", n, "SKILL.md")));
   const agents = filesWith(join(base, "agents"), ".md").map((f) => f.slice(0, -3));
   const rules = filesWith(join(base, "rules"), ".mdc").map((f) => f.slice(0, -4));
-  const hooksFile = join(base, "hooks/hooks.json");
+  const hooksFile = join(base, CLAUDE_HOOKS);
   const hooks = existsSync(hooksFile) ? Object.keys(readJSON(hooksFile).hooks ?? {}).sort() : [];
   return { skills, agents, rules, hooks };
 }
@@ -97,11 +100,12 @@ export function claudeManifest({ dir }) {
   if (cursor.logo) manifest.icon = `./${cursor.logo}`;
 
   if (!isMcpPlugin(cursor)) {
-    // Claude Code scans skills/ and loads hooks/hooks.json by default. Agents are
-    // listed one by one so that helper files in agents/ subfolders are not loaded
-    // as agents. Claude Code has no rule component; instructions.md covers it.
+    // Claude Code scans skills/ by default. Agents are listed one by one so that
+    // only top-level agent files load. Claude Code has no rule component; the
+    // session-start hook loads instructions.md instead.
     const { agents } = kitComponents(dir);
     if (agents.length) manifest.agents = agents.map((a) => `./agents/${a}.md`);
+    if (existsSync(join(base, CLAUDE_HOOKS))) manifest.hooks = `./${CLAUDE_HOOKS}`;
     return manifest;
   }
 

@@ -96,7 +96,8 @@ boldcreate-tool-kit/                  # First-party plugin
 ├── skills/<name>/SKILL.md            # Skills
 ├── agents/                           # Agents
 ├── rules/                            # Cursor rules
-├── hooks/hooks.json                  # Claude Code hooks
+├── lenses/                           # Reviewer checklists
+├── hooks/claude-hooks.json           # Claude Code hooks
 ├── instructions.md                   # Always-on rules for Claude Code
 ├── tests/scenarios/<skill>.md        # One scenario per skill
 ├── assets/logo.svg

@@ -89,7 +89,12 @@
       "source": "boldcreate-tool-kit",
       "logo": "boldcreate-tool-kit/assets/logo.svg",
       "category": "developer-tools",
-      "components": [],
+      "components": [
+        "skills",
+        "rules",
+        "hooks",
+        "agents"
+      ],
       "transports": [],
       "auth": [],
       "requiresSecrets": false,
