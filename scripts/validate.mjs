@@ -82,7 +82,7 @@ for (const { name, dir: base } of plugins) {
     for (const [key, path] of [["skills", "./skills/"], ["agents", "./agents/"], ["rules", "./rules/"]]) {
       if (manifest[key] !== path) fail(`${base}: ${key} must be "${path}"`);
     }
-    if (manifest.hooks !== undefined) fail(`${base}: hooks must not be set; hooks/hooks.json is for Claude Code only`);
+    if (manifest.hooks !== undefined) fail(`${base}: hooks must not be set; the hooks file is for Claude Code only`);
     const { errors: kitErrors, summary } = checkKit(base);
     kitErrors.forEach(fail);
     summaries.push(summary);

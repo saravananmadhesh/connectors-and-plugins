@@ -12,7 +12,7 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
-import { listPlugins, isMcpPlugin, kitComponents } from "./build.mjs";
+import { listPlugins, isMcpPlugin, kitComponents, CLAUDE_HOOKS } from "./build.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -127,14 +127,19 @@ export function checkKit(dir) {
     fail(`${dir}/instructions.md is missing; Claude Code needs it for the always-on rules`);
   }
 
-  const hooksFile = join(base, "hooks/hooks.json");
+  if (existsSync(join(base, "hooks/hooks.json"))) {
+    fail(`${dir}/hooks/hooks.json: Cursor loads this file; put Claude Code hooks in ${CLAUDE_HOOKS}`);
+  }
+  const hooksFile = join(base, CLAUDE_HOOKS);
   if (existsSync(hooksFile)) {
     try {
       const hooks = JSON.parse(readFileSync(hooksFile, "utf-8")).hooks;
-      if (!hooks || typeof hooks !== "object" || Array.isArray(hooks)) fail(`${dir}/hooks/hooks.json: needs a top-level "hooks" object`);
+      if (!hooks || typeof hooks !== "object" || Array.isArray(hooks)) fail(`${dir}/${CLAUDE_HOOKS}: needs a top-level "hooks" object`);
     } catch (e) {
-      fail(`${dir}/hooks/hooks.json is not valid JSON: ${e.message}`);
+      fail(`${dir}/${CLAUDE_HOOKS} is not valid JSON: ${e.message}`);
     }
+  } else if (always.some((a) => a.what.startsWith("rule "))) {
+    fail(`${dir}/${CLAUDE_HOOKS} is missing; Claude Code needs a session-start hook for the always-on rules`);
   }
 
   const summary =
