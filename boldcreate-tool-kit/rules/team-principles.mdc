@@ -1,0 +1,6 @@
+---
+description: Follow the team principles in .boldcreate/principles.md
+alwaysApply: true
+---
+
+Follow `.boldcreate/principles.md` when it exists. Check each change against it before calling the change finished. When a request or existing code conflicts with a principle, name the principle and the conflict, and ask the user before going against it.
