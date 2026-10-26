@@ -1,0 +1,26 @@
+{
+  "name": "google-pay-wallet",
+  "displayName": "Google Pay and Wallet",
+  "version": "0.1.0",
+  "description": "Manage Google Pay merchant setup and read Google Wallet issuer data.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://developers.google.com/pay/api/web/guides/use-pay-wallet-mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google pay",
+    "google wallet",
+    "payments",
+    "merchant",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-pay-wallet": {
+      "type": "http",
+      "url": "https://paydeveloper.googleapis.com/mcp"
+    }
+  }
+}

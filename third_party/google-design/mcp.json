@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "google-design": {
+      "type": "http",
+      "url": "https://design.googleapis.com/mcp"
+    }
+  }
+}

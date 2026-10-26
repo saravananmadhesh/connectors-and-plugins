@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "gitea": {
+      "type": "http",
+      "url": "https://${GITEA_MCP_HOST}/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITEA_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

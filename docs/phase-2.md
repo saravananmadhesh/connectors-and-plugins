@@ -4,12 +4,14 @@ Phase 2 adds about 20 more HTTP plugins, then packs with no MCP server (skills, 
 
 ## More HTTP plugins
 
+Already built: 41 Google, GitLab and Gitea plugins (see the [README](../README.md#next-version-google-gitlab-and-gitea-41-plugins)). They replace the GitLab and BigQuery entries that used to be on this list.
+
 | Group | Plugins | Why later |
 | --- | --- | --- |
-| Code and DevOps | GitLab (`https://gitlab.com/api/v4/mcp`), Azure DevOps (`https://mcp.dev.azure.com/{org}`), Buildkite, Postman, Semgrep | Azure DevOps needs Microsoft Entra and a registered OAuth client; GitLab self-managed needs a per-instance URL |
+| Code and DevOps | Azure DevOps (`https://mcp.dev.azure.com/{org}`), Buildkite, Postman, Semgrep | Azure DevOps needs Microsoft Entra and a registered OAuth client |
 | Team and project tools | Slack, Asana, Monday.com, Miro, Zoom | Slack limits which apps may use its MCP server; the rest are less developer-focused |
 | Cloud and hosting | Cloudflare (docs, bindings, observability), Netlify, Render, Hugging Face | Cloudflare is several servers, so a good first multi-server plugin |
-| Data and observability | Datadog, Google BigQuery, Prisma Postgres | Datadog endpoints are per region; BigQuery needs Google OAuth scopes |
+| Data and observability | Datadog, Prisma Postgres | Datadog endpoints are per region |
 | Search and web | Exa, Firecrawl, Tavily | Paid API keys; overlap with agents' built-in search |
 | Payments and support | PayPal, Square, Intercom | Less developer demand than Stripe |
 
