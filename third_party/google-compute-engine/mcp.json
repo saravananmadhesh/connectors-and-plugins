@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "google-compute-engine": {
+      "type": "http",
+      "url": "https://compute.googleapis.com/mcp",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    }
+  }
+}

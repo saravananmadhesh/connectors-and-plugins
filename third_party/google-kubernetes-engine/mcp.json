@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "google-kubernetes-engine": {
+      "type": "http",
+      "url": "https://container.googleapis.com/mcp",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    }
+  }
+}

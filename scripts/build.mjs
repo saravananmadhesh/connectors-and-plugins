@@ -60,7 +60,15 @@ export function claudeManifest(name) {
   const mcp = readJSON(join(dir, "mcp.json"));
   const props = cursor.variables?.properties ?? {};
   const required = new Set(cursor.variables?.required ?? []);
-  const vars = Object.keys(props);
+
+  // Cursor's "auth" block (OAuth client ID and secret, used by Google servers)
+  // has no Claude Code equivalent in a plugin, so it is dropped here, along
+  // with any variable used only inside it.
+  const servers = Object.fromEntries(
+    Object.entries(mcp.mcpServers).map(([k, { auth, ...rest }]) => [k, rest])
+  );
+  const usedText = JSON.stringify(servers);
+  const vars = Object.keys(props).filter((v) => usedText.includes(`\${${v}}`));
 
   const manifest = {
     name: cursor.name,
@@ -88,7 +96,7 @@ export function claudeManifest(name) {
     );
   }
 
-  manifest.mcpServers = toClaudeRefs(mcp.mcpServers, vars);
+  manifest.mcpServers = toClaudeRefs(servers, vars);
   return manifest;
 }
 
@@ -114,6 +122,10 @@ export function boldcreateManifest(name) {
     const c = { name: key, transport: meta.transport, url: server.url };
     if (server.headers) c.headers = server.headers;
     c.auth = { type: meta.auth, alternatives: meta.alternativeAuth ?? [] };
+    if (server.auth) {
+      c.auth.oauthClient = { clientId: server.auth.CLIENT_ID, clientSecret: server.auth.CLIENT_SECRET };
+    }
+    if (meta.oauthScopes?.length) c.auth.scopes = meta.oauthScopes;
     return c;
   });
 
@@ -131,6 +143,7 @@ export function boldcreateManifest(name) {
     category: cursor.category,
     keywords: cursor.keywords,
     hostedBy: meta.hostedBy,
+    ...(meta.stage ? { stage: meta.stage } : {}),
     docs: meta.docs,
     rollout: { phase: meta.phase, ...(meta.wave ? { wave: meta.wave } : {}) },
     supportedByGateway: meta.transport === "streamable-http",

@@ -1,0 +1,25 @@
+{
+  "name": "google-cloud-alloydb",
+  "displayName": "Google Cloud AlloyDB",
+  "version": "0.1.0",
+  "description": "Manage AlloyDB for PostgreSQL clusters and run queries.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://docs.cloud.google.com/alloydb/docs/ai/use-alloydb-mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "alloydb",
+    "postgresql",
+    "database",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-alloydb": {
+      "type": "http",
+      "url": "https://alloydb.googleapis.com/mcp"
+    }
+  }
+}

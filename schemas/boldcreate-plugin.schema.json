@@ -23,7 +23,8 @@
     "logo": { "type": "string", "pattern": "^assets/[^/]+\\.(svg|png)$", "description": "Logo path relative to the plugin folder." },
     "category": { "type": "string" },
     "keywords": { "type": "array", "items": { "type": "string" } },
-    "hostedBy": { "enum": ["vendor", "boldcreate", "local"] },
+    "hostedBy": { "enum": ["vendor", "customer", "boldcreate", "local"] },
+    "stage": { "enum": ["ga", "preview", "beta", "early-access"] },
     "docs": { "type": "string", "format": "uri" },
     "rollout": {
       "type": "object",
@@ -71,7 +72,15 @@
                 "required": ["type"],
                 "properties": {
                   "type": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] },
-                  "alternatives": { "type": "array", "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] } }
+                  "alternatives": { "type": "array", "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] } },
+                  "oauthClient": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["clientId", "clientSecret"],
+                    "description": "Pre-registered OAuth client, as ${VARIABLE} references.",
+                    "properties": { "clientId": { "type": "string" }, "clientSecret": { "type": "string" } }
+                  },
+                  "scopes": { "type": "array", "items": { "type": "string" } }
                 }
               }
             }

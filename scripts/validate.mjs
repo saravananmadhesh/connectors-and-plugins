@@ -98,6 +98,13 @@ for (const name of names) {
         fail(`${where}: header "${h}" looks like a literal credential; use a \${VARIABLE}`);
       }
     }
+    // Cursor-style OAuth client block: both values must be variables.
+    for (const [k, value] of Object.entries(server.auth ?? {})) {
+      if (!["CLIENT_ID", "CLIENT_SECRET"].includes(k)) fail(`${where}: auth.${k} is not supported (use CLIENT_ID and CLIENT_SECRET)`);
+      const refs = [...String(value).matchAll(VAR_REF)].map((m) => m[1]);
+      if (refs.length === 0) fail(`${where}: auth.${k} must be a \${VARIABLE}, not a literal`);
+      refs.forEach((r) => used.add(r));
+    }
   }
 
   for (const v of used) if (!declared.has(v)) fail(`${base}: \${${v}} is used in mcp.json but not declared in variables`);

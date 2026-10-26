@@ -1,0 +1,27 @@
+{
+  "name": "firebase-sql-connect",
+  "displayName": "Firebase SQL Connect",
+  "version": "0.1.0",
+  "description": "Work with Firebase SQL Connect (Data Connect) services, schemas, and queries.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://firebase.google.com/docs/reference/sql-connect/mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "firebase",
+    "data connect",
+    "sql connect",
+    "postgres",
+    "graphql",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "firebase-sql-connect": {
+      "type": "http",
+      "url": "https://firebasedataconnect.googleapis.com/mcp"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "google-cloud-bigtable",
+  "displayName": "Google Cloud Bigtable",
+  "version": "0.1.0",
+  "minClientVersions": {
+    "cursor": "3.19.0"
+  },
+  "description": "Manage Bigtable instances, clusters, and tables.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://docs.cloud.google.com/bigtable/docs/use-bigtable-mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "bigtable",
+    "nosql",
+    "wide-column",
+    "database",
+    "mcp"
+  ],
+  "category": "database",
+  "tags": [
+    "database",
+    "google cloud",
+    "mcp",
+    "http"
+  ],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "CLIENT_ID": {
+        "type": "string",
+        "title": "Client ID",
+        "description": "A Google OAuth client your team created. Every team member signs in under it.",
+        "x-sensitive": false
+      },
+      "CLIENT_SECRET": {
+        "type": "string",
+        "title": "Client secret",
+        "description": "The secret for that OAuth client. Stored encrypted.",
+        "writeOnly": true,
+        "format": "password",
+        "x-sensitive": true
+      }
+    },
+    "required": [
+      "CLIENT_ID",
+      "CLIENT_SECRET"
+    ]
+  },
+  "mcpServers": "./mcp.json"
+}
