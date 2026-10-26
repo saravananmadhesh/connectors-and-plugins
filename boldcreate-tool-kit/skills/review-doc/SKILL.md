@@ -21,7 +21,7 @@ Have a reviewer with no memory of this conversation check one document, resolve 
   | `docs/specs/` | `spec` |
   | Any document the user wants checked against the code | `fact-check` |
 
-  Lens files live in this kit's `agents/lenses/` folder, two levels above this file.
+  Lens files live in this kit's `lenses/` folder, two levels above this file.
 
 ## Steps
 
