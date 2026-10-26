@@ -6,7 +6,7 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { listPlugins, expectedFiles } from "./build.mjs";
+import { listPlugins, expectedFiles, PLUGINS_DIR } from "./build.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const readJSON = (p) => JSON.parse(readFileSync(join(root, p), "utf-8"));
@@ -48,7 +48,7 @@ const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
 
 const names = listPlugins();
 for (const name of names) {
-  const base = `plugins/${name}`;
+  const base = `${PLUGINS_DIR}/${name}`;
   const manifest = validate("plugin", `${base}/.cursor-plugin/plugin.json`);
   const meta = validate("boldcreate", `${base}/boldcreate.json`);
   if (!manifest) continue;
@@ -57,7 +57,12 @@ for (const name of names) {
   if (!SEMVER.test(manifest.version ?? "")) fail(`${base}: version "${manifest.version}" is not semver`);
   if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
 
-  for (const f of ["README.md", "CHANGELOG.md", "mcp.json"]) {
+  if (manifest.license !== "MIT") fail(`${base}: license must be set (MIT, like cursor/plugins)`);
+  if (!manifest.logo) fail(`${base}: logo must be set, e.g. "assets/logo.svg"`);
+  else if (!/^assets\/[^/]+\.(svg|png)$/.test(manifest.logo)) fail(`${base}: logo must be an .svg or .png under assets/`);
+  else if (!existsSync(join(root, base, manifest.logo))) fail(`${base}/${manifest.logo} does not exist`);
+
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "mcp.json"]) {
     if (!existsSync(join(root, base, f))) fail(`${base}/${f} is missing`);
   }
   const changelog = existsSync(join(root, base, "CHANGELOG.md"))
@@ -101,7 +106,7 @@ for (const name of names) {
 
 validate("marketplace", ".cursor-plugin/marketplace.json");
 validate("boldcreateMarketplace", ".boldcreate-plugin/marketplace.json");
-for (const name of names) validate("boldcreatePlugin", `plugins/${name}/.boldcreate-plugin/plugin.json`);
+for (const name of names) validate("boldcreatePlugin", `${PLUGINS_DIR}/${name}/.boldcreate-plugin/plugin.json`);
 
 // Generated files must match their sources.
 for (const [rel, text] of Object.entries(expectedFiles())) {
