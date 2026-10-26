@@ -12,7 +12,7 @@ Build one milestone from `docs/product/roadmap.md`. Each ready slice goes to a f
 ## Inputs
 
 - `docs/product/roadmap.md`: milestones and the slice table `| ID | Slice | Blocked by | Status | Commit |`.
-- The spec or PRD each slice points to.
+- The spec or PRD named on the roadmap's `Source:` line, and the stories and check under `Slice details`.
 - `.boldcreate/project.yml`: commands, `thresholds.slice_review_files`, `git.default_branch`.
 
 If the roadmap has no slices, stop and run the `plan-slices` skill.
@@ -20,7 +20,7 @@ If the roadmap has no slices, stop and run the `plan-slices` skill.
 ## 1. Load the state
 
 1. Pick the milestone: the first one with a slice that is not `done`. Confirm it with the user in one line.
-2. Find or create the integration branch `feat/<slug>` from `git.default_branch`. Use the slug already named in the roadmap, if any.
+2. Read the milestone's `Integration branch:` line in the roadmap. Check out that branch, or create it from `git.default_branch` if it does not exist yet.
 3. Reconcile the roadmap with git. A slice whose ID starts a commit subject on the integration branch is done; set it to `done` and fill its commit. Never rebuild a done slice.
 4. For each slice marked `in-progress`: if its slice branch has commits, resume from them; otherwise set it back to `todo`.
 
