@@ -27,8 +27,8 @@ Get independent findings on what changed, on axes that are reported separately s
 
 4. **Start the reviewers in parallel.** Give each agent only paths, IDs and the commit range; never paste the diff or file contents.
    - `standards-reviewer`: the range, `.boldcreate/principles.md`, and the full path of this skill's [smells.md](smells.md).
-   - `spec-reviewer`: the range, the spec or bug report path, and the slice or story IDs in scope.
-   - `security-reviewer`: the range and the trigger lines that matched.
+   - `spec-reviewer`: the range, the spec or bug report path, the slice or story IDs in scope, and `.boldcreate/principles.md`.
+   - `security-reviewer`: the range, the trigger lines that matched, and `.boldcreate/principles.md`.
 
    Done when every started reviewer has returned its report.
 

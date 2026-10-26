@@ -12,7 +12,7 @@ thresholds:
   slice_review_files: 8
   pr_split_lines: 800
 git:
-  host: github            # github | gitlab
+  host: github            # github | gitlab | other
   default_branch: main
   protected_branches: [main]
 docs:

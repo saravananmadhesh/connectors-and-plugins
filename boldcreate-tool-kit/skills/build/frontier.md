@@ -15,7 +15,7 @@ If two ready slices plan to change the same files, run them one after the other.
 
 - Branch name: `feat/<slug>--<slice-id>`, for example `feat/billing--M1-S3`.
 - Base: the current tip of the integration branch `feat/<slug>`, taken when the slice starts, so it includes every slice merged so far.
-- Where the host runs agents in parallel, give each slice its own worktree (`git worktree add <path> -b <branch> feat/<slug>`) so agents never share a working folder.
+- Where the host runs agents in parallel and does not give each agent its own worktree, create one per slice without the branch (`git worktree add --detach <path> feat/<slug>`) and pass its path as `worktree`. The implementer creates the branch inside it, so agents never share a working folder.
 
 ## Merge one commit per slice
 

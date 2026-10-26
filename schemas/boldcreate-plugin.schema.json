@@ -88,7 +88,7 @@
         },
         "skills": { "type": "array", "items": { "type": "string" }, "description": "Skill folder names under skills/." },
         "rules": { "type": "array", "items": { "type": "string" }, "description": "Rule names under rules/, without .mdc." },
-        "hooks": { "type": "array", "items": { "type": "string" }, "description": "Hook event names in hooks/hooks.json." },
+        "hooks": { "type": "array", "items": { "type": "string" }, "description": "Hook event names in hooks/claude-hooks.json." },
         "agents": { "type": "array", "items": { "type": "string" }, "description": "Agent names under agents/, without .md." },
         "commands": { "type": "array", "items": { "type": "string" } }
       }

@@ -13,7 +13,7 @@ The kit is a set of skills, agents and rules. It has no MCP server and calls no 
 You also need:
 
 - `git`.
-- The GitHub CLI (`gh`), signed in, to open pull requests and read CI checks. GitHub is the default Git host. To use GitLab instead, set `git.host: gitlab` in `.boldcreate/project.yml` and install `glab`.
+- The GitHub CLI (`gh`), signed in, to open pull requests and read CI checks. GitHub is the default Git host. To use GitLab instead, set `git.host: gitlab` in `.boldcreate/project.yml` and install `glab`. For any other host, set `git.host: other`; the kit pushes branches and gives you the link to open the pull request yourself.
 - A host that runs subagents for the reviewer and implementer agents. Where a host cannot, the reviewer steps stop and say so instead of reviewing in the main session.
 
 ## Get started
@@ -86,6 +86,7 @@ Claude Code has no rule component. There, a session-start hook loads the three a
 | `.boldcreate/project.yml` | `setup`, `scaffold` | Commands, size thresholds, Git host and doc locations |
 | `.boldcreate/principles.md` | `setup` | Team principles that every review checks |
 | `.boldcreate/handoff.md` | `retro` | Where a new session should pick up |
+| `.boldcreate/review-M<n>.md` | `build` | Milestone review findings for the fix run; not committed |
 | `GLOSSARY.md` | `domain-docs` | Project terms, one line each |
 | `docs/adr/NNNN-<title>.md` | `domain-docs` | Decision records |
 | `docs/product/prd.md` | `define-product` | Product requirements |

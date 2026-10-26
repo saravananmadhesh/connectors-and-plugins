@@ -43,6 +43,6 @@ Paths below are defaults. When `.boldcreate/project.yml` exists, use its `docs` 
 
 6. **Approval gate.** Show the user the PRD path, the review verdict and any finding still open. Ask for approval.
    - Approved: hand off to the `design-architecture` skill.
-   - Changes requested: apply them, then ask again. Run review-doc again only if a must feature or the MVP scope changed.
+   - Changes requested: apply them, then ask again. If a must feature or the MVP scope changed and review round 2 has not run, run review-doc as round 2; otherwise show the change to the user and let them decide.
 
    Done when the user approves the PRD.

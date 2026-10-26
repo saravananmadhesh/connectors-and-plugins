@@ -18,6 +18,7 @@ The caller gives you paths, IDs and a range only:
 - `range`: a commit range such as `<base>..HEAD`. In drift mode, the commit to check, usually `HEAD`.
 - `ids` (optional): the story or slice IDs in scope, such as `US-2` or `M1-S3`. Without IDs, the whole spec is in scope.
 - `mode`: `diff` (default) or `drift`.
+- `principles` (optional): path to `.boldcreate/principles.md`. Report a principle the change breaks only when it also affects a spec statement.
 
 If the spec cannot be read, or `range` is empty in diff mode, return a report with one blocking finding that names the problem, and stop.
 
@@ -26,13 +27,13 @@ If the spec cannot be read, or `range` is empty in diff mode, return a report wi
 1. Read the spec and list every requirement in scope: each user story, acceptance condition, interface decision and out-of-scope item. Read `GLOSSARY.md` and `docs/adr/` when they exist. Done when you have a numbered list of checkable statements.
 2. Find the code for each statement.
    - `diff` mode: start from `git diff <range>`, then read the full files and their callers, because a requirement can be met or broken outside the changed lines.
-   - `drift` mode: search the code at the given commit for each statement, each glossary term and each accepted decision record.
+   - `drift` mode: search the code at the given commit for each statement. The caller checks the glossary and decision records.
    Done when every statement points to code that meets it or is marked not found.
 3. Classify each gap:
    - **missing**: a statement has no code that meets it.
    - **wrong**: code exists but behaves differently from the statement, including edge cases and error paths the spec names.
    - **unrequested**: behaviour in the range that no statement asks for, or that the spec puts out of scope.
-   - **drift** (drift mode): the spec, glossary or a decision record no longer matches the code.
+   - **drift** (drift mode): the spec no longer matches the code.
 4. Confirm each finding by reading the code path end to end. Run a test only when the project's test command in `.boldcreate/project.yml` can run it without changing files. Done when every finding is confirmed or dropped.
 
 ## Severity

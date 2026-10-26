@@ -43,7 +43,7 @@ To update an existing PR: `gh pr edit <number> --title "<title>" --body-file <fi
 
 Use this when the milestone diff is over `pr_split_lines`. Each PR then shows exactly one slice commit.
 
-1. Push the integration branch as it was before the first slice of this milestone: `git push -u origin <base-commit>:refs/heads/feat/<slug>`. The base commit is the parent of the first slice commit.
+1. Push the integration branch as it was before the first slice of this milestone: `git push -u origin <base-commit>:refs/heads/feat/<slug>`. The base commit is the parent of the first slice commit. If `feat/<slug>` already exists on the remote at a later commit, stop and ask the user: moving it back needs a force-push.
 2. For each slice in roadmap order, push a branch that ends at that slice's commit: `git push origin <slice-commit>:refs/heads/feat/<slug>--<slice-id>`.
 3. Open the first slice's PR into `feat/<slug>`. Open each later slice's PR into the previous slice's branch, so its diff holds only its own commit.
 4. Use the body template with one slice per PR, and add "Part n of m" under the title.

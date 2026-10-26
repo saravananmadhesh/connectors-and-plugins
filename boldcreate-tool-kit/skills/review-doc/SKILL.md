@@ -72,6 +72,6 @@ Have a reviewer with no memory of this conversation check one document, resolve 
    - the resolution table;
    - any finding the user accepted as open.
 
-   Do not save reviewer reports to files unless the user asks. On the feature path, hand off to the `plan-slices` skill once the user approves the spec.
+   Do not save reviewer reports to files unless the user asks. On the feature path, ask the user to approve the spec, then hand off to the `plan-slices` skill. Without approval, apply the requested changes and ask again.
 
    Done when the summary is shown and the next skill, if any, has started.

@@ -26,7 +26,7 @@ The templates live in this kit's `templates/` folder, two levels above this file
    Done when every key has a command or the user chose to leave it out.
 
 4. **Read the git settings.**
-   - `git.host`: `github` when the `origin` remote URL contains `github`, `gitlab` when it contains `gitlab`. Otherwise ask the user.
+   - `git.host`: `github` when the `origin` remote URL contains `github`, `gitlab` when it contains `gitlab`. Otherwise ask the user, and record `other` when the host is neither.
    - `git.default_branch`: the branch `origin/HEAD` points to. If it is not set, ask the user.
    - `git.protected_branches`: the default branch, plus any branch the user names.
 

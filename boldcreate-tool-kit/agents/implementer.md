@@ -18,7 +18,8 @@ The caller gives you paths, IDs and branch names only:
 - `roadmap`: path to `docs/product/roadmap.md`.
 - `slice`: the slice ID, such as `M1-S2`.
 - `base`: the integration branch, such as `feat/<slug>`.
-- `branch`: the slice branch to create, such as `feat/<slug>--M1-S2`.
+- `branch`: the slice branch, such as `feat/<slug>--M1-S2`. It already exists on fix runs.
+- `worktree` (optional): the folder to work in, when the caller created one.
 - `findings` (fix runs only): the finding IDs to fix and the path of the report that lists them, or the failing `verify` evidence.
 - `message` (fix runs only): the commit message to use.
 
@@ -26,7 +27,7 @@ The project's commands are in `.boldcreate/project.yml` and its principles in `.
 
 ## Method
 
-1. **Branch.** Confirm `git status` is clean, then create `branch` from `base` and switch to it. Done when `git status` shows a clean tree on `branch`.
+1. **Branch.** Work in `worktree` when given. Confirm `git status` is clean. Switch to `branch` if it exists; otherwise create it from `base`. Done when `git status` shows a clean tree on `branch`.
 2. **Understand.** Read the slice row in the roadmap, the spec sections it names, the principles and `GLOSSARY.md`. List the behaviours the slice must show and the test seams the spec agreed. Done when every behaviour on the list traces to a line in the spec, or to a finding or failing check on a fix run.
 3. **Red.** Write one test for the next behaviour, through a public interface at an agreed seam. Run the `test` command and confirm it fails for the expected reason. Done when the new test fails and the failure message names the missing behaviour.
 4. **Green.** Write the least code that makes the test pass, using the glossary's terms. Run the `test` command. Done when all tests pass. Repeat steps 3 and 4 until every behaviour on the list has a passing test.

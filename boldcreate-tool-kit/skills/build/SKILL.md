@@ -32,9 +32,9 @@ Follow `frontier.md` in this folder to find ready slices and to branch and merge
 
 1. Set its status to `in-progress` in the roadmap.
 2. Start the `implementer` agent with only: the slice ID, the roadmap path, the spec path, the integration branch and the slice branch name. Start one agent per ready slice, in parallel where the host allows. Where the host cannot start agents, build the slice in this session with the `tdd` skill, one slice at a time.
-3. When the implementer reports, run the `verify` skill on the slice branch. A slice is done only on `VERIFIED`.
+3. When the implementer reports, run the `verify` skill on the slice commit in a temporary detached worktree (`git worktree add --detach <path> <slice-branch>`), then remove that worktree. This works even while the slice branch is checked out elsewhere. A slice is done only on `VERIFIED`.
 4. Run a spec check when the slice changed more files than `thresholds.slice_review_files`, or changed a shared seam (a public interface other slices or modules call). Start the `spec-reviewer` agent with the spec path, the slice ID and the slice's commit range. Where the host cannot start agents, say the spec check was skipped and why.
-5. On `NOT VERIFIED` or a blocking finding, send the evidence or finding IDs back in one more implementer run. If it still fails, stop and ask the user.
+5. On `NOT VERIFIED` or a blocking finding, send the evidence or finding IDs back in one more implementer run on the same slice branch. If it still fails, stop and ask the user.
 6. Merge the slice as one commit and update the roadmap, as `frontier.md` describes.
 
 Recompute the frontier after each merge. Done when every slice in the milestone is `done`, or no slice is ready and some are still `todo`. In the second case, show the blocked slices and their blockers and ask the user.
@@ -51,7 +51,7 @@ A new session resumes by running this skill again; step 1 picks up from the road
 ## 4. Milestone review
 
 1. Run the `code-review` skill on the integration branch, from its merge base with `git.default_branch` to its tip. This is the full two-axis review for the milestone.
-2. Fix every blocking and major finding in one `implementer` run, passing the finding IDs and the report location. Commit the fixes as `M<n>: address review findings`.
+2. Save the review reports to `.boldcreate/review-M<n>.md` (not committed). Fix every blocking and major finding in one `implementer` run with branch `feat/<slug>--M<n>-review`, base the integration branch, the finding IDs and that report path, and the message `M<n>: address review findings`. Merge it as one commit, as `frontier.md` describes for a slice.
 3. Run the `verify` skill. The gate needs `VERIFIED`.
 
 Minor findings stay open and appear in the status report.

@@ -8,6 +8,7 @@ CI runs the same commands as the `verify` skill, so a green local run and a gree
 |---|---|
 | github | `.github/workflows/ci.yml` |
 | gitlab | `.gitlab-ci.yml` |
+| other | Ask the user for the CI system and file path; skip CI if they have none, and say so in the scaffold report. |
 
 ## What the pipeline must do
 
