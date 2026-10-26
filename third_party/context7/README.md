@@ -42,7 +42,7 @@ Tool calls run with the permissions of the key or token you provide. Rotate or r
 
 ## Logo
 
-Placeholder tile. Replace it with the vendor's official logo once we have permission to use it.
+Neutral tile with the product's initials.
 
 ## License
 
