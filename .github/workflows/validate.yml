@@ -18,4 +18,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run validate
+      - name: Generated files are up to date
+        run: npm run build -- --check
+      - name: Manifests, components and context budgets
+        run: npm run validate
+      - name: Claude Code plugin validator
+        run: |
+          npm install --global @anthropic-ai/claude-code@2.1.310
+          claude plugin validate .
+          for dir in */.claude-plugin third_party/*/.claude-plugin; do
+            claude plugin validate "$(dirname "$dir")"
+          done

@@ -1,6 +1,9 @@
 # BoldCreate Plugins
 
-Plugins for BoldCreate Connect, Cursor and Claude Code. Each plugin connects agents to a remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP and lives in its own directory under `third_party/` with its own manifests.
+Plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds two kinds of plugin, each in its own directory with its own manifests:
+
+- **First-party plugins** at the repository root, made of skills, agents and rules. `boldcreate-tool-kit/` gives agents one software delivery lifecycle on any stack.
+- **MCP plugins** under `third_party/`. Each connects agents to a vendor's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 ## Install
 
@@ -8,9 +11,15 @@ Plugins for BoldCreate Connect, Cursor and Claude Code. Each plugin connects age
 - **Cursor:** add this repository as a team marketplace, then install the plugin.
 - **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install <name>@boldcreate-plugins`.
 
-Secrets such as API keys are never stored in this repository. Each plugin declares them as install-time variables, and you enter them when you install it. See each plugin's README for setup.
+Secrets such as API keys are never stored in this repository. Each MCP plugin declares them as install-time variables, and you enter them when you install it. See each plugin's README for setup.
 
-## Plugins
+## First-party plugins
+
+| `name` | Plugin | Category | `description` (from marketplace) |
+|:-------|:-------|:---------|:-------------------------------------|
+| `boldcreate-tool-kit` | [BoldCreate-tool-kit](boldcreate-tool-kit/) | Developer Tools | Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests. |
+
+## MCP plugins
 
 | `name` | Plugin | Category | `description` (from marketplace) |
 |:-------|:-------|:---------|:-------------------------------------|
@@ -79,6 +88,21 @@ This is a multi-plugin marketplace repository. The root marketplace files list e
 .boldcreate-plugin/marketplace.json   # BoldCreate Connect marketplace (generated)
 .cursor-plugin/marketplace.json       # Cursor marketplace (generated)
 .claude-plugin/marketplace.json       # Claude Code marketplace (generated)
+boldcreate-tool-kit/                  # First-party plugin
+├── .cursor-plugin/plugin.json        # Manifest
+├── .claude-plugin/plugin.json        # Claude Code manifest (generated)
+├── .boldcreate-plugin/plugin.json    # BoldCreate Connect manifest (generated)
+├── boldcreate.json                   # BoldCreate Connect metadata
+├── skills/<name>/SKILL.md            # Skills
+├── agents/                           # Agents
+├── rules/                            # Cursor rules
+├── hooks/hooks.json                  # Claude Code hooks
+├── instructions.md                   # Always-on rules for Claude Code
+├── tests/scenarios/<skill>.md        # One scenario per skill
+├── assets/logo.svg
+├── README.md
+├── CHANGELOG.md
+└── LICENSE
 third_party/
 └── plugin-name/
     ├── .cursor-plugin/plugin.json      # Per-plugin manifest and install-time variables
@@ -91,14 +115,14 @@ third_party/
     ├── CHANGELOG.md
     └── LICENSE
 schemas/                              # JSON schemas for the manifests
-scripts/                              # build.mjs and validate.mjs
+scripts/                              # build.mjs, validate.mjs and check-kit.mjs
 ```
 
 ## Contributing
 
-1. Edit the source files in `third_party/<name>/`: `.cursor-plugin/plugin.json`, `mcp.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`. Don't edit generated files by hand.
-2. Run `npm ci`, then `npm run build` and `npm run validate`.
-3. Open a pull request. CI runs the same validation.
+1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a first-party plugin. Don't edit generated files by hand.
+2. Run `npm ci`, then `npm run build` and `npm run validate`. Validation also checks first-party plugins against their context budgets: auto-skill descriptions plus always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
+3. Open a pull request. CI runs the same checks and the Claude Code plugin validator.
 
 ## License
 
