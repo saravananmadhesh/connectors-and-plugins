@@ -127,6 +127,9 @@ export function checkKit(dir) {
     fail(`${dir}/instructions.md is missing; Claude Code needs it for the always-on rules`);
   }
 
+  if (existsSync(join(base, "hooks/hooks.json"))) {
+    fail(`${dir}/hooks/hooks.json: Cursor loads this file; put Claude Code hooks in ${CLAUDE_HOOKS}`);
+  }
   const hooksFile = join(base, CLAUDE_HOOKS);
   if (existsSync(hooksFile)) {
     try {
@@ -135,6 +138,8 @@ export function checkKit(dir) {
     } catch (e) {
       fail(`${dir}/${CLAUDE_HOOKS} is not valid JSON: ${e.message}`);
     }
+  } else if (always.some((a) => a.what.startsWith("rule "))) {
+    fail(`${dir}/${CLAUDE_HOOKS} is missing; Claude Code needs a session-start hook for the always-on rules`);
   }
 
   const summary =
