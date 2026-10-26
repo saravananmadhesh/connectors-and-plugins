@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-trace",
+  "displayName": "Google Cloud Trace",
+  "version": "0.1.0",
+  "description": "Find and read Cloud Trace spans to debug latency.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://docs.cloud.google.com/trace/docs/reference/mcp/mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "cloud trace",
+    "tracing",
+    "latency",
+    "observability",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-trace": {
+      "type": "http",
+      "url": "https://cloudtrace.googleapis.com/mcp"
+    }
+  }
+}

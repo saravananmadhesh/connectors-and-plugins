@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-bigtable",
+  "displayName": "Google Cloud Bigtable",
+  "version": "0.1.0",
+  "description": "Manage Bigtable instances, clusters, and tables.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://docs.cloud.google.com/bigtable/docs/use-bigtable-mcp",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "bigtable",
+    "nosql",
+    "wide-column",
+    "database",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-bigtable": {
+      "type": "http",
+      "url": "https://bigtableadmin.googleapis.com/mcp"
+    }
+  }
+}

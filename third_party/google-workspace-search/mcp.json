@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "google-workspace-search": {
+      "type": "http",
+      "url": "https://workspacemcp.googleapis.com/mcp/v1",
+      "auth": {
+        "CLIENT_ID": "${CLIENT_ID}",
+        "CLIENT_SECRET": "${CLIENT_SECRET}"
+      }
+    }
+  }
+}

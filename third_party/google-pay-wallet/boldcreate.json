@@ -1,0 +1,19 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "wave": "B",
+  "transport": "streamable-http",
+  "auth": "oauth",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://developers.google.com/pay/api/web/guides/use-pay-wallet-mcp",
+  "stage": "preview",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/paydeveloper.merchant",
+    "https://www.googleapis.com/auth/paydeveloper.issuer.readonly"
+  ],
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

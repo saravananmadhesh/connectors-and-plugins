@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "google-maps-code-assist": {
+      "type": "http",
+      "url": "https://mapscodeassist.googleapis.com/mcp"
+    }
+  }
+}
