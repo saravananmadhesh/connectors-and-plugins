@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Generates files that must stay in sync with each plugin's Cursor manifest:
-//   plugins/<name>/.claude-plugin/plugin.json   (Claude Code manifest)
+//   third_party/<name>/.claude-plugin/plugin.json   (Claude Code manifest)
 //   .cursor-plugin/marketplace.json             (Cursor marketplace index)
 //   .claude-plugin/marketplace.json             (Claude Code marketplace index)
-//   plugins/<name>/.boldcreate-plugin/plugin.json  (BoldCreate Connect manifest)
+//   third_party/<name>/.boldcreate-plugin/plugin.json  (BoldCreate Connect manifest)
 //   .boldcreate-plugin/marketplace.json            (BoldCreate Connect marketplace index)
 //
 // Source of truth per plugin: .cursor-plugin/plugin.json + mcp.json + boldcreate.json.
@@ -17,6 +17,9 @@ import { fileURLToPath } from "url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
 
+// Same layout as cursor/plugins: vendor integrations live under third_party/<name>/.
+export const PLUGINS_DIR = "third_party";
+
 const MARKETPLACE = {
   name: "boldcreate-plugins",
   owner: { name: "BoldCreate Connect" },
@@ -28,7 +31,7 @@ const readJSON = (p) => JSON.parse(readFileSync(p, "utf-8"));
 const toText = (obj) => JSON.stringify(obj, null, 2) + "\n";
 
 export function listPlugins() {
-  const dir = join(root, "plugins");
+  const dir = join(root, PLUGINS_DIR);
   return readdirSync(dir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name)
@@ -52,7 +55,7 @@ function toClaudeRefs(value, vars) {
 }
 
 export function claudeManifest(name) {
-  const dir = join(root, "plugins", name);
+  const dir = join(root, PLUGINS_DIR, name);
   const cursor = readJSON(join(dir, ".cursor-plugin/plugin.json"));
   const mcp = readJSON(join(dir, "mcp.json"));
   const props = cursor.variables?.properties ?? {};
@@ -67,8 +70,10 @@ export function claudeManifest(name) {
     author: cursor.author,
     homepage: cursor.homepage,
     repository: cursor.repository,
+    license: cursor.license,
     keywords: cursor.keywords,
   };
+  if (cursor.logo) manifest.icon = `./${cursor.logo}`;
 
   if (vars.length) {
     manifest.userConfig = Object.fromEntries(
@@ -90,7 +95,7 @@ export function claudeManifest(name) {
 // Self-contained manifest BoldCreate ingests: metadata, components with
 // transport and auth, typed variables with a secret flag, rollout info.
 export function boldcreateManifest(name) {
-  const dir = join(root, "plugins", name);
+  const dir = join(root, PLUGINS_DIR, name);
   const cursor = readJSON(join(dir, ".cursor-plugin/plugin.json"));
   const mcp = readJSON(join(dir, "mcp.json"));
   const meta = readJSON(join(dir, "boldcreate.json"));
@@ -121,6 +126,8 @@ export function boldcreateManifest(name) {
     author: cursor.author,
     homepage: cursor.homepage,
     repository: cursor.repository,
+    license: cursor.license,
+    logo: cursor.logo,
     category: cursor.category,
     keywords: cursor.keywords,
     hostedBy: meta.hostedBy,
@@ -135,20 +142,20 @@ export function boldcreateManifest(name) {
 
 export function marketplaces(names) {
   const entries = names.map((name) => {
-    const m = readJSON(join(root, "plugins", name, ".cursor-plugin/plugin.json"));
+    const m = readJSON(join(root, PLUGINS_DIR, name, ".cursor-plugin/plugin.json"));
     return { name: m.name, description: m.description };
   });
   const cursor = {
     name: MARKETPLACE.name,
     owner: MARKETPLACE.owner,
     metadata: { description: MARKETPLACE.description },
-    plugins: entries.map((e) => ({ ...e, source: `plugins/${e.name}` })),
+    plugins: entries.map((e) => ({ ...e, source: `${PLUGINS_DIR}/${e.name}` })),
   };
   const claude = {
     name: MARKETPLACE.name,
     owner: MARKETPLACE.owner,
     metadata: { description: MARKETPLACE.description },
-    plugins: entries.map((e) => ({ name: e.name, source: `./plugins/${e.name}`, description: e.description })),
+    plugins: entries.map((e) => ({ name: e.name, source: `./${PLUGINS_DIR}/${e.name}`, description: e.description })),
   };
   const boldcreate = {
     $schema: "../schemas/boldcreate-marketplace.schema.json",
@@ -163,7 +170,8 @@ export function marketplaces(names) {
         displayName: m.displayName,
         version: m.version,
         description: m.description,
-        source: `plugins/${m.name}`,
+        source: `${PLUGINS_DIR}/${m.name}`,
+        logo: `${PLUGINS_DIR}/${m.name}/${m.logo}`,
         category: m.category,
         components: Object.entries(m.components).filter(([, v]) => v.length).map(([k]) => k),
         transports: [...new Set(mcp.map((c) => c.transport))],
@@ -181,8 +189,8 @@ export function expectedFiles() {
   const names = listPlugins();
   const files = {};
   for (const name of names) {
-    files[`plugins/${name}/.claude-plugin/plugin.json`] = toText(claudeManifest(name));
-    files[`plugins/${name}/.boldcreate-plugin/plugin.json`] = toText(boldcreateManifest(name));
+    files[`${PLUGINS_DIR}/${name}/.claude-plugin/plugin.json`] = toText(claudeManifest(name));
+    files[`${PLUGINS_DIR}/${name}/.boldcreate-plugin/plugin.json`] = toText(boldcreateManifest(name));
   }
   const { cursor, claude, boldcreate } = marketplaces(names);
   files[".cursor-plugin/marketplace.json"] = toText(cursor);

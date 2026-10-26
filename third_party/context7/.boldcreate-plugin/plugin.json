@@ -1,0 +1,64 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "context7",
+  "displayName": "Context7",
+  "version": "0.2.0",
+  "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
+  "author": {
+    "name": "BoldCreate Connect"
+  },
+  "homepage": "https://context7.com/docs/resources/all-clients",
+  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "documentation",
+  "keywords": [
+    "docs",
+    "libraries",
+    "frameworks",
+    "code-examples",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://context7.com/docs/resources/all-clients",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CONTEXT7_API_KEY": {
+      "title": "Context7 API key",
+      "description": "API key from https://context7.com/dashboard.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "context7",
+        "transport": "streamable-http",
+        "url": "https://mcp.context7.com/mcp",
+        "headers": {
+          "Authorization": "Bearer ${CONTEXT7_API_KEY}"
+        },
+        "auth": {
+          "type": "bearer",
+          "alternatives": [
+            "oauth"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

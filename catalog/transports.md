@@ -11,7 +11,7 @@ The MCP spec defines two transports: **stdio** and **streamable HTTP**. **HTTP +
 
 ## Streamable HTTP (works now)
 
-- The 15 Phase 1 plugins in [`plugins/`](../plugins).
+- The 15 Phase 1 plugins in [`third_party/`](../third_party).
 - The [Phase 2 list](../docs/phase-2.md).
 - Almost all of Cursor's catalogue: 96 of its 98 MCP servers are HTTP, leaning to business apps (HubSpot, Gmail, Zoom, QuickBooks, Salesforce), a ready list if BoldCreate later serves non-developer teams.
 
