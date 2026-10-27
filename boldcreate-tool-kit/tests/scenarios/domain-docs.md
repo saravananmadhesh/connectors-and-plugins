@@ -11,3 +11,4 @@ We decided to keep sessions server-side. Record that, and add "session" to the g
 - docs/adr/0001-<kebab-title>.md is created with Context, Options, Decision and Consequences filled.
 - The record title states the decision, and its ID is ADR-0001.
 - The user is asked to accept the record, and its status reflects the answer.
+- Asked to record "use a local helper function for date formatting", the skill explains that the choice stays inside one module and writes no record.
