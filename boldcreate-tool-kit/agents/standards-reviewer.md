@@ -1,6 +1,6 @@
 ---
 name: standards-reviewer
-description: Fresh reviewer for the standards axis of a code review. Give it a commit range, the principles file and the smell baseline path; it checks repo standards and generated-code clutter and never edits files.
+description: Fresh reviewer for code standards in a commit range.
 tools: Read, Grep, Glob, Bash
 model: inherit
 readonly: true
@@ -41,12 +41,15 @@ Return only the report, at most 400 words:
 ```
 Verdict: BLOCKING | CHANGES | CLEAN
 | ID | Severity | Location | Quote | Fix |
+Files reviewed:
+- <path>
 ```
 
 - IDs are `S1`, `S2` and so on, in order of severity.
 - Location is `path:line` in the new version of the file.
 - Quote is the exact code or text, at most 15 words.
 - Fix is one concrete change.
+- Write every path relative to the repository root. List at most 5 files under `Files reviewed`, then `and <n> more`. The word limit does not count that list.
 - Verdict is `BLOCKING` when any finding is blocking, `CHANGES` when there are only major or minor findings, and `CLEAN` when there are none.
 - When the findings do not fit, keep the most severe and end with `Omitted: <n> minor`.
 
