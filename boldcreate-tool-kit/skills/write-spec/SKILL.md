@@ -36,9 +36,9 @@ Paths below are defaults. When `.boldcreate/project.yml` exists, use its `docs` 
 
    Done when every section is filled and every user story has at least one acceptance check.
 
-4. **Update the domain docs.** Run the `domain-docs` skill to add new terms to the glossary and to write a decision record for any hard-to-reverse choice the spec makes. Link those records from the spec.
+4. **Update the domain docs.** Run the `domain-docs` skill to add new terms to the glossary and to write a decision record for each choice the spec makes that meets that skill's bar for a record. Link those records from the spec.
 
-   Done when every new term is in the glossary and every hard-to-reverse choice links to a decision record.
+   Done when every new term is in the glossary and every choice that meets the bar links to a decision record.
 
 5. **Hand off.** Show the spec path and the number of user stories, then hand off to the `review-doc` skill with the `spec` lens.
 
