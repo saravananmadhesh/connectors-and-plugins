@@ -35,6 +35,7 @@ Follow `frontier.md` in this folder to find ready slices and to branch and merge
 3. When the implementer reports, run the `verify` skill on the slice commit in a fresh temporary worktree, as `frontier.md` describes. A slice is done only on `VERIFIED`.
 4. Run a spec check when the slice changed more files than `thresholds.slice_review_files`, or changed a shared seam (a public interface other slices or modules call). Start the `spec-reviewer` agent with the spec path, the slice ID and the slice's commit range. Where the host lets the caller pick the agent's model, use a smaller model (in Claude Code, `sonnet`). Where the host cannot start agents, say the spec check was skipped and why.
 5. On `NOT VERIFIED` or a blocking finding, send the evidence or finding IDs back in one more implementer run on the same slice branch. If it still fails, stop and ask the user.
+   When an implementer reports `BLOCKED` because a tool call was refused, show the user the refused command and how to allow it (in Claude Code, a `permissions.allow` entry), then build that slice in this session with the `tdd` skill. Start implementers again for later slices once the user has allowed the command.
 6. Merge the slice as one commit and update the roadmap, as `frontier.md` describes.
 
 Recompute the frontier after each merge. Done when every slice in the milestone is `done`, or no slice is ready and some are still `todo`. In the second case, show the blocked slices and their blockers and ask the user.

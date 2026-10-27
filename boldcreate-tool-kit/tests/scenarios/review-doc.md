@@ -12,3 +12,4 @@ A 1200-word spec at docs/specs/invoice-reminders/spec.md with one missing accept
 - When round 1 is BLOCKING, round 2 runs two passes in parallel; when it is not, no second round runs.
 - No third round runs; any blocker left after round 2 is put to the user.
 - The summary returns the final verdict and a resolution table; no report file is written.
+- On the feature path, after the user approves, the spec status is Approved and the spec, glossary and decision records are committed as one commit, `Add <feature> spec`.

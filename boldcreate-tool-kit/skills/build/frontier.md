@@ -32,7 +32,7 @@ Done when `verify` has returned and `git worktree list` no longer shows the path
 3. Set the slice's status to `done` in `docs/product/roadmap.md`, and stage it with the slice's changes.
 4. Commit with the subject `<slice-id>: <slice title>`. The body lists what changed in one to three lines.
 5. Write the new short hash into the slice's `Commit` column. A commit cannot hold its own hash, so this edit is committed with the next slice or a milestone fix commit. On resume, the integration branch log is the record of truth: the subject prefix identifies each slice.
-6. Remove the implementer's worktree: the one this skill created, or the one the host made for the agent (in Claude Code, under `.claude/worktrees/`; `git worktree list` shows which one holds the slice branch). Run `git worktree remove <path>`, then `git worktree prune`. If the worktree has uncommitted changes, show them and ask the user before removing it. Keep the slice branch.
+6. Remove the implementer's worktree: the one this skill created, or the one the host made for the agent (in Claude Code, under `.claude/worktrees/`; `git worktree list` shows which one holds the slice branch). Run `git worktree remove <path>`, then `git worktree prune`. If the worktree has uncommitted changes, show them and ask the user before removing it. Keep the slice branch. The host may also have made a branch of its own for the worktree (in Claude Code, `worktree-agent-<id>`); it holds no slice work, so remove it with `git branch -d`, which refuses if it has unmerged commits.
 
 Done when the integration branch has one new commit for the slice, the roadmap shows it as `done`, and `git worktree list` shows no worktree for the slice.
 

@@ -16,6 +16,7 @@ Add the security axis when the diff matches any line below. One match is enough.
 - Reading, storing, logging or sending credentials, keys or tokens.
 - New or changed handling of input from users, files, URLs, headers, queues or other services.
 - Building queries, shell commands, file paths, templates or HTML from input.
+- Writing input into files other programs open, such as CSV or spreadsheet exports, where a value starting with `=`, `+`, `-` or `@` can run as a formula.
 - Deserialising data from outside the process.
 - File upload or download.
 - Redirects or URLs built from input.

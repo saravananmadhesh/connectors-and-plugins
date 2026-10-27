@@ -18,3 +18,6 @@ Run the build skill.
 - The agent shows a status report of at most 250 words with done counts, open items and risks, points to the roadmap instead of repeating the slice table, and waits for approval before calling `ship`.
 - When the host reports agent token usage, the report has one cost line with the total and the largest run; otherwise it has none.
 - Nothing is pushed and no branch is deleted.
+- When an implementer reports BLOCKED because a command was refused, the user is shown the refused command and how to allow it, and that slice is built in the main session with tdd.
+- In Claude Code, after each slice merge, the host's `worktree-agent-<id>` branch is removed with `git branch -d`, and the slice branch is kept.
+- The implementer switches to its slice branch before reading the spec or roadmap, even when the host's worktree starts on the default branch.

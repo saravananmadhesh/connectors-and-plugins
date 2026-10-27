@@ -30,3 +30,7 @@ Run code-review.
 ## Expected
 - The agent lists the uncommitted files, says they are outside the review, and asks whether to commit them first.
 - After the commit, only the standards axis reviews the range from the merge base to `HEAD`.
+- When the first commit after the merge base is `Set up BoldCreate tool kit`, the range starts after it and the summary line says so.
+- On a `fix/<slug>` branch with `.boldcreate/bugs/<slug>.md`, the spec axis runs against that bug report.
+- A diff that writes user-entered names into a CSV export adds the security axis.
+- Run as background agents, the reviewers read files with the Read tool and run one git command per Bash call, and return findings instead of a "could not review" result.

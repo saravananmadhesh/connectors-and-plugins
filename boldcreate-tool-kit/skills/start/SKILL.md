@@ -9,6 +9,8 @@ disable-model-invocation: true
 
 Classify the request, show the path in one line, let the user change it, then hand off to the first skill of that path.
 
+Most kit skills start only when the user runs them, so the host may refuse to start one for you. Then read `<kit root>/skills/<name>/SKILL.md` and follow it; do not search for the file. The kit root is two levels above this file. In Claude Code, the session-start message also prints it as an absolute path. This applies to every skill this one starts, `setup` included. Running `start` is the user's request to run the skills on the chosen path.
+
 ## Steps
 
 1. **Check setup.** Look for `.boldcreate/project.yml`.
@@ -22,12 +24,13 @@ Classify the request, show the path in one line, let the user change it, then ha
    | Path | Matches when |
    |---|---|
    | New application | The repository has no source code and the user describes a product to build. |
-   | Bug | The user reports behaviour that differs from what the code is meant to do. |
+   | Bug | The user reports behaviour that differs from what the code is meant to do, and the report does not already pin down the change. |
    | Quick fix | The change is expected to stay under `thresholds.quick_fix_lines` changed lines (default 100) and touch fewer than `thresholds.quick_fix_core_files` core files (default 3). |
    | Feature | Anything else. |
 
    Core files are source files that hold behaviour. Tests, docs and configuration do not count.
    Estimate size by reading the code the request touches. If the estimate is near a threshold, or you cannot tell, choose Feature.
+   A defect report pins down the change when it names the wrong output and the input or field that causes it, for example "a comma in the customer name adds a CSV column". Such a report within the quick-fix limits is a Quick fix, and the report becomes its first failing test. When in doubt, choose Bug.
 
    For a new application, also pick the lane. Count the must-have features and the user groups the description names. At most `thresholds.small_app_features` must-have features (default 5) and one user group: small lane. Otherwise, or when you cannot tell: full lane.
 
@@ -40,6 +43,7 @@ Classify the request, show the path in one line, let the user change it, then ha
    ```
 
    For a new application, name the lane and its counts in the reason, for example `New application, small lane (4 must features, one user group)`, so the user can correct it.
+   On the Bug path, do not name a suspected cause or a line of code, here or anywhere before `debug` runs. `debug` must reach the cause from a failing check.
 
    | Path | Skills in order |
    |---|---|
@@ -61,8 +65,6 @@ Classify the request, show the path in one line, let the user change it, then ha
    | Quick fix | `tdd` |
 
    Done when the first skill has started.
-
-   Most kit skills start only when the user runs them, so the host may refuse to start one for you. Then read `<kit root>/skills/<name>/SKILL.md` and follow it; do not search for the file. The kit root is two levels above this file. In Claude Code, the session-start message also prints it as an absolute path. This applies to every hand-off on the path.
 
 5. **Continue the path.** When a skill returns without handing off, start the next skill on the confirmed path, until `ship` has run. Done when `ship` reports or the user stops the work.
 

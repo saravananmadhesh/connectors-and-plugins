@@ -14,13 +14,13 @@ Get independent findings on what changed, on axes that are reported separately s
    - the commit or range the caller or user named, else
    - the merge base with the default branch: `git merge-base HEAD <git.default_branch>`, reading the branch from `.boldcreate/project.yml` (default `main`).
 
-   Record the range as `<base>..HEAD`. Only committed changes are reviewed. Run `git status`; if it shows uncommitted changes, list them, say they are outside the review, and ask the user whether to commit them first. Never skip them silently. Done when the range is fixed, the user has answered about any uncommitted changes, and `git diff --stat <base>..HEAD` is not empty.
+   When the first commit after the base is `Set up BoldCreate tool kit`, move the base to that commit and say so; setup files are not part of the change. Record the range as `<base>..HEAD`. Only committed changes are reviewed. Run `git status`; if it shows uncommitted changes, list them, say they are outside the review, and ask the user whether to commit them first. Never skip them silently. Done when the range is fixed, the user has answered about any uncommitted changes, and `git diff --stat <base>..HEAD` is not empty.
 
 2. **Check the host.** The reviewers must run as separate agents with no chat history. If the host cannot start subagents, stop here and tell the user that this review needs a host with subagent support. Do not review in the main session instead.
 
 3. **Choose the axes.**
    - **Standards** always runs.
-   - **Spec** runs when a spec or bug report exists for the change, unless this is the quick-fix path. Find it from the caller, the branch name, or `docs/specs/`. If none exists, say so and skip the axis. For a milestone review (the whole integration branch), the spec is the one on the roadmap's `Source:` line, and the axis also checks the project rules: `overview.md` under `docs.architecture` (its validation and data rules) and every accepted decision record under `docs.adr`.
+   - **Spec** runs when a spec or bug report exists for the change, unless this is the quick-fix path. Find it from the caller, the branch name, or `docs/specs/`. For a `fix/<slug>` branch, the bug report is `.boldcreate/bugs/<slug>.md`. If none exists, say so and skip the axis. For a milestone review (the whole integration branch), the spec is the one on the roadmap's `Source:` line, and the axis also checks the project rules: `overview.md` under `docs.architecture` (its validation and data rules) and every accepted decision record under `docs.adr`.
    - **Security** runs when the diff matches any trigger in [security.md](security.md). Check the changed paths and the diff text against the list.
 
    Done when each axis is marked run or skipped, with a reason for each skip.
