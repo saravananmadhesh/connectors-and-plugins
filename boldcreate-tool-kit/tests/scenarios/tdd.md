@@ -23,3 +23,4 @@ go
 - The seam is named with its test file in one line, without asking the user to confirm it.
 - After verify returns VERIFIED, the change is committed once on `fix/<slug>`, with no extra prompt.
 - When the same skill runs inside build for a slice, no `fix/` branch is created and no commit is made by this skill.
+- Setup files left uncommitted on main are committed first on the new branch as `Set up BoldCreate tool kit`, without asking.
