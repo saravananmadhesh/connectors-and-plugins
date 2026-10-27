@@ -26,7 +26,7 @@ The templates live in this kit's `templates/` folder, two levels above this file
    Done when every key has a command or the user chose to leave it out.
 
 4. **Read the git settings.**
-   - `git.host`: `github` when the `origin` remote URL contains `github`, `gitlab` when it contains `gitlab`. Otherwise ask the user, and record `other` when the host is neither.
+   - `git.host`: `github` when the `origin` remote URL contains `github`, `gitlab` when it contains `gitlab`, and `other` for anything else, including a local path or no remote. Do not ask.
    - `git.default_branch`: the branch `origin/HEAD` points to. If it is not set, ask the user.
    - `git.protected_branches`: the default branch, plus any branch the user names.
 
@@ -40,9 +40,9 @@ The templates live in this kit's `templates/` folder, two levels above this file
    - If the user or their organization provides a principles file, copy it.
    - Otherwise copy `templates/principles.md`, then add up to five project principles you can read from the repository's contributing guide, editor and lint settings, or the patterns most of the code follows. Each added line names its source.
 
-   Show the file and ask the user to confirm or edit it.
+   Show the file and ask the user to confirm or edit it, unless the calling skill already has the user's answer on principles.
 
-   Done when the user has confirmed the principles.
+   Done when the user has confirmed the principles, now or through the caller.
 
 7. **Create the domain docs.** Run the `domain-docs` skill to create `GLOSSARY.md` and the decision record folder if they are missing.
 

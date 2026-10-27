@@ -18,7 +18,7 @@ Run on every push to the default branch and on every pull or merge request.
 |---|---|
 | build | `commands.build` from `.boldcreate/project.yml` |
 | test | `commands.test` |
-| lint | `commands.lint`, and `commands.typecheck` when present |
+| lint | `commands.lint` and `commands.typecheck`, each when present |
 | dependency scan | The stack's own audit command for known vulnerable dependencies, when the package manager has one. On GitLab, the `Jobs/Dependency-Scanning.gitlab-ci.yml` template can replace it where the plan includes it. |
 | secret scan | A maintained open-source secret scanner over the full history on the default branch and over the changed commits on requests. On GitLab, include the `Jobs/Secret-Detection.gitlab-ci.yml` template. |
 
