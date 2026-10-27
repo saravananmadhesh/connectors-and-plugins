@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/saravananmadhesh/BoldCreate-Plugins/schemas/boldcreate.schema.json",
+  "$id": "https://github.com/syncfusion/BoldCreate-Plugins/schemas/boldcreate.schema.json",
   "title": "BoldCreate plugin metadata",
   "description": "Extra metadata BoldCreate Connect needs that the Cursor and Claude manifests have no field for.",
   "type": "object",

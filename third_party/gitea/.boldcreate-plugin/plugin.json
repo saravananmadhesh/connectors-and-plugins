@@ -5,10 +5,10 @@
   "version": "0.1.0",
   "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://gitea.com/gitea/gitea-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "source-control",

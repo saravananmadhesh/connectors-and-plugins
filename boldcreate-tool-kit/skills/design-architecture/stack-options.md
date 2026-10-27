@@ -4,8 +4,8 @@ Offer two or three complete stacks that can each deliver the MVP. A stack names 
 
 ## Building the options
 
-1. Start from the constraints: stacks the PRD or the user already rules in or out, the platforms the product must run on, and the non-functional needs.
-2. Ask what the team already knows well if the PRD does not say. This is the one fact you cannot look up.
+1. Know what the team already knows well before you draft any option. If the PRD does not say, ask first. This is the one fact you cannot look up.
+2. Add the constraints: stacks the PRD or the user already rules in or out, the platforms the product must run on, and the non-functional needs.
 3. Choose options that differ in a way that matters for this product, such as a managed platform against self-hosted, or one language end to end against a separate front end and back end. Two options that differ only in a library name are one option.
 4. Check each option against current documentation for licensing and active maintenance. Drop any option whose license does not fit the product or whose main parts are no longer maintained.
 

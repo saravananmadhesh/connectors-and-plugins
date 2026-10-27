@@ -10,7 +10,7 @@ Search, read, and create files in Google Drive.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Drive**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Drive**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-drive@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-drive@boldcreate-plugins`.
 
 ## MCP
 

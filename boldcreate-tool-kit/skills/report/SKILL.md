@@ -20,7 +20,8 @@ Produce one of three reports from the repository and the Git host. Each report t
 1. **Pick the report.** Match the user's request to a row above. If it fits none or more than one, ask which, with drift as the recommended answer when the request mentions docs or specs. Done when one report type is chosen.
 2. **Fix the scope.** Each file states its default scope: drift covers all specs, release notes start at the last tag, progress covers the last seven days for the current git user. Show the scope in one line and let the user change it.
 3. **Load the file and follow it.** Done when the file's own check passes.
-4. **Show the report** in the chat. Save it to a file only when the user asks, at the path they name.
+4. **Show the report** in the chat. Done when the full report is shown.
+5. **Offer to save.** For a drift report or release notes, ask once whether to save it under `docs.reports` in `project.yml` (default `docs/reports`), as `<yyyy-mm-dd>-drift.md` or `<yyyy-mm-dd>-release-notes.md`. Write the file only when the user says yes. Save a progress summary only when the user asks, at the path they name. Done when the user has answered and any approved file exists.
 
 ## Hand-offs
 

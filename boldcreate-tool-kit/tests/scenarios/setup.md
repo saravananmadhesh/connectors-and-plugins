@@ -14,3 +14,4 @@ A repository with a build manifest that defines build, lint and test scripts, a 
 - .boldcreate/principles.md exists and the user was asked to confirm it.
 - GLOSSARY.md and docs/adr/ exist.
 - A second /setup run shows the saved commands and changes no file.
+- In a repository whose origin is a local path, or that has no remote, git.host is set to other without asking.

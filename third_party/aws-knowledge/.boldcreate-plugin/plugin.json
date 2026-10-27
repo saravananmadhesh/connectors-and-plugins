@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "description": "Search AWS documentation, API references, and regional availability.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "documentation",

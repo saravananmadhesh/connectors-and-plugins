@@ -8,7 +8,7 @@ Investigate Sentry errors, stack traces, and issues for a project.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Sentry**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Sentry**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install sentry@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install sentry@boldcreate-plugins`.
 
 ## MCP
 

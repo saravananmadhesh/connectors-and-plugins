@@ -15,17 +15,21 @@ Grow the code in small steps, each proven by a test that failed first.
 
 ## Steps
 
-1. **Agree the seams.** A seam is a public interface where a test can observe behaviour without reaching inside: an exported function, a module API, an HTTP endpoint, a command. Propose the seams for this change in a short list and ask the user to confirm. On the implementer path the seams come from the spec; use them as written. Done when the seams are confirmed or taken from the spec.
+1. **Set up the branch.** This step applies on the quick-fix and bug paths: when this skill is started directly, by `start`, or by `debug`. When `build` or the `implementer` agent runs it for a slice, the branch is already given; skip this step. Read `git.default_branch` and `git.protected_branches` from `project.yml`. If the current branch is a work branch not in `protected_branches`, stay on it. Otherwise create `fix/<slug>` from `git.default_branch`, where the slug is two to four kebab-case words naming the change. If the tree has uncommitted changes, ask the user whether they belong to this change before switching. Done when the current branch is not protected.
 
-2. **List behaviours.** Write the behaviours to prove, one line each, in the order you will build them. Start with the simplest useful case. Done when the list covers every acceptance point in the spec or bug report.
+2. **Agree the seams.** A seam is a public interface where a test can observe behaviour without reaching inside: an exported function, a module API, an HTTP endpoint, a command. Propose the seams for this change in a short list and ask the user to confirm. When the change stays inside one existing seam that tests already cover, do not ask; name the seam and its test file in one line. On the implementer path the seams come from the spec; use them as written. Done when the seams are confirmed, named as existing, or taken from the spec.
 
-3. **Red.** Write one test for the next behaviour on the list. Run the test command. Done when that test fails for the expected reason (an assertion about the missing behaviour, not a syntax or import error).
+3. **List behaviours.** Write the behaviours to prove, one line each, in the order you will build them. Start with the simplest useful case. Done when the list covers every acceptance point in the spec or bug report.
 
-4. **Green.** Write the least code that makes the test pass. Do not add behaviour no test asks for. Run the test command. Done when the new test and all earlier tests pass.
+4. **Red.** Write one test for the next behaviour on the list. Run the test command. Done when that test fails for the expected reason (an assertion about the missing behaviour, not a syntax or import error).
 
-5. **Repeat.** Go back to step 3 for the next behaviour. Done when every behaviour on the list has a passing test.
+5. **Green.** Write the least code that makes the test pass. Do not add behaviour no test asks for. Run the test command. Done when the new test and all earlier tests pass.
 
-6. **Hand off.** Run the `verify` skill. Report the tests added and the behaviours they cover. Done when `verify` returns its verdict.
+6. **Repeat.** Go back to step 4 for the next behaviour. Done when every behaviour on the list has a passing test.
+
+7. **Verify.** Run the `verify` skill. Report the tests added and the behaviours they cover. Done when `verify` returns its verdict.
+
+8. **Commit.** On the paths where step 1 applied: when `verify` returned `VERIFIED`, stage only the files of this change and commit once, with a subject that says what the change does for the user. On any other verdict, show the evidence and do not commit until the user decides. Done when `git log -1` shows the commit and `git status` lists no file of this change. The next skill on the path is `code-review`.
 
 ## Rules for every test
 
@@ -39,6 +43,6 @@ Read [tests.md](tests.md) when choosing what a test should assert or when a test
 ## Not in this loop
 
 - Refactoring. Note anything worth cleaning up and leave it for the `code-review` skill.
-- New behaviour discovered mid-loop. Add it to the list in step 2 if it is in scope; otherwise report it to the user.
+- New behaviour discovered mid-loop. Add it to the list in step 3 if it is in scope; otherwise report it to the user.
 
 If a test cannot be made to fail first because the behaviour already exists, say so, keep the test, and move to the next behaviour.

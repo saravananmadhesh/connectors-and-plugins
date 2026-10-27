@@ -7,10 +7,10 @@
   },
   "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "keywords": [

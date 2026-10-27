@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "List, read, and manage Cloud Storage buckets and objects.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/storage/docs/use-cloud-storage-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "cloud storage",

@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/instructions.md\""
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/instructions.md\" && printf '\\nKit root: %s\\n' \"${CLAUDE_PLUGIN_ROOT}\""
           }
         ]
       }

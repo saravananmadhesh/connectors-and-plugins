@@ -4,10 +4,10 @@
   "version": "0.2.0",
   "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://github.com/neondatabase-labs/mcp-server-neon",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "neon",

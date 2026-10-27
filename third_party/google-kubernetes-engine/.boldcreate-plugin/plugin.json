@@ -5,10 +5,10 @@
   "version": "0.1.0",
   "description": "Inspect and manage GKE clusters and workloads.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/kubernetes-engine/docs/how-to/use-gke-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "hosting",

@@ -8,7 +8,7 @@ Browse Google Cloud organizations, folders, and projects.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Resource Manager**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Resource Manager**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-resource-manager@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-resource-manager@boldcreate-plugins`.
 
 ## MCP
 

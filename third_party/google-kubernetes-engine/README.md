@@ -8,7 +8,7 @@ Inspect and manage GKE clusters and workloads.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Kubernetes Engine**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Kubernetes Engine**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-kubernetes-engine@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-kubernetes-engine@boldcreate-plugins`.
 
 ## MCP
 

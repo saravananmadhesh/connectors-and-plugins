@@ -14,7 +14,7 @@ Prove the current state of the code with the project's own commands, and report 
 
 2. **Fill gaps.** If the file is missing, or `commands.test` is missing, ask the user for the command. If the user gives one, offer to save it to `project.yml`. If the user says the project has none, continue without it. A missing build, typecheck or lint command is skipped without asking. Done when every command you will run is known.
 
-3. **Run in order.** Run build, typecheck, lint, test, skipping any that are not saved. Run each from the repository root. Record the exit code of each. Stop after the first failing command except lint, which never blocks the test run. Done when each command has run or been skipped.
+3. **Run in order.** Run build, typecheck, lint, test, skipping any that are not saved. Run each from the repository root, unfiltered: never pipe it through a filter such as `grep`, `head` or `tail`, because the pipe reports the filter's exit code instead of the command's. Record each exit code as soon as the command ends, then trim the output for the report. Stop after the first failing command except lint, which never blocks the test run. Done when each command has run or been skipped.
 
 4. **Re-run failures once.** If tests failed, run the test command one more time. Compare the failing test names. A test that fails on one run and passes on the other is flaky. Done when each failing test is marked as consistent or flaky.
 

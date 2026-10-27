@@ -10,7 +10,7 @@ Work with Firebase SQL Connect (Data Connect) services, schemas, and queries.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Firebase SQL Connect**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Firebase SQL Connect**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install firebase-sql-connect@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install firebase-sql-connect@boldcreate-plugins`.
 
 ## MCP
 

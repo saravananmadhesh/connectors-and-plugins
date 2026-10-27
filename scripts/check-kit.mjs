@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Checks the skills, agents, rules and hooks of first-party plugins, and the
 // context budgets they must stay within:
-//   TB-1  auto-skill descriptions plus always-on rules <= 600 tokens (characters / 4),
-//         each auto-skill description <= 40 words
+//   TB-1  auto-skill descriptions, agent descriptions and always-on rules <= 600 tokens
+//         (characters / 4), each auto-skill description <= 40 words. Claude Code counts
+//         instructions.md in place of the rules.
 //   TB-2  SKILL.md <= 150 lines
 //   TB-3  agent file <= 80 lines
 //   AC-8  every skill has tests/scenarios/<skill>.md
@@ -94,6 +95,7 @@ export function checkKit(dir) {
     const where = `${dir}/${rel}`;
     if (fm.name !== name) fail(`${where}: name "${fm.name}" must match the file name`);
     if (typeof fm.description !== "string" || !fm.description.trim()) fail(`${where}: description is missing`);
+    else always.push({ what: `agent ${name}`, text: fm.description });
     if (typeof fm.tools !== "string" || !fm.tools.trim()) fail(`${where}: tools is missing`);
     const lines = lineCount(text);
     if (lines > BUDGETS.agentLines) fail(`${where}: ${lines} lines (TB-3 limit ${BUDGETS.agentLines})`);
@@ -115,13 +117,12 @@ export function checkKit(dir) {
   }
 
   // Claude Code has no rules: instructions.md replaces the always-on rules there.
-  const autoOnly = always.filter((a) => a.what.startsWith("skill ")).reduce((n, a) => n + tokens(a.text), 0);
-  let claudeTotal = autoOnly;
+  let claudeTotal = always.filter((a) => !a.what.startsWith("rule ")).reduce((n, a) => n + tokens(a.text), 0);
   const instructions = join(base, "instructions.md");
   if (existsSync(instructions)) {
     claudeTotal += tokens(readFileSync(instructions, "utf-8"));
     if (claudeTotal > BUDGETS.alwaysLoadedTokens) {
-      fail(`${dir}: auto descriptions plus instructions.md are about ${claudeTotal} tokens (TB-1 limit ${BUDGETS.alwaysLoadedTokens})`);
+      fail(`${dir}: skill and agent descriptions plus instructions.md are about ${claudeTotal} tokens (TB-1 limit ${BUDGETS.alwaysLoadedTokens})`);
     }
   } else if (always.some((a) => a.what.startsWith("rule "))) {
     fail(`${dir}/instructions.md is missing; Claude Code needs it for the always-on rules`);

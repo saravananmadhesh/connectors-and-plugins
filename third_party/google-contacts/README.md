@@ -10,7 +10,7 @@ Look up contacts and people in your Google Workspace directory.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Contacts**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Contacts**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-contacts@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-contacts@boldcreate-plugins`.
 
 ## MCP
 
