@@ -1,7 +1,7 @@
 {
   "name": "boldcreate-tool-kit",
   "displayName": "BoldCreate-tool-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
   "author": {
     "name": "BoldCreate Connect"

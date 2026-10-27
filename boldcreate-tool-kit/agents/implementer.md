@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Builds one roadmap slice test-first on its own branch, commits it once, and reports the files changed with test evidence. Never pushes or merges.
+description: Builds one roadmap slice test-first as one commit.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 isolation: worktree
@@ -28,7 +28,7 @@ The project's commands are in `.boldcreate/project.yml` and its principles in `.
 ## Method
 
 1. **Branch.** Work in `worktree` when given. Confirm `git status` is clean. Switch to `branch` if it exists; otherwise create it from `base`. Done when `git status` shows a clean tree on `branch`.
-2. **Understand.** Read the slice row in the roadmap, the spec sections it names, the principles and `GLOSSARY.md`. List the behaviours the slice must show and the test seams the spec agreed. Done when every behaviour on the list traces to a line in the spec, or to a finding or failing check on a fix run.
+2. **Understand.** Read only the slice row in the roadmap, the spec sections it names, the principles, `GLOSSARY.md`, the files the slice will touch and their tests. Find those files with targeted searches; do not explore the rest of the repository. List the behaviours the slice must show and the test seams the spec agreed. Done when every behaviour on the list traces to a line in the spec, or to a finding or failing check on a fix run.
 3. **Red.** Write one test for the next behaviour, through a public interface at an agreed seam. Run the `test` command and confirm it fails for the expected reason. Done when the new test fails and the failure message names the missing behaviour.
 4. **Green.** Write the least code that makes the test pass, using the glossary's terms. Run the `test` command. Done when all tests pass. Repeat steps 3 and 4 until every behaviour on the list has a passing test.
 5. **Check.** Run each of the `build`, `typecheck`, `lint` and `test` commands that `project.yml` defines. Skip a command it does not define and say so; never invent one. Done when every defined command exits with 0.
@@ -46,6 +46,7 @@ The project's commands are in `.boldcreate/project.yml` and its principles in `.
 - Never write keys, tokens or passwords into code, tests or commits; read them from the environment. Mask any secret that appears in output you report.
 - Keep refactoring to what the current test needs; wider clean-up belongs to review.
 - Add no explanatory comments, placeholder notes or debug output to the code.
+- Finish with the worktree clean and the slice as one commit on `branch`; the caller merges it and removes the worktree.
 
 ## Report
 
@@ -64,3 +65,5 @@ Evidence:
 | Command | Exit code |
 Blocker: <question or failure, only when BLOCKED>
 ```
+
+Write every path relative to the repository root. List at most 5 files under `Files changed`, then `and <n> more`. The word limit does not count that list.

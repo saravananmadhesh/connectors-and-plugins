@@ -1,6 +1,6 @@
 ---
 name: doc-reviewer
-description: Fresh reviewer for a PRD, architecture document or feature spec. Give it the document path, a lens and the principles file; it returns a finding report and never edits files.
+description: Fresh reviewer for a PRD, architecture document or spec.
 tools: Read, Grep, Glob, Bash
 model: inherit
 readonly: true
@@ -44,12 +44,15 @@ Return only the report, at most 400 words:
 ```
 Verdict: BLOCKING | CHANGES | CLEAN
 | ID | Severity | Location | Quote | Fix |
+Files reviewed:
+- <path>
 ```
 
 - IDs are `D1`, `D2` and so on, in order of severity.
 - Location is the section heading, or `path:line` for code.
 - Quote is the exact text, at most 15 words, or `(missing)` when the problem is an absence.
 - Fix is one concrete change the author can make.
+- Write every path relative to the repository root. List at most 5 files under `Files reviewed`, then `and <n> more`. The word limit does not count that list.
 - Verdict is `BLOCKING` when any finding is blocking, `CHANGES` when there are only major or minor findings, and `CLEAN` when there are none.
 - When the findings do not fit, keep the most severe and end with `Omitted: <n> minor`.
 
