@@ -54,4 +54,4 @@ After every slice PR has merged, open one PR from `feat/<slug>` into the default
 
 ## No PR tool (`git.host: other`)
 
-Push the branch as on the one-PR path. Then write the title and the body above to `.boldcreate/pr-<branch>.md`, with each `/` in the branch name replaced by `-`, and show the same text in the chat. Do not commit this file. Tell the user to open the pull request on their server by pasting the text, from `<branch>` into `<default_branch>`. Give a compare link only when the user names the server's web address.
+Push the branch as on the one-PR path. Then write the title and the body above to `.boldcreate/pr-<branch>.md`, with each `/` in the branch name replaced by `-`, and show the same text in the chat. Do not commit this file; if `git status` lists it, add `.boldcreate/pr-*.md` to `.git/info/exclude`. Tell the user to open the pull request on their server by pasting the text, from `<branch>` into `<default_branch>`. Give a compare link only when the user names the server's web address.
