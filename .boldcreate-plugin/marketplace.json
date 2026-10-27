@@ -2,7 +2,7 @@
   "$schema": "../schemas/boldcreate-marketplace.schema.json",
   "name": "boldcreate-plugins",
   "owner": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "metadata": {
     "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a tool kit for the whole software delivery lifecycle.",

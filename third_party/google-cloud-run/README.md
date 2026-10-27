@@ -8,7 +8,7 @@ Deploy and manage Cloud Run services and jobs.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Run**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Run**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-run@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-run@boldcreate-plugins`.
 
 ## MCP
 

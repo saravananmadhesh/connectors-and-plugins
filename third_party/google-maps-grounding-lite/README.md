@@ -8,7 +8,7 @@ Ground agents in Google Maps data: places, routes, and weather.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Maps Grounding Lite**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Maps Grounding Lite**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-maps-grounding-lite@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-maps-grounding-lite@boldcreate-plugins`.
 
 ## MCP
 

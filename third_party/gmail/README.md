@@ -10,7 +10,7 @@ Search, read, and draft Gmail messages and threads.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Gmail**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Gmail**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install gmail@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install gmail@boldcreate-plugins`.
 
 ## MCP
 

@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Manage Google Pay merchant setup and read Google Wallet issuer data.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://developers.google.com/pay/api/web/guides/use-pay-wallet-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "google pay",

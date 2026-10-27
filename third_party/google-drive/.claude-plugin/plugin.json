@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Search, read, and create files in Google Drive.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "google drive",

@@ -10,7 +10,7 @@ Search across Gmail, Drive, Calendar, and other Google Workspace content in one 
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Workspace Search**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Workspace Search**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-workspace-search@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-workspace-search@boldcreate-plugins`.
 
 ## MCP
 

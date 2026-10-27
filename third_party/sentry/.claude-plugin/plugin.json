@@ -4,10 +4,10 @@
   "version": "0.2.0",
   "description": "Investigate Sentry errors, stack traces, and issues for a project.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://mcp.sentry.dev/",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "sentry",

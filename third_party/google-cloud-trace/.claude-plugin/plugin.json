@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Find and read Cloud Trace spans to debug latency.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/trace/docs/reference/mcp/mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "cloud trace",

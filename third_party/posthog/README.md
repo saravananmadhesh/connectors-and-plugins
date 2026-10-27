@@ -8,7 +8,7 @@ Query product analytics, manage feature flags, and investigate errors in PostHog
 
 - **BoldCreate Connect:** open **Marketplace**, find **PostHog**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **PostHog**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install posthog@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install posthog@boldcreate-plugins`.
 
 ## MCP
 

@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://context7.com/docs/resources/all-clients",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "documentation",

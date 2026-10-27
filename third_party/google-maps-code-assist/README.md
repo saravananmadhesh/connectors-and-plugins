@@ -10,7 +10,7 @@ Get up-to-date Google Maps Platform docs and code samples while you write Maps c
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Maps Code Assist**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Maps Code Assist**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-maps-code-assist@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-maps-code-assist@boldcreate-plugins`.
 
 ## MCP
 

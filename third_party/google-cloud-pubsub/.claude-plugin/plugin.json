@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Manage Pub/Sub topics and subscriptions and publish messages.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/pubsub/docs/use-pubsub-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "pubsub",

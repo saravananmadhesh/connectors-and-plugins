@@ -1,6 +1,6 @@
 # BoldCreate-tool-kit
 
-First-party BoldCreate plugin that gives AI coding agents one software delivery lifecycle: idea, specification, build, test, review, release and maintenance.
+Syncfusion's BoldCreate plugin that gives AI coding agents one software delivery lifecycle: idea, specification, build, test, review, release and maintenance.
 
 The kit is a set of skills, agents and rules. It has no MCP server and calls no outside service except `git` and your Git host's command-line tool. It works with any language that has a command-line build and test, because it reads the project's own commands instead of assuming a stack.
 
@@ -8,7 +8,7 @@ The kit is a set of skills, agents and rules. It has no MCP server and calls no 
 
 - **BoldCreate Connect:** open **Marketplace**, find **BoldCreate-tool-kit**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **BoldCreate-tool-kit**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install boldcreate-tool-kit@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install boldcreate-tool-kit@boldcreate-plugins`.
 
 You also need:
 

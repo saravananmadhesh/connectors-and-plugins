@@ -8,7 +8,7 @@ Find and read Cloud Trace spans to debug latency.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Trace**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Trace**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-trace@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-trace@boldcreate-plugins`.
 
 ## MCP
 

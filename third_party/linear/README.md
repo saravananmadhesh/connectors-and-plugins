@@ -8,7 +8,7 @@ Find, create, and update Linear issues, projects, and cycles.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Linear**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Linear**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install linear@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install linear@boldcreate-plugins`.
 
 ## MCP
 

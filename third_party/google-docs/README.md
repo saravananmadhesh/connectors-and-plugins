@@ -10,7 +10,7 @@ Read, create, and edit Google Docs.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Docs**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Docs**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-docs@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-docs@boldcreate-plugins`.
 
 ## MCP
 
