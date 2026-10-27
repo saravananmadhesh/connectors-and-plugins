@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Read courses, rosters, and coursework, and post announcements in Google Classroom.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "google classroom",

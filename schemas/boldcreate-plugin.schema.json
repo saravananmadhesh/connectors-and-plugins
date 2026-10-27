@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/saravananmadhesh/BoldCreate-Plugins/schemas/boldcreate-plugin.schema.json",
+  "$id": "https://github.com/syncfusion/BoldCreate-Plugins/schemas/boldcreate-plugin.schema.json",
   "title": "BoldCreate Connect plugin manifest",
   "description": "<plugin>/.boldcreate-plugin/plugin.json, where <plugin> is third_party/<name> or a first-party <name> at the repo root. Self-contained: everything BoldCreate needs to ingest, review and install the plugin.",
   "type": "object",

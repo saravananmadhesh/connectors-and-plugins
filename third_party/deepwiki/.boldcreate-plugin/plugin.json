@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "description": "Ask questions about any public GitHub repository and read its generated wiki.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.devin.ai/work-with-devin/deepwiki-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "documentation",

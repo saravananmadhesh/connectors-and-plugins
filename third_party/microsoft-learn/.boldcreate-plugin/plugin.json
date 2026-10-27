@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://learn.microsoft.com/training/support/mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "documentation",

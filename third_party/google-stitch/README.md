@@ -10,7 +10,7 @@ Generate UI designs and front-end code with Google Stitch.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Stitch**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Stitch**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-stitch@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-stitch@boldcreate-plugins`.
 
 ## MCP
 

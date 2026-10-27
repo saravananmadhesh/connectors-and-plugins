@@ -8,7 +8,7 @@ Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Microsoft Learn**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Microsoft Learn**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install microsoft-learn@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install microsoft-learn@boldcreate-plugins`.
 
 ## MCP
 

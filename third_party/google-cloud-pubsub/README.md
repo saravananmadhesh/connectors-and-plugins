@@ -8,7 +8,7 @@ Manage Pub/Sub topics and subscriptions and publish messages.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Pub/Sub**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Pub/Sub**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-pubsub@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-pubsub@boldcreate-plugins`.
 
 ## MCP
 

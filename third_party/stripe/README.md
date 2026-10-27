@@ -8,7 +8,7 @@ Work with Stripe customers, payments, subscriptions, and search Stripe docs.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Stripe**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Stripe**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install stripe@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install stripe@boldcreate-plugins`.
 
 ## MCP
 

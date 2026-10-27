@@ -10,7 +10,7 @@ Get Google design guidance and assets, such as Material Design, while you build 
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Design**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Design**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-design@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-design@boldcreate-plugins`.
 
 ## MCP
 

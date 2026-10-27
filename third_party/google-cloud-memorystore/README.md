@@ -8,7 +8,7 @@ Manage Memorystore for Redis, Redis Cluster, and Valkey instances.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Memorystore**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Memorystore**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-memorystore@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-memorystore@boldcreate-plugins`.
 
 ## MCP
 

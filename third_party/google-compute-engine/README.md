@@ -8,7 +8,7 @@ Manage Compute Engine VMs, disks, and networks.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Compute Engine**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Compute Engine**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-compute-engine@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-compute-engine@boldcreate-plugins`.
 
 ## MCP
 

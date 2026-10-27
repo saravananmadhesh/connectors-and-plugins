@@ -4,10 +4,10 @@
   "version": "0.2.0",
   "description": "Turn Figma frames into code and read design tokens, components, and variables.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "figma",

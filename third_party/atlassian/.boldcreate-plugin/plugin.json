@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "description": "Search and update Jira issues and Confluence pages.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://github.com/atlassian/atlassian-mcp-server",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "project-management",

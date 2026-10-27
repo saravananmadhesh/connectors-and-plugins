@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Manage AlloyDB for PostgreSQL clusters and run queries.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/alloydb/docs/ai/use-alloydb-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "alloydb",

@@ -8,7 +8,7 @@ Generate content, run predictions, and manage models, endpoints, tuning, and eva
 
 - **BoldCreate Connect:** open **Marketplace**, find **Gemini Enterprise Agent Platform (Vertex AI)**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Gemini Enterprise Agent Platform (Vertex AI)**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-agent-platform@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-agent-platform@boldcreate-plugins`.
 
 ## MCP
 

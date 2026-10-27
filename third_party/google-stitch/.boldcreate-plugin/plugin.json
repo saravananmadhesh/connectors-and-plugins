@@ -5,10 +5,10 @@
   "version": "0.1.0",
   "description": "Generate UI designs and front-end code with Google Stitch.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://stitch.withgoogle.com/docs/mcp/setup/",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "design",

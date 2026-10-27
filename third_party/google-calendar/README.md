@@ -10,7 +10,7 @@ List calendars, read events, and check free/busy time.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Calendar**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Calendar**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-calendar@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-calendar@boldcreate-plugins`.
 
 ## MCP
 

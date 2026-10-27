@@ -8,7 +8,7 @@ Read and write Firestore documents and collections.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Firestore**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Firestore**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-firestore@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-firestore@boldcreate-plugins`.
 
 ## MCP
 

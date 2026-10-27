@@ -8,7 +8,7 @@ Inspect Vercel projects, deployments, and build logs, and search Vercel docs.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Vercel**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Vercel**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install vercel@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install vercel@boldcreate-plugins`.
 
 ## MCP
 

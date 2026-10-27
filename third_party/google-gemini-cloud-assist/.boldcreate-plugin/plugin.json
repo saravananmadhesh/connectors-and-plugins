@@ -5,10 +5,10 @@
   "version": "0.1.0",
   "description": "Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resources.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/cloud-assist/use-gemini-cloud-assist-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "category": "ai",

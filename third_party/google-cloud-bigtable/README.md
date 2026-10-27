@@ -8,7 +8,7 @@ Manage Bigtable instances, clusters, and tables.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Bigtable**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Bigtable**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-bigtable@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-bigtable@boldcreate-plugins`.
 
 ## MCP
 

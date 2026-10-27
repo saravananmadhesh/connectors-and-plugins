@@ -8,7 +8,7 @@ Search AWS documentation, API references, and regional availability.
 
 - **BoldCreate Connect:** open **Marketplace**, find **AWS Knowledge**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **AWS Knowledge**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install aws-knowledge@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install aws-knowledge@boldcreate-plugins`.
 
 ## MCP
 

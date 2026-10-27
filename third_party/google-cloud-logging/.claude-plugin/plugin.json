@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Query and analyze Cloud Logging log entries.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/logging/docs/reference/v2_mcp/mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "cloud logging",

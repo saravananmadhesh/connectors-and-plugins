@@ -8,7 +8,7 @@ List, read, and manage Cloud Storage buckets and objects.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Storage**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Storage**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-storage@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-storage@boldcreate-plugins`.
 
 ## MCP
 

@@ -10,7 +10,7 @@ Read, create, and update Google Sheets spreadsheets.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Sheets**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Sheets**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-sheets@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-sheets@boldcreate-plugins`.
 
 ## MCP
 

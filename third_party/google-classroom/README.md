@@ -10,7 +10,7 @@ Read courses, rosters, and coursework, and post announcements in Google Classroo
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Classroom**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Classroom**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-classroom@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-classroom@boldcreate-plugins`.
 
 ## MCP
 

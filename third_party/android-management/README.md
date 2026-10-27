@@ -8,7 +8,7 @@ Manage enterprise Android devices, policies, and apps with the Android Managemen
 
 - **BoldCreate Connect:** open **Marketplace**, find **Android Management**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Android Management**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install android-management@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install android-management@boldcreate-plugins`.
 
 ## MCP
 

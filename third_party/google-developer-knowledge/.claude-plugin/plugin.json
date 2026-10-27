@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Search official Google developer documentation for Android, Firebase, Google Cloud, and Maps.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://developers.google.com/knowledge/api",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "google",

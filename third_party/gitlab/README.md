@@ -8,7 +8,7 @@ Work with GitLab projects, issues, merge requests, pipelines, and code search.
 
 - **BoldCreate Connect:** open **Marketplace**, find **GitLab**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **GitLab**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install gitlab@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install gitlab@boldcreate-plugins`.
 
 ## MCP
 
