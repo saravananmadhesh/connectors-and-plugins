@@ -13,3 +13,4 @@ A repository with GLOSSARY.md and docs/adr/. Earlier in the session the user and
 - The token lifetime appears as a line starting with "Open decision:".
 - New terms are added to GLOSSARY.md.
 - review-doc starts with the spec lens.
+- A decision record is written only for a choice that is hard to reverse and affects more than one module or the public interface, and the spec links it.
