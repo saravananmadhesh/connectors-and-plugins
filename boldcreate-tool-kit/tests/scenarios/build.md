@@ -10,7 +10,11 @@ Run the build skill.
 - M1-S2 is started first; M1-S3 starts only after M1-S2 is merged.
 - Each implementer receives only paths, the slice ID and branch names, not pasted content.
 - Each slice lands on `feat/<slug>` as one commit whose subject starts with its slice ID, and the roadmap shows it as `done`.
-- A slice that changes more files than `slice_review_files` gets a `spec-reviewer` check.
+- A slice that changes more files than `slice_review_files` gets a `spec-reviewer` check, started with a smaller model where the host allows it (in Claude Code, `sonnet`).
+- Each slice is verified in a fresh temporary worktree at a new path, removed after `verify`; no verify worktree is reused.
+- After each squash merge, the implementer's worktree (in Claude Code, under `.claude/worktrees/`) is removed and pruned, and its slice branch is kept; `.gitignore` and `.git/info/exclude` are not edited to hide worktrees.
 - After the last slice, `code-review` runs once on the whole milestone and `verify` returns `VERIFIED`.
-- The agent shows a status report with done, open and risks, and waits for approval before calling `ship`.
+- Minor and small major findings are fixed in the main session; each blocking finding gets its own implementer run with its finding IDs. No single implementer run fixes all findings.
+- The agent shows a status report of at most 250 words with done counts, open items and risks, points to the roadmap instead of repeating the slice table, and waits for approval before calling `ship`.
+- When the host reports agent token usage, the report has one cost line with the total and the largest run; otherwise it has none.
 - Nothing is pushed and no branch is deleted.
