@@ -24,7 +24,7 @@ Use the lane `start` confirmed. Run on its own, decide it after the interview: a
 
    Done when you know whether you are writing a new PRD or updating one.
 
-2. **Prepare the branch.** Read `git.default_branch` and `git.protected_branches` from `.boldcreate/project.yml` When they are missing, the default branch is the one the repository already uses, or `main` in a new repository, and only it is protected.
+2. **Prepare the branch.** Read `git.default_branch` and `git.protected_branches` from `.boldcreate/project.yml`. When they are missing, the default branch is the one the repository already uses, or `main` in a new repository, and only it is protected.
    - Current branch is not protected and not the default branch: work on it.
    - Otherwise: create `feat/<slug>` from the default branch and check it out. `<slug>` is the product name in kebab case.
    - The folder is not a Git repository: initialise one with the default branch name. The default branch has no commits: make one empty commit on it, `Initial commit`, so the new branch has a base.
