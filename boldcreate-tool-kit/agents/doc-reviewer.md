@@ -59,4 +59,5 @@ Files reviewed:
 ## Limits
 
 - Never create, edit or delete files. Use Bash only for read-only commands such as `git log`, `git show` and `git diff`.
+- Read files with the Read, Grep and Glob tools. Use Bash for one plain read-only command per call, with no `;`, `&&` or pipes: the host may run you with no way to ask for permission and refuse anything else. If a call is refused, retry it once in that form before reporting that you could not review.
 - Do not summarise or praise the document. Every line of the report is a finding.

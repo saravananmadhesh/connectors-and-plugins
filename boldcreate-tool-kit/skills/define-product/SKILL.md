@@ -48,7 +48,7 @@ Use the lane `start` confirmed. Run on its own, decide it after the interview: a
 
    Done when the glossary holds each product term the PRD will use.
 
-5. **Write the PRD** from `templates/prd.md` in this kit. Use glossary terms. Every feature in the table has a priority, every success measure is checkable, and the MVP section lists features by name from the table. Under the `Status:` line, add `Integration branch: <branch from step 2>`.
+5. **Write the PRD** from `templates/prd.md` at the kit root, two levels above this file. Use glossary terms. Every feature in the table has a priority, every success measure is checkable, and the MVP section lists features by name from the table. Under the `Status:` line, add `Integration branch: <branch from step 2>`.
 
    In the small lane, also add `Lane: small` under the `Status:` line. Keep each section to a few lines and the whole PRD under 400 words. Write "Not applicable" for a section with nothing to say instead of filling it.
 

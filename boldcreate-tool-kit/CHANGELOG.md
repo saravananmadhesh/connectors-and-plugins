@@ -2,6 +2,19 @@
 
 All notable changes to this plugin will be documented here.
 
+## 0.3.0 - 2026-10-27
+
+- `setup` keeps the kit's one-session files (pull request text, review reports, bug reports, handoff) out of Git with `.boldcreate/.gitignore`, ignores agent worktree folders, and commits its own files as one commit that reviews leave out.
+- Feature work starts on a `feat/<slug>` branch before the spec is written, and the approved spec and the roadmap are each committed there, so nothing is left on the default branch.
+- `debug` saves the bug report to `.boldcreate/bugs/<slug>.md`, and `code-review` checks the fix against it on every bug.
+- `debug` records why it skips narrowing steps when one read of the code shows the cause, and reads `tdd` before writing the fix.
+- `start` sends a defect report that already names what to change to the quick-fix path, and never names a suspected cause before `debug` runs.
+- Every agent reads and edits files with file tools and runs one plain command per call, so background runs are not refused, and retries once before giving up. When an implementer is still refused, `build` names the command to allow and builds that slice in the main session.
+- `build` removes the extra branch Claude Code makes for each implementer worktree, and the implementer switches to its slice branch before reading anything.
+- `start` runs `setup` itself when the host will not start it, instead of asking you to run it.
+- Exports to CSV or spreadsheets now trigger the security review.
+- `ship` reuses a `VERIFIED` result for the same commit instead of running every command again.
+
 ## 0.2.0 - 2026-10-27
 
 - New applications with a few must-have features and one user group take a small lane: a short PRD, a short architecture with fewer decision records, and one combined review.

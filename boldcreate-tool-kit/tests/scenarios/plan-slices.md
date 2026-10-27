@@ -15,3 +15,4 @@ An approved spec with five user stories at docs/specs/team-invites/spec.md. One 
 - The user approves the plan before the roadmap is saved.
 - A second run after M1-S1 is marked done keeps M1-S1 unchanged.
 - The build skill starts after the roadmap is saved.
+- After approval, the roadmap is committed on the integration branch as `Add roadmap`, and `git status` is clean.

@@ -13,3 +13,6 @@ A repository with source code and a saved .boldcreate/project.yml using the defa
 - No file is changed by start itself.
 - Asked separately for "/start A command-line tool for my own use that adds, lists, tags and removes bookmarks" in an empty folder, the path line reads "New application, small lane" with 4 must features and one user group, and the hand-off passes the lane to define-product.
 - When the host refuses to start a kit skill, start reads that skill's SKILL.md from the kit root it was given and follows it, without searching the disk for it.
+- Asked for "/start Exporting a customer named 'Smith, Jones & Co' adds a CSV column" in a repository where the fix is a few lines in one file, the path is Quick fix, and the report becomes the first failing test.
+- On the Bug path, the path line and the message around it name no suspected cause or line of code.
+- In a repository with source code and no project.yml, when the host refuses to start setup, start reads setup's SKILL.md from the kit root and runs it without asking the user to start it.
