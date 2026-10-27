@@ -8,6 +8,7 @@ commands:
 thresholds:
   quick_fix_lines: 100
   quick_fix_core_files: 3
+  small_app_features: 5
   large_doc_words: 2500
   slice_review_files: 8
   pr_split_lines: 800
@@ -22,3 +23,4 @@ docs:
   architecture: docs/architecture
   specs: docs/specs
   learnings: docs/learnings
+  reports: docs/reports
