@@ -26,12 +26,14 @@ In Claude Code, the agent cannot start the skills marked "You" below by itself. 
 { "permissions": { "allow": ["Read(~/.claude/plugins/cache/**)"] } }
 ```
 
+Claude Code runs the implementer agents in the background, where they cannot ask you for permission, so a command you have not allowed is refused. Allow `git` and the commands saved in `.boldcreate/project.yml` in the project's `.claude/settings.json`, for example `"Bash(git:*)"` and `"Bash(<test tool>:*)"`. When a slice is still refused, `build` names the command to allow and builds that slice in the main session.
+
 `start` sorts the request into one of four paths, shows the path in one line, and lets you change it. On first use it runs `setup`, which detects your build, test, lint and run commands and saves them to `.boldcreate/project.yml`. Every skill can also be run on its own.
 
 | Path | When | Skills in order |
 | --- | --- | --- |
-| Quick fix | Under the size threshold in `project.yml` (default: under 100 lines and under 3 core files) | `start`, `tdd`, `verify`, `code-review`, `ship` |
-| Bug | A reported defect | `start`, `debug`, `tdd`, `verify`, `code-review`, `ship`, then `retro` if you want it |
+| Quick fix | Under the size threshold in `project.yml` (default: under 100 lines and under 3 core files), including a defect report that already names what to change | `start`, `tdd`, `verify`, `code-review`, `ship` |
+| Bug | A reported defect whose cause is not yet known | `start`, `debug`, `tdd`, `verify`, `code-review`, `ship`, then `retro` if you want it |
 | Feature | Over the size threshold | `start`, `grilling`, `write-spec`, `review-doc`, `plan-slices`, `build`, `ship` |
 | New application | No code yet | `start`, `define-product`, `design-architecture`, `plan-slices`, `scaffold`, `build` for each milestone, `ship`, `report` |
 | New application, small lane | No code yet, at most `thresholds.small_app_features` must-have features (default 5) and one user group | The same skills, with a short PRD, a short architecture with decision records only for the stack and data format, and one combined review |
@@ -94,8 +96,11 @@ Claude Code has no rule component. There, a session-start hook loads the three a
 | --- | --- | --- |
 | `.boldcreate/project.yml` | `setup`, `scaffold` | Commands, size thresholds, Git host and doc locations |
 | `.boldcreate/principles.md` | `setup` | Team principles that every review checks |
-| `.boldcreate/handoff.md` | `retro` | Where a new session should pick up |
+| `.boldcreate/.gitignore` | `setup` | Keeps the kit's one-session files below out of Git |
+| `.boldcreate/handoff.md` | `retro` | Where a new session should pick up; not committed |
 | `.boldcreate/review-M<n>.md` | `build` | Milestone review findings for the fix run; not committed |
+| `.boldcreate/bugs/<slug>.md` | `debug` | The bug report a fix is reviewed against; not committed |
+| `.boldcreate/pr-<branch>.md` | `ship` | Pull request text to paste, on hosts with no pull request tool; not committed |
 | `GLOSSARY.md` | `domain-docs` | Project terms, one line each |
 | `docs/adr/NNNN-<title>.md` | `domain-docs` | Decision records |
 | `docs/product/prd.md` | `define-product` | Product requirements |
@@ -105,7 +110,7 @@ Claude Code has no rule component. There, a session-start hook loads the three a
 | `docs/learnings/<date>-<topic>.md` | `retro` | Lessons learned |
 | `docs/reports/` | `report` | Drift reports, release notes and progress summaries |
 
-Commit these files so that the whole team and every new session share them. If a command in `project.yml` is missing or fails, the kit asks you for it instead of guessing.
+Commit the other files so that the whole team and every new session share them. `setup` commits its own files as `Set up BoldCreate tool kit`, on the first work branch when you start on a protected branch, and reviews leave that commit out. If a command in `project.yml` is missing or fails, the kit asks you for it instead of guessing.
 
 ## Context budget
 

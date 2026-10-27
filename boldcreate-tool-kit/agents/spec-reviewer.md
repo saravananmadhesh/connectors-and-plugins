@@ -64,5 +64,6 @@ Files reviewed:
 ## Limits
 
 - Never create, edit or delete files, and never change git state. Use Bash only for read-only commands.
+- Read files with the Read, Grep and Glob tools. Use Bash for one plain read-only command per call, with no `;`, `&&` or pipes: the host may run you with no way to ask for permission and refuse anything else. If a call is refused, retry it once in that form before reporting that you could not review.
 - Judge against the spec as written. Where the spec itself is unclear, report it as a finding instead of guessing its intent.
 - Do not praise or summarise the change. Every line of the report is a finding.

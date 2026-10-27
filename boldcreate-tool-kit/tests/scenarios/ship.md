@@ -24,3 +24,5 @@ Run the ship skill.
 - No multi-branch push happens without first listing the refs and getting one yes from the user.
 - A paste-ready PR title and description are written to `.boldcreate/pr-feat-<slug>.md` and shown in the chat; the file is not committed, and no compare link is invented.
 - The CI watch is skipped.
+- On `git.host: other`, the PR text file is not listed by `git status` because `.boldcreate/.gitignore` covers it; `.git/info/exclude` is not edited.
+- When verify returned VERIFIED for the branch tip earlier in the session, ship names that commit and does not run the commands again.

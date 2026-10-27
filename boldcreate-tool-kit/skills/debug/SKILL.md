@@ -14,9 +14,9 @@ Redact keys, tokens, passwords, connection strings and personal data from every 
 
 ## Steps
 
-1. **State the bug.** Write expected behaviour, actual behaviour, and how it was observed, one line each. If the report lacks any of these and you cannot find it, ask the user. Done when all three lines are written.
+1. **State the bug.** Pick a slug: two to four kebab-case words naming the bug. Write `.boldcreate/bugs/<slug>.md` with the ID `BUG-<slug>` on the first line, then expected behaviour, actual behaviour, and how it was observed, one line each. This file is the bug report that `code-review` checks the fix against; it stays out of Git. If the report lacks any of the three and you cannot find it, ask the user. Done when the file holds all three lines.
 
-2. **Set up the branch.** Read `git.default_branch` and `git.protected_branches` from `.boldcreate/project.yml`. If the current branch is a work branch not in `protected_branches`, stay on it. Otherwise create `fix/<slug>` from `git.default_branch`, where the slug is two to four kebab-case words naming the bug. Done when the current branch is not protected, before any file changes.
+2. **Set up the branch.** Read `git.default_branch` and `git.protected_branches` from `.boldcreate/project.yml`. If the current branch is a work branch not in `protected_branches`, stay on it. Otherwise create `fix/<slug>` from `git.default_branch`. If setup left its files uncommitted, commit them on the new branch first as `Set up BoldCreate tool kit`. Done when the current branch is not protected, before any file changes.
 
 3. **Build the loop.** Create the fastest repeatable check that passes when the bug is absent and fails while it is present. Prefer, in order: a failing test at a public seam, a script that calls the code and checks the result, a command against the running app. Run it. Done when the check fails, and fails for the reason in step 1. Read [loops.md](loops.md) if no quick check comes to mind or the bug is intermittent.
 
@@ -26,13 +26,15 @@ Redact keys, tokens, passwords, connection strings and personal data from every 
 
 5. **Hypothesise.** Write up to three causes that would explain the failure, each with a prediction you can test ("if the cache is stale, clearing it makes the loop pass"). Done when each hypothesis has a test that can rule it in or out.
 
+   When the failing check and one read of the code it points to show a single cause, write that one hypothesis with its prediction and test it once in step 6. Say in one line why minimising and further hypotheses were not needed; never drop those steps without that line.
+
 6. **Instrument.** Test the hypotheses one at a time, most likely first: add temporary logging, assertions or a debugger stop, or change one input. Run the loop after each change. Done when one hypothesis is confirmed by evidence and the others are ruled out. If all are ruled out, return to step 5 with what you learned.
 
 7. **Clean up.** Remove every temporary log, assertion and debug change from step 6. Keep the loop; if it is not yet a test, turn it into one at the nearest public seam. Done when the only change left is the failing regression test.
 
-8. **Fix.** Hand off to the `tdd` skill with the regression test as the first failing test. `tdd` keeps the branch from step 2, runs `verify`, and commits the fix once on `VERIFIED`. Done when the fix commit exists and contains only the fix and the regression test.
+8. **Fix.** Read the `tdd` skill before writing any fix. The regression test is its first Red step, so continue from its Green step; it keeps the branch from step 2, runs `verify`, and commits the fix once on `VERIFIED`. Done when the fix commit exists and contains only the fix and the regression test.
 
-9. **Hand off.** Run the `code-review` skill on the range from the merge base with `git.default_branch` to `HEAD`.
+9. **Hand off.** Run the `code-review` skill on the range from the merge base with `git.default_branch` to `HEAD`, and pass `.boldcreate/bugs/<slug>.md` as the bug report for the spec axis.
 
 ## Report
 

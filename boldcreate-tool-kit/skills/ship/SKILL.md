@@ -20,7 +20,7 @@ The commands below use `gh` for `git.host: github`. For `gitlab`, use the equiva
 ## Steps
 
 1. **Check the host tool.** For `github`, run `gh auth status`; for `gitlab`, run `glab auth status`. If no account is signed in, ask the user to sign in; never ask for or print a token. For `other`, skip this step. Done when a signed-in account shows, or the host is `other`.
-2. **Verify.** Run the `verify` skill on the branch. Continue on `VERIFIED`. On any other verdict, show the evidence and continue only if the user says so.
+2. **Verify.** Run the `verify` skill on the branch, unless it already returned `VERIFIED` in this session for the commit at the branch tip; then name that commit and reuse the result. Continue on `VERIFIED`. On any other verdict, show the evidence and continue only if the user says so.
 3. **Choose the PR shape.** Run `git diff --numstat <default_branch>...<branch>` and add insertions and deletions for source and test files only. Leave out docs (Markdown files and the folders under `docs` in `project.yml`), lock files and generated files.
    - At or under `pr_split_lines`: one PR from the branch into the default branch.
    - Over `pr_split_lines` on `github` or `gitlab`: one PR per slice into the integration branch, as `open-pr.md` describes.

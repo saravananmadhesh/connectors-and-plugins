@@ -48,7 +48,24 @@ The templates live in this kit's `templates/` folder, two levels above this file
 
    Done when both exist at the paths in `project.yml`.
 
-8. **Report and return.** List the files created or changed and the commands saved. Then hand back to the `start` skill, or stop if the user ran setup on its own.
+8. **Keep local files out of Git.** Write `.boldcreate/.gitignore` with these lines, for files the kit writes for one session only:
+
+   ```
+   bugs/
+   handoff.md
+   pr-*.md
+   review-*.md
+   ```
+
+   Then add `.claude/worktrees/` and `.worktrees/` to the repository's root `.gitignore` if they are not there, creating the file if needed. Never edit `.git/info/exclude`.
+
+   Done when `git status` would not list any of these paths.
+
+9. **Commit or leave for the first branch.** If the current branch is not protected, commit the setup files as one commit, `Set up BoldCreate tool kit`. On a protected branch, leave them uncommitted: the skill that next creates a work branch commits them there first, under the same subject.
+
+   Done when the setup files are committed, or you are on a protected branch.
+
+10. **Report and return.** List the files created or changed and the commands saved. Then hand back to the `start` skill, or stop if the user ran setup on its own.
 
    Done when the summary is shown.
 

@@ -15,3 +15,5 @@ A repository with a build manifest that defines build, lint and test scripts, a 
 - GLOSSARY.md and docs/adr/ exist.
 - A second /setup run shows the saved commands and changes no file.
 - In a repository whose origin is a local path, or that has no remote, git.host is set to other without asking.
+- .boldcreate/.gitignore lists bugs/, handoff.md, pr-*.md and review-*.md, and the root .gitignore lists .claude/worktrees/ and .worktrees/; .git/info/exclude is not edited.
+- Started on main (protected), setup leaves its files uncommitted; started on a work branch, it commits them as one commit, `Set up BoldCreate tool kit`.
