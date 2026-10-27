@@ -29,7 +29,9 @@ Classify the request, show the path in one line, let the user change it, then ha
    Core files are source files that hold behaviour. Tests, docs and configuration do not count.
    Estimate size by reading the code the request touches. If the estimate is near a threshold, or you cannot tell, choose Feature.
 
-   Done when one path is chosen and you can state the reason in a few words.
+   For a new application, also pick the lane. Count the must-have features and the user groups the description names. At most `thresholds.small_app_features` must-have features (default 5) and one user group: small lane. Otherwise, or when you cannot tell: full lane.
+
+   Done when one path, and for a new application one lane, is chosen and you can state the reason in a few words.
 
 3. **Show the path** as a single line, then ask for confirmation in the same message:
 
@@ -37,16 +39,19 @@ Classify the request, show the path in one line, let the user change it, then ha
    Path: <name> (<reason>). <skill> → <skill> → ... Reply "go", or name another path.
    ```
 
+   For a new application, name the lane and its counts in the reason, for example `New application, small lane (4 must features, one user group)`, so the user can correct it.
+
    | Path | Skills in order |
    |---|---|
    | Quick fix | tdd → verify → code-review (standards axis) → ship |
    | Bug | debug → tdd → verify → code-review → ship → retro (optional) |
    | Feature | grilling → write-spec → review-doc → plan-slices → build → ship |
-   | New application | define-product → design-architecture → plan-slices → scaffold → build (per milestone) → ship → report |
+   | New application, full lane | define-product → design-architecture → plan-slices → scaffold → build (per milestone) → ship → report |
+   | New application, small lane | define-product (short PRD, no product review) → design-architecture (short, one combined review) → plan-slices → scaffold → build → ship |
 
-   Done when the user accepts the path or names another one. A path the user names wins, even if it disagrees with the thresholds.
+   Done when the user accepts the path or names another one. A path or lane the user names wins, even if it disagrees with the thresholds.
 
-4. **Hand off** to the first skill of the chosen path and pass on the user's request unchanged.
+4. **Hand off** to the first skill of the chosen path and pass on the user's request unchanged. For a new application, also pass the lane.
 
    | Path | First skill |
    |---|---|
@@ -56,6 +61,8 @@ Classify the request, show the path in one line, let the user change it, then ha
    | Quick fix | `tdd` |
 
    Done when the first skill has started.
+
+   Most kit skills start only when the user runs them, so the host may refuse to start one for you. Then read `<kit root>/skills/<name>/SKILL.md` and follow it; do not search for the file. The kit root is two levels above this file. In Claude Code, the session-start message also prints it as an absolute path. This applies to every hand-off on the path.
 
 5. **Continue the path.** When a skill returns without handing off, start the next skill on the confirmed path, until `ship` has run. Done when `ship` reports or the user stops the work.
 
