@@ -14,20 +14,20 @@ Get independent findings on what changed, on axes that are reported separately s
    - the commit or range the caller or user named, else
    - the merge base with the default branch: `git merge-base HEAD <git.default_branch>`, reading the branch from `.boldcreate/project.yml` (default `main`).
 
-   Record the range as `<base>..HEAD`. Uncommitted changes are not reviewed; if any exist, ask the user to commit or stash them first. Done when the range is fixed and `git diff --stat <base>..HEAD` is not empty.
+   Record the range as `<base>..HEAD`. Only committed changes are reviewed. Run `git status`; if it shows uncommitted changes, list them, say they are outside the review, and ask the user whether to commit them first. Never skip them silently. Done when the range is fixed, the user has answered about any uncommitted changes, and `git diff --stat <base>..HEAD` is not empty.
 
 2. **Check the host.** The reviewers must run as separate agents with no chat history. If the host cannot start subagents, stop here and tell the user that this review needs a host with subagent support. Do not review in the main session instead.
 
 3. **Choose the axes.**
    - **Standards** always runs.
-   - **Spec** runs when a spec or bug report exists for the change, unless this is the quick-fix path. Find it from the caller, the branch name, or `docs/specs/`. If none exists, say so and skip the axis.
+   - **Spec** runs when a spec or bug report exists for the change, unless this is the quick-fix path. Find it from the caller, the branch name, or `docs/specs/`. If none exists, say so and skip the axis. For a milestone review (the whole integration branch), the spec is the one on the roadmap's `Source:` line, and the axis also checks the project rules: `overview.md` under `docs.architecture` (its validation and data rules) and every accepted decision record under `docs.adr`.
    - **Security** runs when the diff matches any trigger in [security.md](security.md). Check the changed paths and the diff text against the list.
 
    Done when each axis is marked run or skipped, with a reason for each skip.
 
-4. **Start the reviewers in parallel.** Give each agent only paths, IDs and the commit range; never paste the diff or file contents.
+4. **Start the reviewers in parallel.** Give each agent only paths, IDs and the commit range; never paste the diff or file contents. Where the host lets the caller pick an agent's model, start `standards-reviewer` and `spec-reviewer` with a smaller model (in Claude Code, `sonnet`). `security-reviewer` keeps the session's model.
    - `standards-reviewer`: the range, `.boldcreate/principles.md`, and the full path of this skill's [smells.md](smells.md).
-   - `spec-reviewer`: the range, the spec or bug report path, the slice or story IDs in scope, and `.boldcreate/principles.md`.
+   - `spec-reviewer`: the range, the spec or bug report path, the slice or story IDs in scope, and `.boldcreate/principles.md`. For a milestone review, also `rules`: the list of project rule paths from step 3.
    - `security-reviewer`: the range, the trigger lines that matched, and `.boldcreate/principles.md`.
 
    Done when every started reviewer has returned its report.
@@ -38,7 +38,7 @@ Get independent findings on what changed, on axes that are reported separately s
 
 ## Quick-fix path
 
-Run the standards axis only, with the same base point rules. Skip spec and security unless a security trigger matches; a match always adds the security axis.
+Run the standards axis only, on the range from the merge base to `HEAD`. The fix commit comes from the `tdd` skill. If step 1 finds the fix still uncommitted, offer to commit it as the fix commit before the review starts. Skip spec and security unless a security trigger matches; a match always adds the security axis.
 
 ## Rules
 

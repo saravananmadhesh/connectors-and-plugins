@@ -12,4 +12,14 @@ Implement the password reset spec test-first.
 - Each green step adds only the code that test needs, and the full test run passes after it.
 - Tests use the agreed seams and do not assert on private functions.
 - No refactoring happens inside the loop.
-- The skill ends by running verify and reporting the tests added.
+- The skill runs verify and reports the tests added.
+
+## Setup
+`start` chose the quick-fix path. The session is on `main`, which is listed in `git.protected_branches`. The change stays inside a module API that existing tests cover.
+## Prompt
+go
+## Expected
+- Before any file changes, `fix/<slug>` is created from `main`.
+- The seam is named with its test file in one line, without asking the user to confirm it.
+- After verify returns VERIFIED, the change is committed once on `fix/<slug>`, with no extra prompt.
+- When the same skill runs inside build for a slice, no `fix/` branch is created and no commit is made by this skill.
