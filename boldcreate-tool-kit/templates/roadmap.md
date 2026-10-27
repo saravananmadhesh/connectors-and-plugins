@@ -14,4 +14,4 @@ Integration branch: feat/<slug>
 
 ### Slice details
 
-- **M1-S1**: Stories: <US or feature IDs>. Check: <how to show it works on its own>.
+- **M1-S1**: Stories: <US or feature IDs>. Check: <how to show it works on its own>. Files: <main paths it changes>.

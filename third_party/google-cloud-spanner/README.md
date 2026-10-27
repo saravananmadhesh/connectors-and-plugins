@@ -8,7 +8,7 @@ Manage Spanner instances and databases and run SQL.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Spanner**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Spanner**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-spanner@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-spanner@boldcreate-plugins`.
 
 ## MCP
 

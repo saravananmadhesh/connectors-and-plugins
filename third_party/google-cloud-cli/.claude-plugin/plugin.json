@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Run gcloud commands through Google's hosted Cloud CLI server.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/sdk/use-gcloud-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "gcloud",

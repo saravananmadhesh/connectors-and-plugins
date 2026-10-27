@@ -7,10 +7,10 @@
   },
   "description": "Manage enterprise Android devices, policies, and apps with the Android Management API.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://developers.google.com/android/management/use-android-management-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "keywords": [

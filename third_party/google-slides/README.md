@@ -10,7 +10,7 @@ Read, create, and edit Google Slides presentations.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Slides**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Slides**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-slides@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-slides@boldcreate-plugins`.
 
 ## MCP
 

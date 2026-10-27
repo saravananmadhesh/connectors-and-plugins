@@ -8,7 +8,7 @@ Ask questions about any public GitHub repository and read its generated wiki.
 
 - **BoldCreate Connect:** open **Marketplace**, find **DeepWiki**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **DeepWiki**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install deepwiki@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install deepwiki@boldcreate-plugins`.
 
 ## MCP
 

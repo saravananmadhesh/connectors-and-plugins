@@ -10,7 +10,7 @@ Read Google Chat spaces and messages, and post messages.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Chat**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Chat**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-chat@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-chat@boldcreate-plugins`.
 
 ## MCP
 

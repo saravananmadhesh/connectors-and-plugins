@@ -8,7 +8,7 @@ Search official Google developer documentation for Android, Firebase, Google Clo
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Developer Knowledge**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Developer Knowledge**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-developer-knowledge@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-developer-knowledge@boldcreate-plugins`.
 
 ## MCP
 

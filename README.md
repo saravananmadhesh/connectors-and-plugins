@@ -1,19 +1,19 @@
-# BoldCreate Plugins
+# Syncfusion BoldCreate Plugins
 
-Plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds two kinds of plugin, each in its own directory with its own manifests:
+Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds two kinds of plugin, each in its own directory with its own manifests:
 
-- **First-party plugins** at the repository root, made of skills, agents and rules. `boldcreate-tool-kit/` gives agents one software delivery lifecycle on any stack.
+- **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-tool-kit/` gives agents one software delivery lifecycle on any stack.
 - **MCP plugins** under `third_party/`. Each connects agents to a vendor's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 ## Install
 
 - **BoldCreate Connect:** open **Marketplace**, find the plugin, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install the plugin.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install <name>@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install <name>@boldcreate-plugins`.
 
 Secrets such as API keys are never stored in this repository. Each MCP plugin declares them as install-time variables, and you enter them when you install it. See each plugin's README for setup.
 
-## First-party plugins
+## Syncfusion plugins
 
 | `name` | Plugin | Category | `description` (from marketplace) |
 |:-------|:-------|:---------|:-------------------------------------|
@@ -88,7 +88,7 @@ This is a multi-plugin marketplace repository. The root marketplace files list e
 .boldcreate-plugin/marketplace.json   # BoldCreate Connect marketplace (generated)
 .cursor-plugin/marketplace.json       # Cursor marketplace (generated)
 .claude-plugin/marketplace.json       # Claude Code marketplace (generated)
-boldcreate-tool-kit/                  # First-party plugin
+boldcreate-tool-kit/                  # Syncfusion plugin
 ├── .cursor-plugin/plugin.json        # Manifest
 ├── .claude-plugin/plugin.json        # Claude Code manifest (generated)
 ├── .boldcreate-plugin/plugin.json    # BoldCreate Connect manifest (generated)
@@ -121,8 +121,8 @@ scripts/                              # build.mjs, validate.mjs and check-kit.mj
 
 ## Contributing
 
-1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a first-party plugin. Don't edit generated files by hand.
-2. Run `npm ci`, then `npm run build` and `npm run validate`. Validation also checks first-party plugins against their context budgets: auto-skill descriptions plus always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
+1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a Syncfusion plugin. Don't edit generated files by hand.
+2. Run `npm ci`, then `npm run build` and `npm run validate`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
 3. Open a pull request. CI runs the same checks and the Claude Code plugin validator.
 
 ## License

@@ -41,7 +41,7 @@ To update an existing PR: `gh pr edit <number> --title "<title>" --body-file <fi
 
 ## One PR per slice
 
-Use this when the milestone diff is over `pr_split_lines`. Each PR then shows exactly one slice commit.
+Use this when the counted milestone diff is over `pr_split_lines` and the host is `github` or `gitlab`, or when the user asks for it. Each PR then shows exactly one slice commit. Show the ref list from step 3 of the skill and get the user's yes before the first push.
 
 1. Push the integration branch as it was before the first slice of this milestone: `git push -u origin <base-commit>:refs/heads/feat/<slug>`. The base commit is the parent of the first slice commit. If `feat/<slug>` already exists on the remote at a later commit, stop and ask the user: moving it back needs a force-push.
 2. For each slice in roadmap order, push a branch that ends at that slice's commit: `git push origin <slice-commit>:refs/heads/feat/<slug>--<slice-id>`.
@@ -51,3 +51,7 @@ Use this when the milestone diff is over `pr_split_lines`. Each PR then shows ex
 When a slice PR merges and its branch is removed, GitHub moves the next PR's base to `feat/<slug>`. Removing a merged branch is the reviewer's call; do not delete branches without confirmation.
 
 After every slice PR has merged, open one PR from `feat/<slug>` into the default branch, with a short body that links the slice PRs.
+
+## No PR tool (`git.host: other`)
+
+Push the branch as on the one-PR path. Then write the title and the body above to `.boldcreate/pr-<branch>.md`, with each `/` in the branch name replaced by `-`, and show the same text in the chat. Do not commit this file; if `git status` lists it, add `.boldcreate/pr-*.md` to `.git/info/exclude`. Tell the user to open the pull request on their server by pasting the text, from `<branch>` into `<default_branch>`. Give a compare link only when the user names the server's web address.

@@ -8,7 +8,7 @@ Pull up-to-date, version-specific library docs and code examples into the prompt
 
 - **BoldCreate Connect:** open **Marketplace**, find **Context7**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Context7**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install context7@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install context7@boldcreate-plugins`.
 
 ## MCP
 

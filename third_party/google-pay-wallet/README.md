@@ -10,7 +10,7 @@ Manage Google Pay merchant setup and read Google Wallet issuer data.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Pay and Wallet**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Pay and Wallet**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-pay-wallet@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-pay-wallet@boldcreate-plugins`.
 
 ## MCP
 

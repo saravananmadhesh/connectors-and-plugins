@@ -16,21 +16,23 @@ Redact keys, tokens, passwords, connection strings and personal data from every 
 
 1. **State the bug.** Write expected behaviour, actual behaviour, and how it was observed, one line each. If the report lacks any of these and you cannot find it, ask the user. Done when all three lines are written.
 
-2. **Build the loop.** Create the fastest repeatable check that passes when the bug is absent and fails while it is present. Prefer, in order: a failing test at a public seam, a script that calls the code and checks the result, a command against the running app. Run it. Done when the check fails, and fails for the reason in step 1. Read [loops.md](loops.md) if no quick check comes to mind or the bug is intermittent.
+2. **Set up the branch.** Read `git.default_branch` and `git.protected_branches` from `.boldcreate/project.yml`. If the current branch is a work branch not in `protected_branches`, stay on it. Otherwise create `fix/<slug>` from `git.default_branch`, where the slug is two to four kebab-case words naming the bug. Done when the current branch is not protected, before any file changes.
+
+3. **Build the loop.** Create the fastest repeatable check that passes when the bug is absent and fails while it is present. Prefer, in order: a failing test at a public seam, a script that calls the code and checks the result, a command against the running app. Run it. Done when the check fails, and fails for the reason in step 1. Read [loops.md](loops.md) if no quick check comes to mind or the bug is intermittent.
 
    Do not read code looking for the cause, and do not change code, until this step is done.
 
-3. **Minimise.** Remove inputs, steps, data and configuration from the loop until removing anything more makes it pass. Done when the loop is as small and fast as you can make it and still fails.
+4. **Minimise.** Remove inputs, steps, data and configuration from the loop until removing anything more makes it pass. Done when the loop is as small and fast as you can make it and still fails.
 
-4. **Hypothesise.** Write up to three causes that would explain the failure, each with a prediction you can test ("if the cache is stale, clearing it makes the loop pass"). Done when each hypothesis has a test that can rule it in or out.
+5. **Hypothesise.** Write up to three causes that would explain the failure, each with a prediction you can test ("if the cache is stale, clearing it makes the loop pass"). Done when each hypothesis has a test that can rule it in or out.
 
-5. **Instrument.** Test the hypotheses one at a time, most likely first: add temporary logging, assertions or a debugger stop, or change one input. Run the loop after each change. Done when one hypothesis is confirmed by evidence and the others are ruled out. If all are ruled out, return to step 4 with what you learned.
+6. **Instrument.** Test the hypotheses one at a time, most likely first: add temporary logging, assertions or a debugger stop, or change one input. Run the loop after each change. Done when one hypothesis is confirmed by evidence and the others are ruled out. If all are ruled out, return to step 5 with what you learned.
 
-6. **Fix.** Hand off to the `tdd` skill with the loop as the first failing test. If the loop is not yet a test, turn it into one at the nearest public seam first. Done when the fix makes the loop pass.
+7. **Clean up.** Remove every temporary log, assertion and debug change from step 6. Keep the loop; if it is not yet a test, turn it into one at the nearest public seam. Done when the only change left is the failing regression test.
 
-7. **Clean up.** Remove every temporary log, assertion and debug change from step 5. Keep the loop as a regression test. Done when the diff contains only the fix and the regression test.
+8. **Fix.** Hand off to the `tdd` skill with the regression test as the first failing test. `tdd` keeps the branch from step 2, runs `verify`, and commits the fix once on `VERIFIED`. Done when the fix commit exists and contains only the fix and the regression test.
 
-8. **Hand off.** Run the `code-review` skill, using the `verify` verdict from tdd.
+9. **Hand off.** Run the `code-review` skill on the range from the merge base with `git.default_branch` to `HEAD`.
 
 ## Report
 

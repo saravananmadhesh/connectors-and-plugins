@@ -1,6 +1,6 @@
 # BoldCreate-tool-kit
 
-First-party BoldCreate plugin that gives AI coding agents one software delivery lifecycle: idea, specification, build, test, review, release and maintenance.
+Syncfusion's BoldCreate plugin that gives AI coding agents one software delivery lifecycle: idea, specification, build, test, review, release and maintenance.
 
 The kit is a set of skills, agents and rules. It has no MCP server and calls no outside service except `git` and your Git host's command-line tool. It works with any language that has a command-line build and test, because it reads the project's own commands instead of assuming a stack.
 
@@ -8,17 +8,23 @@ The kit is a set of skills, agents and rules. It has no MCP server and calls no 
 
 - **BoldCreate Connect:** open **Marketplace**, find **BoldCreate-tool-kit**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **BoldCreate-tool-kit**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install boldcreate-tool-kit@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install boldcreate-tool-kit@boldcreate-plugins`.
 
 You also need:
 
 - `git`.
-- The GitHub CLI (`gh`), signed in, to open pull requests and read CI checks. GitHub is the default Git host. To use GitLab instead, set `git.host: gitlab` in `.boldcreate/project.yml` and install `glab`. For any other host, set `git.host: other`; the kit pushes branches and gives you the link to open the pull request yourself.
+- The GitHub CLI (`gh`), signed in, to open pull requests and read CI checks. GitHub is the default Git host. To use GitLab instead, set `git.host: gitlab` in `.boldcreate/project.yml` and install `glab`. For any other host, set `git.host: other`; the kit pushes one branch, gives you pull request text ready to paste, and asks before pushing more than one branch.
 - A host that runs subagents for the reviewer and implementer agents. Where a host cannot, the reviewer steps stop and say so instead of reviewing in the main session.
 
 ## Get started
 
 Run the `start` skill and describe what you want. In Cursor, type `/start`. In Claude Code, type `/boldcreate-tool-kit:start`.
+
+In Claude Code, the agent cannot start the skills marked "You" below by itself. When a path reaches one, it reads that skill's `SKILL.md` from the kit folder and follows it; the session-start hook prints that folder as `Kit root: <path>`. If Claude Code asks before each read, allow reads of installed plugins in `~/.claude/settings.json`:
+
+```json
+{ "permissions": { "allow": ["Read(~/.claude/plugins/cache/**)"] } }
+```
 
 `start` sorts the request into one of four paths, shows the path in one line, and lets you change it. On first use it runs `setup`, which detects your build, test, lint and run commands and saves them to `.boldcreate/project.yml`. Every skill can also be run on its own.
 
@@ -28,6 +34,7 @@ Run the `start` skill and describe what you want. In Cursor, type `/start`. In C
 | Bug | A reported defect | `start`, `debug`, `tdd`, `verify`, `code-review`, `ship`, then `retro` if you want it |
 | Feature | Over the size threshold | `start`, `grilling`, `write-spec`, `review-doc`, `plan-slices`, `build`, `ship` |
 | New application | No code yet | `start`, `define-product`, `design-architecture`, `plan-slices`, `scaffold`, `build` for each milestone, `ship`, `report` |
+| New application, small lane | No code yet, at most `thresholds.small_app_features` must-have features (default 5) and one user group | The same skills, with a short PRD, a short architecture with decision records only for the stack and data format, and one combined review |
 
 You approve every gate: specs, the plan, each milestone, merges and releases. The kit never pushes to a protected branch, force-pushes, merges, deletes a branch, releases or deploys without your confirmation in the same session, and it never prints or commits secrets.
 
@@ -58,15 +65,17 @@ The agent can start the first six on its own when a request matches. Only their 
 
 ## Agents
 
-Reviewer agents start with no chat history and never edit files. They receive file paths, IDs and commit ranges, read the code themselves, and return a report of at most 400 words with a verdict of `BLOCKING`, `CHANGES` or `CLEAN`.
+Reviewer agents start with no chat history and never edit files. They receive file paths, IDs and commit ranges, read the code themselves, and return a report of at most 400 words with a verdict of `BLOCKING`, `CHANGES` or `CLEAN`. Reports use paths relative to the repository and list at most five reviewed files; that list does not count toward the limit. The implementer's report follows the same rules with a 300-word limit.
+
+Every agent file sets `model: inherit`. Where the host lets the caller choose an agent's model, the skills start `standards-reviewer` and `spec-reviewer` on a smaller model (in Claude Code, `sonnet`). `implementer`, `doc-reviewer` and `security-reviewer` use the session's model.
 
 | Agent | What it does | Used by |
 | --- | --- | --- |
 | `doc-reviewer` | Reviews product requirements, an architecture or a spec, using a checklist file for that document type. | `review-doc` |
 | `standards-reviewer` | Checks a diff against the repository's standards, the team principles, common code smells and leftover clutter. | `code-review` |
-| `spec-reviewer` | Checks code against the spec for missing, wrong or unrequested behaviour. | `code-review`, `build`, `report` |
+| `spec-reviewer` | Checks code against the spec for missing, wrong or unrequested behaviour. In milestone reviews it also checks the validation and data rules in the architecture and decision records. | `code-review`, `build`, `report` |
 | `security-reviewer` | Looks for exposed secrets, injection, auth and access gaps, vulnerable dependencies and architecture threats. | `code-review`, `design-architecture` |
-| `implementer` | Builds one slice test-first on its own branch and reports what changed. It does not push. | `build` |
+| `implementer` | Builds one slice test-first on its own branch, reading only the spec sections and files that slice needs, and reports what changed. It does not push. | `build` |
 
 ## Rules
 
@@ -77,7 +86,7 @@ Reviewer agents start with no chat history and never edit files. They receive fi
 | `no-secrets` | Always | Keep keys, tokens and passwords out of code, logs, commits and docs. |
 | `plain-english-docs` | Markdown files | Write short, direct sentences and explain how things work. |
 
-Claude Code has no rule component. There, a session-start hook loads the three always-on rules from `instructions.md`.
+Claude Code has no rule component. There, a session-start hook loads the three always-on rules from `instructions.md` and prints the kit folder.
 
 ## Files the kit creates in your project
 
@@ -94,6 +103,7 @@ Claude Code has no rule component. There, a session-start hook loads the three a
 | `docs/architecture/overview.md` | `design-architecture` | Architecture |
 | `docs/specs/<feature>/spec.md` | `write-spec` | Feature spec |
 | `docs/learnings/<date>-<topic>.md` | `retro` | Lessons learned |
+| `docs/reports/` | `report` | Drift reports, release notes and progress summaries |
 
 Commit these files so that the whole team and every new session share them. If a command in `project.yml` is missing or fails, the kit asks you for it instead of guessing.
 
@@ -101,7 +111,7 @@ Commit these files so that the whole team and every new session share them. If a
 
 The kit is built to spend as few tokens as the work allows, and CI checks these limits on every change:
 
-- The six automatic skill descriptions and the always-on rules together stay under 600 tokens, and each description is at most 40 words.
+- The six automatic skill descriptions, the five agent descriptions and the always-on rules together stay under 600 tokens, and each skill description is at most 40 words.
 - Each `SKILL.md` is at most 150 lines. Steps that only some runs need live in sibling files that load on demand.
 - Each agent file is at most 80 lines.
 - Every skill has a scenario file in `tests/scenarios/`.

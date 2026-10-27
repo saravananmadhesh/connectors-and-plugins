@@ -24,7 +24,7 @@ const NOT_PLUGINS = new Set([PLUGINS_DIR, "node_modules", "schemas", "scripts"])
 
 const MARKETPLACE = {
   name: "boldcreate-plugins",
-  owner: { name: "BoldCreate Connect" },
+  owner: { name: "Syncfusion" },
   description:
     "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a tool kit for the whole software delivery lifecycle.",
 };

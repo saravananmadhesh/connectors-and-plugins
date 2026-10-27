@@ -5,10 +5,10 @@
   "version": "0.1.0",
   "description": "Explore datasets and tables and run SQL queries.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.png",
   "category": "database",

@@ -10,7 +10,7 @@ Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resou
 
 - **BoldCreate Connect:** open **Marketplace**, find **Gemini Cloud Assist**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Gemini Cloud Assist**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-gemini-cloud-assist@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-gemini-cloud-assist@boldcreate-plugins`.
 
 ## MCP
 

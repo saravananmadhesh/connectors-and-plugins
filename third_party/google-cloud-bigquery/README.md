@@ -8,7 +8,7 @@ Explore datasets and tables and run SQL queries.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud BigQuery**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud BigQuery**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-bigquery@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-bigquery@boldcreate-plugins`.
 
 ## MCP
 

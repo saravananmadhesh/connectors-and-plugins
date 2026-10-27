@@ -8,7 +8,7 @@ Review grouped application errors from Error Reporting.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud Error Reporting**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud Error Reporting**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-error-reporting@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-error-reporting@boldcreate-plugins`.
 
 ## MCP
 

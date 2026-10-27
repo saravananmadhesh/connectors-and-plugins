@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Read Cloud Monitoring metrics, alerts, and dashboards.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://docs.cloud.google.com/monitoring/api/ref_v3_mcp/mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "keywords": [
     "cloud monitoring",

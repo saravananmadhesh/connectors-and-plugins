@@ -8,7 +8,7 @@ Turn Figma frames into code and read design tokens, components, and variables.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Figma**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Figma**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install figma@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install figma@boldcreate-plugins`.
 
 ## MCP
 

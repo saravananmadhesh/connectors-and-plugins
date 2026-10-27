@@ -8,7 +8,7 @@ Manage Neon serverless Postgres projects, branches, queries, and migrations.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Neon**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Neon**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install neon@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install neon@boldcreate-plugins`.
 
 ## MCP
 

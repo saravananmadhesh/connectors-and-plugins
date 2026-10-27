@@ -7,10 +7,10 @@
   },
   "description": "Work with Firebase SQL Connect (Data Connect) services, schemas, and queries.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://firebase.google.com/docs/reference/sql-connect/mcp",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.svg",
   "keywords": [

@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
   "author": {
-    "name": "BoldCreate Connect"
+    "name": "Syncfusion"
   },
   "homepage": "https://posthog.com/docs/model-context-protocol",
-  "repository": "https://github.com/saravananmadhesh/BoldCreate-Plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
   "logo": "assets/logo.png",
   "category": "analytics",

@@ -8,7 +8,7 @@ Search, read, and update Notion pages and databases.
 
 - **BoldCreate Connect:** open **Marketplace**, find **Notion**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Notion**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install notion@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install notion@boldcreate-plugins`.
 
 ## MCP
 

@@ -8,7 +8,7 @@ Manage Cloud SQL for MySQL, PostgreSQL, and SQL Server instances and run queries
 
 - **BoldCreate Connect:** open **Marketplace**, find **Google Cloud SQL**, and click **Install**.
 - **Cursor:** add this repository as a team marketplace, then install **Google Cloud SQL**.
-- **Claude Code:** `/plugin marketplace add saravananmadhesh/BoldCreate-Plugins`, then `/plugin install google-cloud-sql@boldcreate-plugins`.
+- **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install google-cloud-sql@boldcreate-plugins`.
 
 ## MCP
 

@@ -10,4 +10,4 @@ Run the report skill and check the docs for drift.
 - One `spec-reviewer` runs for the spec with the spec path and `HEAD`, not pasted content.
 - The report lists the renamed endpoint and the replaced library, each with a doc location and a `path:line` code location.
 - The report stays under 400 words and suggests `write-spec` for the stale spec and `domain-docs` for the stale ADR, without starting either.
-- No file is written unless the user asks.
+- After the report is shown, the agent offers once to save it as `docs/reports/<yyyy-mm-dd>-drift.md`, and writes the file only on yes.
