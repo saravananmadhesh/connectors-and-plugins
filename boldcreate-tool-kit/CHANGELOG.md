@@ -6,15 +6,15 @@ All notable changes to this plugin will be documented here.
 
 - New applications with a few must-have features and one user group take a small lane: a short PRD, a short architecture with fewer decision records, and one combined review.
 - Standards and spec reviews run on a smaller model where the host lets the caller pick one. Implementers and the other reviewers keep the session's model.
-- Build fix runs are leaner: the implementer reads only the spec sections and files its slice needs.
-- `build` removes each implementer worktree after its slice is merged, and `verify` cleans up the temporary worktree it uses.
+- `build` costs less: each implementer reads only the spec sections and files its slice needs, and milestone review findings are fixed directly or in one small run per blocking finding instead of one large run.
+- `build` removes each implementer worktree after its slice is merged, and verifies each slice in a fresh temporary worktree that it removes afterwards.
 - Quick fixes and bug fixes now work on a `fix/<slug>` branch and end in one commit, which `code-review` then reviews.
 - `ship` works on Git hosts other than GitHub and GitLab: it pushes one branch, gives you pull request text ready to paste, and asks before pushing more than one branch.
 - Reviewer and implementer reports are shorter: paths are relative to the repository, and long file lists are cut to five lines.
 - Spec reviews of a milestone also check the validation and data rules in the architecture and decision records.
 - A clearer bar for which choices earn a decision record, so fewer, more useful records are written.
 - `grilling` looks up facts itself and skips confirmations that would not change an answer.
-- Approved product and architecture docs are committed early, on an integration branch.
+- Approved product and architecture docs are committed early, on an integration branch, and `plan-slices` records which files each slice changes so slices that share files run in order.
 - `report` saves its output to `docs/reports`.
 - `verify` keeps each command's real exit code in its evidence.
 - In Claude Code, the session-start hook also prints the kit's folder, so skills that Claude Code will not start by itself can be read and followed from there.
