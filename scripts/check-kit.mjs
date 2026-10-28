@@ -3,10 +3,12 @@
 // context budgets they must stay within:
 //   TB-1  auto-skill descriptions, agent descriptions and always-on rules <= 600 tokens
 //         (characters / 4), each auto-skill description <= 40 words. Claude Code counts
-//         instructions.md in place of the rules.
+//         the session-start hook text in place of the rules.
 //   TB-2  SKILL.md <= 150 lines
 //   TB-3  agent file <= 80 lines
 //   AC-8  every skill has tests/scenarios/<skill>.md
+//   Self-contained components: BoldCreate Connect syncs each skill folder, agent, rule and
+//   hook file on its own, so nothing may rely on files elsewhere in the plugin folder.
 // Usage: node scripts/check-kit.mjs   (also run by npm run validate)
 
 import { readFileSync, readdirSync, existsSync } from "fs";
@@ -116,17 +118,9 @@ export function checkKit(dir) {
     fail(`${dir}: always-loaded text is about ${total} tokens (TB-1 limit ${BUDGETS.alwaysLoadedTokens})`);
   }
 
-  // Claude Code has no rules: instructions.md replaces the always-on rules there.
+  // Claude Code has no rules: the session-start hook prints the always-on rules there.
   let claudeTotal = always.filter((a) => !a.what.startsWith("rule ")).reduce((n, a) => n + tokens(a.text), 0);
-  const instructions = join(base, "instructions.md");
-  if (existsSync(instructions)) {
-    claudeTotal += tokens(readFileSync(instructions, "utf-8"));
-    if (claudeTotal > BUDGETS.alwaysLoadedTokens) {
-      fail(`${dir}: skill and agent descriptions plus instructions.md are about ${claudeTotal} tokens (TB-1 limit ${BUDGETS.alwaysLoadedTokens})`);
-    }
-  } else if (always.some((a) => a.what.startsWith("rule "))) {
-    fail(`${dir}/instructions.md is missing; Claude Code needs it for the always-on rules`);
-  }
+  const hasAlwaysRules = always.some((a) => a.what.startsWith("rule "));
 
   if (existsSync(join(base, "hooks/hooks.json"))) {
     fail(`${dir}/hooks/hooks.json: Cursor loads this file; put Claude Code hooks in ${CLAUDE_HOOKS}`);
@@ -136,11 +130,50 @@ export function checkKit(dir) {
     try {
       const hooks = JSON.parse(readFileSync(hooksFile, "utf-8")).hooks;
       if (!hooks || typeof hooks !== "object" || Array.isArray(hooks)) fail(`${dir}/${CLAUDE_HOOKS}: needs a top-level "hooks" object`);
+      else {
+        const commands = Object.values(hooks).flat().flatMap((h) => h.hooks ?? []).map((h) => h.command ?? "");
+        for (const command of commands) {
+          if (/CLAUDE_PLUGIN_ROOT\}?\//.test(command)) {
+            fail(`${dir}/${CLAUDE_HOOKS}: a hook command reads or runs a file from the plugin folder; BoldCreate Connect delivers only the hooks file, so keep the command self-contained`);
+          }
+        }
+        const sessionStart = (hooks.SessionStart ?? []).flatMap((h) => h.hooks ?? []).map((h) => h.command ?? "").join("\n");
+        claudeTotal += tokens(sessionStart);
+      }
     } catch (e) {
       fail(`${dir}/${CLAUDE_HOOKS} is not valid JSON: ${e.message}`);
     }
-  } else if (always.some((a) => a.what.startsWith("rule "))) {
+  } else if (hasAlwaysRules) {
     fail(`${dir}/${CLAUDE_HOOKS} is missing; Claude Code needs a session-start hook for the always-on rules`);
+  }
+  if (claudeTotal > BUDGETS.alwaysLoadedTokens) {
+    fail(`${dir}: skill and agent descriptions plus the session-start hook are about ${claudeTotal} tokens (TB-1 limit ${BUDGETS.alwaysLoadedTokens})`);
+  }
+
+  // BoldCreate Connect delivers components one by one, so plugin-level folders never reach the user.
+  const allowedTop = new Set([
+    ".boldcreate-plugin", ".claude-plugin", ".cursor-plugin", "boldcreate.json",
+    "skills", "agents", "rules", "hooks", "assets", "tests", "README.md", "CHANGELOG.md", "LICENSE",
+  ]);
+  for (const entry of readdirSync(base)) {
+    if (!allowedTop.has(entry)) {
+      fail(`${dir}/${entry}: BoldCreate Connect does not deliver plugin-level files; move it into the skill folder that uses it`);
+    }
+  }
+  if (existsSync(join(base, "hooks"))) {
+    for (const entry of readdirSync(join(base, "hooks"))) {
+      if (`hooks/${entry}` !== CLAUDE_HOOKS) fail(`${dir}/hooks/${entry}: BoldCreate Connect delivers only ${CLAUDE_HOOKS}; inline the script in the hook command`);
+    }
+  }
+  const outsideRefs = /kit root|two levels above|this plugin's folder|\.\.\/\.\.\//i;
+  const components = [
+    ...skills.flatMap((s) => readdirSync(join(base, "skills", s)).map((f) => `skills/${s}/${f}`)),
+    ...agents.map((a) => `agents/${a}.md`),
+    ...rules.map((r) => `rules/${r}.mdc`),
+  ];
+  for (const rel of components) {
+    const m = readFileSync(join(base, rel), "utf-8").match(outsideRefs);
+    if (m) fail(`${dir}/${rel}: refers to a file outside its component ("${m[0]}"); keep the file in the skill folder`);
   }
 
   const summary =

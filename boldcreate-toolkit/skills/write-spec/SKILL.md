@@ -28,7 +28,7 @@ Paths below are defaults. When `.boldcreate/project.yml` exists, use its `docs` 
 
    Done when you know which glossary terms and decisions apply to this feature.
 
-4. **Write the spec** from `templates/spec.md` at the kit root, two levels above this file. Fill each section from the conversation:
+4. **Write the spec** from `spec-template.md` in this skill's folder. Fill each section from the conversation:
    - **Problem**: who has it and what it costs them today.
    - **Solution**: what changes for the user, in a few sentences.
    - **User stories**: numbered `US-1`, `US-2` and so on, each with acceptance checks a test can confirm.

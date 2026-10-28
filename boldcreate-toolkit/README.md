@@ -20,7 +20,7 @@ You also need:
 
 Run the `bc-start` skill and describe what you want. In Cursor, type `/bc-start`. In Claude Code, type `/boldcreate-toolkit:bc-start`.
 
-In Claude Code, the agent cannot start the skills marked "You" below by itself. When a path reaches one, it reads that skill's `SKILL.md` from the kit folder and follows it; the session-start hook prints that folder as `Kit root: <path>`. If Claude Code asks before each read, allow reads of installed plugins in `~/.claude/settings.json`:
+In Claude Code, the agent cannot start the skills marked "You" below by itself. When a path reaches one, it reads that skill's `SKILL.md` from the folder next to the current skill's folder and follows it; the session-start hook also prints the kit's skills folder as `Kit skills: <path>`. If Claude Code asks before each read, allow reads of installed plugins in `~/.claude/settings.json`:
 
 ```json
 { "permissions": { "allow": ["Read(~/.claude/plugins/cache/**)"] } }
@@ -96,7 +96,9 @@ Every agent file sets `model: inherit`. Where the host lets the caller choose an
 | `no-secrets` | Always | Keep keys, tokens and passwords out of code, logs, commits and docs. |
 | `plain-english-docs` | Markdown files | Write short, direct sentences and explain how things work. |
 
-Claude Code has no rule component. There, a session-start hook loads the three always-on rules from `instructions.md` and prints the kit folder.
+Claude Code has no rule component. There, a session-start hook prints the three always-on rules and the kit's skills folder.
+
+Every skill keeps the templates and review checklists it reads in its own folder, and the hook needs no script file. That way each skill works on its own when BoldCreate Connect delivers skills, agents, rules and hooks one by one.
 
 ## Files the kit creates in your project
 

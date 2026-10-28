@@ -15,4 +15,4 @@ A repository with GLOSSARY.md and docs/adr/. Earlier in the session the user and
 - review-doc starts with the spec lens.
 - A decision record is written only for a choice that is hard to reverse and affects more than one module or the public interface, and the spec links it.
 - Started on main (protected), the skill creates `feat/<feature-slug>` before writing any file, and no spec, glossary or decision record change is left on main.
-- The spec template is read from the kit root's templates/ folder on the first try.
+- The spec template is read from spec-template.md in the write-spec folder on the first try.

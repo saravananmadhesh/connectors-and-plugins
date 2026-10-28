@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 Write `.boldcreate/project.yml` and `.boldcreate/principles.md` from the repository's own files, and make sure the glossary and decision record folder exist. Detection runs once per repository; later runs read the saved file.
 
-The templates live in this kit's `templates/` folder, two levels above this file.
+The templates are in this skill's folder: `project-template.yml` and `principles-template.md`.
 
 ## Steps
 
@@ -32,13 +32,13 @@ The templates live in this kit's `templates/` folder, two levels above this file
 
    Done when all three keys have values.
 
-5. **Write `.boldcreate/project.yml`** from `templates/project.yml`. Fill in the commands from steps 2 and 3 and remove the lines for commands that were left out. Keep the default thresholds and doc paths unless the repository already keeps those docs elsewhere, for example decision records in another folder. In that case record the existing path.
+5. **Write `.boldcreate/project.yml`** from `project-template.yml`. Fill in the commands from steps 2 and 3 and remove the lines for commands that were left out. Keep the default thresholds and doc paths unless the repository already keeps those docs elsewhere, for example decision records in another folder. In that case record the existing path.
 
    Done when the file exists, parses as YAML and holds only commands that came from the repository or the user.
 
 6. **Write `.boldcreate/principles.md`.**
    - If the user or their organization provides a principles file, copy it.
-   - Otherwise copy `templates/principles.md`, then add up to five project principles you can read from the repository's contributing guide, editor and lint settings, or the patterns most of the code follows. Each added line names its source.
+   - Otherwise copy `principles-template.md`, then add up to five project principles you can read from the repository's contributing guide, editor and lint settings, or the patterns most of the code follows. Each added line names its source.
 
    Show the file and ask the user to confirm or edit it, unless the calling skill already has the user's answer on principles.
 
