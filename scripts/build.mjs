@@ -26,7 +26,7 @@ const MARKETPLACE = {
   name: "boldcreate-plugins",
   owner: { name: "Syncfusion" },
   description:
-    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a tool kit for the whole software delivery lifecycle.",
+    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a toolkit for the whole software delivery lifecycle.",
 };
 
 const readJSON = (p) => JSON.parse(readFileSync(p, "utf-8"));
