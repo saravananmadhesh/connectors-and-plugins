@@ -1,6 +1,0 @@
-{
-  "$schema": "../schemas/boldcreate.schema.json",
-  "phase": 1,
-  "stage": "preview",
-  "docs": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/boldcreate-tool-kit"
-}
