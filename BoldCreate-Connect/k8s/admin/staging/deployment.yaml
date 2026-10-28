@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: boldcreate-integrations-admin-staging, namespace: boldcreate-stag }
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-admin-staging }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: boldcreate-integrations-admin-staging }
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: boldcreate-integrations-admin-staging
+          image: us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/boldcreate-staging-integrations-admin:#{Build.BuildId}#
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: boldcreate-integrations-admin-config-staging
+            - secretRef:
+                name: boldcreate-integrations-admin-secrets-staging
+          ports: [{ name: http, containerPort: 3004 }]
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: '1', memory: 1024Mi }
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+      volumes:
+        - name: tmp
+          emptyDir: {}

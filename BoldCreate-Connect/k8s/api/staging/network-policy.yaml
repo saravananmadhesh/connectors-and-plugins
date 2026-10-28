@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: boldcreate-integrations-api-ingress-staging, namespace: boldcreate-stag }
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-api-staging }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-web-staging }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-admin-staging }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-gateway-staging }
+      ports: [{ protocol: TCP, port: 3001 }]

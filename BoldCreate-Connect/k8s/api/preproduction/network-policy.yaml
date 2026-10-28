@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: boldcreate-integrations-api-ingress-preproduction, namespace: boldcreate-preprod }
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-api-preproduction }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-web-preproduction }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-admin-preproduction }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-gateway-preproduction }
+      ports: [{ protocol: TCP, port: 3001 }]

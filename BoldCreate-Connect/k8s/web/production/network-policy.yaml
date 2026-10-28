@@ -1,0 +1,16 @@
+# The web server never calls a Google API, so it gets no route to the node metadata server
+# (169.254.169.254), which would hand a compromised pod the node's service account token.
+# Everything else stays open (pods and DNS in any namespace, and every address except that one):
+# an egress policy denies whatever it does not list.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: boldcreate-integrations-web-production-egress, namespace: boldcreate-prod }
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-web-production }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0, except: [169.254.169.254/32] }
+    - to:
+        - namespaceSelector: {}

@@ -1,0 +1,2742 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BoldCreate Admin (Observability demo)</title>
+    <style>
+      :root {
+        --bg: #fff;
+        --fg: #171717;
+        --mut: #737373;
+        --bd: #e5e5e5;
+        --card: #fff;
+        --soft: #f5f5f5;
+        --side: #fafafa;
+        --ok: #15803d;
+        --okb: #f0fdf4;
+        --warn: #b45309;
+        --warnb: #fffbeb;
+        --bad: #b91c1c;
+        --badb: #fef2f2;
+        --info: #1d4ed8;
+        --infob: #eff6ff;
+      }
+      [data-theme='dark'] {
+        --bg: #0a0a0a;
+        --fg: #fafafa;
+        --mut: #a3a3a3;
+        --bd: #262626;
+        --card: #111;
+        --soft: #1a1a1a;
+        --side: #0f0f0f;
+        --ok: #4ade80;
+        --okb: #052e16;
+        --warn: #fbbf24;
+        --warnb: #2a1a03;
+        --bad: #f87171;
+        --badb: #2d0a0a;
+        --info: #60a5fa;
+        --infob: #0a1a33;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        display: flex;
+        min-height: 100vh;
+      }
+      aside {
+        width: 240px;
+        background: var(--side);
+        border-right: 1px solid var(--bd);
+        padding: 16px 10px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        flex: none;
+      }
+      aside h1 {
+        font-size: 14px;
+        margin: 0 8px 16px;
+        font-weight: 600;
+      }
+      nav button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: 0;
+        color: var(--mut);
+        padding: 8px 10px;
+        border-radius: 6px;
+        font: inherit;
+        cursor: pointer;
+      }
+      nav button:hover {
+        background: var(--soft);
+      }
+      nav button[aria-current='page'] {
+        background: var(--soft);
+        color: var(--fg);
+        font-weight: 500;
+      }
+      nav hr {
+        border: 0;
+        border-top: 1px solid var(--bd);
+        margin: 12px 0;
+      }
+      main {
+        flex: 1;
+        padding: 24px 32px;
+        min-width: 0;
+      }
+      header.top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      h2 {
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0;
+      }
+      .sub,
+      .mut {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      .bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        align-items: center;
+      }
+      select,
+      input,
+      button.btn {
+        font: inherit;
+        font-size: 13px;
+        padding: 6px 10px;
+        border: 1px solid var(--bd);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      button.btn {
+        cursor: pointer;
+      }
+      button.btn:hover {
+        background: var(--soft);
+      }
+      button.primary {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: var(--fg);
+      }
+      button.danger {
+        color: var(--bad);
+      }
+      :focus-visible {
+        outline: 2px solid var(--info);
+        outline-offset: 1px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .card {
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        padding: 16px;
+        background: var(--card);
+      }
+      .card .n {
+        font-size: 24px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 1px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--bd);
+        white-space: nowrap;
+      }
+      .badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .b-ok {
+        color: var(--ok);
+        background: var(--okb);
+      }
+      .b-warn {
+        color: var(--warn);
+        background: var(--warnb);
+      }
+      .b-bad {
+        color: var(--bad);
+        background: var(--badb);
+      }
+      .b-info {
+        color: var(--info);
+        background: var(--infob);
+      }
+      .b-n {
+        color: var(--mut);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .tw {
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        overflow: auto;
+        margin-bottom: 16px;
+      }
+      th {
+        background: color-mix(in srgb, var(--soft) 60%, transparent);
+        text-align: left;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--mut);
+        padding: 8px 12px;
+      }
+      td {
+        padding: 8px 12px;
+        border-top: 1px solid var(--bd);
+        vertical-align: middle;
+      }
+      td.r,
+      th.r {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      tr.row {
+        cursor: pointer;
+      }
+      tr.row:hover,
+      tr.row:focus-visible {
+        background: var(--soft);
+      }
+      code,
+      .mono {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 12px;
+      }
+      .spark {
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 28px;
+      }
+      .spark i {
+        display: block;
+        width: 5px;
+        background: var(--mut);
+        border-radius: 1px;
+        opacity: 0.7;
+      }
+      .chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 110px;
+        margin-top: 8px;
+      }
+      .chart i {
+        flex: 1;
+        background: var(--fg);
+        opacity: 0.75;
+        border-radius: 2px 2px 0 0;
+        min-width: 4px;
+      }
+      .chart i.e {
+        background: var(--bad);
+        opacity: 1;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 900px) {
+        .two {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          display: none;
+        }
+        main {
+          padding: 16px;
+        }
+      }
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .crumb {
+        background: none;
+        border: 0;
+        color: var(--mut);
+        cursor: pointer;
+        font: inherit;
+        padding: 0;
+        margin-bottom: 8px;
+      }
+      .stack {
+        background: var(--soft);
+        border-radius: 8px;
+        padding: 12px;
+        overflow: auto;
+      }
+      .stack div {
+        white-space: pre;
+      }
+      .stack .app {
+        color: var(--fg);
+      }
+      .stack .lib {
+        color: var(--mut);
+      }
+      .stack .hit {
+        background: var(--badb);
+        color: var(--bad);
+        display: block;
+        margin: 0 -12px;
+        padding: 0 12px;
+      }
+      dl {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 6px 12px;
+        margin: 0;
+      }
+      dt {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      dd {
+        margin: 0;
+        word-break: break-all;
+      }
+      .crumbs li {
+        list-style: none;
+        display: flex;
+        gap: 10px;
+        padding: 5px 0;
+        border-top: 1px solid var(--bd);
+      }
+      .crumbs {
+        padding: 0;
+        margin: 0;
+      }
+      .crumbs time {
+        color: var(--mut);
+        width: 64px;
+        flex: none;
+      }
+      .hidden {
+        display: none;
+      }
+      .bardisk {
+        height: 8px;
+        background: var(--soft);
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid var(--bd);
+      }
+      .bardisk i {
+        display: block;
+        height: 100%;
+        background: var(--fg);
+      }
+      .tabs {
+        display: flex;
+        gap: 16px;
+        border-bottom: 1px solid var(--bd);
+        margin-bottom: 12px;
+      }
+      .tabs button {
+        background: none;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        padding: 6px 0;
+        color: var(--mut);
+        font: inherit;
+        cursor: pointer;
+      }
+      .tabs button[aria-selected='true'] {
+        color: var(--fg);
+        border-color: var(--fg);
+      }
+      .banner {
+        border: 1px solid var(--bd);
+        background: var(--infob);
+        color: var(--info);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 16px;
+        font-size: 12px;
+      }
+      .nav-heading {
+        padding: 0 10px 4px;
+        color: var(--mut);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .nav-sub {
+        margin: 3px 0 5px 14px;
+        padding-left: 8px;
+        border-left: 1px solid var(--bd);
+      }
+      .nav-sub button {
+        font-size: 12px;
+        padding: 6px 9px;
+      }
+      .workspace {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        margin-bottom: 12px;
+        border: 1px solid var(--bd);
+        border-radius: 7px;
+        color: var(--mut);
+        font-size: 12px;
+      }
+      .section-tabs {
+        display: flex;
+        gap: 18px;
+        border-bottom: 1px solid var(--bd);
+        margin: 0 0 18px;
+      }
+      .section-tabs button {
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: transparent;
+        color: var(--mut);
+        font: inherit;
+        padding: 7px 0;
+        cursor: pointer;
+      }
+      .section-tabs button[aria-current='page'] {
+        border-color: var(--fg);
+        color: var(--fg);
+        font-weight: 500;
+      }
+      .crumbline {
+        color: var(--mut);
+        font-size: 12px;
+        margin-bottom: 7px;
+      }
+      .placeholder {
+        max-width: 760px;
+        padding: 28px;
+      }
+      .placeholder h2 {
+        margin-bottom: 8px;
+      }
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .live-callout {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .live-guidance {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+      .live-guidance li {
+        margin: 7px 0;
+      }
+      .kbd {
+        font:
+          11px ui-monospace,
+          monospace;
+        border: 1px solid var(--bd);
+        border-radius: 4px;
+        padding: 1px 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <h1>BoldCreate Admin</h1>
+      <div class="workspace">
+        <span class="badge b-ok">PROD</span><span>BoldCreate Connect</span>
+      </div>
+      <nav aria-label="Admin sections">
+        <button data-v="admin-dashboard">Dashboard</button>
+        <div class="nav-heading" style="margin-top: 12px">Catalog</div>
+        <button data-v="plugins">Plugins</button>
+        <button data-v="discover">Discover</button>
+        <button data-v="review">Review</button>
+        <button data-v="categories">Categories</button>
+        <div class="nav-heading" style="margin-top: 12px">Operations</div>
+        <button data-v="overview" aria-current="page">Observability</button>
+        <div class="nav-sub" aria-label="Observability sections">
+          <button data-v="live-status">Live status</button>
+          <button data-v="metrics-trends">Metrics trends</button>
+          <button data-v="errors">Errors</button>
+          <button data-v="events">Events</button>
+          <button data-v="storage">Storage</button>
+        </div>
+        <div class="nav-heading" style="margin-top: 12px">System</div>
+        <button data-v="audit">Audit</button>
+      </nav>
+      <div style="position: absolute; bottom: 16px; left: 10px; right: 10px">
+        <button class="btn" id="theme" style="width: 100%">Theme: light</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="banner" role="note">
+        Demo data only. Navigation and monitoring interactions are simulated; no backend data is
+        read or changed.
+      </div>
+
+      <!-- EXISTING ADMIN ROUTE PLACEHOLDERS -->
+      <section id="admin-dashboard" class="hidden">
+        <div class="crumbline">Dashboard</div>
+        <div class="card placeholder">
+          <h2>Dashboard</h2>
+          <div class="sub">
+            Existing admin landing page remains in place. Monitoring is a separate Operations
+            destination.
+          </div>
+        </div>
+      </section>
+      <section id="plugins" class="hidden">
+        <div class="crumbline">Catalog / Plugins</div>
+        <div class="card placeholder">
+          <h2>Plugins</h2>
+          <div class="sub">
+            Existing plugin management route. This demo placeholder illustrates that the current
+            catalog navigation remains available.
+          </div>
+        </div>
+      </section>
+      <section id="discover" class="hidden">
+        <div class="crumbline">Catalog / Discover</div>
+        <div class="card placeholder">
+          <h2>Discover</h2>
+          <div class="sub">
+            Existing discovery route. No monitoring filters or state are mixed into this flow.
+          </div>
+        </div>
+      </section>
+      <section id="review" class="hidden">
+        <div class="crumbline">Catalog / Review</div>
+        <div class="card placeholder">
+          <h2>Review</h2>
+          <div class="sub">Existing review queue route, unchanged.</div>
+        </div>
+      </section>
+      <section id="categories" class="hidden">
+        <div class="crumbline">Catalog / Categories</div>
+        <div class="card placeholder">
+          <h2>Categories</h2>
+          <div class="sub">Existing category management route, unchanged.</div>
+        </div>
+      </section>
+      <section id="audit" class="hidden">
+        <div class="crumbline">System / Audit</div>
+        <div class="card placeholder">
+          <h2>Audit</h2>
+          <div class="sub">Existing audit log remains the last system navigation item.</div>
+        </div>
+      </section>
+
+      <!-- OVERVIEW -->
+      <section id="overview">
+        <div class="crumbline">Operations / Observability</div>
+        <header class="top">
+          <div>
+            <h2>Observability</h2>
+            <div class="sub">
+              Issues and operational events across Connect. Use Live status for current service load
+              and capacity.
+            </div>
+          </div>
+          <div class="header-actions">
+            <select aria-label="Environment">
+              <option>Production</option>
+              <option>Staging</option></select
+            ><select aria-label="Range">
+              <option>Last 24 hours</option>
+              <option>Last 7 days</option>
+              <option>Last 14 days</option>
+            </select>
+          </div>
+        </header>
+        <div class="section-tabs" aria-label="Observability sections">
+          <button data-v="overview" aria-current="page">Overview</button
+          ><button data-v="errors">Errors</button><button data-v="events">Events</button
+          ><button data-v="storage">Storage</button>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="mut">Open error groups</div>
+            <div class="n">7</div>
+            <div class="mut">2 new today</div>
+          </div>
+          <div class="card">
+            <div class="mut">Error events (24h)</div>
+            <div class="n">412</div>
+            <div class="mut">-18% vs yesterday</div>
+          </div>
+          <div class="card">
+            <div class="mut">Failed jobs (24h)</div>
+            <div class="n">3</div>
+            <div class="mut">1 dead-lettered</div>
+          </div>
+          <div class="card">
+            <div class="mut">Security events (24h)</div>
+            <div class="n">5</div>
+            <div class="mut">1 needs review</div>
+          </div>
+        </div>
+
+        <div class="card live-callout" style="margin-bottom: 16px">
+          <div>
+            <strong>Live service status</strong>
+            <div class="mut">
+              Current request load and saturation signals. Open for the per-service view.
+            </div>
+          </div>
+          <button class="btn" data-go="live-status">View live status</button>
+        </div>
+        <div class="two">
+          <div>
+            <h3>Services</h3>
+            <div class="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Release</th>
+                    <th class="r">5xx rate</th>
+                    <th class="r">p95</th>
+                    <th>Errors, 24h</th>
+                    <th class="r">Open groups</th>
+                  </tr>
+                </thead>
+                <tbody id="svc"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Errors over time</h3>
+            <div class="mut">Events per hour, all services</div>
+            <div
+              class="chart"
+              id="chart"
+              role="img"
+              aria-label="Error events per hour for the last 24 hours, peak at 14:00"
+            ></div>
+            <div class="mut" style="margin-top: 6px">Red bar: deploy 2.14.0 at 14:02</div>
+          </div>
+        </div>
+
+        <h3>Needs attention</h3>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Service</th>
+                <th class="r">Events</th>
+                <th>Last seen</th>
+              </tr>
+            </thead>
+            <tbody id="top"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- LIVE SERVICE STATUS -->
+      <section id="live-status" class="hidden">
+        <div class="crumbline">Operations / Observability / Live status</div>
+        <header class="top">
+          <div>
+            <h2>Live service status</h2>
+            <div class="sub">
+              Application metrics from the service registries. Infrastructure instance counts and
+              resource metrics are not shown until a verified GCP source is connected.
+            </div>
+          </div>
+          <div class="header-actions">
+            <span class="badge b-info" id="liveUpdated">Illustrative sample · not connected</span>
+            <button class="btn" id="refreshLive" type="button">Refresh sample</button>
+            <button class="btn" id="pauseLive" aria-pressed="false">Pause updates</button>
+          </div>
+        </header>
+        <div class="section-tabs" aria-label="Observability sections">
+          <button data-v="overview">Overview</button
+          ><button data-v="live-status" aria-current="page">Live status</button
+          ><button data-v="metrics-trends">Metrics trends</button
+          ><button data-v="errors">Errors</button><button data-v="events">Events</button
+          ><button data-v="storage">Storage</button>
+        </div>
+        <div class="banner" role="note">
+          Sample values illustrate application metrics only. Infrastructure and deployment fields
+          are omitted because their GCP source is not yet verified.
+        </div>
+        <div class="grid" id="liveSummary"></div>
+        <div class="two">
+          <div>
+            <h3>Service capacity</h3>
+            <div class="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th class="r">Event-loop p99</th>
+                    <th class="r">Heap used / limit</th>
+                    <th class="r">Thread-pool p95</th>
+                  </tr>
+                </thead>
+                <tbody id="liveRuntime"></tbody>
+              </table>
+            </div>
+            <h3>Dependency state</h3>
+            <div class="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Dependency</th>
+                    <th>Status</th>
+                    <th class="r">Latency p95</th>
+                    <th class="r">Pool wait</th>
+                    <th>Signal</th>
+                  </tr>
+                </thead>
+                <tbody id="liveDependencies"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3>Service load</h3>
+            <div class="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th class="r">Requests/s</th>
+                    <th class="r">p95</th>
+                    <th class="r">In flight</th>
+                    <th class="r">5xx rate</th>
+                  </tr>
+                </thead>
+                <tbody id="liveServices"></tbody>
+              </table>
+            </div>
+            <h3>Recent load trend</h3>
+            <div class="card">
+              <div class="mut">Gateway requests per second · last 10 minutes</div>
+              <div
+                class="chart"
+                id="loadChart"
+                role="img"
+                aria-label="Sample gateway request rate trend"
+              ></div>
+              <div class="mut">
+                Sustained rising load is a scaling signal when latency or saturation also increases.
+              </div>
+            </div>
+          </div>
+        </div>
+        <h3 style="margin-top: 16px">Worker queue</h3>
+        <div class="grid" id="workerSignals"></div>
+        <div class="card">
+          <strong>What this view can tell you</strong>
+          <ul class="live-guidance">
+            <li>Request rate, latency, in-flight work and errors are application metrics.</li>
+            <li>Worker queue depth and oldest-job age come from queue state, not HTTP traffic.</li>
+            <li>
+              These signals identify load and bottlenecks; they do not report GCP instance counts or
+              prove that scaling occurred.
+            </li>
+            <li>
+              Connect Cloud Monitoring instance and resource metrics to display running versus
+              desired capacity.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- METRICS TRENDS -->
+      <section id="metrics-trends" class="hidden">
+        <div class="crumbline">Operations / Observability / Metrics trends</div>
+        <header class="top">
+          <div>
+            <h2>Metrics trends</h2>
+            <div class="sub">
+              Historical service performance, dependency health and workload trends for capacity
+              planning and release comparison.
+            </div>
+          </div>
+          <div class="header-actions">
+            <span class="badge b-info" id="trendsUpdated">Illustrative sample · not connected</span>
+            <button class="btn" id="refreshTrends" type="button">Refresh sample</button>
+            <select id="trendRange" aria-label="Metrics time period">
+              <option value="24h">Last 24 hours</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d" selected>Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="12m">Last 12 months</option>
+              <option value="custom">Custom period</option></select
+            ><select id="trendService" aria-label="Metrics service">
+              <option>All services</option>
+              <option>web</option>
+              <option>admin</option>
+              <option>api</option>
+              <option>gateway</option>
+              <option>worker</option>
+            </select>
+          </div>
+        </header>
+        <div class="section-tabs" aria-label="Observability sections">
+          <button data-v="overview">Overview</button
+          ><button data-v="live-status">Live status</button
+          ><button data-v="metrics-trends" aria-current="page">Metrics trends</button
+          ><button data-v="errors">Errors</button><button data-v="events">Events</button
+          ><button data-v="storage">Storage</button>
+        </div>
+        <div class="banner" role="note">
+          Illustrative sample aggregates only — this demo is not connected to a data source. Refresh
+          sample redraws the example, not production data. In production, refresh must query the
+          verified metrics backend through the admin API; history and retention are shown only when
+          confirmed. Long periods use coarser aggregation, never individual scrape rows.
+        </div>
+        <div class="bar hidden" id="customRange">
+          <label>From <input type="date" aria-label="Start date" value="2025-01-01" /></label
+          ><label>To <input type="date" aria-label="End date" value="2025-01-31" /></label>
+        </div>
+        <div class="grid" id="trendSummary"></div>
+        <div class="grid" id="deepSummary"></div>
+        <div class="two">
+          <div class="card">
+            <h3>Request volume</h3>
+            <div class="mut" id="volumeResolution">Daily totals · 30 days</div>
+            <div
+              class="chart"
+              id="volumeChart"
+              role="img"
+              aria-label="Sample request volume trend"
+            ></div>
+          </div>
+          <div class="card">
+            <h3>Latency percentiles</h3>
+            <div class="mut">Histogram-derived p50, p95 and p99 · selected service scope</div>
+            <div
+              class="chart"
+              id="latencyChart"
+              role="img"
+              aria-label="Sample latency percentile trend"
+            ></div>
+          </div>
+        </div>
+        <h3 style="margin-top: 16px">Dependency performance</h3>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Dependency</th>
+                <th class="r">p95 latency</th>
+                <th class="r">Availability</th>
+                <th class="r">Pool wait / hit rate</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody id="trendDependencies"></tbody>
+          </table>
+        </div>
+        <h3>Worker throughput and backlog</h3>
+        <div class="grid" id="trendWorker"></div>
+        <h3>Runtime and saturation</h3>
+        <div class="grid" id="trendRuntime"></div>
+        <h3>Service summary</h3>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th class="r">Requests</th>
+                <th class="r">p95</th>
+                <th class="r">5xx ratio</th>
+                <th class="r">Availability</th>
+                <th class="r">Change vs prior</th>
+                <th>Resolution</th>
+              </tr>
+            </thead>
+            <tbody id="trendRows"></tbody>
+          </table>
+        </div>
+        <h3>Release and reliability markers</h3>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Service</th>
+                <th>Change</th>
+                <th>Observed impact</th>
+              </tr>
+            </thead>
+            <tbody id="trendReleases"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <strong>Reading historical metrics</strong>
+          <ul class="live-guidance">
+            <li>
+              Counters are converted to rates or totals over the selected interval; gauges are
+              summarized as time-weighted averages/maxima.
+            </li>
+            <li>
+              Latency percentiles are derived from histogram buckets, not averaged across samples.
+            </li>
+            <li>
+              Yearly history is available only if the metrics backend retains it; otherwise show an
+              explicit unavailable state, never fabricate values.
+            </li>
+            <li>
+              Use these summaries for capacity and trend analysis. Use Live status and alerting for
+              current conditions.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ERRORS LIST -->
+      <section id="errors" class="hidden">
+        <div class="crumbline">Operations / Observability / Errors</div>
+        <header class="top">
+          <div>
+            <h2>Errors</h2>
+            <div class="sub">
+              One row per fingerprint group; matching reports increment the group count instead of
+              creating duplicates. Select a group to inspect impact and debug context.
+            </div>
+          </div>
+          <button class="btn" id="copyPrompt">Copy issue summary</button
+          ><span
+            class="badge b-info"
+            id="groupActionStatus"
+            role="status"
+            aria-live="polite"
+          ></span>
+        </header>
+        <div class="section-tabs" aria-label="Observability sections">
+          <button data-v="overview">Overview</button
+          ><button data-v="errors" aria-current="page">Errors</button
+          ><button data-v="events">Events</button><button data-v="storage">Storage</button>
+        </div>
+        <div class="bar">
+          <input
+            id="q"
+            type="search"
+            placeholder="Search message or id"
+            aria-label="Search"
+            style="min-width: 240px"
+          />
+          <select id="fs" aria-label="Service">
+            <option value="">All services</option>
+            <option>api</option>
+            <option>gateway</option>
+            <option>worker</option>
+            <option>web</option>
+            <option>admin</option>
+          </select>
+          <select id="fst" aria-label="Status">
+            <option value="">Any status</option>
+            <option>unresolved</option>
+            <option>resolved</option>
+            <option>ignored</option>
+          </select>
+          <button class="btn" id="clr">Clear filters</button>
+        </div>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Issue group</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Trend (24h)</th>
+                <th class="r">Events</th>
+                <th class="r">Similar reports</th>
+                <th>First seen</th>
+                <th>Last seen</th>
+              </tr>
+            </thead>
+            <tbody id="grp"></tbody>
+          </table>
+        </div>
+        <div id="empty" class="card hidden" style="text-align: center">
+          No groups match these filters. Use Clear filters.
+        </div>
+      </section>
+
+      <!-- ERROR DETAIL -->
+      <section id="detail" class="hidden">
+        <div class="crumbline">Operations / Observability / Errors / Issue detail</div>
+        <button class="crumb" id="back">&larr; Back to errors</button>
+        <header class="top">
+          <div>
+            <h2 id="dTitle"></h2>
+            <div class="sub" id="dSub"></div>
+          </div>
+          <div class="bar">
+            <button class="btn" id="ign">Ignore</button
+            ><button class="btn primary" id="res">Resolve</button>
+            <button class="btn hidden" id="reopen">Reopen as unresolved</button>
+          </div>
+        </header>
+        <div class="grid" id="dStats"></div>
+        <div class="two">
+          <div>
+            <div class="card" style="margin-bottom: 16px">
+              <div class="mut">Likely cause and next step</div>
+              <div id="hint"></div>
+            </div>
+            <h3>Stack trace</h3>
+            <div class="stack mono" id="stack"></div>
+            <h3 style="margin-top: 16px">Timeline before the error</h3>
+            <div class="card"><ul class="crumbs" id="crumbs"></ul></div>
+          </div>
+          <div>
+            <h3>Context</h3>
+            <div class="card"><dl id="ctx"></dl></div>
+            <h3 style="margin-top: 16px">Events in this group</h3>
+            <div class="tw">
+              <table>
+                <tbody id="evs"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EVENTS -->
+      <section id="events" class="hidden">
+        <div class="crumbline">Operations / Observability / Events</div>
+        <header class="top">
+          <div>
+            <h2>Events</h2>
+            <div class="sub">
+              Key events only: failed jobs, upstream failures, security and deploys.
+            </div>
+          </div>
+        </header>
+        <div class="section-tabs" aria-label="Observability sections">
+          <button data-v="overview">Overview</button><button data-v="errors">Errors</button
+          ><button data-v="events" aria-current="page">Events</button
+          ><button data-v="storage">Storage</button>
+        </div>
+        <div class="tabs" role="tablist" id="evTabs">
+          <button role="tab" aria-selected="true" data-k="">All</button>
+          <button role="tab" aria-selected="false" data-k="job">Jobs</button>
+          <button role="tab" aria-selected="false" data-k="upstream">Upstream</button>
+          <button role="tab" aria-selected="false" data-k="security">Security</button>
+          <button role="tab" aria-selected="false" data-k="deploy">Deploys</button>
+        </div>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Kind</th>
+                <th>Severity</th>
+                <th>Service</th>
+                <th>What happened</th>
+                <th>Request</th>
+              </tr>
+            </thead>
+            <tbody id="ev"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CATALOG -->
+      <section id="catalog" class="hidden">
+        <header class="top">
+          <div>
+            <h2>Issue catalog</h2>
+            <div class="sub">
+              Every issue type we propose to capture, what is stored for it and what is left out.
+              Click a row for the full field list.
+            </div>
+          </div>
+        </header>
+        <div class="grid" id="catStats"></div>
+        <div class="bar">
+          <select id="cc" aria-label="Category">
+            <option value="">All categories</option>
+          </select>
+          <select id="cd" aria-label="Decision">
+            <option value="">Captured and skipped</option>
+            <option>Capture</option>
+            <option>Capture, sampled</option>
+            <option>Skip</option>
+          </select>
+          <input
+            id="cq"
+            type="search"
+            placeholder="Search issue"
+            aria-label="Search catalog"
+            style="min-width: 220px"
+          />
+        </div>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Category</th>
+                <th>Service</th>
+                <th>Captured when</th>
+                <th>Severity</th>
+                <th>Decision</th>
+                <th>Sampling</th>
+                <th>Alert</th>
+                <th>Keep</th>
+              </tr>
+            </thead>
+            <tbody id="cat"></tbody>
+          </table>
+        </div>
+        <div id="catDetail" class="card hidden"></div>
+      </section>
+
+      <!-- STORAGE -->
+      <section id="storage" class="hidden">
+        <div class="crumbline">Operations / Observability / Storage</div>
+        <header class="top">
+          <div>
+            <h2>Storage and retention</h2>
+            <div class="sub">Database footprint, retention status and safe cleanup controls.</div>
+          </div>
+        </header>
+        <div class="section-tabs" aria-label="Observability sections">
+          <button data-v="overview">Overview</button><button data-v="errors">Errors</button
+          ><button data-v="events">Events</button
+          ><button data-v="storage" aria-current="page">Storage</button>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="mut">Used</div>
+            <div class="n">186 MB</div>
+            <div class="bardisk" role="img" aria-label="37% of the 500 MB budget used">
+              <i style="width: 37%"></i>
+            </div>
+            <div class="mut">of 500 MB budget</div>
+          </div>
+          <div class="card">
+            <div class="mut">Oldest row</div>
+            <div class="n">13 days</div>
+            <div class="mut">Retention 14 days</div>
+          </div>
+          <div class="card">
+            <div class="mut">Dropped by sampling</div>
+            <div class="n">96%</div>
+            <div class="mut">of repeated events</div>
+          </div>
+          <div class="card">
+            <div class="mut">Next cleanup</div>
+            <div class="n">02:30</div>
+            <div class="mut">worker, daily</div>
+          </div>
+        </div>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th class="r">Rows</th>
+                <th class="r">Size</th>
+                <th>Retention</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="sto"></tbody>
+          </table>
+        </div>
+        <h3>Delete data</h3>
+        <div class="bar">
+          <button class="btn danger" data-del="resolved groups">Delete resolved groups</button>
+          <button class="btn danger" data-del="events older than 7 days">
+            Delete events older than 7 days
+          </button>
+          <select id="delSvc" aria-label="Service">
+            <option>web</option>
+            <option>api</option>
+            <option>gateway</option>
+            <option>worker</option>
+            <option>admin</option>
+          </select>
+          <button class="btn danger" data-del="all data for the selected service">
+            Delete service data
+          </button>
+        </div>
+        <div id="delMsg" class="mut" role="status"></div>
+      </section>
+    </main>
+
+    <dialog
+      id="dlg"
+      style="
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        background: var(--bg);
+        color: var(--fg);
+        max-width: 420px;
+      "
+    >
+      <form method="dialog">
+        <h3>Delete data?</h3>
+        <p id="dlgTxt" class="mut"></p>
+        <div class="bar" style="justify-content: flex-end; margin: 0">
+          <button class="btn" value="no">Cancel</button
+          ><button class="btn primary" value="yes">Delete</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      const $ = (s, r = document) => r.querySelector(s);
+      const el = (tag, props = {}, ...kids) => {
+        const n = Object.assign(document.createElement(tag), props);
+        kids.flat().forEach((k) => n.append(k));
+        return n;
+      };
+      const badge = (text, tone) => el('span', { className: 'badge b-' + tone, textContent: text });
+      const tone = {
+        healthy: 'ok',
+        degraded: 'warn',
+        down: 'bad',
+        unresolved: 'bad',
+        resolved: 'ok',
+        ignored: 'n',
+        error: 'bad',
+        warning: 'warn',
+        info: 'info',
+      };
+
+      const services = [
+        {
+          n: 'api',
+          st: 'healthy',
+          rel: '2.14.0',
+          r5: '0.02%',
+          p95: '180 ms',
+          tr: [1, 0, 2, 1, 0, 0, 1, 3, 1, 0, 0, 1],
+          g: 1,
+        },
+        {
+          n: 'gateway',
+          st: 'degraded',
+          rel: '2.14.0',
+          r5: '1.4%',
+          p95: '920 ms',
+          tr: [0, 1, 2, 5, 9, 14, 11, 8, 6, 4, 3, 2],
+          g: 3,
+        },
+        {
+          n: 'worker',
+          st: 'degraded',
+          rel: '2.14.0',
+          r5: '-',
+          p95: '-',
+          tr: [0, 0, 1, 0, 2, 1, 0, 4, 3, 1, 0, 1],
+          g: 2,
+        },
+        {
+          n: 'web',
+          st: 'healthy',
+          rel: '2.14.0',
+          r5: '0%',
+          p95: '95 ms',
+          tr: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+          g: 1,
+        },
+        {
+          n: 'admin',
+          st: 'healthy',
+          rel: '2.14.0',
+          r5: '0%',
+          p95: '110 ms',
+          tr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          g: 0,
+        },
+      ];
+      const liveMetrics = [
+        {
+          name: 'web',
+          rps: 84,
+          p95: 95,
+          err: 0.03,
+          flight: 8,
+          status: 'healthy',
+          loop: 12,
+          heapUsed: 380,
+          heapLimit: 2048,
+          pool: 8,
+        },
+        {
+          name: 'admin',
+          rps: 5,
+          p95: 110,
+          err: 0,
+          flight: 1,
+          status: 'healthy',
+          loop: 9,
+          heapUsed: 192,
+          heapLimit: 2048,
+          pool: 7,
+        },
+        {
+          name: 'api',
+          rps: 42,
+          p95: 180,
+          err: 0.02,
+          flight: 12,
+          status: 'healthy',
+          loop: 18,
+          heapUsed: 740,
+          heapLimit: 2048,
+          pool: 11,
+        },
+        {
+          name: 'gateway',
+          rps: 128,
+          p95: 920,
+          err: 1.4,
+          flight: 76,
+          status: 'degraded',
+          loop: 84,
+          heapUsed: 1590,
+          heapLimit: 2048,
+          pool: 62,
+        },
+        {
+          name: 'worker',
+          rps: 0,
+          p95: null,
+          err: null,
+          flight: 34,
+          cpu: 68,
+          mem: 63,
+          status: 'degraded',
+          queue: 34,
+          oldest: '6m 12s',
+          loop: 36,
+          heapUsed: 1290,
+          heapLimit: 2048,
+          pool: 22,
+        },
+      ];
+      const liveDependencies = [
+        {
+          name: 'Postgres',
+          status: 'healthy',
+          p95: '18 ms',
+          wait: '0',
+          signal: 'Connections 42 / 80',
+        },
+        { name: 'Redis', status: 'healthy', p95: '4 ms', wait: '0', signal: 'Cache available' },
+        {
+          name: 'Object storage',
+          status: 'healthy',
+          p95: '76 ms',
+          wait: '—',
+          signal: 'Requests succeeding',
+        },
+        {
+          name: 'MCP upstreams',
+          status: 'degraded',
+          p95: '1.2 s',
+          wait: '—',
+          signal: 'Timeouts elevated',
+        },
+      ];
+      const groups = [
+        {
+          id: 'CON-142',
+          fingerprint: 'gateway:TypeError:resolveToolScopes',
+          occurrences: ['CON-142', 'CON-145'],
+          duplicateCount: 2,
+          t: 'TypeError: Cannot read properties of undefined (reading "scopes")',
+          svc: 'gateway',
+          st: 'unresolved',
+          n: 238,
+          first: '2 hours ago',
+          last: '1 min ago',
+          tr: [0, 0, 1, 4, 9, 14, 11, 8, 6, 4, 3, 2],
+          where: 'resolveToolScopes (packages/domain/src/scopes.ts:88)',
+          route: 'POST /mcp/:server/tools/call',
+        },
+        {
+          id: 'CON-139',
+          t: 'UpstreamTimeoutError: GitHub API did not answer within 10000 ms',
+          svc: 'gateway',
+          st: 'unresolved',
+          n: 97,
+          first: '1 day ago',
+          last: '6 min ago',
+          tr: [3, 2, 4, 5, 3, 2, 4, 6, 5, 4, 3, 2],
+          where: 'callUpstream (packages/adapters/src/http-upstream.ts:61)',
+          route: 'POST /mcp/:server/tools/call',
+        },
+        {
+          id: 'CON-141',
+          t: 'Job sync-connection failed after 5 attempts: invalid_grant',
+          svc: 'worker',
+          st: 'unresolved',
+          n: 14,
+          first: '5 hours ago',
+          last: '32 min ago',
+          tr: [0, 0, 0, 1, 2, 1, 0, 4, 3, 1, 1, 1],
+          where: 'refreshOAuthToken (packages/adapters/src/oauth-refresh.ts:47)',
+          route: 'job: sync-connection',
+        },
+        {
+          id: 'CON-137',
+          t: 'PostgresError: deadlock detected',
+          svc: 'api',
+          st: 'unresolved',
+          n: 41,
+          first: '3 days ago',
+          last: '3 hours ago',
+          tr: [1, 0, 2, 1, 0, 0, 1, 3, 1, 0, 0, 1],
+          where: 'updateProjectKey (packages/db/src/schema/keys.ts:130)',
+          route: 'PATCH /v1/projects/:id/keys/:keyId',
+        },
+        {
+          id: 'CON-144',
+          t: 'Cross-organization access blocked for user u_88',
+          svc: 'api',
+          st: 'unresolved',
+          n: 3,
+          first: '5 hours ago',
+          last: '4 hours ago',
+          tr: [0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+          where: 'assertOrgAccess (packages/security/src/org-access.ts:34)',
+          route: 'GET /v1/orgs/:id/projects',
+          kind: 'S01',
+          hint: 'Check whether u_88 holds a stale link to org_x2. Three hits in 5 hours looks like a stale browser tab, not an attack.',
+        },
+        {
+          id: 'CON-143',
+          t: 'Migration 0042 failed: relation already exists',
+          svc: 'api',
+          st: 'resolved',
+          n: 1,
+          first: '2 days ago',
+          last: '2 days ago',
+          tr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+          where: 'migrate (packages/db/src/migrate.ts:19)',
+          route: 'job: migrate',
+          kind: 'D02',
+          hint: 'Seen once after the staging copy was reset. No action needed.',
+        },
+        {
+          id: 'CON-136',
+          t: 'Webhook delivery failed: 503 from hooks.acme.example',
+          svc: 'worker',
+          st: 'unresolved',
+          n: 27,
+          first: '1 day ago',
+          last: '2 hours ago',
+          tr: [1, 1, 2, 1, 3, 2, 2, 3, 4, 3, 2, 3],
+          where: 'deliverWebhook (apps/worker/src/webhooks.ts:58)',
+          route: 'job: deliver-webhook',
+          kind: 'W01',
+          hint: 'The customer endpoint is down. Notify the organization owner; do not retry past the limit.',
+        },
+        {
+          id: 'CON-133',
+          t: 'Slow request: GET /v1/orgs/:id/audit took 6.8 s',
+          svc: 'api',
+          st: 'unresolved',
+          n: 19,
+          first: '4 days ago',
+          last: '50 min ago',
+          tr: [1, 2, 1, 0, 2, 1, 3, 2, 1, 2, 2, 1],
+          where: 'listAudit (packages/db/src/schema/audit.ts:92)',
+          route: 'GET /v1/orgs/:id/audit',
+          kind: 'P01',
+          hint: 'Sequential scan with a long date range. Add a keyset cursor or a created_at index.',
+        },
+        {
+          id: 'CON-131',
+          t: 'ReferenceError: window is not defined',
+          svc: 'web',
+          st: 'unresolved',
+          n: 8,
+          first: '1 day ago',
+          last: '7 hours ago',
+          tr: [0, 0, 1, 0, 0, 2, 0, 1, 0, 1, 0, 3],
+          where: 'ThemeToggle (apps/web/client/src/theme.tsx:14)',
+          route: 'page: /settings',
+          kind: 'E05',
+          hint: 'Browser-only access runs during server rendering. Move it into an effect.',
+        },
+        {
+          id: 'CON-130',
+          t: 'ZodError: webhook url must be https',
+          svc: 'web',
+          st: 'resolved',
+          n: 12,
+          first: '6 days ago',
+          last: '2 days ago',
+          tr: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+          where: 'parseWebhookInput (apps/web/server/webhooks.ts:22)',
+          route: 'POST /api/webhooks',
+        },
+        {
+          id: 'CON-128',
+          t: 'ECONNRESET while streaming SSE response',
+          svc: 'gateway',
+          st: 'ignored',
+          n: 310,
+          first: '9 days ago',
+          last: '20 min ago',
+          tr: [4, 5, 3, 6, 4, 5, 7, 4, 3, 5, 4, 3],
+          where: 'streamResponse (apps/gateway/src/sse.ts:54)',
+          route: 'GET /mcp/:server/sse',
+        },
+      ];
+      const events = [
+        [
+          '14:21',
+          'job',
+          'error',
+          'worker',
+          'Job sync-connection dead-lettered (invalid_grant), connection cn_8f2a',
+          'req_71ab',
+        ],
+        [
+          '14:02',
+          'deploy',
+          'info',
+          'all',
+          'Release 2.14.0 rolled out (api, gateway, worker, web, admin)',
+          '-',
+        ],
+        [
+          '13:58',
+          'security',
+          'warning',
+          'api',
+          'Project key pk_live_3d91 rejected 25 times in 5 min from one address',
+          'req_a902',
+        ],
+        [
+          '13:40',
+          'upstream',
+          'warning',
+          'gateway',
+          'GitHub API circuit opened after 5 timeouts, recovering in 30 s',
+          'req_5c3e',
+        ],
+        ['12:15', 'security', 'info', 'admin', 'Signing key rotated by user u_204', 'req_0f11'],
+        [
+          '11:03',
+          'job',
+          'warning',
+          'worker',
+          'Webhook delivery to org_ac1 failed 3 times, retrying',
+          'req_c4d8',
+        ],
+        [
+          '09:47',
+          'security',
+          'error',
+          'api',
+          'Cross-organization access attempt blocked (user u_88, org_x2)',
+          'req_9be2',
+        ],
+      ];
+      const stack = [
+        ['lib', 'TypeError: Cannot read properties of undefined (reading "scopes")'],
+        ['lib', '  at Object.<anonymous> (node_modules/zod/lib/types.js:210:12)'],
+        ['hit', '  at resolveToolScopes (packages/domain/src/scopes.ts:88:31)'],
+        ['app', '  at authorizeToolCall (apps/gateway/src/authorize.ts:42:18)'],
+        ['app', '  at handleToolCall (apps/gateway/src/routes/tools.ts:77:9)'],
+        ['lib', '  at Layer.handle (node_modules/hono/dist/compose.js:30:20)'],
+      ];
+      const crumbs = [
+        ['14:21:08.120', 'Request started POST /mcp/github/tools/call'],
+        ['14:21:08.125', 'Project key verified (pk_live_3d91, org_ac1)'],
+        ['14:21:08.131', 'Loaded server config: github v3 (no scopes field)'],
+        ['14:21:08.133', 'Error thrown in resolveToolScopes'],
+      ];
+      const common = ['request id', 'trace id', 'release', 'pod', 'organization', 'project key id'];
+      const C = (id, name, cat, svc, when, sev, dec, samp, alert, keep, fields, skip, cost) => ({
+        id,
+        name,
+        cat,
+        svc,
+        when,
+        sev,
+        dec,
+        samp,
+        alert,
+        keep,
+        fields,
+        skip,
+        cost,
+      });
+      const catalog = [
+        C(
+          'E01',
+          'Unhandled exception',
+          'Errors',
+          'all services',
+          'Any thrown error that no handler catches',
+          'error',
+          'Capture',
+          'First 5 per group, then 1 in 100',
+          'Alert on new group or 10x spike',
+          '14 days',
+          [
+            ...common,
+            'stack trace (app frames marked)',
+            'error class and message',
+            'route and method',
+            'HTTP status',
+            'duration',
+            'last 10 timeline steps',
+          ],
+          'Expected validation errors (400, 404)',
+          '~1 KB per stored event',
+        ),
+        C(
+          'E02',
+          'Server error response (5xx)',
+          'Errors',
+          'api, gateway, web',
+          'Response status 500 or above',
+          'error',
+          'Capture',
+          'Same fingerprint rules as E01',
+          'Alert when 5xx rate is above 1% for 5 min',
+          '14 days',
+          [...common, 'route', 'status', 'duration', 'upstream involved', 'error class'],
+          'Request and response bodies',
+          '~0.8 KB',
+        ),
+        C(
+          'E03',
+          'Database error',
+          'Errors',
+          'api, worker',
+          'Deadlock, timeout, pool exhausted',
+          'error',
+          'Capture',
+          'First 5 per group, then 1 in 100',
+          'Alert on pool exhaustion',
+          '14 days',
+          [...common, 'error code', 'query name (never values)', 'wait time', 'pool in use'],
+          'SQL parameters and row data',
+          '~1 KB',
+        ),
+        C(
+          'E04',
+          'Crash or restart loop',
+          'Errors',
+          'all services',
+          'Process exits unexpectedly or restarts 3 times in 10 min',
+          'error',
+          'Capture',
+          'Never sampled, one row per restart',
+          'Page immediately',
+          '30 days',
+          ['pod', 'exit code', 'memory at exit', 'last error group', 'restart count'],
+          'Heap dumps',
+          '~0.3 KB',
+        ),
+        C(
+          'E05',
+          'Frontend error',
+          'Errors',
+          'web, admin',
+          'Uncaught browser error or failed API call',
+          'error',
+          'Capture, sampled',
+          '1 in 10',
+          'None',
+          '7 days',
+          ['page', 'component', 'browser', 'release', 'message (no user text)'],
+          'Console output',
+          '~0.5 KB',
+        ),
+        C(
+          'J01',
+          'Job dead-lettered',
+          'Jobs',
+          'worker',
+          'Job failed its last retry',
+          'error',
+          'Capture',
+          'Never sampled',
+          'Alert if more than 3 in 1 h',
+          '30 days',
+          [
+            ...common,
+            'job name',
+            'attempts',
+            'last error',
+            'payload id (not payload)',
+            'connection id',
+          ],
+          'Retries that later succeed',
+          '~0.6 KB',
+        ),
+        C(
+          'J02',
+          'Job retried and recovered',
+          'Jobs',
+          'worker',
+          'A retry succeeded',
+          'info',
+          'Skip',
+          '-',
+          '-',
+          '-',
+          [],
+          'Self-healing noise; counted in metrics only',
+          '0',
+        ),
+        C(
+          'U01',
+          'Upstream circuit opened',
+          'Upstream',
+          'gateway, worker',
+          'Breaker opens for GitHub, Slack or another provider',
+          'warning',
+          'Capture',
+          'One per open and close',
+          'Alert if open over 10 min',
+          '30 days',
+          ['provider', 'failure count', 'last status', 'open duration', 'servers affected'],
+          'Single timeouts below the breaker limit',
+          '~0.3 KB',
+        ),
+        C(
+          'U02',
+          'Upstream auth rejected (invalid_grant)',
+          'Upstream',
+          'worker, gateway',
+          'Provider refuses a refresh token',
+          'error',
+          'Capture',
+          'One per connection per day',
+          'Notify org owner, no page',
+          '30 days',
+          ['provider', 'connection id', 'organization', 'error code', 'first failure time'],
+          'Token values',
+          '~0.4 KB',
+        ),
+        C(
+          'S01',
+          'Cross-organization access blocked',
+          'Security',
+          'api, gateway',
+          'Row policy or scope check denies a request',
+          'warning',
+          'Capture',
+          'Never sampled',
+          'Alert on repeats from one user',
+          '90 days',
+          ['user id', 'target organization', 'route', 'project key id', 'masked IP'],
+          'Request body',
+          '~0.4 KB',
+        ),
+        C(
+          'S02',
+          'Repeated key rejection',
+          'Security',
+          'api, gateway',
+          'Same key or address rejected 20 times in 5 min',
+          'warning',
+          'Capture',
+          'One summary per 5 min window',
+          'Alert',
+          '90 days',
+          ['key id', 'masked IP', 'count', 'window', 'reason'],
+          'Each single rejection',
+          '~0.3 KB',
+        ),
+        C(
+          'S03',
+          'Signing or API key changed',
+          'Security',
+          'admin, api',
+          'Key created, rotated or revoked',
+          'info',
+          'Capture',
+          'Never sampled',
+          'None',
+          '90 days',
+          ['actor', 'key id', 'action', 'organization'],
+          'Key material (never stored)',
+          '~0.3 KB',
+        ),
+        C(
+          'D01',
+          'Deploy marker',
+          'Deploys',
+          'all services',
+          'New release becomes ready',
+          'info',
+          'Capture',
+          'Never sampled',
+          'None',
+          '90 days',
+          ['release', 'commit', 'services', 'time', 'migration job result'],
+          '-',
+          '~0.2 KB',
+        ),
+        C(
+          'D02',
+          'Migration failure',
+          'Deploys',
+          'api',
+          'Migration job exits with an error',
+          'error',
+          'Capture',
+          'Never sampled',
+          'Page immediately',
+          '90 days',
+          ['release', 'migration name', 'error', 'duration'],
+          '-',
+          '~0.3 KB',
+        ),
+        C(
+          'W01',
+          'Webhook delivery failed',
+          'Webhooks',
+          'worker',
+          'Delivery failed after all retries',
+          'warning',
+          'Capture, sampled',
+          'One per endpoint per hour',
+          'Notify org, no page',
+          '14 days',
+          ['organization', 'endpoint host (no path)', 'status', 'attempts', 'last response time'],
+          'Webhook payloads',
+          '~0.4 KB',
+        ),
+        C(
+          'P01',
+          'Slow request',
+          'Performance',
+          'api, gateway',
+          'Request slower than 3 s',
+          'warning',
+          'Capture, sampled',
+          '1 in 20, max 50 per hour per route',
+          'Alert on p95 above 1 s for 10 min',
+          '7 days',
+          [...common, 'route', 'duration', 'upstream time', 'database time'],
+          'Fast requests',
+          '~0.5 KB',
+        ),
+        C(
+          'R01',
+          'Rate limit hit (429)',
+          'Requests',
+          'gateway, api',
+          'A caller exceeds its limit',
+          'info',
+          'Skip',
+          '-',
+          '-',
+          '-',
+          [],
+          'Normal protection; counted in metrics',
+          '0',
+        ),
+        C(
+          'N01',
+          'Client error (400, 401, 404)',
+          'Requests',
+          'api, gateway',
+          'Caller sent a bad request',
+          'info',
+          'Skip',
+          '-',
+          '-',
+          '-',
+          [],
+          'Caller mistakes; counted in metrics',
+          '0',
+        ),
+        C(
+          'N02',
+          'Successful request, health check, tool call',
+          'Requests',
+          'all services',
+          'Every normal request',
+          'info',
+          'Skip',
+          '-',
+          '-',
+          '-',
+          [],
+          'Biggest log cost; keep as counters only',
+          '0',
+        ),
+      ];
+      const storage = [
+        ['Error groups', '1,204', '4 MB', 'Resolved: 30 days'],
+        ['Error events (sampled)', '38,410', '118 MB', '14 days'],
+        ['Key events', '9,882', '31 MB', '30 days (security 90)'],
+        ['Counters (metrics)', '212,000', '33 MB', '7 days'],
+      ];
+
+      // helpers
+      const spark = (a) => {
+        const m = Math.max(...a, 1);
+        return el(
+          'div',
+          { className: 'spark', ariaHidden: 'true' },
+          a.map((v) => el('i', { style: `height:${Math.max(2, (v / m) * 28)}px` })),
+        );
+      };
+      const rel = (t) =>
+        el('span', { textContent: t, title: 'Exact time shown here in the real UI' });
+
+      // live service status
+      const loadTrend = [98, 104, 101, 108, 112, 110, 118, 121, 117, 128];
+      const queueTrend = [18, 20, 19, 22, 24, 25, 27, 29, 31, 34];
+      function renderLiveStatus() {
+        $('#liveServices').replaceChildren(
+          ...liveMetrics.map((m) =>
+            el(
+              'tr',
+              {},
+              el('td', {}, el('b', { textContent: m.name })),
+              el('td', {}, badge(m.status, tone[m.status])),
+              el('td', { className: 'r', textContent: `${m.rps} req/s` }),
+              el('td', { className: 'r', textContent: m.p95 === null ? '—' : `${m.p95} ms` }),
+              el('td', { className: 'r', textContent: m.flight }),
+              el('td', { className: 'r', textContent: m.err === null ? '—' : `${m.err}%` }),
+            ),
+          ),
+        );
+        $('#liveRuntime').replaceChildren(
+          ...liveMetrics.map((m) =>
+            el(
+              'tr',
+              {},
+              el('td', {}, el('b', { textContent: m.name })),
+              el('td', { className: 'r', textContent: `${m.loop} ms` }),
+              el('td', { className: 'r', textContent: `${m.heapUsed} / ${m.heapLimit} MB` }),
+              el('td', { className: 'r', textContent: `${m.pool} ms` }),
+            ),
+          ),
+        );
+        $('#liveDependencies').replaceChildren(
+          ...liveDependencies.map((d) =>
+            el(
+              'tr',
+              {},
+              el('td', { textContent: d.name }),
+              el('td', {}, badge(d.status, tone[d.status])),
+              el('td', { className: 'r', textContent: d.p95 }),
+              el('td', { className: 'r', textContent: d.wait }),
+              el('td', { textContent: d.signal }),
+            ),
+          ),
+        );
+        const worker = liveMetrics.find((m) => m.name === 'worker');
+        const cards = [
+          ['Worker queue depth', `${worker.queue} jobs`, 'Across ready and retry queues'],
+          ['Oldest queued job', worker.oldest, 'Target: under 5 minutes'],
+        ];
+        $('#workerSignals').replaceChildren(
+          ...cards.map(([k, v, hint]) =>
+            el(
+              'div',
+              { className: 'card' },
+              el('div', { className: 'mut', textContent: k }),
+              el('div', { className: 'n', textContent: v }),
+              el('div', { className: 'mut', textContent: hint }),
+            ),
+          ),
+        );
+        const maxLoad = Math.max(...loadTrend);
+        $('#loadChart').replaceChildren(
+          ...loadTrend.map((v, i) =>
+            el('i', {
+              style: `height:${Math.max(4, (v / maxLoad) * 100)}%`,
+              title: `${10 - i} min ago: ${v} req/s`,
+            }),
+          ),
+        );
+        $('#liveUpdated').textContent = 'Illustrative sample · not connected';
+      }
+      $('#refreshLive').addEventListener('click', (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = 'Refreshing sample…';
+        renderLiveStatus();
+        window.setTimeout(() => {
+          button.disabled = false;
+          button.textContent = 'Refresh sample';
+          $('#liveUpdated').textContent = 'Sample re-rendered · no source connection';
+        }, 250);
+      });
+      renderLiveStatus();
+
+      // historical metric trends
+      const trendSamples = {
+        '24h': {
+          resolution: 'Hourly · 24 points',
+          requests: '4.8M',
+          p95: '214 ms',
+          errors: '0.18%',
+          availability: '99.94%',
+          p50: '42 ms',
+          p99: '680 ms',
+          change: '+4%',
+          points: [35, 42, 38, 48, 51, 44, 56, 63, 59, 68, 72, 64],
+        },
+        '7d': {
+          resolution: 'Hourly · 168 points',
+          requests: '31.2M',
+          p95: '228 ms',
+          errors: '0.21%',
+          availability: '99.92%',
+          p50: '44 ms',
+          p99: '710 ms',
+          change: '+8%',
+          points: [38, 41, 45, 52, 49, 59, 64, 61, 70, 75, 68, 78],
+        },
+        '30d': {
+          resolution: 'Daily · 30 points',
+          requests: '132M',
+          p95: '236 ms',
+          errors: '0.24%',
+          availability: '99.91%',
+          p50: '47 ms',
+          p99: '760 ms',
+          change: '+12%',
+          points: [28, 34, 39, 36, 44, 49, 46, 56, 61, 67, 64, 73],
+        },
+        '90d': {
+          resolution: 'Daily · 90 points',
+          requests: '388M',
+          p95: '242 ms',
+          errors: '0.26%',
+          availability: '99.90%',
+          p50: '49 ms',
+          p99: '790 ms',
+          change: '+15%',
+          points: [24, 31, 34, 42, 39, 47, 53, 50, 60, 66, 62, 71],
+        },
+        '12m': {
+          resolution: 'Monthly · 12 points',
+          requests: '1.5B',
+          p95: '251 ms',
+          errors: '0.29%',
+          availability: '99.89%',
+          p50: '52 ms',
+          p99: '840 ms',
+          change: '+18%',
+          points: [22, 28, 33, 30, 37, 43, 41, 49, 55, 61, 59, 68],
+        },
+        custom: {
+          resolution: 'Daily · sample custom range',
+          requests: '18.4M',
+          p95: '231 ms',
+          errors: '0.22%',
+          availability: '99.92%',
+          p50: '46 ms',
+          p99: '735 ms',
+          change: '+6%',
+          points: [30, 35, 40, 38, 46, 53, 49, 58, 63, 61, 69, 74],
+        },
+      };
+      function renderTrends() {
+        const range = $('#trendRange').value;
+        const sample = trendSamples[range];
+        const service = $('#trendService').value;
+        $('#customRange').classList.toggle('hidden', range !== 'custom');
+        $('#volumeResolution').textContent = `${sample.resolution} · ${service}`;
+        const adjusted =
+          service === 'All services'
+            ? sample
+            : {
+                ...sample,
+                requests: service === 'gateway' ? '44M' : service === 'worker' ? '—' : '19M',
+              };
+        const cards = [
+          ['Requests in period', adjusted.requests, 'Counter increase across selected range'],
+          ['p95 latency', sample.p95, 'From request duration histogram'],
+          ['5xx ratio', sample.errors, '5xx / total HTTP requests'],
+          ['Availability', sample.availability, 'Based on configured service SLI'],
+        ];
+        const deepCards = [
+          ['p50 latency', sample.p50, 'Typical request latency'],
+          ['p99 latency', sample.p99, 'Slow-tail request latency'],
+          ['Request volume change', sample.change, 'Compared with previous equivalent period'],
+          ['SLO budget', '78% consumed', 'Sample 30-day error-budget burn'],
+        ];
+        $('#deepSummary').replaceChildren(
+          ...deepCards.map(([k, v, hint]) =>
+            el(
+              'div',
+              { className: 'card' },
+              el('div', { className: 'mut', textContent: k }),
+              el('div', { className: 'n', textContent: v }),
+              el('div', { className: 'mut', textContent: hint }),
+            ),
+          ),
+        );
+        $('#trendDependencies').replaceChildren(
+          ...[
+            ['Postgres', '18 ms', '99.98%', '0.4 ms wait', 'Stable'],
+            ['Redis', '4 ms', '99.99%', '94% cache hit', 'Stable'],
+            ['Object storage', '76 ms', '99.95%', '—', 'Stable'],
+            ['MCP upstreams', '1.2 s', '98.9%', '—', 'Latency increased after release'],
+          ].map(([name, p95, availability, wait, trend]) =>
+            el(
+              'tr',
+              {},
+              el('td', { textContent: name }),
+              el('td', { className: 'r', textContent: p95 }),
+              el('td', { className: 'r', textContent: availability }),
+              el('td', { className: 'r', textContent: wait }),
+              el('td', { textContent: trend }),
+            ),
+          ),
+        );
+        $('#trendWorker').replaceChildren(
+          ...[
+            ['Jobs completed', '42,180', 'Completed during selected period'],
+            ['Throughput', '58 jobs/min', 'Mean completed jobs per minute'],
+            ['Oldest queued job', 'p95 2m 18s', 'Queue age distribution'],
+            ['Retries / dead letters', '1.8% / 12', 'Retries as share of attempted jobs'],
+          ].map(([k, v, hint]) =>
+            el(
+              'div',
+              { className: 'card' },
+              el('div', { className: 'mut', textContent: k }),
+              el('div', { className: 'n', textContent: v }),
+              el('div', { className: 'mut', textContent: hint }),
+            ),
+          ),
+        );
+        $('#trendRuntime').replaceChildren(
+          ...[
+            ['Event-loop lag p99', '22 ms', 'Time-weighted p95 14 ms'],
+            ['Heap usage', '68% avg', 'Peak 84% of configured V8 limit'],
+            ['GC pause', 'p95 8 ms', 'Peak 43 ms'],
+            ['Thread-pool probe', 'p95 11 ms', 'Elevated values can signal saturation'],
+          ].map(([k, v, hint]) =>
+            el(
+              'div',
+              { className: 'card' },
+              el('div', { className: 'mut', textContent: k }),
+              el('div', { className: 'n', textContent: v }),
+              el('div', { className: 'mut', textContent: hint }),
+            ),
+          ),
+        );
+        $('#trendReleases').replaceChildren(
+          ...[
+            ['Jun 12 · 14:02', 'gateway', '2.14.0 deployed', 'p95 +18% over following hour'],
+            ['Jun 08 · 09:35', 'worker', '2.13.2 deployed', 'Queue age returned below target'],
+            ['Jun 01 · 18:10', 'api', '2.13.1 deployed', 'No material SLO change'],
+          ].map(([at, name, change, impact]) =>
+            el(
+              'tr',
+              {},
+              el('td', { textContent: at }),
+              el('td', { textContent: name }),
+              el('td', { textContent: change }),
+              el('td', { textContent: impact }),
+            ),
+          ),
+        );
+        const scale =
+          service === 'All services'
+            ? 1
+            : service === 'gateway'
+              ? 0.7
+              : service === 'worker'
+                ? 0.35
+                : 0.5;
+        const periodPoints = sample.points.map((v) => Math.max(5, Math.round(v * scale)));
+        $('#latencyChart').setAttribute(
+          'aria-label',
+          'Sample p50, p95 and p99 latency trend for ' + service,
+        );
+        $('#latencyChart').replaceChildren(
+          ...periodPoints.map((v, i) =>
+            el('i', {
+              title: `${sample.resolution}: p95 sample ${i + 1}, ${Math.round(v * 3.2)} ms`,
+              style: `height:${Math.max(4, (v / Math.max(...periodPoints)) * 100)}%`,
+            }),
+          ),
+        );
+        $('#volumeChart').setAttribute('aria-label', 'Sample request volume trend for ' + service);
+        $('#trendSummary').replaceChildren(
+          ...cards.map(([k, v, hint]) =>
+            el(
+              'div',
+              { className: 'card' },
+              el('div', { className: 'mut', textContent: k }),
+              el('div', { className: 'n', textContent: v }),
+              el('div', { className: 'mut', textContent: hint }),
+            ),
+          ),
+        );
+        const max = Math.max(...sample.points);
+        for (const [selector, multiplier] of [
+          ['#volumeChart', 1],
+          ['#latencyChart', 0.62],
+        ]) {
+          const values =
+            selector === '#volumeChart'
+              ? sample.points
+              : sample.points.map((v) => Math.round(v * multiplier));
+          $(`${selector}`).replaceChildren(
+            ...values.map((v, i) =>
+              el('i', {
+                style: `height:${Math.max(4, (v / max) * 100)}%`,
+                title: `${sample.resolution}: sample point ${i + 1}`,
+              }),
+            ),
+          );
+        }
+        const rows =
+          service === 'All services' ? liveMetrics : liveMetrics.filter((m) => m.name === service);
+        $('#trendRows').replaceChildren(
+          ...rows.map((m) =>
+            el(
+              'tr',
+              {},
+              el('td', { textContent: m.name }),
+              el('td', {
+                className: 'r',
+                textContent: m.name === 'worker' ? '—' : adjusted.requests,
+              }),
+              el('td', { className: 'r', textContent: m.p95 === null ? '—' : `${m.p95} ms` }),
+              el('td', { className: 'r', textContent: m.err === null ? '—' : `${m.err}%` }),
+              el('td', { className: 'r', textContent: sample.availability }),
+              el('td', { className: 'r', textContent: sample.change }),
+              el('td', { textContent: sample.resolution.split(' · ')[0] }),
+            ),
+          ),
+        );
+      }
+      $('#trendRange').addEventListener('change', renderTrends);
+      $('#trendService').addEventListener('change', renderTrends);
+      $('#refreshTrends').addEventListener('click', (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = 'Refreshing sample…';
+        renderTrends();
+        window.setTimeout(() => {
+          button.disabled = false;
+          button.textContent = 'Refresh sample';
+          $('#trendsUpdated').textContent = 'Sample re-rendered · no source connection';
+        }, 250);
+      });
+      renderTrends();
+
+      // overview
+      const svc = $('#svc');
+      services.forEach((s) =>
+        svc.append(
+          el(
+            'tr',
+            {},
+            el('td', {}, el('b', { textContent: s.n })),
+            el('td', {}, badge(s.st, tone[s.st])),
+            el('td', {}, el('code', { textContent: s.rel })),
+            el('td', { className: 'r', textContent: s.r5 }),
+            el('td', { className: 'r', textContent: s.p95 }),
+            el('td', {}, spark(s.tr)),
+            el('td', { className: 'r', textContent: s.g }),
+          ),
+        ),
+      );
+      const chartData = [
+        2, 1, 1, 0, 1, 2, 3, 4, 6, 5, 7, 9, 31, 48, 44, 39, 30, 22, 18, 12, 10, 8, 6, 5,
+      ];
+      $('#chart').append(
+        ...chartData.map((v, i) =>
+          el('i', {
+            className: i === 13 ? 'e' : '',
+            style: `height:${Math.max(3, (v / 48) * 100)}%`,
+            title: `${i}:00 - ${v} events`,
+          }),
+        ),
+      );
+      const attn = $('#top');
+      groups
+        .filter((g) => g.st === 'unresolved')
+        .slice(0, 3)
+        .forEach((g) =>
+          attn.append(
+            el(
+              'tr',
+              {
+                className: 'row',
+                tabIndex: 0,
+                onclick: () => openDetail(g.id),
+                onkeydown: (e) => e.key === 'Enter' && openDetail(g.id),
+              },
+              el(
+                'td',
+                {},
+                el('div', { textContent: g.t }),
+                el('div', { className: 'mut mono', textContent: g.id }),
+              ),
+              el('td', { textContent: g.svc }),
+              el('td', { className: 'r', textContent: g.n }),
+              el('td', {}, rel(g.last)),
+            ),
+          ),
+        );
+
+      // errors list
+      function renderGroups() {
+        const q = $('#q').value.toLowerCase(),
+          s = $('#fs').value,
+          st = $('#fst').value;
+        const body = $('#grp');
+        body.replaceChildren();
+        const rows = groups.filter(
+          (g) =>
+            (!q || (g.t + g.id + g.fingerprint).toLowerCase().includes(q)) &&
+            (!s || g.svc === s) &&
+            (!st || g.st === st),
+        );
+        rows.forEach((g) =>
+          body.append(
+            el(
+              'tr',
+              {
+                className: 'row',
+                tabIndex: 0,
+                onclick: () => openDetail(g.id),
+                onkeydown: (e) => e.key === 'Enter' && openDetail(g.id),
+              },
+              el(
+                'td',
+                {},
+                el('div', { textContent: g.t }),
+                el('div', { className: 'mut mono', textContent: g.id + '  ' + g.where }),
+              ),
+              el('td', { textContent: g.svc }),
+              el('td', {}, badge(g.st, tone[g.st])),
+              el('td', {}, spark(g.tr)),
+              el('td', { className: 'r', textContent: g.n }),
+              el('td', {
+                className: 'r',
+                textContent: g.duplicateCount ? `${g.duplicateCount} merged` : '—',
+              }),
+              el('td', {}, rel(g.first)),
+              el('td', {}, rel(g.last)),
+            ),
+          ),
+        );
+        $('#empty').classList.toggle('hidden', rows.length > 0);
+      }
+      ['input', 'change'].forEach((e) =>
+        ['#q', '#fs', '#fst'].forEach((s) => $(s).addEventListener(e, renderGroups)),
+      );
+      $('#clr').onclick = () => {
+        $('#q').value = '';
+        $('#fs').value = '';
+        $('#fst').value = '';
+        renderGroups();
+      };
+
+      // detail
+      let cur;
+      function openDetail(id) {
+        cur = groups.find((g) => g.id === id);
+        $('#dTitle').textContent = cur.t;
+        $('#dSub').textContent = `${cur.id} · ${cur.svc} · ${cur.route}`;
+        $('#dStats').replaceChildren(
+          ...[
+            ['Events', cur.n],
+            ['Users affected', Math.round(cur.n / 9)],
+            ['First seen', cur.first],
+            ['Introduced in', '2.14.0'],
+          ].map(([k, v]) =>
+            el(
+              'div',
+              { className: 'card' },
+              el('div', { className: 'mut', textContent: k }),
+              el('div', { className: 'n', textContent: v, style: 'font-size:20px' }),
+            ),
+          ),
+        );
+        $('#res').classList.toggle('hidden', cur.st === 'resolved');
+        $('#ign').classList.toggle('hidden', cur.st === 'ignored');
+        $('#reopen').classList.toggle('hidden', cur.st !== 'resolved' && cur.st !== 'ignored');
+        $('#reopen').textContent =
+          cur.st === 'resolved' ? 'Reopen as unresolved' : 'Stop ignoring and reopen';
+        $('#hint').textContent =
+          cur.hint ||
+          'Roll back 2.14.0 or ship a fix: the config loader returns servers without a scopes field after the v3 manifest change. Default it to an empty list.';
+        $('#stack').replaceChildren(
+          ...stack.map(([c, t]) =>
+            el('div', { className: c === 'hit' ? 'hit' : c, textContent: t }),
+          ),
+        );
+        $('#crumbs').replaceChildren(
+          ...crumbs.map(([t, m]) =>
+            el(
+              'li',
+              {},
+              el('time', { textContent: t.slice(0, 8) }),
+              el('span', { textContent: m }),
+            ),
+          ),
+        );
+        $('#ctx').replaceChildren(
+          ...[
+            ['Request id', 'req_71ab9c'],
+            ['Trace id', '4bf92f3577b34da6'],
+            ['Organization', 'org_ac1'],
+            ['Project key', 'pk_live_3d91'],
+            ['Release', '2.14.0'],
+            ['Issue type', cur.kind || 'E01'],
+            ['Pod', cur.svc + '-6d9f-x2k'],
+            ['Node', '24 / linux'],
+            ['HTTP status', cur.svc === 'worker' ? '-' : '500'],
+            ['Duration', '184 ms'],
+            ['Caller', 'sdk-node 1.9.2'],
+            ['Masked IP', '203.0.113.x'],
+            ['Assigned to', 'Unassigned'],
+            ['Regression', 'No'],
+            ['Status', cur.st],
+          ].flatMap(([k, v]) => [
+            el('dt', { textContent: k }),
+            el('dd', { className: 'mono', textContent: v }),
+          ]),
+        );
+        $('#evs').replaceChildren(
+          ...['1 min ago', '3 min ago', '4 min ago', '7 min ago'].map((t, i) =>
+            el(
+              'tr',
+              {},
+              el('td', { className: 'mono', textContent: 'evt_' + (9100 - i) }),
+              el('td', { className: 'mut', textContent: t }),
+            ),
+          ),
+        );
+        show('detail');
+      }
+      $('#back').onclick = () => show('errors');
+      function updateGroupStatus(status) {
+        cur.st = status;
+        renderGroups();
+        $('#groupActionStatus').textContent = `${cur.id} marked ${status}`;
+        show('errors');
+      }
+      $('#res').onclick = () => updateGroupStatus('resolved');
+      $('#ign').onclick = () => updateGroupStatus('ignored');
+      $('#reopen').onclick = () => updateGroupStatus('unresolved');
+
+      // events
+      function renderEvents(kind = '') {
+        const body = $('#ev');
+        body.replaceChildren();
+        events
+          .filter((e) => !kind || e[1] === kind)
+          .forEach((e) =>
+            body.append(
+              el(
+                'tr',
+                {},
+                el('td', { className: 'mono', textContent: e[0] }),
+                el('td', {}, badge(e[1], 'n')),
+                el('td', {}, badge(e[2], tone[e[2]])),
+                el('td', { textContent: e[3] }),
+                el('td', { textContent: e[4] }),
+                el('td', { className: 'mono', textContent: e[5] }),
+              ),
+            ),
+          );
+      }
+      $('#evTabs').addEventListener('click', (ev) => {
+        const b = ev.target.closest('button');
+        if (!b) return;
+        $('#evTabs')
+          .querySelectorAll('button')
+          .forEach((x) => x.setAttribute('aria-selected', x === b));
+        renderEvents(b.dataset.k);
+      });
+
+      // catalog
+      const cats = [...new Set(catalog.map((c) => c.cat))];
+      cats.forEach((c) => $('#cc').append(el('option', { textContent: c })));
+      const decTone = { Capture: 'ok', 'Capture, sampled': 'info', Skip: 'n' };
+      function renderCatalog() {
+        const c = $('#cc').value,
+          d = $('#cd').value,
+          q = $('#cq').value.toLowerCase();
+        const rows = catalog.filter(
+          (x) =>
+            (!c || x.cat === c) &&
+            (!d || x.dec === d) &&
+            (!q || (x.name + x.id).toLowerCase().includes(q)),
+        );
+        const b = $('#cat');
+        b.replaceChildren();
+        rows.forEach((x) =>
+          b.append(
+            el(
+              'tr',
+              {
+                className: 'row',
+                tabIndex: 0,
+                onclick: () => catDetail(x),
+                onkeydown: (e) => e.key === 'Enter' && catDetail(x),
+              },
+              el(
+                'td',
+                {},
+                el('div', { textContent: x.name }),
+                el('div', { className: 'mut mono', textContent: x.id }),
+              ),
+              el('td', { textContent: x.cat }),
+              el('td', { textContent: x.svc }),
+              el('td', { textContent: x.when }),
+              el('td', {}, badge(x.sev, tone[x.sev])),
+              el('td', {}, badge(x.dec, decTone[x.dec])),
+              el('td', { textContent: x.samp }),
+              el('td', { textContent: x.alert }),
+              el('td', { textContent: x.keep }),
+            ),
+          ),
+        );
+        if (!rows.length)
+          b.append(
+            el(
+              'tr',
+              {},
+              el('td', {
+                colSpan: 9,
+                className: 'mut',
+                textContent: 'No issue types match. Clear the filters.',
+              }),
+            ),
+          );
+      }
+      function catDetail(x) {
+        const p = $('#catDetail');
+        p.classList.remove('hidden');
+        const chips = x.fields.length
+          ? x.fields.map((f) =>
+              el('code', {
+                textContent: f,
+                style:
+                  'display:inline-block;margin:0 6px 4px 0;padding:1px 6px;border:1px solid var(--bd);border-radius:4px',
+              }),
+            )
+          : [el('span', { className: 'mut', textContent: 'Nothing stored' })];
+        p.replaceChildren(
+          el('h3', { textContent: x.id + ' ' + x.name }),
+          el(
+            'dl',
+            {},
+            el('dt', { textContent: 'Captured when' }),
+            el('dd', { textContent: x.when }),
+            el('dt', { textContent: 'Details stored' }),
+            el('dd', {}, ...chips),
+            el('dt', { textContent: 'Never stored' }),
+            el('dd', { textContent: x.skip }),
+            el('dt', { textContent: 'Size' }),
+            el('dd', { textContent: x.cost }),
+            el('dt', { textContent: 'Alert' }),
+            el('dd', { textContent: x.alert }),
+          ),
+        );
+        p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      ['input', 'change'].forEach((e) =>
+        ['#cc', '#cd', '#cq'].forEach((s) => $(s).addEventListener(e, renderCatalog)),
+      );
+      $('#catStats').append(
+        ...[
+          ['Issue types', catalog.length],
+          ['Captured', catalog.filter((x) => x.dec !== 'Skip').length],
+          ['Skipped on purpose', catalog.filter((x) => x.dec === 'Skip').length],
+          ['Categories', cats.length],
+        ].map(([k, v]) =>
+          el(
+            'div',
+            { className: 'card' },
+            el('div', { className: 'mut', textContent: k }),
+            el('div', { className: 'n', textContent: v }),
+          ),
+        ),
+      );
+
+      // storage
+      storage.forEach((r) =>
+        $('#sto').append(
+          el(
+            'tr',
+            {},
+            el('td', { textContent: r[0] }),
+            el('td', { className: 'r', textContent: r[1] }),
+            el('td', { className: 'r', textContent: r[2] }),
+            el('td', { textContent: r[3] }),
+            el('td', {}, el('button', { className: 'btn', textContent: 'Change' })),
+          ),
+        ),
+      );
+      const dlg = $('#dlg');
+      document.querySelectorAll('[data-del]').forEach(
+        (b) =>
+          (b.onclick = () => {
+            const what = b.dataset.del.includes('selected')
+              ? `all data for ${$('#delSvc').value}`
+              : b.dataset.del;
+            $('#dlgTxt').textContent = `This permanently removes ${what}. It cannot be undone.`;
+            dlg.returnValue = '';
+            dlg.showModal();
+            dlg.onclose = () => {
+              if (dlg.returnValue === 'yes')
+                $('#delMsg').textContent = `Deleted ${what} (sample, nothing changed).`;
+            };
+          }),
+      );
+
+      // nav + theme
+      function show(id) {
+        document
+          .querySelectorAll('main > section')
+          .forEach((s) => s.classList.toggle('hidden', s.id !== id));
+        const navId =
+          id === 'detail'
+            ? 'overview'
+            : ['overview', 'live-status', 'metrics-trends', 'errors', 'events', 'storage'].includes(
+                  id,
+                )
+              ? 'overview'
+              : id;
+        document.querySelectorAll('nav button[data-v]').forEach((b) => {
+          const active = b.dataset.v === navId;
+          if (active) b.setAttribute('aria-current', 'page');
+          else b.removeAttribute('aria-current');
+        });
+        document.querySelectorAll('.section-tabs button[data-v]').forEach((b) => {
+          if (b.dataset.v === navId) b.setAttribute('aria-current', 'page');
+          else b.removeAttribute('aria-current');
+        });
+        const hash =
+          id === 'detail'
+            ? '#observability/errors/CON-142'
+            : id.startsWith('admin-') ||
+                ['plugins', 'discover', 'review', 'categories', 'audit'].includes(id)
+              ? '#' + id
+              : '#observability/' + (id === 'overview' ? '' : id);
+        if (location.hash !== hash) history.replaceState(null, '', hash);
+      }
+      document
+        .querySelectorAll('[data-go]')
+        .forEach((b) => b.addEventListener('click', () => show(b.dataset.go)));
+      document.querySelector('nav').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-v]');
+        if (b && !b.disabled) show(b.dataset.v);
+      });
+      document.querySelectorAll('.section-tabs').forEach((t) =>
+        t.addEventListener('click', (e) => {
+          const b = e.target.closest('button[data-v]');
+          if (b) show(b.dataset.v);
+        }),
+      );
+      window.addEventListener('hashchange', () => {
+        const path = location.hash.slice(1).split('/');
+        const id =
+          path[0] === 'observability'
+            ? path[1] === 'errors' && path[2]
+              ? 'detail'
+              : path[1] || 'overview'
+            : path[0] || 'admin-dashboard';
+        if (document.getElementById(id)) show(id);
+      });
+      $('#theme').onclick = () => {
+        const d = document.documentElement;
+        const dark = d.dataset.theme !== 'dark';
+        d.dataset.theme = dark ? 'dark' : 'light';
+        $('#theme').textContent = 'Theme: ' + d.dataset.theme;
+      };
+
+      $('#copyPrompt').addEventListener('click', async () => {
+        const g = groups[0];
+        const text =
+          'Issue ' +
+          g.id +
+          ': ' +
+          g.t +
+          '\nService: ' +
+          g.svc +
+          '\nRelease: 2.14.0\nEvents: ' +
+          g.n +
+          '\nStack: ' +
+          g.where;
+        try {
+          await navigator.clipboard.writeText(text);
+          $('#copyPrompt').textContent = 'Summary copied';
+        } catch {
+          $('#copyPrompt').textContent = 'Copy unavailable in this preview';
+        }
+      });
+      renderGroups();
+      renderEvents();
+      renderCatalog();
+      if (location.hash) window.dispatchEvent(new HashChangeEvent('hashchange'));
+    </script>
+  </body>
+</html>

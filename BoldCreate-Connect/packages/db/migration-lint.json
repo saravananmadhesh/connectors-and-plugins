@@ -1,0 +1,7 @@
+{
+  "firstLinted": "0001",
+  "contractAllow": [
+    { "tag": "0001_remove_partner_apps", "adr": "decisions.md" },
+    { "tag": "0002_remove_teams", "adr": "decisions.md" }
+  ]
+}

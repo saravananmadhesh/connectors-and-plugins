@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  { name: boldcreate-integrations-admin-config-preproduction, namespace: boldcreate-preprod }
+data:
+  NODE_ENV: production
+  DEPLOY_ENV: staging
+  LOG_LEVEL: info
+  PORT: '3004'
+  API_BASE_URL: http://boldcreate-integrations-api-preproduction.boldcreate-preprod.svc.cluster.local:3001
+  APP_BASE_URL: https://preproduction.admin.example.com
+  ADMIN_ALLOWED_EMAILS: ops@example.com
+  PLUGIN_SOURCE_ALLOWED_OWNERS: ''
+  ADMIN_ALLOWED_CIDRS: ''
+  DB_POOL_MAX: '5'

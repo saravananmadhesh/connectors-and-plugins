@@ -1,0 +1,3 @@
+deepagents
+langchain-mcp-adapters
+langchain-anthropic

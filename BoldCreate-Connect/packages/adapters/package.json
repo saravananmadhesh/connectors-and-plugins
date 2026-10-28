@@ -1,0 +1,83 @@
+{
+  "name": "@boldcreate-integrations/adapters",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./system": {
+      "types": "./src/system/index.ts",
+      "development": "./src/system/index.ts",
+      "default": "./dist/system/index.js"
+    },
+    "./redis": {
+      "types": "./src/redis/index.ts",
+      "development": "./src/redis/index.ts",
+      "default": "./dist/redis/index.js"
+    },
+    "./s3": {
+      "types": "./src/s3/index.ts",
+      "development": "./src/s3/index.ts",
+      "default": "./dist/s3/index.js"
+    },
+    "./kms": {
+      "types": "./src/kms/index.ts",
+      "development": "./src/kms/index.ts",
+      "default": "./dist/kms/index.js"
+    },
+    "./mailpit": {
+      "types": "./src/mailpit/index.ts",
+      "development": "./src/mailpit/index.ts",
+      "default": "./dist/mailpit/index.js"
+    },
+    "./postgres-queue": {
+      "types": "./src/postgres-queue/index.ts",
+      "development": "./src/postgres-queue/index.ts",
+      "default": "./dist/postgres-queue/index.js"
+    },
+    "./secrets": {
+      "types": "./src/secrets/index.ts",
+      "development": "./src/secrets/index.ts",
+      "default": "./dist/secrets/index.js"
+    },
+    "./ses": {
+      "types": "./src/ses/index.ts",
+      "development": "./src/ses/index.ts",
+      "default": "./dist/ses/index.js"
+    },
+    "./smtp": {
+      "types": "./src/smtp/index.ts",
+      "development": "./src/smtp/index.ts",
+      "default": "./dist/smtp/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/client-sesv2": "catalog:",
+    "@aws-sdk/lib-storage": "catalog:",
+    "@boldcreate-integrations/config": "workspace:*",
+    "@boldcreate-integrations/contracts": "workspace:*",
+    "@boldcreate-integrations/db": "workspace:*",
+    "@boldcreate-integrations/ports": "workspace:*",
+    "@google-cloud/kms": "catalog:",
+    "@google-cloud/secret-manager": "catalog:",
+    "drizzle-orm": "catalog:",
+    "ioredis": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "pg": "catalog:"
+  }
+}

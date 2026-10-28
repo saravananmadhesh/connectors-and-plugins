@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "semi": true,
+  "sorting": {
+    "imports": true,
+    "tailwindcss": true,
+    "packageJson": true
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "pnpm-lock.yaml",
+    "skills-lock.json",
+    "**/*.min.js",
+    "**/docs/reference/**",
+    "**/docs/openapi/**",
+    "**/.agents/**",
+    "**/.codestudio/**"
+  ]
+}

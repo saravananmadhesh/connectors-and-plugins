@@ -1,0 +1,139 @@
+[
+  {
+    "name": "one server, standard",
+    "servers": [
+      {
+        "name": "second",
+        "url": "https://y",
+        "headers": {},
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      }
+    ],
+    "options": {
+      "format": "standard"
+    },
+    "expected": "{\n  \"mcpServers\": {\n    \"second\": {\n      \"type\": \"http\",\n      \"url\": \"https://y\",\n      \"headers\": {}\n    }\n  }\n}\n"
+  },
+  {
+    "name": "two servers, standard, placeholder",
+    "servers": [
+      {
+        "name": "a b",
+        "url": "https://x/mcp?q=1&r=<2>",
+        "headers": {
+          "Authorization": "Bearer stk_abc",
+          "X": "é"
+        },
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      },
+      {
+        "name": "second",
+        "url": "https://y",
+        "headers": {},
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      }
+    ],
+    "options": {
+      "format": "standard"
+    },
+    "expected": "{\n  \"mcpServers\": {\n    \"a b\": {\n      \"type\": \"http\",\n      \"url\": \"https://x/mcp?q=1&r=<2>\",\n      \"headers\": {\n        \"Authorization\": \"Bearer ${CONNECT_TOKEN}\",\n        \"X\": \"é\"\n      }\n    },\n    \"second\": {\n      \"type\": \"http\",\n      \"url\": \"https://y\",\n      \"headers\": {}\n    }\n  }\n}\n"
+  },
+  {
+    "name": "two servers, vscode, literal token",
+    "servers": [
+      {
+        "name": "a b",
+        "url": "https://x/mcp?q=1&r=<2>",
+        "headers": {
+          "Authorization": "Bearer stk_abc",
+          "X": "é"
+        },
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      },
+      {
+        "name": "second",
+        "url": "https://y",
+        "headers": {},
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      }
+    ],
+    "options": {
+      "format": "vscode",
+      "literalToken": true
+    },
+    "expected": "{\n  \"servers\": {\n    \"a b\": {\n      \"type\": \"http\",\n      \"url\": \"https://x/mcp?q=1&r=<2>\",\n      \"headers\": {\n        \"Authorization\": \"Bearer stk_abc\",\n        \"X\": \"é\"\n      }\n    },\n    \"second\": {\n      \"type\": \"http\",\n      \"url\": \"https://y\",\n      \"headers\": {}\n    }\n  }\n}\n"
+  },
+  {
+    "name": "repeated name keeps first place, last value",
+    "servers": [
+      {
+        "name": "a b",
+        "url": "https://x/mcp?q=1&r=<2>",
+        "headers": {
+          "Authorization": "Bearer stk_abc",
+          "X": "é"
+        },
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      },
+      {
+        "name": "second",
+        "url": "https://y",
+        "headers": {},
+        "ready": true,
+        "setup": {
+          "kind": "none"
+        }
+      },
+      {
+        "name": "a b",
+        "url": "https://z/last",
+        "headers": {
+          "authorization": "Bearer stk_def"
+        },
+        "ready": false,
+        "setup": {
+          "kind": "variables",
+          "names": ["T"]
+        }
+      }
+    ],
+    "options": {
+      "format": "standard"
+    },
+    "expected": "{\n  \"mcpServers\": {\n    \"a b\": {\n      \"type\": \"http\",\n      \"url\": \"https://z/last\",\n      \"headers\": {\n        \"authorization\": \"Bearer ${CONNECT_TOKEN}\"\n      }\n    },\n    \"second\": {\n      \"type\": \"http\",\n      \"url\": \"https://y\",\n      \"headers\": {}\n    }\n  }\n}\n"
+  },
+  {
+    "name": "no servers",
+    "servers": [],
+    "options": {
+      "format": "standard"
+    },
+    "expected": "{\n  \"mcpServers\": {}\n}\n"
+  },
+  {
+    "name": "no servers, vscode",
+    "servers": [],
+    "options": {
+      "format": "vscode"
+    },
+    "expected": "{\n  \"servers\": {}\n}\n"
+  }
+]

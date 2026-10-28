@@ -1,0 +1,15 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: boldcreate-integrations-admin-backend-staging
+  namespace: boldcreate-stag
+spec:
+  healthCheck:
+    type: HTTP
+    port: 3004
+    requestPath: /healthz
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 2
+    unhealthyThreshold: 3
+  timeoutSec: 60

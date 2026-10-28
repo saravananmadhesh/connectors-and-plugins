@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boldcreate-integrations-worker-config-preproduction
+  namespace: boldcreate-preprod
+data:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  EMAIL_PROVIDER: resend
+  EMAIL_FROM: noreply@preproduction.example.com
+  OUTBOX_POLL_INTERVAL_MS: '5000'
+  APP_BASE_URL: https://preproduction.example.com
+  BLOB_BUCKET: boldcreate-artifacts-preprod
+  KMS_LOCAL_KEYRING_PATH: /tmp/keyring.json

@@ -1,0 +1,36 @@
+{
+  "name": "@boldcreate-integrations/gateway",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsx ../../scripts/package-service.ts gateway",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@boldcreate-integrations/adapters": "workspace:*",
+    "@boldcreate-integrations/config": "workspace:*",
+    "@boldcreate-integrations/contracts": "workspace:*",
+    "@boldcreate-integrations/credentials": "workspace:*",
+    "@boldcreate-integrations/db": "workspace:*",
+    "@boldcreate-integrations/domain": "workspace:*",
+    "@boldcreate-integrations/http-server": "workspace:*",
+    "@boldcreate-integrations/observability": "workspace:*",
+    "@boldcreate-integrations/ports": "workspace:*",
+    "@boldcreate-integrations/security": "workspace:*",
+    "@google-cloud/kms": "catalog:",
+    "@modelcontextprotocol/fastify": "catalog:",
+    "@modelcontextprotocol/node": "catalog:",
+    "@modelcontextprotocol/server": "catalog:",
+    "fastify": "catalog:",
+    "ioredis": "catalog:",
+    "pino": "catalog:",
+    "undici": "catalog:",
+    "zod": "catalog:"
+  }
+}

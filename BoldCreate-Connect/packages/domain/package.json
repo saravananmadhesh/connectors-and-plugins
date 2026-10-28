@@ -1,0 +1,32 @@
+{
+  "name": "@boldcreate-integrations/domain",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@boldcreate-integrations/contracts": "workspace:*",
+    "@boldcreate-integrations/credentials": "workspace:*",
+    "@boldcreate-integrations/db": "workspace:*",
+    "@boldcreate-integrations/limits": "workspace:*",
+    "@boldcreate-integrations/observability": "workspace:*",
+    "@boldcreate-integrations/ports": "workspace:*",
+    "@boldcreate-integrations/security": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

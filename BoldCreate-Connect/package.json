@@ -1,0 +1,57 @@
+{
+  "name": "boldcreate-integrations",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --conditions=development scripts/dev.ts",
+    "dev:docker": "tsx --conditions=development scripts/dev.ts --postgres=docker",
+    "dev:staging": "tsx --conditions=development scripts/dev-staging.ts",
+    "dev:dashboard": "tsx --conditions=development scripts/dev-dashboard/server.ts",
+    "test": "tsx --conditions=development scripts/test-runner/run-all.ts",
+    "format": "oxfmt .",
+    "build": "pnpm -r --filter \"./apps/**\" --filter \"./packages/**\" run --if-present build",
+    "coverage": "vitest run --coverage",
+    "test:stack": "tsx --conditions=development scripts/test-runner/stack-control.ts",
+    "test:staging": "vitest run --project staging",
+    "test:mutation": "stryker run",
+    "db:generate": "tsx --conditions=development scripts/db-generate.ts",
+    "db:lint": "tsx --conditions=development scripts/checks/migration-lint.ts",
+    "openapi": "tsx --conditions=development scripts/generate-openapi.ts",
+    "db:check": "drizzle-kit check",
+    "db:migrate": "tsx --conditions=development scripts/migrate.ts",
+    "k8s:migration": "tsx scripts/generate-migration-manifest.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "catalog:",
+    "@modelcontextprotocol/fastify": "catalog:",
+    "@modelcontextprotocol/node": "catalog:",
+    "@modelcontextprotocol/server": "catalog:",
+    "drizzle-orm": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@stryker-mutator/core": "catalog:",
+    "@stryker-mutator/vitest-runner": "catalog:",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "drizzle-kit": "catalog:",
+    "embedded-postgres": "catalog:",
+    "oxc-parser": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "redis-commander": "catalog:",
+    "safe-regex2": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "packageManager": "pnpm@10.34.6"
+}

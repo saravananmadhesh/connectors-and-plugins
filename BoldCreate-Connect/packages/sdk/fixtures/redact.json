@@ -1,0 +1,26 @@
+[
+  {
+    "input": "prk_0123456789abcdef.abcdefghijklmnopqrstuvwxyz012345",
+    "expected": "prk_0123456789abcdef.[redacted]"
+  },
+  {
+    "input": "a stk_fedcba9876543210.zyxwvutsrqponmlkjihgfedcba012345 b",
+    "expected": "a stk_fedcba9876543210.[redacted] b"
+  },
+  {
+    "input": "plk_0123456789abcdef.short",
+    "expected": "plk_0123456789abcdef.short"
+  },
+  {
+    "input": "fyk_0123456789abcdef.AAAAAAAAAAAAAAAAAAAA and ptk_0123456789abcdef.B_-B_-B_-B_-B_-B_-B_-B_-",
+    "expected": "fyk_0123456789abcdef.[redacted] and ptk_0123456789abcdef.[redacted]"
+  },
+  {
+    "input": "nothing secret here",
+    "expected": "nothing secret here"
+  },
+  {
+    "input": "prk_0123456789abcde.abcdefghijklmnopqrstuvwxyz012345",
+    "expected": "prk_0123456789abcde.abcdefghijklmnopqrstuvwxyz012345"
+  }
+]

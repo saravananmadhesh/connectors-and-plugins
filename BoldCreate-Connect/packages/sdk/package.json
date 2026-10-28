@@ -1,0 +1,38 @@
+{
+  "name": "@syncfusion/boldcreate-connect",
+  "version": "0.1.0",
+  "description": "Client for hosts: projects, users, sessions and plugin sync",
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/test-support.*",
+    "!dist/**/*.map"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./sync": {
+      "types": "./dist/sync.d.ts",
+      "development": "./src/sync.ts",
+      "default": "./dist/sync.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@boldcreate-integrations/contracts": "workspace:*",
+    "@types/node": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "secret": "whsec_test_secret",
+  "now": "2026-01-01T00:00:00.000Z",
+  "toleranceSeconds": 300,
+  "cases": [
+    {
+      "name": "valid",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,pkfkOMMt2nJwYIuxvc9Lezps0yr9wbj+UGkZDJoOF1w="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": true,
+        "type": "user.created",
+        "id": "evt_1",
+        "userId": "u1"
+      }
+    },
+    {
+      "name": "valid among several signatures",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,wrong v1,pkfkOMMt2nJwYIuxvc9Lezps0yr9wbj+UGkZDJoOF1w="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": true,
+        "type": "user.created",
+        "id": "evt_1",
+        "userId": "u1"
+      }
+    },
+    {
+      "name": "header names in other case",
+      "headers": {
+        "Webhook-Id": "msg_1",
+        "WEBHOOK-TIMESTAMP": "1767225600",
+        "Webhook-Signature": "v1,pkfkOMMt2nJwYIuxvc9Lezps0yr9wbj+UGkZDJoOF1w="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": true,
+        "type": "user.created",
+        "id": "evt_1",
+        "userId": "u1"
+      }
+    },
+    {
+      "name": "wrong secret",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,Ogsia1BxzIYtc5VqRmDrrgDfHOR1161q3A0GPJpc0E8="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook signature does not match."
+      }
+    },
+    {
+      "name": "body changed",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,pkfkOMMt2nJwYIuxvc9Lezps0yr9wbj+UGkZDJoOF1w="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u2\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook signature does not match."
+      }
+    },
+    {
+      "name": "timestamp too old",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225299",
+        "webhook-signature": "v1,UGIOa/HobJnF7XzYLAFpwC6Bb1sdD8e7I9bOGAqVGag="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook timestamp is outside the allowed time."
+      }
+    },
+    {
+      "name": "timestamp at the limit",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225300",
+        "webhook-signature": "v1,lQp5U1XWSp3CdQUrsR3uP/7t/o0kjh2EYRfdq3XDVJc="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": true,
+        "type": "user.created",
+        "id": "evt_1",
+        "userId": "u1"
+      }
+    },
+    {
+      "name": "timestamp in the future",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225901",
+        "webhook-signature": "v1,F3rbGqYDU6xWd8dmRigk08PQuhEXS87zsg10z/COn0Y="
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook timestamp is outside the allowed time."
+      }
+    },
+    {
+      "name": "timestamp not a number",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "abc",
+        "webhook-signature": "v1,x"
+      },
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook timestamp is not valid."
+      }
+    },
+    {
+      "name": "headers missing",
+      "headers": {},
+      "rawBody": "{\"id\":\"evt_1\",\"type\":\"user.created\",\"createdAt\":\"2026-01-01T00:00:00Z\",\"projectId\":\"prj_1\",\"userId\":\"u1\",\"data\":{\"a\":1}}",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook headers are missing."
+      }
+    },
+    {
+      "name": "signed body is not JSON",
+      "headers": {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,8gxYORy4KZvHT1vyrSwC1gOeOZOJszE1DY/AqaOICXg="
+      },
+      "rawBody": "not json",
+      "expected": {
+        "ok": false,
+        "code": "webhook_invalid",
+        "status": 400,
+        "message": "The webhook body is not JSON."
+      }
+    }
+  ]
+}

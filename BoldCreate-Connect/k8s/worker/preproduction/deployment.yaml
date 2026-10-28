@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: boldcreate-integrations-worker-preproduction, namespace: boldcreate-preprod }
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-worker-preproduction }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: boldcreate-integrations-worker-preproduction }
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: boldcreate-integrations-worker-preproduction
+          image: us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/boldcreate-preproduction-integrations-worker:#{Build.BuildId}#
+          imagePullPolicy: Always
+          command: [node]
+          args: [dist/index.js]
+          ports: [{ name: health, containerPort: 3005 }]
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: '1', memory: 512Mi }
+          startupProbe:
+            httpGet: { path: /healthz, port: health }
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /readyz, port: health }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: health }
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }

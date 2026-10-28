@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  { name: boldcreate-integrations-gateway-config-preproduction, namespace: boldcreate-preprod }
+data:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  PORT_GATEWAY: '3002'
+  API_BASE_URL: http://boldcreate-integrations-api-preproduction.boldcreate-preprod.svc.cluster.local:3001
