@@ -2,12 +2,13 @@
  * Gateway HTTP server, the public data plane.
  *   POST /mcp and /{server}/mcp  stateless MCP over HTTP, Bearer key.
  *   GET /v1/sync, GET /v1/sync/components/{sha256}, POST /v1/sync/reports, GET /v1/plugin-versions/{id}/archive  forwarded to the api.
- *   The routes the registry opens to project keys: forwarded to the api for `prk_` and `stk_` bearers only.
+ *   The routes the registry opens to project keys: forwarded to the api for `prk_` bearers only.
+ *   The `/v1/session/...` routes a session's user calls: forwarded to the api for `stk_` bearers only.
  */
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from 'pino';
 import { tenantKey, type LimiterPort } from '@boldcreate-integrations/ports';
-import { ROUTES, type ApiKeyPrincipal } from '@boldcreate-integrations/contracts';
+import { ROUTES, type ApiKeyPrincipal, type RouteDef } from '@boldcreate-integrations/contracts';
 import type { Db } from '@boldcreate-integrations/db';
 import {
   authenticateKey,
@@ -25,6 +26,7 @@ import {
   type WorkloadHeaders,
 } from '@boldcreate-integrations/http-server';
 import type { Metrics } from '@boldcreate-integrations/observability';
+import { KEY_PREFIX } from '@boldcreate-integrations/security';
 import { createArtifactProxy } from './artifacts.js';
 import type { GatewayConfig } from './config.js';
 import type { GatewayRemote } from './remote.js';
@@ -65,6 +67,18 @@ const HOST_RESPONSE_HEADERS = [
 export const PROJECT_FORWARDED_ROUTES = ROUTES.filter(
   (route) => route.app === 'api' && route.principals.includes('project'),
 );
+
+/** The registry entries a session token is made for; the api serves them only behind the gateway. */
+export const SESSION_FORWARDED_ROUTES = ROUTES.filter(
+  (route) =>
+    route.app === 'api' &&
+    route.principals.includes('key') &&
+    route.pathTemplate.startsWith('/v1/session/'),
+);
+
+/** Whether the header offers a session token, well formed or not; the api checks the rest. */
+const offersSessionToken = (header: string | undefined): boolean =>
+  typeof header === 'string' && header.startsWith(`Bearer ${KEY_PREFIX.session}`);
 
 /** Protocol versions this gateway answers; the first is offered when the client's is unknown. */
 export const SUPPORTED_PROTOCOL_VERSIONS = [
@@ -322,24 +336,29 @@ export function buildApp(config: GatewayConfig, deps: GatewayDeps): HttpServer {
     );
   });
 
-  // Project routes: the api decides everything; here only a project key is let through, so a
-  // personal or shared key, a session or no credential never reaches a project route.
-  for (const route of PROJECT_FORWARDED_ROUTES) {
-    app.route({
-      method: route.method,
-      url: toFastifyPath(route.pathTemplate),
-      handler: (request, reply) => {
-        if (!offersProjectKey(request.headers.authorization)) {
-          void reply.header('www-authenticate', 'Bearer');
-          return reply
-            .status(401)
-            .send(apiError(request, 'unauthenticated', 'A valid Bearer key is required.'));
-        }
-        const path = request.raw.url?.split('?')[0] ?? route.pathTemplate;
-        return forwardHost(request, reply, path);
-      },
-    });
-  }
+  // Project and session routes: the api decides everything; here only the credential made for
+  // the route is let through, so a project route never sees a session token or another key, and a
+  // session route never sees a project key or another key.
+  const forwardOnly = (routes: readonly RouteDef[], offers: (header?: string) => boolean) => {
+    for (const route of routes) {
+      app.route({
+        method: route.method,
+        url: toFastifyPath(route.pathTemplate),
+        handler: (request, reply) => {
+          if (!offers(request.headers.authorization)) {
+            void reply.header('www-authenticate', 'Bearer');
+            return reply
+              .status(401)
+              .send(apiError(request, 'unauthenticated', 'A valid Bearer key is required.'));
+          }
+          const path = request.raw.url?.split('?')[0] ?? route.pathTemplate;
+          return forwardHost(request, reply, path);
+        },
+      });
+    }
+  };
+  forwardOnly(PROJECT_FORWARDED_ROUTES, offersProjectKey);
+  forwardOnly(SESSION_FORWARDED_ROUTES, offersSessionToken);
 
   return server;
 }

@@ -8,7 +8,7 @@ import {
   type HttpServer,
 } from '@boldcreate-integrations/http-server';
 import { createLogger, createMetrics } from '@boldcreate-integrations/observability';
-import { buildApp, PROJECT_FORWARDED_ROUTES } from './app.js';
+import { buildApp, PROJECT_FORWARDED_ROUTES, SESSION_FORWARDED_ROUTES } from './app.js';
 import { loadGatewayConfig } from './config.js';
 
 const unsealer: Unsealer = {
@@ -36,6 +36,11 @@ const PROTOCOL_ROUTES = [
 
 /** The api routes a project key may call; the gateway forwards them for the host's server. */
 const PROJECT_ROUTES = PROJECT_FORWARDED_ROUTES.map(
+  (route) => `${route.method} ${toFastifyPath(route.pathTemplate)}`,
+);
+
+/** The api routes a session token is made for; the gateway forwards them for the session's user. */
+const SESSION_ROUTES = SESSION_FORWARDED_ROUTES.map(
   (route) => `${route.method} ${toFastifyPath(route.pathTemplate)}`,
 );
 
@@ -74,7 +79,11 @@ describe('gateway routes', () => {
     );
     const entries = ROUTES.filter((route) => route.app === 'gateway' || route.app === 'all');
     expect(
-      compareRoutes(server.routes(), entries, [...PROTOCOL_ROUTES, ...PROJECT_ROUTES]),
+      compareRoutes(server.routes(), entries, [
+        ...PROTOCOL_ROUTES,
+        ...PROJECT_ROUTES,
+        ...SESSION_ROUTES,
+      ]),
     ).toEqual({
       missing: [],
       unexpected: [],
@@ -83,5 +92,18 @@ describe('gateway routes', () => {
     for (const route of PROTOCOL_ROUTES) expect(served).toContain(route);
     expect(PROJECT_ROUTES.length).toBeGreaterThan(0);
     for (const route of PROJECT_ROUTES) expect(served).toContain(route);
+    expect(SESSION_ROUTES).toEqual(
+      expect.arrayContaining([
+        'GET /v1/session/catalog',
+        'GET /v1/session/plugins',
+        'PUT /v1/session/plugins/:pluginId',
+        'DELETE /v1/session/plugins/:pluginId',
+        'PUT /v1/session/plugins/:pluginId/variables',
+        'PUT /v1/session/plugins/:pluginId/components/:componentId',
+        'POST /v1/session/connections',
+        'GET /v1/session/connections',
+      ]),
+    );
+    for (const route of SESSION_ROUTES) expect(served).toContain(route);
   });
 });
