@@ -5,17 +5,17 @@
     "name": "Syncfusion"
   },
   "metadata": {
-    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a tool kit for the whole software delivery lifecycle.",
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a toolkit for the whole software delivery lifecycle.",
     "formatVersion": 1
   },
   "plugins": [
     {
-      "name": "boldcreate-tool-kit",
-      "displayName": "BoldCreate-tool-kit",
-      "version": "0.3.0",
+      "name": "boldcreate-toolkit",
+      "displayName": "BoldCreate Toolkit",
+      "version": "0.6.0",
       "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
-      "source": "boldcreate-tool-kit",
-      "logo": "boldcreate-tool-kit/assets/logo.svg",
+      "source": "boldcreate-toolkit",
+      "logo": "boldcreate-toolkit/assets/logo.svg",
       "category": "developer-tools",
       "components": [
         "skills",

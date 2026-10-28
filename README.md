@@ -1,8 +1,8 @@
 # Syncfusion BoldCreate Plugins
 
-Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. This branch holds only the tool kit:
+Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. This branch holds only the toolkit:
 
-- **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-tool-kit/` gives agents one software delivery lifecycle on any stack.
+- **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-toolkit/` gives agents one software delivery lifecycle on any stack.
 
 ## Install
 
@@ -14,7 +14,7 @@ Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. 
 
 | `name` | Plugin | Category | `description` (from marketplace) |
 |:-------|:-------|:---------|:-------------------------------------|
-| `boldcreate-tool-kit` | [BoldCreate-tool-kit](boldcreate-tool-kit/) | Developer Tools | Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests. |
+| `boldcreate-toolkit` | [BoldCreate Toolkit](boldcreate-toolkit/) | Developer Tools | Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests. |
 
 ## Repository structure
 
@@ -24,17 +24,15 @@ This is a multi-plugin marketplace repository. The root marketplace files list e
 .boldcreate-plugin/marketplace.json   # BoldCreate Connect marketplace (generated)
 .cursor-plugin/marketplace.json       # Cursor marketplace (generated)
 .claude-plugin/marketplace.json       # Claude Code marketplace (generated)
-boldcreate-tool-kit/                  # Syncfusion plugin
+boldcreate-toolkit/                   # Syncfusion plugin
 ├── .cursor-plugin/plugin.json        # Manifest
 ├── .claude-plugin/plugin.json        # Claude Code manifest (generated)
 ├── .boldcreate-plugin/plugin.json    # BoldCreate Connect manifest (generated)
 ├── boldcreate.json                   # BoldCreate Connect metadata
-├── skills/<name>/SKILL.md            # Skills
+├── skills/<name>/                    # Skills: SKILL.md plus the templates and checklists it reads
 ├── agents/                           # Agents
 ├── rules/                            # Cursor rules
-├── lenses/                           # Reviewer checklists
 ├── hooks/claude-hooks.json           # Claude Code hooks
-├── instructions.md                   # Always-on rules for Claude Code
 ├── tests/scenarios/<skill>.md        # One scenario per skill
 ├── assets/logo.svg
 ├── README.md

@@ -26,7 +26,7 @@ const MARKETPLACE = {
   name: "boldcreate-plugins",
   owner: { name: "Syncfusion" },
   description:
-    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a tool kit for the whole software delivery lifecycle.",
+    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a toolkit for the whole software delivery lifecycle.",
 };
 
 const readJSON = (p) => JSON.parse(readFileSync(p, "utf-8"));
@@ -102,7 +102,7 @@ export function claudeManifest({ dir }) {
   if (!isMcpPlugin(cursor)) {
     // Claude Code scans skills/ by default. Agents are listed one by one so that
     // only top-level agent files load. Claude Code has no rule component; the
-    // session-start hook loads instructions.md instead.
+    // session-start hook prints the always-on rules instead.
     const { agents } = kitComponents(dir);
     if (agents.length) manifest.agents = agents.map((a) => `./agents/${a}.md`);
     if (existsSync(join(base, CLAUDE_HOOKS))) manifest.hooks = `./${CLAUDE_HOOKS}`;

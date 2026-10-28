@@ -1,0 +1,73 @@
+{
+  "$schema": "../../schemas/boldcreate-plugin.schema.json",
+  "name": "boldcreate-toolkit",
+  "displayName": "BoldCreate Toolkit",
+  "version": "0.6.0",
+  "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/boldcreate-toolkit",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "developer-tools",
+  "keywords": [
+    "sdlc",
+    "specification",
+    "tdd",
+    "code-review",
+    "debugging",
+    "pull-requests",
+    "skills",
+    "agents"
+  ],
+  "stage": "preview",
+  "docs": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/boldcreate-toolkit",
+  "rollout": {
+    "phase": 1
+  },
+  "supportedByGateway": false,
+  "variables": {},
+  "components": {
+    "mcp": [],
+    "skills": [
+      "bc-start",
+      "build",
+      "code-review",
+      "debug",
+      "define-product",
+      "design-architecture",
+      "domain-docs",
+      "grilling",
+      "plan-slices",
+      "report",
+      "retro",
+      "review-doc",
+      "scaffold",
+      "setup",
+      "ship",
+      "tdd",
+      "verify",
+      "write-spec"
+    ],
+    "rules": [
+      "no-secrets",
+      "plain-english-docs",
+      "team-principles",
+      "verify-before-done"
+    ],
+    "hooks": [
+      "SessionStart"
+    ],
+    "agents": [
+      "doc-reviewer",
+      "implementer",
+      "security-reviewer",
+      "spec-reviewer",
+      "standards-reviewer"
+    ],
+    "commands": []
+  },
+  "endpointCheck": null
+}
