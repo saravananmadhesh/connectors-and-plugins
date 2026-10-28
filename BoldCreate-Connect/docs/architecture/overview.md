@@ -28,7 +28,7 @@ flowchart LR
 ```
 
 - `api` owns management-time work with untrusted upstreams (probe, tool discovery, OAuth discovery, registration, code exchange) through the SSRF-guarded fetcher. `gateway` only calls tools. `worker` never unwraps keys; untrusted archives are ingested there.
-- Agents use one host: `gateway` serves `POST /mcp` and `POST /{server}/mcp` itself and forwards `GET /v1/sync`, `GET /v1/sync/components/{sha256}`, `POST /v1/sync/reports` and `GET /v1/plugin-versions/{id}/archive` to `api` with its own workload identity. Archives are streamed, never buffered, never presigned.
+- Agents use one host: `gateway` serves `POST /mcp` and `POST /{server}/mcp` itself and forwards `GET /v1/sync`, `GET /v1/sync/components/{sha256}`, `POST /v1/sync/reports` and `GET /v1/plugin-versions/{id}/archive` to `api` with its own workload identity. It also forwards the `/v1/project/...` routes for `prk_` keys and the `/v1/session/...` routes for `stk_` tokens, and refuses any other credential on them. Archives are streamed, never buffered, never presigned.
 - `admin` also reads Postgres directly with its own role (`app_admin`), and `gateway` reads it with `app_gateway` (a temporary arrangement until the gateway moves to a cache). Each service uses its own database role; `api` uses `app_api`, `worker` `app_worker`.
 - Admin routes are served by the `admin` app itself (session cookie plus CSRF); the `/internal/v1/admin` mirror on `api` is not confirmed in the code.
 - Internal calls use workload identity (shared secret only in `local` and `test`). Internal credentials never go to an upstream.
