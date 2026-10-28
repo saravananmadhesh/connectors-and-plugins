@@ -57,7 +57,7 @@ Paths below are defaults. When `.boldcreate/project.yml` exists, use its `docs` 
 
    Done when the user approves the plan or the changes they asked for are applied and approved.
 
-7. **Save the roadmap** at `docs/product/roadmap.md` from `templates/roadmap.md` at the kit root, two levels above this file. Each milestone has a slice table with IDs `M<milestone>-S<slice>`, status `todo` for new slices, and an empty Commit column. Write each slice's stories, check and main files (`Files: <paths>`) in the slice details below its table. Fill each milestone's `Integration branch:` line with the branch named on the PRD's `Integration branch:` line; without one, use the current branch when it is a `feat/<slug>` branch, otherwise `feat/<slug>` with the slug from the PRD or spec name.
+7. **Save the roadmap** at `docs/product/roadmap.md` from `roadmap-template.md` in this skill's folder. Each milestone has a slice table with IDs `M<milestone>-S<slice>`, status `todo` for new slices, and an empty Commit column. Write each slice's stories, check and main files (`Files: <paths>`) in the slice details below its table. Fill each milestone's `Integration branch:` line with the branch named on the PRD's `Integration branch:` line; without one, use the current branch when it is a `feat/<slug>` branch, otherwise `feat/<slug>` with the slug from the PRD or spec name.
 
    Check out the integration branch, creating it from `git.default_branch` if it does not exist, and commit the roadmap there as `Add roadmap`.
 

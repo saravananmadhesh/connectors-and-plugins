@@ -102,7 +102,7 @@ export function claudeManifest({ dir }) {
   if (!isMcpPlugin(cursor)) {
     // Claude Code scans skills/ by default. Agents are listed one by one so that
     // only top-level agent files load. Claude Code has no rule component; the
-    // session-start hook loads instructions.md instead.
+    // session-start hook prints the always-on rules instead.
     const { agents } = kitComponents(dir);
     if (agents.length) manifest.agents = agents.map((a) => `./agents/${a}.md`);
     if (existsSync(join(base, CLAUDE_HOOKS))) manifest.hooks = `./${CLAUDE_HOOKS}`;

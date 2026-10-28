@@ -21,7 +21,7 @@ Have a reviewer with no memory of this conversation check one document, resolve 
   | `docs/specs/` | `spec` |
   | Any document the user wants checked against the code | `fact-check` |
 
-  Lens files live in this kit's `lenses/` folder, two levels above this file.
+  Each lens is a file in this skill's folder, named `lens-<lens>.md`, for example `lens-product.md`.
 
 ## Steps
 
@@ -37,7 +37,7 @@ Have a reviewer with no memory of this conversation check one document, resolve 
 
 3. **Run the reviewers.** Start one `doc-reviewer` agent per pass. Give each only:
    - the document path;
-   - the lens file path;
+   - the full path of the lens file;
    - `.boldcreate/principles.md`, if it exists;
    - the pass focus: `clarity and readiness` or `design and complexity`.
 

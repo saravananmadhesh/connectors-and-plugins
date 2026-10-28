@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 Classify the request, show the path in one line, let the user change it, then hand off to the first skill of that path.
 
-Most kit skills start only when the user runs them, so the host may refuse to start one for you. Then read `<kit root>/skills/<name>/SKILL.md` and follow it; do not search for the file. The kit root is two levels above this file. In Claude Code, the session-start message also prints it as an absolute path. This applies to every skill this one starts, `setup` included. Running `bc-start` is the user's request to run the skills on the chosen path.
+Most kit skills start only when the user runs them, so the host may refuse to start one for you. Then read `SKILL.md` in the `<name>` folder next to this skill's folder (`../<name>/SKILL.md` from this file) and follow it; do not search for the file. In Claude Code, the session-start message also prints the kit's skills folder as an absolute path. This applies to every skill this one starts, `setup` included. Running `bc-start` is the user's request to run the skills on the chosen path.
 
 ## Steps
 
