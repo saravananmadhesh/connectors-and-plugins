@@ -24,3 +24,5 @@ go
 - After verify returns VERIFIED, the change is committed once on `fix/<slug>`, with no extra prompt.
 - When the same skill runs inside build for a slice, no `fix/` branch is created and no commit is made by this skill.
 - Setup files left uncommitted on main are committed first on the new branch as `Set up BoldCreate tool kit`, without asking.
+- When `dotnet sln add` or a package tool rewrites a solution, project or lock file, the commit keeps only the lines the change needs; no byte order mark or unrelated platform entries are added.
+- On the quick-fix and bug paths, code-review starts right after the commit, in the same turn.

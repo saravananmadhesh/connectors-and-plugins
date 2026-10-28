@@ -2,6 +2,17 @@
 
 All notable changes to this plugin will be documented here.
 
+## 0.4.0 - 2026-10-28
+
+- A confirmed path keeps going. After `go`, the quick-fix and bug paths run fix, verify, review and ship in one turn, and stop only for a question, an approval, a failed or inconclusive check, or review findings you must decide.
+- `build` starts the next ready slices as soon as one merges, instead of asking after each slice whether to go on.
+- The README and `build` show the allow rules in both forms, `Bash(...)` and `PowerShell(...)`, because Claude Code on Windows runs most commands in PowerShell.
+- On Windows, `build` recognises a test run that Smart App Control or Application Control refused (error `0x800711C7`), or a path that is too long, stops without trying to get around it, and suggests a repository outside `%TEMP%` on a short path. The README says the same.
+- `tdd` and the implementer keep only the lines a change needs when a tool rewrites a solution, project or lock file, and keep its encoding, byte order mark and line endings.
+- `debug`'s failing check covers every place the bug report says the bug shows, such as both endpoints.
+- `review-doc` sizes round 2 like round 1, so a short document gets one reviewer in round 2 instead of two.
+- The repository keeps LF line endings on every OS with `.gitattributes`, so `npm run validate` no longer reports false drift on Windows checkouts that convert line endings.
+
 ## 0.3.0 - 2026-10-27
 
 - `setup` keeps the kit's one-session files (pull request text, review reports, bug reports, handoff) out of Git with `.boldcreate/.gitignore`, ignores agent worktree folders, and commits its own files as one commit that reviews leave out.

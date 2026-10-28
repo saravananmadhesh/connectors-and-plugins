@@ -44,4 +44,4 @@ Run the standards axis only, on the range from the merge base to `HEAD`. The fix
 
 - Reviewers never edit files. All fixes happen in the main session or through the caller.
 - A second review round runs only when the user asks or a blocking finding was fixed. Stop after two rounds and hand any open blocking findings to the user.
-- Do not push, merge or open a pull request from this skill. Hand off to `ship`.
+- Do not push, merge or open a pull request from this skill. Hand off to `ship`. On the quick-fix and bug paths, once the user has decided every finding and the fixes are committed after `VERIFIED`, start `ship` in the same turn.

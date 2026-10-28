@@ -21,3 +21,6 @@ Run the build skill.
 - When an implementer reports BLOCKED because a command was refused, the user is shown the refused command and how to allow it, and that slice is built in the main session with tdd.
 - In Claude Code, after each slice merge, the host's `worktree-agent-<id>` branch is removed with `git branch -d`, and the slice branch is kept.
 - The implementer switches to its slice branch before reading the spec or roadmap, even when the host's worktree starts on the default branch.
+- After M1-S2 merges, M1-S3 starts in the same turn without asking the user whether to continue.
+- On Windows, when a refused command ran in PowerShell, the allow entry shown is `PowerShell(<tool>:*)`, not only `Bash(<tool>:*)`.
+- When a test run fails because the operating system blocked a file the build produced (Windows Smart App Control, `0x800711C7`) or a path is too long, the agent does not retry or work around the policy; it names the cause, suggests a repository outside `%TEMP%` on a short path, and stops.

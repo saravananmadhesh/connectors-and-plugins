@@ -20,3 +20,4 @@ The order total is wrong when someone buys the same item twice. Can you fix it?
 - When the first failing check points to one line, one hypothesis is written and confirmed, with one line saying why minimise and instrument needed nothing more.
 - The tdd skill is read before the fix is written, and the regression test is its first Red step.
 - code-review receives `.boldcreate/bugs/<slug>.md` and runs the spec axis against it.
+- When the bug report says the wrong limit shows on both `/api/ask` and `/api/me`, the failing check covers both endpoints before any fix.
