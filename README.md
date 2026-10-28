@@ -93,12 +93,10 @@ boldcreate-toolkit/                   # Syncfusion plugin
 ├── .claude-plugin/plugin.json        # Claude Code manifest (generated)
 ├── .boldcreate-plugin/plugin.json    # BoldCreate Connect manifest (generated)
 ├── boldcreate.json                   # BoldCreate Connect metadata
-├── skills/<name>/SKILL.md            # Skills
+├── skills/<name>/                    # Skills: SKILL.md plus the templates and checklists it reads
 ├── agents/                           # Agents
 ├── rules/                            # Cursor rules
-├── lenses/                           # Reviewer checklists
 ├── hooks/claude-hooks.json           # Claude Code hooks
-├── instructions.md                   # Always-on rules for Claude Code
 ├── tests/scenarios/<skill>.md        # One scenario per skill
 ├── assets/logo.svg
 ├── README.md

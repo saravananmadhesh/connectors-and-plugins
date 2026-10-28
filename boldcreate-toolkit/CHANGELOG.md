@@ -2,6 +2,14 @@
 
 All notable changes to this plugin will be documented here.
 
+## 0.6.0 - 2026-10-28
+
+- Every skill now works when BoldCreate Connect delivers it on its own. The templates moved into the skills that use them (`prd-template.md` in `define-product`, `roadmap-template.md` in `plan-slices`, `spec-template.md` in `write-spec`, `project-template.yml` and `principles-template.md` in `setup`), and the review checklists moved into `review-doc` as `lens-<name>.md`. The kit-level `templates/` and `lenses/` folders are gone.
+- `review-doc` gives the doc reviewer the full path of the lens file, so the agent no longer looks for a kit folder.
+- The Claude Code session-start hook prints the always-on rules itself instead of reading `instructions.md`, which is removed. It prints the kit's skills folder only when Claude Code provides it.
+- `bc-start` and the always-on rules find a skill the host will not start in the folder next to the current skill's folder (`../<name>/SKILL.md`).
+- `npm run validate` now fails when a kit has plugin-level files, hook script files, or a skill that points outside its own folder.
+
 ## 0.5.0 - 2026-10-28
 
 - The plugin is now `boldcreate-toolkit` (shown as BoldCreate Toolkit). Reinstall it under the new name: in Claude Code, `/plugin install boldcreate-toolkit@boldcreate-plugins`.
