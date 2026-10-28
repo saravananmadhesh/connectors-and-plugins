@@ -1,0 +1,36 @@
+{
+  "name": "@boldcreate-integrations/api",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsx ../../scripts/package-service.ts api",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@boldcreate-integrations/adapters": "workspace:*",
+    "@boldcreate-integrations/config": "workspace:*",
+    "@boldcreate-integrations/contracts": "workspace:*",
+    "@boldcreate-integrations/credentials": "workspace:*",
+    "@boldcreate-integrations/db": "workspace:*",
+    "@boldcreate-integrations/domain": "workspace:*",
+    "@boldcreate-integrations/http-server": "workspace:*",
+    "@boldcreate-integrations/limits": "workspace:*",
+    "@boldcreate-integrations/observability": "workspace:*",
+    "@boldcreate-integrations/ports": "workspace:*",
+    "@boldcreate-integrations/security": "workspace:*",
+    "@fastify/cookie": "catalog:",
+    "@fastify/csrf-protection": "catalog:",
+    "@fastify/helmet": "catalog:",
+    "@google-cloud/kms": "catalog:",
+    "fastify": "catalog:",
+    "ioredis": "catalog:",
+    "pino": "catalog:",
+    "zod": "catalog:"
+  }
+}

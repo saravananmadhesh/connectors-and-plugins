@@ -1,0 +1,7 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: boldcreate-integrations-web-production, namespace: boldcreate-prod }
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-web-production }

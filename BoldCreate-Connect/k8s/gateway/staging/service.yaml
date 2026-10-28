@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: boldcreate-integrations-gateway-staging
+  namespace: boldcreate-stag
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"ports": {"http": "boldcreate-integrations-gateway-backend-staging"}}'
+spec:
+  type: ClusterIP
+  selector: { app.kubernetes.io/name: boldcreate-integrations-gateway-staging }
+  ports: [{ name: http, port: 80, targetPort: http }]

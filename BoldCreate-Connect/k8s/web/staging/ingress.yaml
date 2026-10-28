@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: boldcreate-integrations-web-staging
+  namespace: boldcreate-stag
+  annotations:
+    kubernetes.io/ingress.class: gce-internal
+    kubernetes.io/ingress.allow-http: 'false'
+spec:
+  rules:
+    - host: connect-staging.boldcreate.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: boldcreate-integrations-web-staging
+                port: { name: http }
+  tls:
+    - secretName: ssl-boldcreate-staging

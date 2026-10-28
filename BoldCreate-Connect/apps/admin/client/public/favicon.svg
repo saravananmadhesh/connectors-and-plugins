@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    .tile { fill: #0a0a0a; }
+    .glyph { stroke: #fff; }
+    .dot { fill: #fff; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #fafafa; }
+      .glyph { stroke: #0a0a0a; }
+      .dot { fill: #0a0a0a; }
+    }
+  </style>
+  <rect class="tile" width="64" height="64" rx="14" />
+  <g transform="translate(9.6 9.6) scale(.7)">
+    <path class="glyph" d="M20 12v40M20 12h14a9 9 0 0 1 0 20H20m0 0h17a10 10 0 0 1 0 20H20" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+    <circle class="dot" cx="50" cy="14" r="4" />
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boldcreate-integrations-api-config-staging
+  namespace: boldcreate-stag
+data:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  PORT: '3001'
+  BFF_CALLER_ALLOWLIST: web,admin,gateway
+  BLOB_BUCKET: codestudio-marketplace
+  BLOB_REGION: us-east-1
+  KMS_ADAPTER: cloud-kms
+  KMS_CLOUD_KEY_NAME: projects/codestudio-dev/locations/global/keyRings/boldcreate-connect/cryptoKeys/boldcreate-connect-kms
+  NODE_TLS_REJECT_UNAUTHORIZED: '0'
+  # REDIS_URL (with the Redis password) is in the secret, not here
+  OPEN_SIGNUP_ENABLED: 'true'
+  APP_BASE_URL: https://connect-staging.boldcreate.ai

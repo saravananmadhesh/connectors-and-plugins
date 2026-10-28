@@ -1,0 +1,8 @@
+{
+  "files": [
+    "packages/config/src/env.ts",
+    "packages/adapters/src/kms/local.ts",
+    "packages/adapters/src/redis/tls-ca.ts",
+    "packages/credentials/src/org-key-fixture.ts"
+  ]
+}

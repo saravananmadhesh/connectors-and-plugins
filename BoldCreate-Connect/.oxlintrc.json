@@ -1,0 +1,66 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc", "node", "vitest"],
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "no-unused-vars": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/consistent-type-imports": "error",
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "oxc/no-accumulating-spread": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["apps/web/client/src/**/*.{ts,tsx}", "apps/admin/client/src/**/*.{ts,tsx}"],
+      "env": {
+        "browser": true,
+        "node": false
+      }
+    },
+    {
+      "files": ["apps/*/client/src/test/**/*.{ts,tsx}"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "tests/**/*.ts"],
+      "rules": {
+        "no-console": "off",
+        "vitest/expect-expect": [
+          "error",
+          {
+            "assertFunctionNames": ["expect", "expectDenied", "expectTypeOf", "expectPrefixed"]
+          }
+        ],
+        "vitest/no-disabled-tests": "warn",
+        "vitest/no-focused-tests": "error"
+      }
+    },
+    {
+      "files": ["scripts/**/*.ts", "fixtures/**/*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "pnpm-lock.yaml",
+    "**/docs/reference/**",
+    "**/.agents/**",
+    "**/.codestudio/**"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "composite": true
+  },
+  "references": [
+    { "path": "../../packages/adapters" },
+    { "path": "../../packages/config" },
+    { "path": "../../packages/contracts" },
+    { "path": "../../packages/domain" },
+    { "path": "../../packages/http-server" },
+    { "path": "../../packages/db" },
+    { "path": "../../packages/security" },
+    { "path": "../../packages/credentials" },
+    { "path": "../../packages/observability" },
+    { "path": "../../packages/ports" },
+    { "path": "../../packages/limits" }
+  ],
+  "include": ["src"]
+}

@@ -1,0 +1,306 @@
+{
+  "validation_failed": {
+    "status": 400,
+    "message": "The request is not valid."
+  },
+  "idempotency_key_required": {
+    "status": 400,
+    "message": "An Idempotency-Key header is required."
+  },
+  "unauthenticated": {
+    "status": 401,
+    "message": "Authentication required."
+  },
+  "forbidden": {
+    "status": 403,
+    "message": "You do not have permission to do this."
+  },
+  "not_found": {
+    "status": 404,
+    "message": "Not found."
+  },
+  "method_not_allowed": {
+    "status": 405,
+    "message": "Method not allowed."
+  },
+  "conflict": {
+    "status": 409,
+    "message": "The request conflicts with the current state."
+  },
+  "idempotency_key_reused": {
+    "status": 409,
+    "message": "This Idempotency-Key was already used for a different request."
+  },
+  "idempotent_replay_secret_unavailable": {
+    "status": 409,
+    "message": "The original response contained a secret that is no longer available."
+  },
+  "payload_too_large": {
+    "status": 413,
+    "message": "The request body is too large."
+  },
+  "unsupported_media_type": {
+    "status": 415,
+    "message": "The request body must be JSON."
+  },
+  "unprocessable": {
+    "status": 422,
+    "message": "The request cannot be processed."
+  },
+  "client_version_unsupported": {
+    "status": 426,
+    "message": "This client version is no longer supported."
+  },
+  "rate_limited": {
+    "status": 429,
+    "message": "Too many requests."
+  },
+  "concurrency_limited": {
+    "status": 429,
+    "message": "Too many requests in flight."
+  },
+  "internal_error": {
+    "status": 500,
+    "message": "Something went wrong."
+  },
+  "upstream_unavailable": {
+    "status": 502,
+    "message": "An upstream service is unavailable."
+  },
+  "service_unavailable": {
+    "status": 503,
+    "message": "The service is temporarily unavailable."
+  },
+  "upstream_timeout": {
+    "status": 504,
+    "message": "An upstream service timed out."
+  },
+  "limit_exceeded": {
+    "status": 409,
+    "message": "A limit was reached."
+  },
+  "invalid_credentials": {
+    "status": 401,
+    "message": "The email or password is not correct."
+  },
+  "email_not_verified": {
+    "status": 403,
+    "message": "The email address has not been verified."
+  },
+  "account_suspended": {
+    "status": 403,
+    "message": "This profile is suspended."
+  },
+  "token_invalid_or_expired": {
+    "status": 400,
+    "message": "The token is not valid or has expired."
+  },
+  "password_policy_violation": {
+    "status": 422,
+    "message": "The password does not meet the policy."
+  },
+  "session_required": {
+    "status": 403,
+    "message": "This action needs a signed-in session."
+  },
+  "confirmation_mismatch": {
+    "status": 422,
+    "message": "The confirmation does not match."
+  },
+  "last_owner_required": {
+    "status": 409,
+    "message": "An organization needs at least one owner."
+  },
+  "last_admin_required": {
+    "status": 409,
+    "message": "An organization needs at least one admin."
+  },
+  "organization_suspended": {
+    "status": 403,
+    "message": "This organization is suspended."
+  },
+  "api_key_expired": {
+    "status": 401,
+    "message": "The API key has expired."
+  },
+  "api_key_revoked": {
+    "status": 401,
+    "message": "The API key was revoked."
+  },
+  "api_key_owner_inactive": {
+    "status": 401,
+    "message": "The owner of this API key is no longer active."
+  },
+  "key_permission_denied": {
+    "status": 403,
+    "message": "The API key does not allow this."
+  },
+  "api_key_quota_exceeded": {
+    "status": 409,
+    "message": "The API key limit was reached."
+  },
+  "api_key_expiry_out_of_range": {
+    "status": 422,
+    "message": "The expiry is outside the allowed range."
+  },
+  "personal_installs_disabled": {
+    "status": 403,
+    "message": "Personal installs are disabled for this organization."
+  },
+  "install_not_allowed": {
+    "status": 403,
+    "message": "This project does not allow its users to install that plugin."
+  },
+  "personal_api_keys_disabled": {
+    "status": 403,
+    "message": "Personal API keys are disabled for this organization."
+  },
+  "org_key_pending": {
+    "status": 503,
+    "message": "The organization key is still being created."
+  },
+  "insufficient_scope": {
+    "status": 403,
+    "message": "The key does not have the scope this needs."
+  },
+  "return_url_not_allowed": {
+    "status": 422,
+    "message": "The return address is not allowed for this app."
+  },
+  "not_oauth": {
+    "status": 422,
+    "message": "This server does not use a user sign-in."
+  },
+  "org_deleting": {
+    "status": 409,
+    "message": "This organization is being deleted."
+  },
+  "plugin_version_yanked": {
+    "status": 409,
+    "message": "This plugin version was yanked."
+  },
+  "plugin_deprecated": {
+    "status": 409,
+    "message": "This plugin is deprecated."
+  },
+  "installation_already_exists": {
+    "status": 409,
+    "message": "This plugin is already installed here."
+  },
+  "installation_required_by_org": {
+    "status": 409,
+    "message": "Your organization requires this plugin, so it cannot be replaced."
+  },
+  "downgrade_not_allowed": {
+    "status": 409,
+    "message": "This downgrade is not allowed."
+  },
+  "variable_not_declared": {
+    "status": 422,
+    "message": "The variable is not declared by the plugin."
+  },
+  "too_many_custom_variables": {
+    "status": 422,
+    "message": "An installation can have at most 10 custom variables."
+  },
+  "version_state_invalid": {
+    "status": 409,
+    "message": "The version is not in a state that allows this."
+  },
+  "impact_confirmation_required": {
+    "status": 409,
+    "message": "This action has an impact and needs confirmation."
+  },
+  "source_not_allowed": {
+    "status": 403,
+    "message": "This source is not allowed here."
+  },
+  "ref_not_resolved": {
+    "status": 422,
+    "message": "The reference could not be resolved."
+  },
+  "kill_switch_conflict": {
+    "status": 409,
+    "message": "An identical kill switch is already active."
+  },
+  "url_not_allowed": {
+    "status": 422,
+    "message": "The URL is not allowed."
+  },
+  "mcp_transport_unsupported": {
+    "status": 422,
+    "message": "The MCP transport is not supported."
+  },
+  "tool_name_collision": {
+    "status": 409,
+    "message": "Two tools would have the same name."
+  },
+  "oauth_client_not_configured": {
+    "status": 409,
+    "message": "The OAuth client is not configured."
+  },
+  "oauth_state_invalid": {
+    "status": 400,
+    "message": "The OAuth state is not valid."
+  },
+  "oauth_session_mismatch": {
+    "status": 403,
+    "message": "The OAuth flow was started by a different session."
+  },
+  "oauth_issuer_mismatch": {
+    "status": 400,
+    "message": "The OAuth issuer does not match."
+  },
+  "oauth_redirect_not_allowed": {
+    "status": 400,
+    "message": "The return path is not allowed."
+  },
+  "oauth_discovery_failed": {
+    "status": 502,
+    "message": "OAuth discovery failed."
+  },
+  "oauth_registration_failed": {
+    "status": 502,
+    "message": "OAuth client registration failed."
+  },
+  "oauth_exchange_failed": {
+    "status": 502,
+    "message": "The OAuth token exchange failed."
+  },
+  "credential_unavailable": {
+    "status": 503,
+    "message": "The credential is temporarily unavailable."
+  },
+  "upstream_circuit_open": {
+    "status": 503,
+    "message": "The upstream server is temporarily disabled after failures."
+  },
+  "origin_not_allowed": {
+    "status": 403,
+    "message": "The origin is not allowed."
+  },
+  "protocol_version_unsupported": {
+    "status": 400,
+    "message": "The protocol version is not supported."
+  },
+  "batch_not_supported": {
+    "status": 400,
+    "message": "Batch requests are not supported."
+  },
+  "download_limit_exceeded": {
+    "status": 429,
+    "message": "Too many downloads in flight."
+  },
+  "artifact_store_unavailable": {
+    "status": 503,
+    "message": "The artifact store is temporarily unavailable."
+  },
+  "range_not_satisfiable": {
+    "status": 416,
+    "message": "The requested range cannot be satisfied."
+  },
+  "sync_target_unsupported": {
+    "status": 422,
+    "message": "The sync target is not supported."
+  }
+}

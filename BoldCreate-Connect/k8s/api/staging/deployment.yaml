@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: boldcreate-integrations-api-staging, namespace: boldcreate-stag }
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 0, maxUnavailable: 1 }
+  selector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-api-staging }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: boldcreate-integrations-api-staging }
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: boldcreate-integrations-api-staging
+          image: us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/boldcreate-staging-integrations-api:#{Build.BuildId}#
+          imagePullPolicy: Always
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/gcp/sa-key.json
+          envFrom:
+            - configMapRef:
+                name: boldcreate-integrations-api-config-staging
+            - secretRef:
+                name: boldcreate-integrations-api-secrets-staging
+          ports: [{ name: http, containerPort: 3001 }]
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: '1', memory: 1024Mi }
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: gcp-sa-key
+              mountPath: /etc/gcp
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: gcp-sa-key
+          secret:
+            secretName: boldcreate-gcp-sa-key
+            optional: true

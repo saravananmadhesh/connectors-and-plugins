@@ -1,0 +1,13 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata: { name: boldcreate-integrations-gateway-backend-production, namespace: boldcreate-prod }
+spec:
+  timeoutSec: 60
+  healthCheck:
+    type: HTTP
+    requestPath: /healthz
+    port: 3002
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 2
+    unhealthyThreshold: 3

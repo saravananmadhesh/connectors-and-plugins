@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: boldcreate-integrations-web-config-production, namespace: boldcreate-prod }
+data:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  PORT_WEB: '3000'
+  WEB_MODE: customer
+  API_BASE_URL: http://boldcreate-integrations-api-production.boldcreate-prod.svc.cluster.local:3001

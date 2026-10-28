@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- net10.0 is added when the build machine has the .NET 10 SDK. -->
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals($(NETCoreSdkVersion), '10.0'))">net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Syncfusion.BoldCreate.Connect</RootNamespace>
+    <AssemblyName>Syncfusion.BoldCreate.Connect</AssemblyName>
+    <PackageId>Syncfusion.BoldCreate.Connect</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Syncfusion</Authors>
+    <Company>Syncfusion</Company>
+    <Product>BoldCreate-Connect</Product>
+    <Description>Client for hosts of BoldCreate Connect: projects, users, sessions and plugin sync.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="Syncfusion.BoldCreate.Connect.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
+  </ItemGroup>
+</Project>

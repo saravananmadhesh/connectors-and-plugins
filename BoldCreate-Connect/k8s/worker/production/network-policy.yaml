@@ -1,0 +1,8 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: boldcreate-integrations-worker-ingress-production, namespace: boldcreate-prod }
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-integrations-worker-production }
+  policyTypes: [Ingress]
+  ingress: []

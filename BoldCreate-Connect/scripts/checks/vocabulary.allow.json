@@ -1,0 +1,28 @@
+{
+  "identifiers": [
+    "BOLDCREATE_INTEGRATIONS_API_KEY",
+    "NodeTracerProvider",
+    "QueryClientProvider",
+    "RouterProvider",
+    "capabilities",
+    "vitestProject",
+    "GCP_PROJECT_ID",
+    "ApiKeyTokenSchema",
+    "TestApiKeyTokenSchema",
+    "account_suspended",
+    "Integrations",
+    "provider"
+  ],
+  "databaseNames": [
+    "provider",
+    "auth_identity_provider_format",
+    "auth_identity_provider_subject_unique",
+    "auth_identity_user_provider_unique"
+  ],
+  "phrases": ["account deletion", "delete account", "deleteaccount"],
+  "paths": [
+    "^scripts/checks/vocabulary(?:\\.test)?\\.ts$",
+    "^scripts/checks/naming(?:\\.test)?\\.ts$",
+    "^scripts/package-service\\.ts$"
+  ]
+}
