@@ -118,6 +118,7 @@ import {
   ProjectAuthConfigVariablesParamsSchema,
   ProjectPluginPageSchema,
   ProjectPluginParamsSchema,
+  ProjectServerPageSchema,
   ProjectPluginResponseSchema,
   PutProjectPluginBodySchema,
 } from './project-plugins.js';
@@ -974,6 +975,11 @@ const projects: RouteDef[] = [
       idempotency: 'optional',
     },
   ),
+  route('projectServersConsole.list', 'GET', '/v1/orgs/{orgId}/projects/{projectId}/servers', {
+    action: 'project-plugin:read',
+    params: ProjectParamsSchema,
+    responses: { 200: ProjectServerPageSchema },
+  }),
   route(
     'projectAuthConfigsConsole.list',
     'GET',

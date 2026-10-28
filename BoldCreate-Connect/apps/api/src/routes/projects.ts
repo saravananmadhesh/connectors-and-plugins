@@ -24,6 +24,7 @@
  *   GET    /v1/orgs/:orgId/projects/:projectId/plugins
  *   PUT    /v1/orgs/:orgId/projects/:projectId/plugins/:pluginId
  *   DELETE /v1/orgs/:orgId/projects/:projectId/plugins/:pluginId
+ *   GET    /v1/orgs/:orgId/projects/:projectId/servers
  *   GET    /v1/orgs/:orgId/projects/:projectId/auth-configs
  *   PUT    /v1/orgs/:orgId/projects/:projectId/auth-configs/:componentId/variables
  */
@@ -70,6 +71,7 @@ import {
   rotateProjectWebhookSecret,
   listProjectKeys,
   listProjectPlugins,
+  listProjectServers,
   listProjectUsers,
   listProjects,
   projectUsage,
@@ -95,6 +97,7 @@ import {
   serializeWebhookDelivery,
   serializeProjectUsage,
   serializeProjectPlugin,
+  serializeProjectServer,
   serializeProjectUser,
   serializeUserPluginState,
   serializeVariable,
@@ -397,6 +400,17 @@ export async function projectRoutes(app: FastifyInstance, opts: Options): Promis
   const configOptions = { callbackUrl: opts.redirectUri, includeTools: true };
   const configParamsOf = (req: FastifyRequest) =>
     req.params as { orgId: string; projectId: string; authConfigId: string };
+
+  app.get('/orgs/:orgId/projects/:projectId/servers', async (req, reply) => {
+    const { orgId, projectId } = projectParams(req);
+    const principal = await authenticate(db, req, orgId);
+    const servers = await inTenant(db, principal, async (tx) => {
+      requireAction(principal, 'project-plugin:read', { orgId });
+      await getProject(tx, principal, orgId, projectId);
+      return listProjectServers(tx, { projectId, organizationId: orgId });
+    });
+    return reply.status(200).send(serializeList(servers, serializeProjectServer));
+  });
 
   app.get('/orgs/:orgId/projects/:projectId/auth-configs', async (req, reply) => {
     const { orgId, projectId } = projectParams(req);

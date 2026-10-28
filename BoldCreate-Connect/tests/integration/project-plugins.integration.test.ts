@@ -34,6 +34,17 @@ interface ConfigBody {
   name?: string;
   tools?: { name: string; description: string }[];
 }
+interface ServerBody {
+  componentId: string;
+  pluginId: string;
+  pluginName: string;
+  pluginDisplayName: string;
+  serverName: string;
+  url: string | null;
+  variables: { name: string; isSet: boolean; required: boolean }[];
+  authConfigCount: number;
+  defaultAuthConfigId: string | null;
+}
 interface Host {
   projectId: string;
   rawProjectId: string;
@@ -715,6 +726,63 @@ describe('the console', () => {
       [host.rawProjectId],
     );
     expect(row).toBeUndefined();
+  });
+
+  it('lists each server of an added plugin with what it needs, before any config exists', async () => {
+    const host = await createHost();
+    const root = `${base()}/${host.projectId}`;
+    const servers = async (user = owner()) => {
+      const res = await callApi('GET', `${root}/servers`, user);
+      expect(res.status).toBe(200);
+      return ((await res.json()) as { items: ServerBody[]; nextCursor: null }).items;
+    };
+    expect(await servers()).toEqual([]);
+
+    const plugin = await seedPlugin();
+    expect((await callApi('PUT', `${root}/plugins/${plugin.pluginId}`, owner(), {})).status).toBe(
+      201,
+    );
+    const configs = await callApi('GET', `${root}/auth-configs`, owner());
+    expect(((await configs.json()) as { items: unknown[] }).items).toEqual([]);
+
+    const [server] = await servers();
+    expect(server).toMatchObject({
+      pluginId: plugin.pluginId,
+      pluginDisplayName: 'Project Plugin',
+      serverName: 'tool',
+      url: 'http://localhost:19999/mcp',
+      authConfigCount: 0,
+      defaultAuthConfigId: null,
+    });
+    expect(server!.componentId).toMatch(/^cmp_[0-9a-f]{32}$/);
+    expect(server!.variables).toEqual([
+      expect.objectContaining({ name: 'API_TOKEN', required: true, isSet: false }),
+      expect.objectContaining({ name: 'REGION', required: false, isSet: false }),
+    ]);
+
+    const set = await callApi(
+      'PUT',
+      `${root}/auth-configs/${server!.componentId}/variables`,
+      owner(),
+      { values: { API_TOKEN: 'console-servers-value' } },
+    );
+    expect(set.status).toBe(200);
+    const made = await callApi('POST', `${root}/auth-configs`, owner(), {
+      componentId: server!.componentId,
+      name: 'Sign in',
+      authMode: 'dcr',
+    });
+    expect(made.status).toBe(201);
+    const config = (await made.json()) as ConfigBody;
+
+    const [after] = await servers(fx.users.viewer);
+    expect(after!.variables[0]).toMatchObject({ name: 'API_TOKEN', isSet: true });
+    expect(after).toMatchObject({ authConfigCount: 1, defaultAuthConfigId: config.id });
+    expect(JSON.stringify(after)).not.toContain('console-servers-value');
+
+    expect((await callApi('GET', `${root}/servers`, fx.stranger)).status).not.toBe(200);
+    const foreign = `/v1/orgs/${fx.orgId}/projects/${formatId('prj', randomUUID())}`;
+    expect((await callApi('GET', `${foreign}/servers`, owner())).status).toBe(404);
   });
 
   it('lets a member read but not change, and shows nothing to an outsider', async () => {

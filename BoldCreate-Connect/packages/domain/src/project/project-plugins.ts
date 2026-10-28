@@ -8,6 +8,7 @@
 import { randomUUID } from 'node:crypto';
 import { and, asc, desc, eq, isNull, ne, or, sql, type SQL } from 'drizzle-orm';
 import {
+  authConfigTable,
   componentTable,
   decodeCursor,
   encodeCursor,
@@ -23,6 +24,7 @@ import type {
   PageQuery,
   Plain,
   ProjectPluginResponse,
+  ProjectServerResponse,
   PutVariablesBody,
   VariableStatus,
 } from '@boldcreate-integrations/contracts';
@@ -30,7 +32,7 @@ import { PROJECT_LIMITS } from '@boldcreate-integrations/limits';
 import type { Sealer } from '@boldcreate-integrations/credentials';
 import { writeAudit, type AuditEntry } from '../audit/write-audit.js';
 import { conflict, isUniqueViolation, limitExceeded, notFound } from '../errors.js';
-import { writeVariables } from '../installation/variables.js';
+import { variableStatuses, writeVariables } from '../installation/variables.js';
 import type { ProjectScope } from './project-users.js';
 import { revokeSessionsForPlugin } from './sessions.js';
 
@@ -370,8 +372,10 @@ async function authConfigRows(tx: Executor, project: ProjectScope, componentId?:
       pluginVersionId: installationTable.pluginVersionId,
       pluginId: pluginTable.id,
       pluginName: pluginTable.name,
+      pluginDisplayName: pluginTable.displayName,
       componentId: componentTable.id,
       componentName: componentTable.name,
+      componentMetadata: componentTable.metadata,
       server: mcpServerTable,
     })
     .from(installationTable)
@@ -396,6 +400,56 @@ async function authConfigRows(tx: Executor, project: ProjectScope, componentId?:
       ),
     )
     .orderBy(asc(pluginTable.name), asc(componentTable.name), asc(componentTable.id));
+}
+
+/**
+ * Every MCP server of the project's plugins, with the values its plugin needs and how many auth
+ * configs it has. A server without any config is listed too, so the console can ask for its setup
+ * right after the plugin is added.
+ */
+export async function listProjectServers(
+  tx: Executor,
+  project: ProjectScope,
+): Promise<Plain<ProjectServerResponse>[]> {
+  const rows = await authConfigRows(tx, project);
+  if (rows.length === 0) return [];
+  const configs = await tx
+    .select({
+      id: authConfigTable.id,
+      pluginId: authConfigTable.pluginId,
+      serverName: authConfigTable.serverName,
+      isDefault: authConfigTable.isDefault,
+    })
+    .from(authConfigTable)
+    .where(eq(authConfigTable.projectId, project.projectId));
+  const variablesByInstall = new Map<string, Plain<VariableStatus>[]>();
+  const servers: Plain<ProjectServerResponse>[] = [];
+  for (const row of rows) {
+    let variables = variablesByInstall.get(row.installationId);
+    if (!variables) {
+      variables = await variableStatuses(tx, {
+        id: row.installationId,
+        pluginVersionId: row.pluginVersionId,
+      });
+      variablesByInstall.set(row.installationId, variables);
+    }
+    const own = configs.filter(
+      (config) => config.pluginId === row.pluginId && config.serverName === row.componentName,
+    );
+    const url = (row.componentMetadata as { url?: unknown }).url;
+    servers.push({
+      componentId: row.componentId,
+      pluginId: row.pluginId,
+      pluginName: row.pluginName,
+      pluginDisplayName: row.pluginDisplayName,
+      serverName: row.componentName,
+      url: typeof url === 'string' ? url : null,
+      variables,
+      authConfigCount: own.length,
+      defaultAuthConfigId: own.find((config) => config.isDefault)?.id ?? null,
+    });
+  }
+  return servers;
 }
 
 /**

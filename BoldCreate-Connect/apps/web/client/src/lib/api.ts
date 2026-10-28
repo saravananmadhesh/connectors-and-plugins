@@ -79,6 +79,9 @@ import type {
   ProjectPluginResponse,
   PutProjectPluginBody,
   AuthConfigResponse,
+  CreateAuthConfigBody,
+  UpdateAuthConfigBody,
+  ProjectServerResponse,
   UserInstallModeResponse,
   UserInstallMode,
   AllowedPluginResponse,
@@ -140,6 +143,9 @@ export type {
   ProjectPluginResponse,
   PutProjectPluginBody,
   AuthConfigResponse,
+  CreateAuthConfigBody,
+  UpdateAuthConfigBody,
+  ProjectServerResponse,
   UserInstallModeResponse,
   UserInstallMode,
   AllowedPluginResponse,
@@ -719,6 +725,35 @@ export const projects = {
     request<Page<AuthConfigResponse>>(
       'GET',
       `${projectBase(orgId, projectId)}/auth-configs${query(params)}`,
+    ),
+  /** Every MCP server of the project's plugins, with what it needs, configured or not. */
+  servers: (orgId: string, projectId: string) =>
+    request<Page<ProjectServerResponse>>('GET', `${projectBase(orgId, projectId)}/servers`),
+  createAuthConfig: (orgId: string, projectId: string, body: CreateAuthConfigBody) =>
+    request<AuthConfigResponse>(
+      'POST',
+      `${projectBase(orgId, projectId)}/auth-configs`,
+      body,
+      true,
+    ),
+  updateAuthConfig: (
+    orgId: string,
+    projectId: string,
+    authConfigId: string,
+    body: UpdateAuthConfigBody,
+  ) =>
+    request<AuthConfigResponse>(
+      'PUT',
+      `${projectBase(orgId, projectId)}/auth-configs/${authConfigId}`,
+      body,
+      true,
+    ),
+  deleteAuthConfig: (orgId: string, projectId: string, authConfigId: string) =>
+    request<void>(
+      'DELETE',
+      `${projectBase(orgId, projectId)}/auth-configs/${authConfigId}`,
+      undefined,
+      true,
     ),
   /** Sets the variables of one MCP component; a value is sent and never read back. */
   putAuthConfigVariables: (

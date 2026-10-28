@@ -24,6 +24,8 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
 import { Section } from '@/components/Page';
 import { CatalogPicker } from './CatalogPicker';
+import { configsOf, serverState, useServerSetup } from '@/lib/server-setup';
+import { ServerSetup } from './ServerSetup';
 import { CursorPager, QueryFrame, type TabProps } from './shared';
 import { messageOf, useCursorPaging } from './paging';
 
@@ -98,6 +100,64 @@ function VersionDialog({
   );
 }
 
+/**
+ * The step right after a plugin is added when one of its MCP servers still needs values or a
+ * sign-in: the same setup as the Auth configs tab, for that plugin only.
+ */
+function PluginSetupDialog({
+  orgId,
+  projectId,
+  pluginId,
+  onClose,
+}: {
+  orgId: string;
+  projectId: string;
+  pluginId: string;
+  onClose: () => void;
+}) {
+  const setup = useServerSetup(orgId, projectId);
+  const servers = setup.servers.filter((server) => server.pluginId === pluginId);
+  const name = servers[0]?.pluginDisplayName ?? 'the plugin';
+  const ready = servers.every((server) => serverState(server) === 'ready');
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogTitle>Set up {name}</DialogTitle>
+        <div className="mt-4 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Your users can call {name} once its servers have what they need. You can change this
+            later under Auth configs.
+          </p>
+          <QueryFrame
+            label="the setup"
+            isPending={setup.isPending}
+            error={setup.error}
+            onRetry={setup.refetch}
+          >
+            <div className="space-y-6">
+              {servers.map((server) => (
+                <ServerSetup
+                  key={server.componentId}
+                  orgId={orgId}
+                  projectId={projectId}
+                  server={server}
+                  configs={configsOf(setup.configs, server)}
+                  canWrite
+                />
+              ))}
+            </div>
+          </QueryFrame>
+          <div className="flex justify-end">
+            <Button variant={ready ? 'default' : 'outline'} onClick={onClose}>
+              {ready ? 'Done' : 'Later'}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /** The plugins every user of the project gets, and the values they need. */
 export function PluginsTab({ orgId, projectId, canWrite }: TabProps) {
   const qc = useQueryClient();
@@ -105,6 +165,7 @@ export function PluginsTab({ orgId, projectId, canWrite }: TabProps) {
   const [adding, setAdding] = useState(false);
   const [changing, setChanging] = useState<ProjectPluginResponse | null>(null);
   const [removing, setRemoving] = useState<ProjectPluginResponse | null>(null);
+  const [settingUp, setSettingUp] = useState<string | null>(null);
   const [error, setError] = useState('');
   const plugins = useQuery({
     queryKey: qk.projectPart(orgId, projectId, 'plugins', { cursor: paging.cursor }),
@@ -113,6 +174,7 @@ export function PluginsTab({ orgId, projectId, canWrite }: TabProps) {
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: qk.projectPart(orgId, projectId, 'plugins') });
     void qc.invalidateQueries({ queryKey: qk.projectPart(orgId, projectId, 'auth-configs') });
+    void qc.invalidateQueries({ queryKey: qk.projectPart(orgId, projectId, 'servers') });
   };
   const remove = useMutation({
     mutationFn: (pluginId: string) => projects.removePlugin(orgId, projectId, pluginId),
@@ -219,8 +281,27 @@ export function PluginsTab({ orgId, projectId, canWrite }: TabProps) {
           onPick={async (pluginId) => {
             await projects.putPlugin(orgId, projectId, pluginId);
             refresh();
+            const servers = await qc.fetchQuery({
+              queryKey: qk.projectPart(orgId, projectId, 'servers'),
+              queryFn: () => projects.servers(orgId, projectId),
+            });
+            const needsSetup = servers.items.some(
+              (server) => server.pluginId === pluginId && serverState(server) !== 'ready',
+            );
+            if (needsSetup) {
+              setAdding(false);
+              setSettingUp(pluginId);
+            }
           }}
           onClose={() => setAdding(false)}
+        />
+      )}
+      {settingUp && (
+        <PluginSetupDialog
+          orgId={orgId}
+          projectId={projectId}
+          pluginId={settingUp}
+          onClose={() => setSettingUp(null)}
         />
       )}
       {changing && (

@@ -25,17 +25,56 @@ const render = (tab: string, role: TestRole = 'ADMIN') =>
     queryData: baseData(role),
   });
 
-const authConfig = (isSet: boolean) =>
+const server = (isSet: boolean, over: Record<string, unknown> = {}) =>
+  ({
+    componentId: 'cmp_1',
+    pluginId: 'plg_1',
+    pluginName: 'alpha',
+    pluginDisplayName: 'Alpha',
+    serverName: 'search',
+    url: 'https://search.example.test/mcp',
+    variables: [
+      {
+        name: 'API_TOKEN',
+        required: true,
+        secret: true,
+        isSet,
+        description: 'Token for search',
+        custom: false,
+      },
+      {
+        name: 'REGION',
+        required: false,
+        secret: false,
+        isSet: false,
+        description: '',
+        custom: false,
+      },
+    ],
+    authConfigCount: 0,
+    defaultAuthConfigId: null,
+    ...over,
+  }) as unknown as Awaited<ReturnType<typeof projects.servers>>['items'][number];
+
+const authConfig = (over: Record<string, unknown> = {}) =>
   ({
     id: 'acf_1',
     componentId: 'cmp_1',
+    pluginId: 'plg_1',
     pluginName: 'alpha',
     serverName: 'search',
-    authMode: 'user-credentials',
-    variables: [
-      { name: 'API_TOKEN', required: true, secret: true, isSet, description: 'Token for search' },
-      { name: 'REGION', required: false, secret: false, isSet: false, description: null },
-    ],
+    name: 'Default',
+    authMode: 'dcr',
+    isDefault: true,
+    status: 'active',
+    clientId: null,
+    clientSecretSet: false,
+    secretSet: false,
+    secretLastFour: null,
+    scopes: null,
+    callbackUrl: 'https://app.example.test/api/v1/oauth/callback',
+    variables: [],
+    ...over,
   }) as unknown as Awaited<ReturnType<typeof projects.authConfigs>>['items'][number];
 
 describe('project tabs', () => {
@@ -44,7 +83,8 @@ describe('project tabs', () => {
     vi.spyOn(projects, 'get').mockResolvedValue(project());
     vi.spyOn(projects, 'users').mockResolvedValue(page([projectUser()]));
     vi.spyOn(projects, 'plugins').mockResolvedValue(page([projectPlugin()]));
-    vi.spyOn(projects, 'authConfigs').mockResolvedValue(page([authConfig(true)]));
+    vi.spyOn(projects, 'servers').mockResolvedValue(page([server(true)]));
+    vi.spyOn(projects, 'authConfigs').mockResolvedValue(page([]));
     vi.spyOn(projects, 'logs').mockResolvedValue(
       page([
         {
@@ -150,6 +190,57 @@ describe('project tabs', () => {
       await waitFor(() => expect(put).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'plg_2'));
     });
 
+    it('opens the setup of an added plugin whose server still needs a value', async () => {
+      vi.spyOn(marketplace, 'listCategories').mockResolvedValue({ items: [] } as Awaited<
+        ReturnType<typeof marketplace.listCategories>
+      >);
+      vi.spyOn(projects, 'catalog').mockResolvedValue({
+        items: [{ id: 'plg_1', displayName: 'Alpha', summary: 'First plugin' }],
+        total: 1,
+        page: 1,
+        pageSize: 8,
+      } as Awaited<ReturnType<typeof projects.catalog>>);
+      vi.spyOn(projects, 'plugins').mockResolvedValue(page([]));
+      vi.spyOn(projects, 'servers').mockResolvedValue(page([server(false)]));
+      vi.spyOn(projects, 'putPlugin').mockResolvedValue(projectPlugin());
+      const save = vi
+        .spyOn(projects, 'putAuthConfigVariables')
+        .mockResolvedValue({ items: [], nextCursor: null });
+      await render('plugins');
+      await userEvent.click(await screen.findByRole('button', { name: 'Add plugin' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Add Alpha' }));
+      expect(await screen.findByRole('heading', { name: 'Set up Alpha' })).toBeInTheDocument();
+      expect(screen.getByText('Needs values')).toBeInTheDocument();
+      await userEvent.type(screen.getByLabelText('API_TOKEN'), SECRET_VALUE);
+      await userEvent.click(screen.getByRole('button', { name: 'Save values' }));
+      await waitFor(() =>
+        expect(save).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'cmp_1', { API_TOKEN: SECRET_VALUE }),
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'Later' }));
+      await waitFor(() =>
+        expect(screen.queryByRole('heading', { name: 'Set up Alpha' })).toBeNull(),
+      );
+    });
+
+    it('asks for nothing when the added plugin is ready', async () => {
+      vi.spyOn(marketplace, 'listCategories').mockResolvedValue({ items: [] } as Awaited<
+        ReturnType<typeof marketplace.listCategories>
+      >);
+      vi.spyOn(projects, 'catalog').mockResolvedValue({
+        items: [{ id: 'plg_2', displayName: 'Beta', summary: 'Second plugin' }],
+        total: 1,
+        page: 1,
+        pageSize: 8,
+      } as Awaited<ReturnType<typeof projects.catalog>>);
+      const servers = vi.spyOn(projects, 'servers').mockResolvedValue(page([server(false)]));
+      vi.spyOn(projects, 'putPlugin').mockResolvedValue(projectPlugin());
+      await render('plugins');
+      await userEvent.click(await screen.findByRole('button', { name: 'Add plugin' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Add Beta' }));
+      await waitFor(() => expect(servers).toHaveBeenCalled());
+      expect(screen.queryByRole('heading', { name: /^Set up/ })).toBeNull();
+    });
+
     it('removes a plugin after a confirm', async () => {
       const remove = vi.spyOn(projects, 'removePlugin').mockResolvedValue(undefined);
       await render('plugins');
@@ -174,14 +265,16 @@ describe('project tabs', () => {
   });
 
   describe('auth configs', () => {
-    it('shows whether a value is set, never the value', async () => {
+    it('lists a server that has no config yet, with what it needs and never a value', async () => {
+      vi.spyOn(projects, 'servers').mockResolvedValue(page([server(false)]));
       await render('auth-configs');
-      expect(await screen.findByText('API_TOKEN')).toBeInTheDocument();
-      expect(screen.getByText('Set')).toBeInTheDocument();
-      expect(screen.getByText('Not set')).toBeInTheDocument();
+      expect(await screen.findByText('Alpha · search')).toBeInTheDocument();
+      expect(screen.getByText('Needs values')).toBeInTheDocument();
+      expect(screen.getAllByText('Not set')).toHaveLength(2);
       const token = screen.getByLabelText('API_TOKEN');
       expect(token).toHaveAttribute('type', 'password');
       expect(token).toHaveValue('');
+      expect(screen.getByRole('button', { name: 'Add sign-in for search' })).toBeInTheDocument();
     });
 
     it('sends only the values that were typed, and clears them after', async () => {
@@ -202,17 +295,105 @@ describe('project tabs', () => {
       expect(screen.queryByText(SECRET_VALUE)).toBeNull();
     });
 
-    it('says so when no plugin needs values', async () => {
-      vi.spyOn(projects, 'authConfigs').mockResolvedValue(page([]));
+    it('creates an OAuth config with a client ID as the default for a server', async () => {
+      vi.spyOn(projects, 'servers').mockResolvedValue(page([server(true, { variables: [] })]));
+      const create = vi.spyOn(projects, 'createAuthConfig').mockResolvedValue(authConfig());
       await render('auth-configs');
-      expect(await screen.findByText('No plugin needs values from you.')).toBeInTheDocument();
+      expect(await screen.findByText('No sign-in set up')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Add sign-in for search' }));
+      await userEvent.selectOptions(screen.getByLabelText('How users sign in'), 'oauth_client');
+      const add = screen.getByRole('button', { name: 'Add sign-in' });
+      expect(add).toBeDisabled();
+      await userEvent.type(screen.getByLabelText('Client ID'), 'client-123');
+      await userEvent.type(screen.getByLabelText('Scopes (optional)'), 'repo read:org');
+      await userEvent.click(add);
+      await waitFor(() =>
+        expect(create).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, {
+          componentId: 'cmp_1',
+          name: 'Default',
+          authMode: 'oauth_client',
+          isDefault: true,
+          clientId: 'client-123',
+          scopes: 'repo read:org',
+        }),
+      );
     });
 
-    it('hides the value inputs from a viewer', async () => {
+    it('creates a shared API key config and never shows the key again', async () => {
+      vi.spyOn(projects, 'servers').mockResolvedValue(page([server(true, { variables: [] })]));
+      const create = vi.spyOn(projects, 'createAuthConfig').mockResolvedValue(authConfig());
+      await render('auth-configs');
+      await userEvent.click(await screen.findByRole('button', { name: 'Add sign-in for search' }));
+      await userEvent.selectOptions(screen.getByLabelText('How users sign in'), 'shared_secret');
+      expect(screen.getByLabelText('API key')).toHaveAttribute('type', 'password');
+      await userEvent.type(screen.getByLabelText('API key'), SECRET_VALUE);
+      await userEvent.click(screen.getByRole('button', { name: 'Add sign-in' }));
+      await waitFor(() =>
+        expect(create).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, {
+          componentId: 'cmp_1',
+          name: 'Default',
+          authMode: 'shared_secret',
+          isDefault: true,
+          secret: SECRET_VALUE,
+        }),
+      );
+      await waitFor(() => expect(screen.queryByLabelText('API key')).toBeNull());
+    });
+
+    it('shows an existing config under its server and changes or removes it', async () => {
+      vi.spyOn(projects, 'servers').mockResolvedValue(
+        page([server(true, { authConfigCount: 2, defaultAuthConfigId: 'acf_1' })]),
+      );
+      vi.spyOn(projects, 'authConfigs').mockResolvedValue(
+        page([
+          authConfig(),
+          authConfig({
+            id: 'acf_2',
+            name: 'Backup key',
+            authMode: 'shared_secret',
+            isDefault: false,
+            secretSet: true,
+            secretLastFour: 'abcd',
+            status: 'disabled',
+          }),
+        ]),
+      );
+      const update = vi.spyOn(projects, 'updateAuthConfig').mockResolvedValue(authConfig());
+      const remove = vi.spyOn(projects, 'deleteAuthConfig').mockResolvedValue(undefined);
+      await render('auth-configs');
+      expect(await screen.findByText('Backup key')).toBeInTheDocument();
+      expect(screen.getByText('Ready')).toBeInTheDocument();
+      expect(screen.getByText('ends in abcd')).toBeInTheDocument();
+      expect(
+        screen.getByText('https://app.example.test/api/v1/oauth/callback'),
+      ).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Make Backup key the default' }));
+      await waitFor(() =>
+        expect(update).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'acf_2', { isDefault: true }),
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'Turn on Backup key' }));
+      await waitFor(() =>
+        expect(update).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'acf_2', { status: 'active' }),
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'Remove Backup key' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Remove' }));
+      await waitFor(() => expect(remove).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'acf_2'));
+    });
+
+    it('says so when the project has no MCP server', async () => {
+      vi.spyOn(projects, 'servers').mockResolvedValue(page([]));
+      await render('auth-configs');
+      expect(await screen.findByText('No MCP servers yet')).toBeInTheDocument();
+    });
+
+    it('hides every input and action from a viewer', async () => {
+      vi.spyOn(projects, 'authConfigs').mockResolvedValue(page([authConfig()]));
       await render('auth-configs', 'VIEWER');
       await screen.findByText('API_TOKEN');
       expect(screen.queryByLabelText('API_TOKEN')).toBeNull();
       expect(screen.queryByRole('button', { name: 'Save values' })).toBeNull();
+      expect(screen.queryByRole('button', { name: /Add sign-in/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: /Remove/ })).toBeNull();
     });
   });
 

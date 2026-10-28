@@ -741,6 +741,10 @@ const FIXED: Record<string, Fixture> = {
       seed.owner,
     );
   },
+  'projectServersConsole.list': async (seed) => {
+    const { projectId } = await sharedDelivery(seed);
+    return callApi('GET', `/v1/orgs/${seed.owner.orgId}/projects/${projectId}/servers`, seed.owner);
+  },
   'projectAuthConfigsConsole.list': async (seed) => {
     const { projectId } = await sharedDelivery(seed);
     return callApi(

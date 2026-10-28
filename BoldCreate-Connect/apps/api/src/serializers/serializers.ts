@@ -7,6 +7,7 @@ import {
   formatId,
   type ProjectMeResponse,
   type AuthConfigResponse,
+  type ProjectServerResponse,
   type ProjectPluginResponse,
   type AllowedPluginResponse,
   type PluginSetResponse,
@@ -407,6 +408,19 @@ export function serializeAuthConfig(config: Plain<AuthConfigResponse>): AuthConf
     componentId: config.componentId === null ? null : formatId('cmp', config.componentId),
     pluginId: formatId('plg', config.pluginId),
     variables: config.variables.map(serializeVariable),
+  };
+}
+
+export function serializeProjectServer(
+  server: Plain<ProjectServerResponse>,
+): ProjectServerResponse {
+  return {
+    ...server,
+    componentId: formatId('cmp', server.componentId),
+    pluginId: formatId('plg', server.pluginId),
+    variables: server.variables.map(serializeVariable),
+    defaultAuthConfigId:
+      server.defaultAuthConfigId === null ? null : formatId('acf', server.defaultAuthConfigId),
   };
 }
 

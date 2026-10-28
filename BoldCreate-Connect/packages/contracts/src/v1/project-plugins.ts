@@ -64,6 +64,26 @@ export type AuthConfigResponse = z.infer<typeof AuthConfigResponseSchema>;
 
 export const AuthConfigPageSchema = PageSchema(AuthConfigResponseSchema);
 
+/**
+ * One MCP server of a plugin the project has added, whether or not it has an auth config yet, so
+ * the console can ask for what the server needs. `variables` are the plugin's values for the
+ * project (set or not, never shown); the config counts say how users sign in today.
+ */
+export const ProjectServerResponseSchema = z.object({
+  componentId: IdSchema('cmp'),
+  pluginId: IdSchema('plg'),
+  pluginName: z.string(),
+  pluginDisplayName: z.string(),
+  serverName: z.string(),
+  url: z.string().nullable(),
+  variables: z.array(VariableStatusSchema),
+  authConfigCount: z.number().int().min(0),
+  defaultAuthConfigId: IdSchema('acf').nullable(),
+});
+export type ProjectServerResponse = z.infer<typeof ProjectServerResponseSchema>;
+
+export const ProjectServerPageSchema = PageSchema(ProjectServerResponseSchema);
+
 const AuthConfigNameSchema = z.string().trim().min(1).max(60);
 const ClientIdSchema = z.string().trim().min(1).max(512);
 const SecretValueSchema = z.string().min(1).max(8192);
