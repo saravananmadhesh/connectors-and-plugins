@@ -270,6 +270,17 @@ async function mint(userId = userRef(), body: Record<string, unknown> = {}, extr
   return { ...((await res.json()) as { id: string; token: string }), userId };
 }
 
+/** A call the way a host's agent makes it: to the gateway host, with no workload identity. */
+const viaGateway = (token: string, method: string, path: string, body?: unknown) =>
+  fetch(`${gatewayUrl}${path}`, {
+    method,
+    headers: {
+      authorization: `Bearer ${token}`,
+      ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+
 const gatewayCall = (token: string, method: string, params?: unknown) =>
   fetch(`${gatewayUrl}/mcp`, {
     method: 'POST',
@@ -447,6 +458,53 @@ describe('a host and its users, from the key to the gateway', () => {
       .find((component) => component.kind === 'skill');
     expect(skill?.sha256).toBe(skillSha);
     expect(JSON.stringify(manifest)).not.toContain(UPSTREAM_SECRET);
+  });
+
+  it("serves the session user's catalog, plugins and installs through the gateway", async () => {
+    const own = await mint();
+    const extra = await seedPlugin(
+      'flow-own',
+      `flow-own-${randomUUID().slice(0, 8)}`,
+      `${FIXTURE_ORIGIN}/flow-api`,
+      false,
+    );
+    const before = (await (await host('GET', '/user-install-mode')).json()) as { mode: string };
+    expect((await host('PUT', '/user-install-mode', { mode: 'any' })).status).toBe(200);
+    try {
+      const catalog = await viaGateway(own.token, 'GET', '/v1/session/catalog?limit=100');
+      expect(catalog.status).toBe(200);
+      const offered = (await catalog.json()) as { items: { id: string }[] };
+      expect(offered.items.map((item) => item.id)).toContain(extra.pluginId);
+
+      const installed = await viaGateway(
+        own.token,
+        'PUT',
+        `/v1/session/plugins/${extra.pluginId}`,
+        {},
+      );
+      expect(installed.status).toBe(201);
+
+      const listed = await viaGateway(own.token, 'GET', '/v1/session/plugins');
+      expect(listed.status).toBe(200);
+      const mine = (await listed.json()) as { items: { pluginId: string }[] };
+      expect(mine.items.map((item) => item.pluginId)).toContain(extra.pluginId);
+
+      const signIns = await viaGateway(own.token, 'GET', '/v1/session/connections');
+      expect(signIns.status).toBe(200);
+
+      const removed = await viaGateway(
+        own.token,
+        'DELETE',
+        `/v1/session/plugins/${extra.pluginId}`,
+      );
+      expect(removed.status).toBe(204);
+    } finally {
+      await host('PUT', '/user-install-mode', { mode: before.mode });
+    }
+
+    // The gateway lets only a session token through to a session route.
+    const refused = await viaGateway(hostKey, 'GET', '/v1/session/catalog');
+    expect(refused.status).toBe(401);
   });
 
   it('downloads a component by hash, and a stale hash is not found', async () => {

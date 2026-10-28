@@ -329,3 +329,139 @@ describe('project routes', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('session routes', () => {
+  const SESSION_TOKEN = `stk_0123456789abcdef.${'a'.repeat(43)}`;
+  const PROJECT_KEY = `prk_0123456789abcdef.${'a'.repeat(43)}`;
+
+  function withUpstream(answer: () => Response | Promise<Response>) {
+    const calls: { url: string; init: RequestInit }[] = [];
+    const app = build({
+      fetch: (async (url: string, init: RequestInit) => {
+        calls.push({ url, init });
+        return answer();
+      }) as unknown as typeof fetch,
+    });
+    return { app, calls };
+  }
+
+  it('forwards a read with a session token, query included, and relays the answer', async () => {
+    const { app, calls } = withUpstream(
+      () =>
+        new Response('{"data":[],"nextCursor":null}', {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+    );
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/session/catalog?limit=5',
+      headers: { authorization: `Bearer ${SESSION_TOKEN}`, cookie: 'sid=secret' },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ data: [], nextCursor: null });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.url).toBe(`${config.API_BASE_URL}/v1/session/catalog?limit=5`);
+    expect(calls[0]?.init.method).toBe('GET');
+    const sent = (calls[0]?.init.headers ?? {}) as Record<string, string>;
+    expect(sent['authorization']).toBe(`Bearer ${SESSION_TOKEN}`);
+    expect(sent['x-caller-id']).toBe('gateway');
+    expect(sent['cookie']).toBeUndefined();
+  });
+
+  it('forwards an install with its body and the idempotency key', async () => {
+    const { app, calls } = withUpstream(
+      () =>
+        new Response('{"pluginId":"p"}', {
+          status: 201,
+          headers: { 'content-type': 'application/json' },
+        }),
+    );
+    const res = await app.inject({
+      method: 'PUT',
+      url: '/v1/session/plugins/plg_0123',
+      headers: { authorization: `Bearer ${SESSION_TOKEN}`, 'idempotency-key': 'gateway-install-1' },
+      payload: { versionId: 'ver_1' },
+    });
+    expect(res.statusCode).toBe(201);
+    expect(calls[0]?.url).toBe(`${config.API_BASE_URL}/v1/session/plugins/plg_0123`);
+    expect(calls[0]?.init.method).toBe('PUT');
+    expect(JSON.parse(String(calls[0]?.init.body))).toEqual({ versionId: 'ver_1' });
+    const sent = (calls[0]?.init.headers ?? {}) as Record<string, string>;
+    expect(sent['idempotency-key']).toBe('gateway-install-1');
+  });
+
+  it('forwards a removal and the start of a sign-in', async () => {
+    const { app, calls } = withUpstream(() => new Response(null, { status: 204 }));
+    const removed = await app.inject({
+      method: 'DELETE',
+      url: '/v1/session/plugins/plg_0123',
+      headers: { authorization: `Bearer ${SESSION_TOKEN}` },
+    });
+    expect(removed.statusCode).toBe(204);
+    const started = await app.inject({
+      method: 'POST',
+      url: '/v1/session/connections',
+      headers: { authorization: `Bearer ${SESSION_TOKEN}` },
+      payload: { componentId: 'cmp_1', callbackUrl: 'https://host.example.test/done' },
+    });
+    expect(started.statusCode).toBe(204);
+    expect(calls.map((call) => `${call.init.method} ${call.url}`)).toEqual([
+      `DELETE ${config.API_BASE_URL}/v1/session/plugins/plg_0123`,
+      `POST ${config.API_BASE_URL}/v1/session/connections`,
+    ]);
+    expect(calls[0]?.init.body).toBeUndefined();
+    expect(JSON.parse(String(calls[1]?.init.body))).toEqual({
+      componentId: 'cmp_1',
+      callbackUrl: 'https://host.example.test/done',
+    });
+  });
+
+  it('relays an error from the api as it is', async () => {
+    const { app } = withUpstream(
+      () =>
+        new Response('{"error":{"code":"forbidden"}}', {
+          status: 403,
+          headers: { 'content-type': 'application/json' },
+        }),
+    );
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/session/plugins',
+      headers: { authorization: `Bearer ${SESSION_TOKEN}` },
+    });
+    expect(res.statusCode).toBe(403);
+    expect(res.json()).toEqual({ error: { code: 'forbidden' } });
+  });
+
+  it('refuses a call with no token or another kind of key, without calling the api', async () => {
+    const { app, calls } = withUpstream(() => new Response('{}', { status: 200 }));
+    for (const authorization of [
+      undefined,
+      `Bearer ${PROJECT_KEY}`,
+      `Bearer ${KEY}`,
+      `Basic ${SESSION_TOKEN}`,
+      'Bearer stx_0123',
+    ]) {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/v1/session/catalog',
+        headers: authorization ? { authorization } : {},
+      });
+      expect(res.statusCode).toBe(401);
+      expect(res.headers['www-authenticate']).toBe('Bearer');
+    }
+    expect(calls).toHaveLength(0);
+  });
+
+  it('keeps a session token off the project routes', async () => {
+    const { app, calls } = withUpstream(() => new Response('{}', { status: 200 }));
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/project/me',
+      headers: { authorization: `Bearer ${SESSION_TOKEN}` },
+    });
+    expect(res.statusCode).toBe(401);
+    expect(calls).toHaveLength(0);
+  });
+});
