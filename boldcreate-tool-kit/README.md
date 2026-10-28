@@ -28,6 +28,14 @@ In Claude Code, the agent cannot start the skills marked "You" below by itself. 
 
 Claude Code runs the implementer agents in the background, where they cannot ask you for permission, so a command you have not allowed is refused. Allow `git` and the commands saved in `.boldcreate/project.yml` in the project's `.claude/settings.json`, for example `"Bash(git:*)"` and `"Bash(<test tool>:*)"`. When a slice is still refused, `build` names the command to allow and builds that slice in the main session.
 
+On Windows, Claude Code runs most commands with its PowerShell tool, which `Bash(...)` rules do not cover. Add the same commands in both forms, for example:
+
+```json
+{ "permissions": { "allow": ["Bash(git:*)", "PowerShell(git:*)", "Bash(dotnet:*)", "PowerShell(dotnet:*)"] } }
+```
+
+Also on Windows, keep the repository on a short path outside `%TEMP%`. Agent worktrees add folders to every path, and Smart App Control can refuse to run test programs built under the temporary folder.
+
 `start` sorts the request into one of four paths, shows the path in one line, and lets you change it. On first use it runs `setup`, which detects your build, test, lint and run commands and saves them to `.boldcreate/project.yml`. Every skill can also be run on its own.
 
 | Path | When | Skills in order |

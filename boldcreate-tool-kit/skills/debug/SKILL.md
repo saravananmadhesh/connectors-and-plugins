@@ -18,7 +18,7 @@ Redact keys, tokens, passwords, connection strings and personal data from every 
 
 2. **Set up the branch.** Read `git.default_branch` and `git.protected_branches` from `.boldcreate/project.yml`. If the current branch is a work branch not in `protected_branches`, stay on it. Otherwise create `fix/<slug>` from `git.default_branch`. If setup left its files uncommitted, commit them on the new branch first as `Set up BoldCreate tool kit`. Done when the current branch is not protected, before any file changes.
 
-3. **Build the loop.** Create the fastest repeatable check that passes when the bug is absent and fails while it is present. Prefer, in order: a failing test at a public seam, a script that calls the code and checks the result, a command against the running app. Run it. Done when the check fails, and fails for the reason in step 1. Read [loops.md](loops.md) if no quick check comes to mind or the bug is intermittent.
+3. **Build the loop.** Create the fastest repeatable check that passes when the bug is absent and fails while it is present. Prefer, in order: a failing test at a public seam, a script that calls the code and checks the result, a command against the running app. When the report names more than one place where the bug shows, such as two endpoints, commands or screens, the check covers each of them. Run it. Done when the check fails, and fails for the reason in step 1. Read [loops.md](loops.md) if no quick check comes to mind or the bug is intermittent.
 
    Do not read code looking for the cause, and do not change code, until this step is done.
 

@@ -58,7 +58,7 @@ Have a reviewer with no memory of this conversation check one document, resolve 
 
 5. **Decide on round 2.**
    - Round 1 verdict `CLEAN` or `CHANGES`: stop. The fixes are not reviewed again.
-   - Round 1 verdict `BLOCKING`: run round 2 on the updated document with two independent passes, one per focus, as in step 3. Drop any round 2 finding that repeats a round 1 finding marked Keep, unless it brings new evidence. Resolve the rest as in step 4.
+   - Round 1 verdict `BLOCKING`: run round 2 on the updated document, sized as in step 2: one pass on clarity and readiness at or under the threshold, two independent passes, one per focus, over it. Drop any round 2 finding that repeats a round 1 finding marked Keep, unless it brings new evidence. Resolve the rest as in step 4.
 
    Done when either round 1 ended without a blocker, or round 2 is resolved.
 

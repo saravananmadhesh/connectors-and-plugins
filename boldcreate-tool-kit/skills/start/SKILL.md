@@ -66,7 +66,7 @@ Most kit skills start only when the user runs them, so the host may refuse to st
 
    Done when the first skill has started.
 
-5. **Continue the path.** When a skill returns without handing off, start the next skill on the confirmed path, until `ship` has run. Done when `ship` reports or the user stops the work.
+5. **Continue the path.** When a skill returns without handing off, start the next skill on the confirmed path, until `ship` has run. Do not end a turn just to say which skill comes next. Stop only where a skill asks the user a question, waits for an approval, or returns `NOT VERIFIED`, `INCONCLUSIVE` or findings the user must decide. Done when `ship` reports or the user stops the work.
 
 ## Which skill when
 

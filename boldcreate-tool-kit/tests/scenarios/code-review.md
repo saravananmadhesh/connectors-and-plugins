@@ -34,3 +34,4 @@ Run code-review.
 - On a `fix/<slug>` branch with `.boldcreate/bugs/<slug>.md`, the spec axis runs against that bug report.
 - A diff that writes user-entered names into a CSV export adds the security axis.
 - Run as background agents, the reviewers read files with the Read tool and run one git command per Bash call, and return findings instead of a "could not review" result.
+- On the quick-fix path, after the user picks the findings to fix and the fixes are committed after VERIFIED, ship starts in the same turn.
