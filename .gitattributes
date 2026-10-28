@@ -1,0 +1,5 @@
+# Keep LF in the working tree on every OS. The build compares generated
+# manifests byte for byte, so CRLF checkouts would report false drift.
+* text=auto eol=lf
+*.png binary
+*.svg text eol=lf

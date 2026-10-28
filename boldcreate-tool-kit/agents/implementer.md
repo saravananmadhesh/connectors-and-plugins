@@ -47,6 +47,7 @@ The project's commands are in `.boldcreate/project.yml` and its principles in `.
 - Change files only with the file editing tools, never with shell scripts, here-documents or `sed`. Read files with the Read tool. Run each command on its own, exactly as `project.yml` saves it, and use plain `git` commands, with no `;`, `&&` or pipes. Hosts often run agents with no way to ask the user for permission, so anything else may be refused.
 - Never write keys, tokens or passwords into code, tests or commits; read them from the environment. Mask any secret that appears in output you report.
 - Keep refactoring to what the current test needs; wider clean-up belongs to review.
+- When a tool rewrites a shared file, such as a solution, project or lock file, keep only the lines this slice needs, with the file's encoding and line endings unchanged.
 - Add no explanatory comments, placeholder notes or debug output to the code.
 - Finish with the worktree clean and the slice as one commit on `branch`; the caller merges it and removes the worktree.
 

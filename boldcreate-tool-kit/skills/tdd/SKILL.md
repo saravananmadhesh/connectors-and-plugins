@@ -29,7 +29,7 @@ Grow the code in small steps, each proven by a test that failed first.
 
 7. **Verify.** Run the `verify` skill. Report the tests added and the behaviours they cover. Done when `verify` returns its verdict.
 
-8. **Commit.** On the paths where step 1 applied: when `verify` returned `VERIFIED`, stage only the files of this change and commit once, with a subject that says what the change does for the user. On any other verdict, show the evidence and do not commit until the user decides. Done when `git log -1` shows the commit and `git status` lists no file of this change. The next skill on the path is `code-review`.
+8. **Commit.** On the paths where step 1 applied: when `verify` returned `VERIFIED`, stage only the files of this change and commit once, with a subject that says what the change does for the user. On any other verdict, show the evidence and do not commit until the user decides. Done when `git log -1` shows the commit and `git status` lists no file of this change. On the paths where step 1 applied, start `code-review` now, in the same turn.
 
 ## Rules for every test
 
@@ -37,6 +37,7 @@ Grow the code in small steps, each proven by a test that failed first.
 - Name each test after the behaviour it proves, in the project's own vocabulary.
 - One reason to fail per test.
 - Prefer real collaborators. Replace one only when it is slow, non-deterministic or outside the system boundary.
+- When a tool rewrites a shared file, such as a solution, project or lock file, read its diff before committing. Keep only the lines this change needs, and keep the file's encoding, byte order mark and line endings as they were.
 
 Read [tests.md](tests.md) when choosing what a test should assert or when a test is hard to write. Read [mocking.md](mocking.md) before replacing any collaborator with a test double.
 
