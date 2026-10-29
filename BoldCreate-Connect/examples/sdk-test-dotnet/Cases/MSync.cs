@@ -46,13 +46,20 @@ internal static class GroupMSync
             return r.Unchanged.Count;
         });
 
-        // Scenario: AllowHooks. Expected: hooks placed with the scripts they run.
-        await T("M3", "AllowHooks places hooks and their scripts", async () =>
+        // Scenario: AllowHooks. Expected: hooks placed with the scripts they run, and those scripts runnable.
+        await T("M3", "AllowHooks places hooks and their runnable scripts", async () =>
         {
             var r = await sessionM.SyncPluginsAsync(new SyncOptions { Dir = dirM, AllowHooks = true });
             var ralph = Tree(Path.Combine(dirM, "ralph-loop"));
             Ok(r.Added.Any(c => c.Kind == FileKind.Hook), "no hooks added");
             Ok(ralph.Any(f => f.EndsWith(".sh", StringComparison.Ordinal)), $"ralph-loop hook scripts missing: {string.Join(",", ralph.Where(f => f.Contains("hook", StringComparison.Ordinal)))}");
+            if (!OperatingSystem.IsWindows())
+            {
+                var notRunnable = ralph.Where(f => f.EndsWith(".sh", StringComparison.Ordinal))
+                    .Where(f => (File.GetUnixFileMode(Path.Combine(dirM, "ralph-loop", f)) & UnixFileMode.UserExecute) == 0).ToList();
+                Ok(notRunnable.Count == 0, $"hook scripts not runnable: {string.Join(",", notRunnable)}");
+            }
+
             return ralph;
         });
 

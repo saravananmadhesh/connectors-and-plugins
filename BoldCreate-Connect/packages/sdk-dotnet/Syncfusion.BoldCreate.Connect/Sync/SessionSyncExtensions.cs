@@ -168,10 +168,14 @@ public static class SessionSyncExtensions
             var files = new Dictionary<string, byte[]>(SyncFiles.PathComparer);
             var conflicts = new List<string>();
             var hashes = new Dictionary<string, string>(StringComparer.Ordinal);
+            var scripts = new HashSet<string>(SyncFiles.PathComparer);
             foreach (var (path, bytes) in archives[wanted.Sha256])
             {
                 var destination = SyncFiles.DestinationOf(dir, wanted.PluginName, path);
                 files[destination] = bytes;
+
+                // The agent runs a hook's scripts itself, so they must be runnable once hooks are allowed.
+                if (wanted.Kind == FileKind.Hook && SyncFiles.IsScript(bytes)) scripts.Add(destination);
                 hashes[path] = SyncFiles.Sha256Hex(bytes);
                 var current = await SyncFiles.HashOnDiskAsync(destination, ct).ConfigureAwait(false);
                 if (current is null || current == hashes[path]) continue;
@@ -186,7 +190,7 @@ public static class SessionSyncExtensions
                 return false;
             }
 
-            await SyncFiles.PlaceFilesAsync(dir, files, ct).ConfigureAwait(false);
+            await SyncFiles.PlaceFilesAsync(dir, files, ct, scripts).ConfigureAwait(false);
             next.Components[wanted.ComponentId] = new LockedComponent(wanted.PluginName, wanted.Kind, wanted.Name, wanted.Sha256, hashes);
             applied.Add(new AppliedComponent(wanted.ComponentId, wanted.Sha256));
             return true;
@@ -229,9 +233,10 @@ public static class SessionSyncExtensions
             removed.Add(gone);
         }
 
-        // Anything left out (a kept file, a hook) must be looked at again, so the revision stays where it
-        // was and the next call asks for the whole manifest instead of "not modified".
-        if (modified.Count > 0 || plan.Skipped.Count > 0) next = next with { Revision = lockFile.Revision };
+        // Anything left out (a kept file, a hook) must be looked at again, so no revision is kept and the
+        // next call asks for the whole manifest. Keeping an older revision is not enough: the server can
+        // come back to that same revision (a plugin added, then removed) and answer "not modified".
+        if (modified.Count > 0 || plan.Skipped.Count > 0) next = next with { Revision = string.Empty };
         await SyncFiles.WriteLockAsync(dir, next, ct).ConfigureAwait(false);
         return (new SyncResult
         {

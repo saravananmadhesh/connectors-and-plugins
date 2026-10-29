@@ -5,7 +5,7 @@
  *   1. From the repo root: `pnpm build` and `pnpm dev` (web 3000, api 3001, gateway 3002,
  *      admin 3004, Mailpit 8025). GitHub must be reachable by the worker.
  *   2. node examples/sdk-test/setup-local.mjs
- *      Optional: SDK_TEST_REF (default master) and SDK_TEST_OWNER (default syncfusion) pick the
+ *      Optional: SDK_TEST_REF (default main) and SDK_TEST_OWNER (default syncfusion) pick the
  *      BoldCreate-Plugins repo, SDK_TEST_STATE (default examples/sdk-test/.local/state.json).
  *
  * What it does (anything already done is skipped, so it can be run again)
@@ -28,7 +28,7 @@ const ADMIN = process.env.SDK_TEST_ADMIN_URL ?? 'http://localhost:3004';
 const WEB = process.env.SDK_TEST_WEB_URL ?? 'http://localhost:3000';
 const MAILPIT = process.env.SDK_TEST_MAILPIT_URL ?? 'http://localhost:8025';
 const OWNER = process.env.SDK_TEST_OWNER ?? 'syncfusion';
-const REF = process.env.SDK_TEST_REF ?? 'master';
+const REF = process.env.SDK_TEST_REF ?? 'main';
 const STATE = process.env.SDK_TEST_STATE ?? join(import.meta.dirname, '.local', 'state.json');
 const ADMIN_EMAIL = 'admin@example.test';
 const USER_EMAIL = 'owner@sdk.test';
@@ -163,8 +163,15 @@ async function admin() {
     const { items: sources } = await a.call('GET', '/v1/admin/plugin-sources');
     const busy = sources.filter((s) => s.lastStatus === 'queued' || s.lastStatus === 'running');
     if (busy.length === 0) {
+      // A source from an earlier run (another ref or owner) can fail on a name clash with the
+      // plugin it already installed; that is a leftover, not a problem with this run.
+      const current = (s) =>
+        SOURCES.some(
+          (x) => x.owner === s.owner && x.repository === s.repository && x.ref === s.ref,
+        );
       for (const s of sources.filter((x) => x.lastStatus === 'failed')) {
-        log(`admin: source ${s.path} failed: ${s.lastError}`);
+        const where = `${s.owner}/${s.repository}@${s.ref} ${s.path}`;
+        log(`admin: ${current(s) ? '' : '(earlier run) '}source ${where} failed: ${s.lastError}`);
       }
       break;
     }
@@ -174,16 +181,22 @@ async function admin() {
   const { items: plugins } = await a.call('GET', '/v1/admin/plugins?pageSize=100');
   for (const plugin of plugins) {
     const detail = await a.call('GET', `/v1/admin/plugins/${plugin.id}`);
+    const statuses = [];
     for (const version of detail.versions ?? []) {
       if (version.actions.includes('approve')) {
         await a.call('POST', `/v1/admin/plugin-versions/${version.id}/approve`);
       }
-      const now = await a.call('GET', `/v1/admin/plugin-versions/${version.id}`);
+      let now = await a.call('GET', `/v1/admin/plugin-versions/${version.id}`);
       if (now.actions.includes('publish')) {
         await a.call('POST', `/v1/admin/plugin-versions/${version.id}/publish`);
+        now = await a.call('GET', `/v1/admin/plugin-versions/${version.id}`);
       }
+      statuses.push(`${now.version} ${now.status}`);
     }
-    log(`admin: ${plugin.name} published`);
+    const live = statuses.some((s) => s.endsWith(' published'));
+    log(
+      `admin: ${plugin.name} ${live ? 'published' : 'NOT published'} (${statuses.join(', ') || 'no versions'})`,
+    );
   }
 }
 
