@@ -8,6 +8,7 @@ import { Alert } from './ui/alert';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Checkbox, Switch } from './ui/checkbox';
+import { Skeleton } from './ui/skeleton';
 
 /** Categories, the featured and verified marks and who can see one plugin. */
 export function PluginClassification({ plugin }: { plugin: AdminPluginDetailResponse }) {
@@ -72,9 +73,7 @@ export function PluginClassification({ plugin }: { plugin: AdminPluginDetailResp
           </label>
         </div>
         <h3 className="mb-1 mt-4 text-sm font-medium">Categories</h3>
-        {categories.isPending && (
-          <p className="text-sm text-muted-foreground">Loading categories…</p>
-        )}
+        {categories.isPending && <Skeleton className="h-16" aria-label="Loading categories" />}
         {categories.isError && (
           <p role="alert" className="text-sm text-destructive">
             {errorMessage(categories.error)}

@@ -18,6 +18,7 @@ import {
   type AdminStatsQuery,
   type VersionChange,
   type BulkIdsBody,
+  type AddAdminAllowedEmailBody,
   type CreateCategoryBody,
   type PluginFlagsBody,
   type SetPluginCategoriesBody,
@@ -32,7 +33,11 @@ import {
   authenticateAdminSession,
   changeVersion,
   completeAdminSetup,
+  addAdminAllowedEmail,
   createCategory,
+  inviteAdminAllowedEmail,
+  listAdminAllowedEmails,
+  removeAdminAllowedEmail,
   createSource,
   deleteCategory,
   deletePlugin,
@@ -139,6 +144,10 @@ const ADMIN_ROUTE_IDS = [
   'adminPlugins.delete',
   'adminPlugins.setCategories',
   'adminPlugins.setFlags',
+  'adminAllowedEmails.list',
+  'adminAllowedEmails.add',
+  'adminAllowedEmails.invite',
+  'adminAllowedEmails.remove',
   'adminCategories.list',
   'adminCategories.create',
   'adminCategories.update',
@@ -518,6 +527,34 @@ export async function buildApp(config: AdminConfig, deps: AdminDeps): Promise<Ht
       actorOf(request),
     );
     return noStore(reply).status(200).send(plugin);
+  });
+
+  const emailOf = (request: FastifyRequest) => (request.params as { email: string }).email;
+
+  server.register('adminAllowedEmails.list', async (_request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send({ items: await listAdminAllowedEmails(deps.db) });
+  });
+
+  server.register('adminAllowedEmails.add', async (request, reply) => {
+    const added = await addAdminAllowedEmail(
+      deps.db,
+      policy,
+      request.body as AddAdminAllowedEmailBody,
+      actorOf(request),
+    );
+    return noStore(reply).status(201).send(added);
+  });
+
+  server.register('adminAllowedEmails.invite', async (request, reply) => {
+    await inviteAdminAllowedEmail(deps.db, policy, emailOf(request), actorOf(request));
+    return noStore(reply).status(204).send();
+  });
+
+  server.register('adminAllowedEmails.remove', async (request, reply) => {
+    await removeAdminAllowedEmail(deps.db, emailOf(request), actorOf(request));
+    return noStore(reply).status(204).send();
   });
 
   const categoryIdOf = (request: FastifyRequest) =>

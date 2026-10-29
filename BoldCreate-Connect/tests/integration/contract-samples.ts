@@ -19,30 +19,44 @@ export const baseId = (route: Pick<RouteDef, 'id'>): string =>
   route.id.replace(/\.(org|user)$/, '');
 
 const SAMPLES: Record<string, () => Sample> = {
-  'auth.changePassword': () => ({ body: { currentPassword: 'a', newPassword: 'b' } }),
-  'auth.changeEmail': () => ({ body: { newEmail: 'sample@example.com', currentPassword: 'a' } }),
+  'auth.changePassword': () => ({
+    body: { currentPassword: 'a', newPassword: 'b' },
+  }),
+  'auth.changeEmail': () => ({
+    body: { newEmail: 'sample@example.com', currentPassword: 'a' },
+  }),
   'auth.deleteMe': () => ({ query: 'confirmEmail=sample@example.com' }),
   'orgs.create': () => ({ body: { name: 'Sample org', slug: 'sample-org' } }),
   'orgs.update': () => ({ body: { name: 'Sample org' } }),
   'orgs.delete': () => ({ query: 'confirmSlug=sample-org' }),
   'orgPolicy.update': () => ({ body: { allowPersonalInstalls: true } }),
   'members.update': () => ({ body: { role: 'ADMIN' } }),
-  'invites.create': () => ({ body: { emails: ['sample@example.com'], role: 'ADMIN' } }),
+  'invites.create': () => ({
+    body: { emails: ['sample@example.com'], role: 'ADMIN' },
+  }),
+  'invites.preview': () => ({ body: { token: 'sample' } }),
   'invites.accept': () => ({ body: { token: 'sample' } }),
   'installations.create': () => ({ body: { pluginVersionId: id('pv') } }),
   'installations.update': () => ({ body: { active: false } }),
   'installations.upgrade': () => ({ body: { pluginVersionId: id('pv') } }),
   'components.update': () => ({ body: { enabled: true } }),
   'variables.put': () => ({ body: { values: { API_TOKEN: 'sample-value' } } }),
-  'mcpServers.putAuth': () => ({ body: { authType: 'api_key', apiKey: 'sample-key' } }),
+  'mcpServers.putAuth': () => ({
+    body: { authType: 'api_key', apiKey: 'sample-key' },
+  }),
   'mcpServers.oauthStart': () => ({ body: {} }),
   'projects.create': () => ({ body: { name: 'Sample host' } }),
   'projects.update': () => ({ body: { name: 'Sample host' } }),
   'projectKeys.create': () => ({
-    body: { scopes: ['sessions:read'], expiresAt: new Date(Date.now() + 86_400_000).toISOString() },
+    body: {
+      scopes: ['sessions:read'],
+      expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+    },
   }),
   'projectPluginsConsole.put': () => ({ body: {} }),
-  'projectAuthConfigs.putVariables': () => ({ body: { values: { API_TOKEN: 'sample-value' } } }),
+  'projectAuthConfigs.putVariables': () => ({
+    body: { values: { API_TOKEN: 'sample-value' } },
+  }),
   'projectAuthConfigsConsole.putVariables': () => ({
     body: { values: { API_TOKEN: 'sample-value' } },
   }),
@@ -53,7 +67,9 @@ const SAMPLES: Record<string, () => Sample> = {
   'projectUserPluginVariables.put': () => ({
     body: { userId: 'sample-user', values: { API_TOKEN: 'sample-value' } },
   }),
-  'projectUserPluginComponents.put': () => ({ body: { userId: 'sample-user', enabled: true } }),
+  'projectUserPluginComponents.put': () => ({
+    body: { userId: 'sample-user', enabled: true },
+  }),
   'projectUserPluginVariablesConsole.put': () => ({
     body: { userId: 'sample-user', values: { API_TOKEN: 'sample-value' } },
   }),
@@ -63,7 +79,9 @@ const SAMPLES: Record<string, () => Sample> = {
   'projectWebhookConsole.put': () => ({
     body: { url: 'https://hooks.example.com/hook', events: ['user.created'] },
   }),
-  'sessionPluginVariables.put': () => ({ body: { values: { API_TOKEN: 'sample-value' } } }),
+  'sessionPluginVariables.put': () => ({
+    body: { values: { API_TOKEN: 'sample-value' } },
+  }),
   'sessionPluginComponents.put': () => ({ body: { enabled: true } }),
   'projectUserPlugins.list': () => ({ query: 'userId=sample-user' }),
   'projectUserPlugins.delete': () => ({ query: 'userId=sample-user' }),
@@ -73,6 +91,10 @@ const SAMPLES: Record<string, () => Sample> = {
   'projectUserPluginsConsole.put': () => ({ body: { userId: 'sample-user' } }),
   'projectUserPluginsConsole.list': () => ({ query: 'userId=sample-user' }),
   'projectUserPluginsConsole.delete': () => ({ query: 'userId=sample-user' }),
+  'projectUserPluginComponents.delete': () => ({ query: 'userId=sample-user' }),
+  'projectUserPluginComponentsConsole.delete': () => ({
+    query: 'userId=sample-user',
+  }),
   'projectSessions.create': () => ({ body: { userId: 'sample-user' } }),
   'sessionPlugins.put': () => ({ body: {} }),
   'projectConnections.start': () => ({
@@ -83,7 +105,11 @@ const SAMPLES: Record<string, () => Sample> = {
     },
   }),
   'projectConnections.put': () => ({
-    body: { userId: 'sample-user', componentId: id('cmp'), apiKey: 'sample-key' },
+    body: {
+      userId: 'sample-user',
+      componentId: id('cmp'),
+      apiKey: 'sample-key',
+    },
   }),
   'projectAuthConfigs.create': () => ({
     body: { componentId: id('cmp'), name: 'Sample', authMode: 'dcr' },
@@ -94,9 +120,14 @@ const SAMPLES: Record<string, () => Sample> = {
   }),
   'projectAuthConfigsConsole.update': () => ({ body: { name: 'Sample' } }),
   'sessionConnections.start': () => ({
-    body: { componentId: id('cmp'), callbackUrl: 'https://app.example.test/cb' },
+    body: {
+      componentId: id('cmp'),
+      callbackUrl: 'https://app.example.test/cb',
+    },
   }),
-  'apiKeys.create': () => ({ body: { name: 'Sample key', permissions: ['mcp:list'] } }),
+  'apiKeys.create': () => ({
+    body: { name: 'Sample key', permissions: ['mcp:list'] },
+  }),
 };
 
 /** Input that passes validation, or null when the route needs none. */

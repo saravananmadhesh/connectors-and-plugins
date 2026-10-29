@@ -10,6 +10,7 @@ import {
   installationComponentTable,
   installationTable,
   pluginVersionTable,
+  userComponentPreferenceTable,
   userTable,
   type Executor,
 } from '@boldcreate-integrations/db';
@@ -308,7 +309,134 @@ export async function setUserPluginVariables(
   );
 }
 
-/** Turns one component of the user's own install on or off. */
+async function setProjectComponentPreference(
+  tx: Executor,
+  caller: ProjectCaller,
+  userId: string,
+  pluginId: string,
+  componentId: string,
+  enabled: boolean,
+): Promise<void> {
+  const [shared] = await tx
+    .select({ id: installationTable.id })
+    .from(installationTable)
+    .where(
+      and(
+        eq(installationTable.organizationId, caller.organizationId),
+        eq(installationTable.scopeType, 'project'),
+        eq(installationTable.projectId, caller.projectId),
+        eq(installationTable.pluginId, pluginId),
+        eq(installationTable.status, 'active'),
+      ),
+    )
+    .limit(1);
+  if (!shared) throw notFound();
+  await tx.transaction(async (inner) => {
+    const [component] = await inner
+      .select({ componentId: installationComponentTable.componentId })
+      .from(installationComponentTable)
+      .where(
+        and(
+          eq(installationComponentTable.installationId, shared.id),
+          eq(installationComponentTable.componentId, componentId),
+        ),
+      )
+      .limit(1);
+    if (!component) throw notFound();
+    await inner
+      .insert(userComponentPreferenceTable)
+      .values({
+        installationId: shared.id,
+        organizationId: caller.organizationId,
+        componentId,
+        userId,
+        enabled,
+      })
+      .onConflictDoUpdate({
+        target: [
+          userComponentPreferenceTable.installationId,
+          userComponentPreferenceTable.componentId,
+          userComponentPreferenceTable.userId,
+        ],
+        set: { enabled, updatedAt: new Date() },
+      });
+    await writeAudit(
+      inner,
+      userAudit(caller, 'user_plugin.component_updated', userId, shared.id, {
+        scope: 'project',
+        componentId,
+        enabled: String(enabled),
+      }),
+    );
+  });
+}
+
+/**
+ * Removes the user's own preference for one component of a plugin the project provides, so the
+ * user follows the install again. Repeating it is safe. A plugin the user installed has no
+ * preference to clear and is not found here.
+ */
+export async function clearUserPluginComponent(
+  tx: Executor,
+  caller: ProjectCaller,
+  userId: string,
+  pluginId: string,
+  componentId: string,
+): Promise<void> {
+  await requireProjectUser(tx, caller, userId);
+  const [shared] = await tx
+    .select({ id: installationTable.id })
+    .from(installationTable)
+    .where(
+      and(
+        eq(installationTable.organizationId, caller.organizationId),
+        eq(installationTable.scopeType, 'project'),
+        eq(installationTable.projectId, caller.projectId),
+        eq(installationTable.pluginId, pluginId),
+        eq(installationTable.status, 'active'),
+      ),
+    )
+    .limit(1);
+  if (!shared) throw notFound();
+  await tx.transaction(async (inner) => {
+    const [component] = await inner
+      .select({ componentId: installationComponentTable.componentId })
+      .from(installationComponentTable)
+      .where(
+        and(
+          eq(installationComponentTable.installationId, shared.id),
+          eq(installationComponentTable.componentId, componentId),
+        ),
+      )
+      .limit(1);
+    if (!component) throw notFound();
+    const removed = await inner
+      .delete(userComponentPreferenceTable)
+      .where(
+        and(
+          eq(userComponentPreferenceTable.installationId, shared.id),
+          eq(userComponentPreferenceTable.componentId, componentId),
+          eq(userComponentPreferenceTable.userId, userId),
+        ),
+      )
+      .returning({ componentId: userComponentPreferenceTable.componentId });
+    if (!removed[0]) return;
+    await writeAudit(
+      inner,
+      userAudit(caller, 'user_plugin.component_updated', userId, shared.id, {
+        scope: 'project',
+        componentId,
+        enabled: 'default',
+      }),
+    );
+  });
+}
+
+/**
+ * Turns one component on or off for the user. On the user's own install it changes the install. On
+ * a plugin the project provides, the install is shared, so it stores the user's own preference
+ * instead; the install's value stays the default and an administrator's off still wins.
+ */
 export async function setUserPluginComponent(
   tx: Executor,
   caller: ProjectCaller,
@@ -317,7 +445,17 @@ export async function setUserPluginComponent(
   componentId: string,
   enabled: boolean,
 ): Promise<void> {
-  const install = await ownInstall(tx, caller, userId, pluginId);
+  await requireProjectUser(tx, caller, userId);
+  const [own] = await tx
+    .select({ id: installationTable.id })
+    .from(installationTable)
+    .where(and(userInstalls(caller, userId), eq(installationTable.pluginId, pluginId)))
+    .limit(1);
+  if (!own) {
+    await setProjectComponentPreference(tx, caller, userId, pluginId, componentId, enabled);
+    return;
+  }
+  const install = own;
   await tx.transaction(async (inner) => {
     const updated = await inner
       .update(installationComponentTable)

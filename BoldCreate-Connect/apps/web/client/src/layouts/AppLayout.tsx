@@ -1,12 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Link,
-  Outlet,
-  useNavigate,
-  useParams,
-  useRouterState,
-  useSearch,
-} from '@tanstack/react-router';
+import { Link, Outlet, useNavigate, useParams, useRouterState } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -20,6 +13,8 @@ import {
   Layers,
   LayoutDashboard,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   Package,
   PackageCheck,
   Rocket,
@@ -33,20 +28,22 @@ import { qk } from '@/lib/query-keys';
 import { cn } from '@/lib/cn';
 import { useAbilities } from '@/lib/abilities';
 import { useActiveOrg } from '@/lib/active-org';
-import { PROJECT_TABS, type ProjectSearch, type ProjectTab } from '@/lib/project-search';
-import { availableAreas, inProject, pathArea, useArea } from '@/lib/area';
+import { PROJECT_TABS, type ProjectTab } from '@/lib/project-search';
+import { NoOrganization } from '@/components/NoOrganization';
+import { areaDestination, availableAreas, inProject, pathArea, useArea } from '@/lib/area';
 import { PERSONAL_GROUP, buildTrail, trailTitle } from '@/lib/scope';
 import { PRODUCT } from '@/lib/product';
 import { writeSetupFlag } from '@/lib/setup-progress';
-import { Brand } from '@/components/Brand';
+import { Brand, BrandMark } from '@/components/Brand';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { PAGE_GUTTER, PAGE_MAX_WIDTH } from '@/components/Page';
+import { useSidebarCollapsed } from '@/lib/sidebar';
 import { UserMenu } from '@/components/UserMenu';
 import { AreaSwitcher } from '@/components/AreaSwitcher';
 import { RouteNotFound } from '@/components/RouteFallbacks';
 import { ScopeSwitcher } from '@/components/ScopeSwitcher';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageLoader } from '@/components/PageLoader';
 import { Alert } from '@/components/ui/alert';
 
 interface NavEntry {
@@ -55,7 +52,7 @@ interface NavEntry {
   icon: LucideIcon;
   /** Active only on this exact path, not on the pages beneath it. */
   exact?: boolean;
-  /** A section of the open project: the address keeps the page and sets the tab. */
+  /** A section of the open project, which has its own path. */
   tab?: ProjectTab;
 }
 
@@ -72,30 +69,34 @@ const PROJECT_ICONS: Record<ProjectTab, LucideIcon> = {
   settings: Settings,
 };
 
-function NavLink({ entry, onNavigate }: { entry: NavEntry; onNavigate: () => void }) {
+function NavLink({
+  entry,
+  onNavigate,
+  collapsed,
+}: {
+  entry: NavEntry;
+  onNavigate: () => void;
+  collapsed: boolean;
+}) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const current = useSearch({ strict: false }) as ProjectSearch;
-  const active = entry.tab
-    ? pathname === entry.to && (current.tab ?? 'overview') === entry.tab
-    : entry.exact
-      ? pathname === entry.to
-      : pathname === entry.to || pathname.startsWith(`${entry.to}/`);
+  const active = entry.exact
+    ? pathname === entry.to
+    : pathname === entry.to || pathname.startsWith(`${entry.to}/`);
   return (
     <Link
       to={entry.to}
-      search={
-        entry.tab ? ({ tab: entry.tab === 'overview' ? undefined : entry.tab } as never) : undefined
-      }
       activeOptions={{ exact: Boolean(entry.exact) }}
       onClick={onNavigate}
       aria-current={active ? 'page' : undefined}
+      aria-label={entry.label}
+      title={collapsed ? entry.label : undefined}
       className={cn(
-        'flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-sidebar-muted transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-foreground',
+        'flex w-full items-center gap-2.5 group-data-[collapsed=true]/sb:md:justify-center rounded-md px-2.5 py-1.5 text-sm text-sidebar-muted transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-foreground',
         active && 'bg-sidebar-accent font-medium text-sidebar-foreground',
       )}
     >
-      <entry.icon aria-hidden="true" className="size-4" />
-      <span className="truncate">{entry.label}</span>
+      <entry.icon aria-hidden="true" className="size-4 group-data-[collapsed=true]/sb:md:size-5" />
+      <span className="truncate group-data-[collapsed=true]/sb:md:hidden">{entry.label}</span>
     </Link>
   );
 }
@@ -104,21 +105,28 @@ function NavGroup({
   label,
   entries,
   onNavigate,
+  collapsed,
 }: {
   label?: string | undefined;
   entries: NavEntry[];
   onNavigate: () => void;
+  collapsed: boolean;
 }) {
   if (entries.length === 0) return null;
   return (
     <div className="mt-3 flex flex-col gap-0.5 first:mt-0">
       {label && (
-        <p className="truncate px-2.5 pb-1 text-[11px] font-medium tracking-wide text-sidebar-muted uppercase">
+        <p className="truncate px-2.5 pb-1 group-data-[collapsed=true]/sb:md:hidden text-[11px] font-medium tracking-wide text-sidebar-muted uppercase">
           {label}
         </p>
       )}
       {entries.map((entry) => (
-        <NavLink key={entry.tab ?? entry.to} entry={entry} onNavigate={onNavigate} />
+        <NavLink
+          key={entry.tab ?? entry.to}
+          entry={entry}
+          onNavigate={onNavigate}
+          collapsed={collapsed}
+        />
       ))}
     </div>
   );
@@ -132,6 +140,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [collapsed, toggleCollapsed] = useSidebarCollapsed();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const routeParams = useParams({ strict: false }) as { projectId?: string };
@@ -153,6 +162,15 @@ export function AppLayout() {
   const canUseForYou = allowed('installation:list');
   const areas = availableAreas(canUseForYou);
   const area = useArea(areas);
+
+  // Sign-in, verification and the home link all lead to For You pages. A viewer has none, so they
+  // are taken to the Platform side of their organization instead of a dead end.
+  const forYouClosed = pathArea(pathname) === 'for-you' && !canUseForYou && Boolean(orgId);
+  useEffect(() => {
+    if (forYouClosed) {
+      void navigate({ to: areaDestination(pathname, 'platform', orgId), replace: true });
+    }
+  }, [forYouClosed, pathname, orgId, navigate]);
 
   const signoutMutation = useMutation({
     mutationFn: auth.signout,
@@ -184,7 +202,7 @@ export function AppLayout() {
 
   // Browsing the marketplace is a step of the Get started page that only a visit can confirm.
   useEffect(() => {
-    if (orgId && pathname.startsWith('/marketplace'))
+    if (orgId && pathname.startsWith(`/orgs/${orgId}/marketplace`))
       writeSetupFlag('browsed-marketplace', orgId, true);
   }, [orgId, pathname]);
 
@@ -213,37 +231,29 @@ export function AppLayout() {
   }
 
   if (isPending || !Array.isArray(data?.memberships)) {
-    return (
-      <div className="flex min-h-dvh" role="status" aria-label="Loading profile">
-        <aside className="hidden w-64 shrink-0 flex-col gap-4 border-r bg-sidebar p-4 md:flex">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-28" />
-        </aside>
-        <div className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Skeleton className="h-8 w-56" />
-        </div>
-      </div>
-    );
+    return <PageLoader label="Loading profile" />;
   }
 
   const orgBase = orgId ? `/orgs/${orgId}` : undefined;
   const close = () => setOpen(false);
 
+  // Nothing in the sidebar leads anywhere without an organization; the page says what to do.
+  const noOrganization = memberships.length === 0;
   const main: NavEntry[] =
-    area === 'for-you' && canUseForYou
+    area === 'for-you' && canUseForYou && !noOrganization && orgBase
       ? [
-          { to: '/get-started', label: 'Get started', icon: Rocket },
-          { to: '/marketplace', label: 'Marketplace', icon: Package },
-          { to: '/installed', label: 'Installed', icon: PackageCheck },
-          { to: '/api-keys', label: 'API keys', icon: KeyRound },
+          { to: `${orgBase}/get-started`, label: 'Get started', icon: Rocket },
+          { to: `${orgBase}/marketplace`, label: 'Marketplace', icon: Package },
+          { to: `${orgBase}/installed`, label: 'Installed', icon: PackageCheck },
+          { to: `${orgBase}/api-keys`, label: 'API keys', icon: KeyRound },
         ]
       : [];
-  const personalEntries: NavEntry[] = [{ to: '/profile', label: 'Profile', icon: UserRound }];
   // Inside a project its own tabs are the sections; the organization pages are one step up, so the
-  // sidebar offers the way back instead of a third level of navigation.
+  // sidebar offers the way back instead of a third level of navigation, and nothing personal.
   const projectPage = inProject(pathname);
+  const personalEntries: NavEntry[] = projectPage
+    ? []
+    : [{ to: '/profile', label: 'Profile', icon: UserRound }];
   const backEntries: NavEntry[] =
     orgBase && projectPage
       ? [{ to: `${orgBase}/projects`, label: 'All projects', icon: ArrowLeft, exact: true }]
@@ -255,7 +265,8 @@ export function AppLayout() {
             (item.value !== 'keys' || allowed('project-key:read')) &&
             (item.value !== 'settings' || allowed('project-webhook:read')),
         ).map((item) => ({
-          to: `${orgBase}/projects/${routeProjectId}`,
+          to: `${orgBase}/projects/${routeProjectId}${item.value === 'overview' ? '' : `/${item.value}`}`,
+          exact: true,
           label: item.label,
           icon: PROJECT_ICONS[item.value],
           tab: item.value,
@@ -264,12 +275,10 @@ export function AppLayout() {
   const orgEntries: NavEntry[] =
     orgBase && !projectPage
       ? [
-          {
-            to: orgBase,
-            label: 'Overview',
-            icon: LayoutDashboard,
-            exact: true,
-          },
+          // The overview is about running the organization; For You is about using plugins.
+          ...(area === 'platform'
+            ? [{ to: orgBase, label: 'Overview', icon: LayoutDashboard, exact: true }]
+            : []),
           ...(allowed('project:read') && area === 'platform'
             ? [
                 {
@@ -309,21 +318,57 @@ export function AppLayout() {
         Skip to main content
       </a>
       <aside
+        data-collapsed={collapsed}
         className={cn(
-          'w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:sticky md:top-0 md:flex md:h-dvh',
+          'group/sb w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:sticky md:top-0 md:flex md:h-dvh',
+          collapsed && 'md:w-16',
           open
             ? 'fixed inset-y-0 left-0 z-40 flex w-[min(16rem,85vw)] shadow-lg md:static md:w-64 md:shadow-none'
             : 'hidden',
         )}
       >
-        <Link
-          to="/marketplace"
-          onClick={close}
-          aria-label={`${PRODUCT.name} by ${PRODUCT.maker}`}
-          className="px-5 pt-5 pb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Brand />
-        </Link>
+        <div className="flex items-start">
+          <Link
+            to="/orgs"
+            onClick={close}
+            aria-label={`${PRODUCT.name} by ${PRODUCT.maker}`}
+            className={cn(
+              'block min-w-0 flex-1',
+              collapsed && 'md:hidden',
+              'px-5 pt-5 pb-4 outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            )}
+          >
+            <Brand />
+          </Link>
+          {collapsed ? (
+            <button
+              type="button"
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+              aria-expanded={false}
+              onClick={toggleCollapsed}
+              className="group/expand mx-auto my-3 hidden size-10 place-items-center rounded-md text-sidebar-foreground outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring md:grid"
+            >
+              <BrandMark className="size-8 group-hover/expand:hidden group-focus-visible/expand:hidden" />
+              <PanelLeftOpen
+                aria-hidden="true"
+                className="hidden size-4 group-hover/expand:block group-focus-visible/expand:block"
+              />
+            </button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              aria-expanded
+              onClick={toggleCollapsed}
+              className="mt-[22px] mr-3 hidden size-8 shrink-0 text-sidebar-muted md:inline-flex"
+            >
+              <PanelLeftClose className="size-4" />
+            </Button>
+          )}
+        </div>
         {areas.length > 1 && (
           <div className="px-3 pb-3">
             <AreaSwitcher areas={areas} area={area} orgId={orgId} />
@@ -333,11 +378,26 @@ export function AppLayout() {
           aria-label="Main"
           className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 pb-3"
         >
-          <NavGroup entries={main} onNavigate={close} />
-          <NavGroup entries={backEntries} onNavigate={close} />
-          <NavGroup label="Project" entries={sectionEntries} onNavigate={close} />
-          <NavGroup label="Organization" entries={orgEntries} onNavigate={close} />
-          <NavGroup label={PERSONAL_GROUP} entries={personalEntries} onNavigate={close} />
+          <NavGroup entries={main} onNavigate={close} collapsed={collapsed} />
+          <NavGroup entries={backEntries} onNavigate={close} collapsed={collapsed} />
+          <NavGroup
+            label="Project"
+            entries={sectionEntries}
+            onNavigate={close}
+            collapsed={collapsed}
+          />
+          <NavGroup
+            label="Organization"
+            entries={orgEntries}
+            onNavigate={close}
+            collapsed={collapsed}
+          />
+          <NavGroup
+            label={PERSONAL_GROUP}
+            entries={personalEntries}
+            onNavigate={close}
+            collapsed={collapsed}
+          />
         </nav>
         <div className="flex flex-col gap-2 border-t border-sidebar-border p-3">
           <ScopeSwitcher
@@ -350,6 +410,7 @@ export function AppLayout() {
             displayName={data.user.displayName}
             email={data.user.email}
             signingOut={signoutMutation.isPending}
+            collapsed={collapsed}
             onSignOut={() => signoutMutation.mutate()}
           />
         </div>
@@ -372,11 +433,18 @@ export function AppLayout() {
           >
             <Menu />
           </Button>
-          <span className="font-semibold">{PRODUCT.name}</span>
+          <Link
+            to="/orgs"
+            aria-label={`${PRODUCT.name} by ${PRODUCT.maker}`}
+            className="flex items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <BrandMark className="size-7" />
+            <span className="brand-name">{PRODUCT.name}</span>
+          </Link>
         </div>
         {/* One step is the page title again, so a breadcrumb starts at two. */}
         {trail.length > 1 && (
-          <div className={cn('border-b py-2.5', PAGE_GUTTER)}>
+          <div className={cn('pt-4', PAGE_GUTTER)}>
             <div className={PAGE_MAX_WIDTH}>
               <Breadcrumbs trail={trail} />
             </div>
@@ -387,7 +455,18 @@ export function AppLayout() {
           {orgName ? `Showing ${orgName}` : ''}
         </p>
         <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
-          {pathArea(pathname) === 'for-you' && !canUseForYou ? <RouteNotFound /> : <Outlet />}
+          {noOrganization && pathname !== '/profile' ? (
+            <NoOrganization />
+          ) : pathArea(pathname) === 'for-you' && !canUseForYou ? (
+            // Mid-redirect there is nothing to show; without an organization there is nowhere to go.
+            forYouClosed ? null : (
+              <RouteNotFound />
+            )
+          ) : (
+            <div key={pathname} className="animate-page-in">
+              <Outlet />
+            </div>
+          )}
         </main>
       </div>
     </div>

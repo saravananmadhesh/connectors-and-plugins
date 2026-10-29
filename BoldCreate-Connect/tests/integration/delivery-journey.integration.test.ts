@@ -380,3 +380,37 @@ describe('sync and archive download', () => {
     expect((await gateway('/v1/sync', doomed)).status).toBe(401);
   });
 });
+
+describe('the For You key and the maker’s own installs', () => {
+  it('serves the maker’s For me install in sync and nothing of another member’s', async () => {
+    const pluginId = randomUUID();
+    const versionId = randomUUID();
+    const name = `for-me-${pluginId.slice(0, 8)}`;
+    await sql(
+      `INSERT INTO plugin (id, name, display_name, summary, description, status, visibility)
+       VALUES ($1, $2, 'For Me', 'fixture', 'fixture', 'active', 'public')`,
+      [pluginId, name],
+    );
+    await sql(
+      `INSERT INTO plugin_version (id, plugin_id, version, major, minor, patch,
+         manifest_schema_version, manifest, manifest_sha256, status, archive_sha256, archive_size_bytes)
+       VALUES ($1, $2, '1.0.0', 1, 0, 0, '1', '{}', $3, 'published', $4, $5)`,
+      [versionId, pluginId, `sha256-forme-${versionId}`, ARCHIVE_SHA, ARCHIVE.byteLength],
+    );
+    const installed = await callApi('POST', `/v1/orgs/${user.orgId}/me/installations`, user, {
+      pluginVersionId: `pv_${versionId.replaceAll('-', '')}`,
+    });
+    must(installed, 201, 'install for me');
+
+    const res = must(await gateway('/v1/sync', fullKey), 200, 'sync');
+    const body = (await res.json()) as { entries: { pluginName: string; scope: string }[] };
+    expect(body.entries.find((entry) => entry.pluginName === name)?.scope).toBe('user');
+
+    const other = await createSignedInUser('delivery-journey-foryou-other');
+    const otherKey = await createKey(other, ['artifact:sync']);
+    const otherSync = (await (await gateway('/v1/sync', otherKey)).json()) as {
+      entries: { pluginName: string }[];
+    };
+    expect(otherSync.entries.map((entry) => entry.pluginName)).not.toContain(name);
+  });
+});

@@ -71,7 +71,18 @@ const RENDER_OPTS = {
 function mockQueries() {
   vi.spyOn(apiModule.auth, 'me').mockResolvedValue(ME);
   vi.spyOn(apiModule.orgs, 'listMembers').mockResolvedValue({ items: MEMBERS });
+  vi.spyOn(apiModule.orgs, 'listInvites').mockResolvedValue({ items: [] });
 }
+
+const inviteRow = (id: string, email: string, expiresAt: string) =>
+  ({
+    id: id as Id<'inv'>,
+    organizationId: ORG_ID,
+    email,
+    role: 'MEMBER' as const,
+    expiresAt,
+    createdAt: new Date().toISOString(),
+  }) satisfies apiModule.InviteResponse;
 
 /** Opens the invite dialog and enters the addresses; any role works. */
 async function fillInvite(emails: string) {
@@ -85,6 +96,32 @@ describe('OrgMembersPage', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockQueries();
+  });
+
+  it('lists open invitations, marks an expired one, and resends or revokes them', async () => {
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    const past = new Date(Date.now() - 86_400_000).toISOString();
+    vi.spyOn(apiModule.orgs, 'listInvites').mockResolvedValue({
+      items: [
+        inviteRow('inv_1', 'new@example.com', future),
+        inviteRow('inv_2', 'old@example.com', past),
+      ],
+    });
+    const resend = vi.spyOn(apiModule.orgs, 'resendInvite').mockResolvedValue(undefined);
+    const revoke = vi.spyOn(apiModule.orgs, 'revokeInvite').mockResolvedValue(undefined);
+    await renderWithRouter(OrgMembersPage, ROUTE_PATH, RENDER_OPTS);
+    expect(await screen.findByText('new@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getAllByText('Expired').length).toBeGreaterThan(0);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Resend invitation to old@example.com' }),
+    );
+    await waitFor(() => expect(resend).toHaveBeenCalledWith(ORG_ID, 'inv_2'));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Revoke invitation to new@example.com' }),
+    );
+    await waitFor(() => expect(revoke).toHaveBeenCalledWith(ORG_ID, 'inv_1'));
   });
 
   it('renders member names', async () => {

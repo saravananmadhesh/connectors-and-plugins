@@ -10,8 +10,8 @@ import { ProjectPage } from './ProjectPage';
 const ROUTE = '/orgs/$orgId/projects/$projectId';
 
 const render = (role: TestRole = 'ADMIN') =>
-  renderWithRouter(ProjectPage, ROUTE, {
-    url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}?tab=catalog`,
+  renderWithRouter(ProjectPage, `${ROUTE}/$tab`, {
+    url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}/catalog`,
     queryData: baseData(role),
   });
 

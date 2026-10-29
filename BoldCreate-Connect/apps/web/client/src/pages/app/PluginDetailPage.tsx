@@ -111,7 +111,7 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
 }
 
 export function PluginDetailPage() {
-  const { pluginId } = useParams({ strict: false }) as { pluginId: string };
+  const { orgId, pluginId } = useParams({ strict: false }) as { orgId: string; pluginId: string };
   const [tab, setTab] = useState<Tab>('customizations');
   const [expanded, setExpanded] = useState<ReadonlySet<ComponentKind>>(new Set());
   const [installing, setInstalling] = useState<InstallScope | undefined>();
@@ -152,7 +152,11 @@ export function PluginDetailPage() {
             Retry
           </Button>
         )}
-        <Link to="/marketplace" className="block text-sm text-muted-foreground hover:underline">
+        <Link
+          to="/orgs/$orgId/marketplace"
+          params={{ orgId }}
+          className="block text-sm text-muted-foreground hover:underline"
+        >
           Back to the marketplace
         </Link>
       </Page>
@@ -177,7 +181,8 @@ export function PluginDetailPage() {
   return (
     <Page className="space-y-6">
       <Link
-        to="/marketplace"
+        to="/orgs/$orgId/marketplace"
+        params={{ orgId }}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />

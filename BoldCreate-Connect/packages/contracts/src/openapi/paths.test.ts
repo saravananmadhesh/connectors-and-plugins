@@ -17,6 +17,7 @@ describe('public paths', () => {
       'verify',
       'resend',
       'accept',
+      'preview',
       'signup',
       'signin',
       'signout',
@@ -45,7 +46,7 @@ describe('public paths', () => {
     ]);
     const offenders: string[] = [];
     for (const path of Object.keys(document.paths)) {
-      if (path === '/api/csrf') continue;
+      if (path === '/api/csrf' || path === '/api/runtime-config') continue;
       if (!path.startsWith('/v1/')) offenders.push(`${path} is not under /v1`);
       for (const segment of path
         .split('/')

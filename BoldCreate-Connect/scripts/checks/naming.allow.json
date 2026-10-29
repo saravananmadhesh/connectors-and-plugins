@@ -55,6 +55,7 @@
     "session",
     "resend",
     "accept",
+    "preview",
     "runtime-config",
     "project",
     "catalog"

@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { DiscoverCandidate } from '../components/DiscoverCandidate';
 import { InstalledRepositories } from '../components/InstalledRepositories';
 import { PageHeader } from '../components/PageHeader';
@@ -11,28 +11,44 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Checkbox, Switch } from '../components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 import { Input, Select } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Tabs } from '../components/ui/tabs';
-import { adminApi, type DiscoverPluginsResponse, type InstallPluginsResponse } from '../lib/api';
+import {
+  adminApi,
+  type DiscoveredPlugin,
+  type DiscoverPluginsResponse,
+  type InstalledSource,
+  type InstallPluginsResponse,
+} from '../lib/api';
 import {
   CANDIDATE_FILTERS,
+  DEFAULT_HIDE,
+  HIDE_OPTIONS,
   MAX_INSTALL_PATHS,
-  candidateState,
+  canInstall,
   filterCandidates,
+  githubFolderUrl,
   needsAttention,
   type CandidateFilter,
+  type HideOption,
 } from '../lib/discover';
+import {
+  clearDiscoverSession,
+  readDiscoverSession,
+  updateDiscoverSession,
+  type DiscoverOptions as Options,
+} from '../lib/discover-session';
 import { parseGithubUrl } from '../lib/github-url';
 import { errorMessage } from '../lib/messages';
 import { PLUGINS_KEY, REVIEW_COUNT_KEY, SOURCES_KEY } from '../lib/plugins';
 import { parseDiscoverSearch } from '../lib/search';
-
-interface Options {
-  featured: boolean;
-  verified: boolean;
-  private: boolean;
-}
 
 function InstallOutcome({ result }: { result: InstallPluginsResponse }) {
   const added = result.items.filter((item) => item.outcome === 'added').length;
@@ -45,7 +61,7 @@ function InstallOutcome({ result }: { result: InstallPluginsResponse }) {
         Each plugin arrives as a pending version. Review and publish it when it appears.
       </p>
       <p className="mt-2">
-        <Link to="/review" className="underline">
+        <Link to="/plugins" search={{ stage: 'needs_review' }} className="underline">
           Go to Review
         </Link>{' '}
         ·{' '}
@@ -57,15 +73,58 @@ function InstallOutcome({ result }: { result: InstallPluginsResponse }) {
   );
 }
 
+function withLiveStatus(
+  plugin: DiscoveredPlugin,
+  source: InstalledSource | undefined,
+  justAdded: boolean,
+): DiscoveredPlugin {
+  if (source) {
+    return {
+      ...plugin,
+      installed: {
+        sourceId: source.id,
+        pluginId: source.plugin?.id ?? null,
+        pluginStatus: source.plugin?.status ?? null,
+        syncStatus: source.lastStatus,
+        lastSyncedAt: source.lastSyncedAt,
+        lastError: source.lastError,
+      },
+    };
+  }
+  if (!justAdded) return plugin;
+  return {
+    ...plugin,
+    installed: {
+      sourceId: plugin.path,
+      pluginId: null,
+      pluginStatus: null,
+      syncStatus: 'queued',
+      lastSyncedAt: null,
+      lastError: null,
+    },
+  };
+}
+
 function Results({ found, options }: { found: DiscoverPluginsResponse; options: Options }) {
   const queryClient = useQueryClient();
-  const pickable = found.plugins
-    .filter((plugin) => candidateState(plugin).key === 'available')
-    .map((plugin) => plugin.path);
-  const [selected, setSelected] = useState<string[]>(found.layout === 'plugin' ? pickable : []);
-  const [installed, setInstalled] = useState<InstallPluginsResponse | null>(null);
-  const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<CandidateFilter>('all');
+  const pickable = found.plugins.filter(canInstall).map((plugin) => plugin.path);
+  // Coming back to the tab restores what was selected, searched and installed for this inspection.
+  const [saved] = useState(() => {
+    const current = readDiscoverSession();
+    return current.found === found ? current : null;
+  });
+  const [selected, setSelected] = useState<string[]>(
+    saved?.selected ?? (found.layout === 'plugin' ? pickable : []),
+  );
+  const [installed, setInstalled] = useState<InstallPluginsResponse | null>(
+    saved?.installed ?? null,
+  );
+  const [query, setQuery] = useState(saved?.query ?? '');
+  const [filter, setFilter] = useState<CandidateFilter>(saved?.filter ?? 'all');
+  const [hide, setHide] = useState<HideOption[]>(saved?.hide ?? [...DEFAULT_HIDE]);
+  useEffect(() => {
+    updateDiscoverSession({ selected, installed, query, filter, hide });
+  }, [selected, installed, query, filter, hide]);
   const install = useMutation({
     mutationFn: () =>
       adminApi.installPlugins({
@@ -97,14 +156,28 @@ function Results({ found, options }: { found: DiscoverPluginsResponse; options: 
     setSelected((current) =>
       [...new Set([...current, ...shownPickable])].slice(0, MAX_INSTALL_PATHS),
     );
-  // Folders just queued show as installing without asking the server again.
+  // Folders just queued show as installing, then follow the live sync status of their source.
   const justAdded = new Set(
     (installed?.items ?? []).filter((item) => item.outcome === 'added').map((item) => item.path),
   );
-  const shown = filterCandidates(found.plugins, query, filter);
-  const shownPickable = shown
-    .filter((plugin) => candidateState(plugin).key === 'available')
-    .map((plugin) => plugin.path);
+  const liveSources = useQuery({ queryKey: SOURCES_KEY, queryFn: adminApi.listSources });
+  const liveById = new Map((liveSources.data?.items ?? []).map((item) => [item.id, item]));
+  // The install response names each folder's source, so cards follow it by id, not by matching text.
+  const sourceIdByPath = new Map(
+    (installed?.items ?? []).map((item) => [item.path, item.source.id]),
+  );
+  const liveSourceOf = (plugin: DiscoveredPlugin) => {
+    const id = plugin.installed?.sourceId ?? sourceIdByPath.get(plugin.path);
+    return id ? liveById.get(id) : undefined;
+  };
+  // The queued notice goes away once every folder it announced has finished syncing.
+  const stillSyncing = (installed?.items ?? []).some((item) => {
+    if (item.outcome !== 'added') return false;
+    const status = liveById.get(item.source.id)?.lastStatus;
+    return status === undefined || status === 'queued' || status === 'running';
+  });
+  const shown = filterCandidates(found.plugins, query, filter, hide);
+  const shownPickable = shown.filter(canInstall).map((plugin) => plugin.path);
 
   return (
     <section aria-label="Plugins found" className="mt-6">
@@ -162,6 +235,33 @@ function Results({ found, options }: { found: DiscoverPluginsResponse; options: 
                 </option>
               ))}
             </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  {hide.length > 0 ? `Hide (${hide.length})` : 'Hide'}
+                  <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {HIDE_OPTIONS.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={hide.includes(option.value)}
+                    // Keep the menu open so several can be picked in one go.
+                    onSelect={(event) => event.preventDefault()}
+                    onCheckedChange={(on) =>
+                      setHide((current) =>
+                        on
+                          ? [...current.filter((item) => item !== option.value), option.value]
+                          : current.filter((item) => item !== option.value),
+                      )
+                    }
+                  >
+                    {option.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="outline"
               size="sm"
@@ -197,7 +297,7 @@ function Results({ found, options }: { found: DiscoverPluginsResponse; options: 
           {errorMessage(install.error)}
         </Alert>
       )}
-      {installed && <InstallOutcome result={installed} />}
+      {installed && stillSyncing && <InstallOutcome result={installed} />}
       {found.notes.length > 0 && (
         <Alert className="mt-3">
           <p className="font-medium">Left out</p>
@@ -212,28 +312,17 @@ function Results({ found, options }: { found: DiscoverPluginsResponse; options: 
         <p className="mt-4 text-sm text-muted-foreground">No plugins were found in this folder.</p>
       )}
       {found.plugins.length > 0 && shown.length === 0 && (
-        <p className="mt-4 text-sm text-muted-foreground">No plugin matches your search.</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          {query ? 'No plugin matches your search.' : 'Every plugin is hidden by the Hide options.'}
+        </p>
       )}
       <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-3">
         {shown.map((plugin) => (
           <DiscoverCandidate
             key={plugin.path}
-            plugin={
-              justAdded.has(plugin.path)
-                ? {
-                    ...plugin,
-                    installed: {
-                      sourceId: plugin.path,
-                      pluginId: null,
-                      pluginStatus: null,
-                      syncStatus: 'queued',
-                      lastSyncedAt: null,
-                      lastError: null,
-                    },
-                  }
-                : plugin
-            }
+            plugin={withLiveStatus(plugin, liveSourceOf(plugin), justAdded.has(plugin.path))}
             checked={selected.includes(plugin.path)}
+            githubUrl={githubFolderUrl(found, plugin.path)}
             limitReached={limitReached}
             onToggle={() => toggle(plugin.path)}
           />
@@ -244,16 +333,45 @@ function Results({ found, options }: { found: DiscoverPluginsResponse; options: 
 }
 
 function FindPlugins() {
-  const [url, setUrl] = useState('');
-  const [branch, setBranch] = useState('');
-  const [options, setOptions] = useState<Options>({
-    featured: false,
-    verified: false,
-    private: false,
-  });
+  // The form and the inspection survive switching tabs; Clear starts over.
+  const [url, setUrl] = useState(() => readDiscoverSession().url);
+  const [branch, setBranch] = useState(() => readDiscoverSession().branch);
+  const [options, setOptions] = useState<Options>(() => readDiscoverSession().options);
+  const [found, setFound] = useState(() => readDiscoverSession().found);
+  const [foundAt, setFoundAt] = useState(() => readDiscoverSession().foundAt);
   const [invalid, setInvalid] = useState(false);
-  const inspect = useMutation({ mutationFn: adminApi.discoverPlugins });
-  const [historyOpen, setHistoryOpen] = useState(true);
+  const inspect = useMutation({
+    mutationFn: adminApi.discoverPlugins,
+    onSuccess: (data) => {
+      const at = Date.now();
+      updateDiscoverSession({
+        found: data,
+        foundAt: at,
+        selected: null,
+        installed: null,
+        query: '',
+        filter: 'all',
+        hide: [...DEFAULT_HIDE],
+      });
+      setFound(data);
+      setFoundAt(at);
+    },
+  });
+  useEffect(() => {
+    updateDiscoverSession({ url, branch, options });
+  }, [url, branch, options]);
+  const clear = () => {
+    clearDiscoverSession();
+    inspect.reset();
+    setUrl('');
+    setBranch('');
+    setOptions(readDiscoverSession().options);
+    setFound(null);
+    setFoundAt(0);
+    setInvalid(false);
+    setHistoryOpen(true);
+  };
+  const [historyOpen, setHistoryOpen] = useState(() => readDiscoverSession().found === null);
   // Shares its data with the added repositories tab; one entry per repository and branch.
   const sources = useQuery({ queryKey: SOURCES_KEY, queryFn: adminApi.listSources });
   const history = [
@@ -374,11 +492,16 @@ function FindPlugins() {
                 <Search />
                 {inspect.isPending ? 'Inspecting…' : 'Inspect repository'}
               </Button>
+              {(found !== null || url !== '' || branch !== '') && (
+                <Button type="button" variant="outline" className="ml-2" onClick={clear}>
+                  Clear
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>
       </Card>
-      {inspect.data && <Results key={inspect.submittedAt} found={inspect.data} options={options} />}
+      {found && <Results key={foundAt} found={found} options={options} />}
     </div>
   );
 }

@@ -22,6 +22,16 @@ function clientDist(): string {
   return dir;
 }
 
+describe('runtime config', () => {
+  it('publishes the gateway address from the environment without a session', async () => {
+    web = await buildTestWeb();
+    const res = await web.server.app.inject({ method: 'GET', url: '/api/runtime-config' });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect((res.json() as { gatewayUrl: string }).gatewayUrl).toMatch(/^https?:\/\//);
+  });
+});
+
 describe('CSRF', () => {
   it('issues a token and a host-bound cookie', async () => {
     web = await buildTestWeb();

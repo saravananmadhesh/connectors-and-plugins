@@ -5,6 +5,7 @@
 import { and, eq, isNull, lt, or } from 'drizzle-orm';
 import {
   apiKeyTable,
+  organizationMemberTable,
   organizationTable,
   projectTable,
   userTable,
@@ -23,7 +24,7 @@ import {
   splitApiKey,
   safeCompareHash,
 } from '@boldcreate-integrations/security';
-import type { Resource } from '../permissions/authorize.js';
+import { managesOrg, type Resource } from '../permissions/authorize.js';
 
 export interface KeyIdentity {
   principal: ApiKeyPrincipal;
@@ -80,9 +81,13 @@ export async function authenticateKey(
   if (key.revokedAt) return null;
   if (key.expiresAt && key.expiresAt <= now) return null;
 
+  // The For You key serves its creator's own installs next to the organization's; a session key
+  // serves its project user's.
+  const subjectId = isSession ? (key.ownerUserId ?? undefined) : key.principalUserId;
+
   const standing = await withTenant(
     db,
-    { orgId: key.organizationId, userId: key.ownerUserId ?? undefined },
+    { orgId: key.organizationId, userId: subjectId },
     async (tx) => {
       const [org] = await tx
         .select({
@@ -97,6 +102,22 @@ export async function authenticateKey(
         )
         .limit(1);
       if (!org) return null;
+
+      if (!isSession) {
+        // The key stops serving the creator's files once they leave, are suspended or become a viewer.
+        const [member] = await tx
+          .select({ role: organizationMemberTable.role })
+          .from(organizationMemberTable)
+          .where(
+            and(
+              eq(organizationMemberTable.organizationId, key.organizationId),
+              eq(organizationMemberTable.userId, key.principalUserId),
+              eq(organizationMemberTable.status, 'active'),
+            ),
+          )
+          .limit(1);
+        if (!member || !managesOrg(member.role)) return null;
+      }
 
       if (isSession) {
         if (!key.ownerUserId || !key.projectId) return null;
@@ -158,7 +179,7 @@ export async function authenticateKey(
       keyId: key.keyId,
       orgId: key.organizationId,
       scope: key.scopeType,
-      ...(key.ownerUserId ? { userId: key.ownerUserId } : {}),
+      ...(subjectId ? { userId: subjectId } : {}),
       ...(isSession && key.projectId
         ? {
             projectId: key.projectId,

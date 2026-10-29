@@ -4,6 +4,7 @@ export const qk = {
   org: (orgId: string) => ['org', orgId] as const,
   orgMe: (orgId: string) => ['org', orgId, 'me'] as const,
   orgMembers: (orgId: string) => ['org', orgId, 'members'] as const,
+  orgInvites: (orgId: string) => ['org', orgId, 'invites'] as const,
   orgPolicy: (orgId: string) => ['org', orgId, 'policy'] as const,
   // Marketplace
   marketplacePlugins: () => ['marketplace', 'plugins'] as const,

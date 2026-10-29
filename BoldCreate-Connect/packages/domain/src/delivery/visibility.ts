@@ -46,7 +46,6 @@ function scopeFilter(principal: ApiKeyPrincipal): SQL {
           eq(installationTable.projectId, principal.projectId),
         )
       : undefined;
-  if (principal.scope === 'org') return or(org, project) ?? org;
   // A person's own install carries no project; a project user's carries the project of the key.
   const own =
     principal.userId !== undefined

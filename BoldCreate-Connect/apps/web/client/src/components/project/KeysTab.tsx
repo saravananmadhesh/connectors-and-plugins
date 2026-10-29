@@ -247,7 +247,7 @@ export function KeysTab({ orgId, projectId, canWrite }: TabProps) {
           <EmptyState
             icon={KeyRound}
             title="No keys yet"
-            description="Create a key for your server to call BoldCreate for this project."
+            description="Create a key for your server to call BoldConnect for this project."
           />
         ) : (
           <>

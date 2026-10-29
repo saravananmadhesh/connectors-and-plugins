@@ -102,6 +102,8 @@ describe('requests of the project client', () => {
     await connect.users.plugins(user);
     await connect.users.install(user, PLG, { versionId: PV });
     await connect.users.uninstall(user, PLG);
+    await connect.users.setComponentEnabled(user, PLG, CMP, false);
+    await connect.users.clearComponentEnabled(user, PLG, CMP);
     await connect.sessions.list({ userId: user, limit: 5 });
     await connect.sessions.get(id('pjs'));
     await connect.sessions.delete(id('pjs'));
@@ -187,6 +189,8 @@ describe('requests of a session', () => {
     await session.plugins.update(PLG, { versionId: PV });
     await session.plugins.remove(PLG);
     await session.plugins.setVariables(PLG, { A: 'x', B: null });
+    await session.plugins.setComponentEnabled(PLG, CMP, false);
+    await session.plugins.clearComponentEnabled(PLG, CMP);
     await session.manifest({ kinds: ['skill', 'rule'], plugins: ['alpha'], revision: 'r0' });
     await session.report({ applied: [{ componentId: CMP, sha256: 'a'.repeat(64) }] });
     await session.component('a'.repeat(64)).catch(() => undefined);

@@ -7,6 +7,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import { and, asc, eq, inArray, ne, sql } from 'drizzle-orm';
+import { effectiveEnabled } from '../delivery/effective-enabled.js';
 import {
   componentTable,
   decodeCursor,
@@ -129,7 +130,7 @@ async function plan(
     .where(
       and(
         eq(installationComponentTable.componentId, input.componentId),
-        eq(installationComponentTable.enabled, true),
+        effectiveEnabled(principal.userId),
         inArray(
           installationComponentTable.installationId,
           installations.map((item) => item.installationId),
@@ -422,7 +423,7 @@ export async function putProjectConnection(
     .where(
       and(
         eq(installationComponentTable.componentId, body.componentId),
-        eq(installationComponentTable.enabled, true),
+        effectiveEnabled(userId),
         inArray(
           installationComponentTable.installationId,
           installations.map((item) => item.installationId),

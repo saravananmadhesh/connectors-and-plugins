@@ -20,8 +20,8 @@ const ROUTE = '/orgs/$orgId/projects/$projectId';
 const SECRET_VALUE = 'sk-live-supersecretvalue';
 
 const render = (tab: string, role: TestRole = 'ADMIN') =>
-  renderWithRouter(ProjectPage, ROUTE, {
-    url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}?tab=${tab}`,
+  renderWithRouter(ProjectPage, `${ROUTE}/$tab`, {
+    url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}/${tab}`,
     queryData: baseData(role),
   });
 

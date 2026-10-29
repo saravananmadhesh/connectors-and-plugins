@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { UserAvatar } from '@/components/UserAvatar';
+import { ClickableRow } from '@/components/ClickableRow';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
 import { projects } from '@/lib/api';
@@ -304,20 +306,29 @@ export function UsersTab({ orgId, projectId, canWrite }: TabProps) {
                 </TableHeader>
                 <TableBody>
                   {items.map((user) => (
-                    <TableRow key={user.id}>
+                    <ClickableRow key={user.id} onActivate={() => setOpen(user)}>
                       <TableCell>
-                        <button
-                          type="button"
-                          className="text-left font-medium hover:underline"
-                          onClick={() => setOpen(user)}
-                        >
-                          {user.userId}
-                        </button>
-                        {user.displayName && (
-                          <span className="block text-xs text-muted-foreground">
-                            {user.displayName}
+                        <span className="flex items-center gap-2.5">
+                          <UserAvatar
+                            name={user.displayName || user.userId}
+                            colorKey={user.userId}
+                            className="size-7"
+                          />
+                          <span>
+                            <button
+                              type="button"
+                              className="text-left font-medium hover:underline"
+                              onClick={() => setOpen(user)}
+                            >
+                              {user.userId}
+                            </button>
+                            {user.displayName && (
+                              <span className="block text-xs text-muted-foreground">
+                                {user.displayName}
+                              </span>
+                            )}
                           </span>
-                        )}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.status === 'active' ? 'secondary' : 'outline'}>
@@ -343,7 +354,7 @@ export function UsersTab({ orgId, projectId, canWrite }: TabProps) {
                           </Button>
                         )}
                       </TableCell>
-                    </TableRow>
+                    </ClickableRow>
                   ))}
                 </TableBody>
               </Table>

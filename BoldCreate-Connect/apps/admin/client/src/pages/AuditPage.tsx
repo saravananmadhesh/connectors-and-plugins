@@ -76,7 +76,7 @@ export function AuditPage() {
     <div className="mx-auto max-w-7xl p-6">
       <PageHeader
         title="Audit"
-        description="Who did what, and when, across the integrations platform. Visible to platform admins only."
+        description="Who did what, and when, across the platform. Visible to platform admins only."
       />
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <Field label="Who">

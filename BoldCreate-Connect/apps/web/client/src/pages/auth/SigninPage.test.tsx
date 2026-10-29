@@ -12,9 +12,10 @@ import { renderWithRouter } from '@/test/render-with-router';
 import type { Id } from '@boldcreate-integrations/contracts';
 
 const EXTRA = [
-  { path: '/marketplace', component: () => <div>marketplace</div> },
+  { path: '/orgs', component: () => <div>marketplace</div> },
   { path: '/forgot-password', component: () => <div>forgot</div> },
   { path: '/signup', component: () => <div>signup</div> },
+  { path: '/accept-invite', component: () => <div>accept invite</div> },
 ];
 
 describe('SigninPage', () => {
@@ -36,7 +37,7 @@ describe('SigninPage', () => {
   it('renders email, password fields and sign-in button', async () => {
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
@@ -46,7 +47,7 @@ describe('SigninPage', () => {
       .mockRejectedValue(new apiModule.ApiError(401, 'unauthenticated', 'Unauthenticated'));
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'short');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'short');
     expect(screen.queryByText('Password must be at least 12 characters')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -74,7 +75,7 @@ describe('SigninPage', () => {
     );
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password12345');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password12345');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => expect(me).toHaveBeenCalledOnce());
@@ -104,13 +105,41 @@ describe('SigninPage', () => {
     await waitFor(() => expect(screen.getByText('marketplace')).toBeInTheDocument());
   });
 
+  it('carries a pending invitation through sign-in and fills in the invited address', async () => {
+    localStorage.setItem('pending-invite-token', 'tok-1');
+    localStorage.setItem('pending-invite-email', 'ada@example.com');
+    localStorage.setItem('pending-invite-org', 'Acme');
+    vi.spyOn(apiModule.auth, 'signin').mockResolvedValue({} as never);
+    await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
+    expect(screen.getByText(/sign in to join Acme as ada@example.com/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toHaveValue('ada@example.com');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password12345');
+    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    await waitFor(() => expect(screen.getByText('accept invite')).toBeInTheDocument());
+    localStorage.clear();
+  });
+
+  it('offers to send the verification mail again when the address is not verified', async () => {
+    vi.spyOn(apiModule.auth, 'signin').mockRejectedValue(
+      new apiModule.ApiError(403, 'email_not_verified', 'The email address has not been verified.'),
+    );
+    const resend = vi.spyOn(apiModule.auth, 'resendVerification').mockResolvedValue(undefined);
+    await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
+    await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password12345');
+    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    expect(await screen.findByText(/not verified yet/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Resend email' }));
+    await waitFor(() => expect(resend).toHaveBeenCalledWith('ada@example.com'));
+  });
+
   it('shows generic message on 401', async () => {
     vi.spyOn(apiModule.auth, 'signin').mockRejectedValue(
       new apiModule.ApiError(401, 'unauthenticated', 'Unauthenticated'),
     );
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword1');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'wrongpassword1');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent(/incorrect email or password/i),
@@ -123,7 +152,7 @@ describe('SigninPage', () => {
     );
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password12345');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password12345');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Service unavailable'));
   });
@@ -142,7 +171,7 @@ describe('SigninPage', () => {
     vi.spyOn(apiModule.auth, 'signin').mockReturnValue(new Promise(() => {}));
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password12345');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password12345');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
     expect(screen.getByRole('button', { name: /sign in/i })).toBeDisabled();
     expect(document.querySelector('svg')).toBeInTheDocument();
@@ -152,7 +181,7 @@ describe('SigninPage', () => {
     vi.spyOn(apiModule.auth, 'signin').mockRejectedValue(new Error('Network error'));
     await renderWithRouter(SigninPage, '/signin', { extraRoutes: EXTRA });
     await userEvent.type(screen.getByLabelText(/email/i), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password12345');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password12345');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong'),

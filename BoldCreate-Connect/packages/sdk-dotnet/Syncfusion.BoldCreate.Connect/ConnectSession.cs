@@ -279,4 +279,16 @@ public sealed class SessionPluginsApi
         string pluginId, IReadOnlyDictionary<string, string?> values, CancellationToken ct = default) =>
         await _http.JsonAsync<UserPlugin>(HttpMethod.Put, $"{PluginPath(pluginId)}/variables",
             new { values }, ct: ct).ConfigureAwait(false) ?? throw UsersApi.Empty();
+
+    /// <summary>Turns one component on or off for the user; on a project-provided plugin this stores the user's own preference.</summary>
+    public async Task<UserPlugin> SetComponentEnabledAsync(
+        string pluginId, string componentId, bool enabled, CancellationToken ct = default) =>
+        await _http.JsonAsync<UserPlugin>(HttpMethod.Put, $"{PluginPath(pluginId)}/components/{Paths.Id(componentId)}",
+            new { enabled }, ct: ct).ConfigureAwait(false) ?? throw UsersApi.Empty();
+
+    /// <summary>Drops the user's own preference for one component, so the user follows the install again.</summary>
+    public async Task<UserPlugin> ClearComponentEnabledAsync(
+        string pluginId, string componentId, CancellationToken ct = default) =>
+        await _http.JsonAsync<UserPlugin>(HttpMethod.Delete, $"{PluginPath(pluginId)}/components/{Paths.Id(componentId)}",
+            ct: ct).ConfigureAwait(false) ?? throw UsersApi.Empty();
 }

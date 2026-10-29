@@ -240,6 +240,20 @@ describe('ConnectSession', () => {
       ]);
     });
 
+    it('turns a component on or off and clears the preference again', async () => {
+      const { session: value, calls } = session({
+        'PUT /v1/session/plugins/plg_1/components/cmp_1': json(USER_PLUGIN),
+        'DELETE /v1/session/plugins/plg_1/components/cmp_1': json(USER_PLUGIN),
+      });
+      await value.plugins.setComponentEnabled('plg_1', 'cmp_1', false);
+      await value.plugins.clearComponentEnabled('plg_1', 'cmp_1');
+      expect(calls.map((call) => `${call.method} ${call.url.pathname}`)).toEqual([
+        'PUT /v1/session/plugins/plg_1/components/cmp_1',
+        'DELETE /v1/session/plugins/plg_1/components/cmp_1',
+      ]);
+      expect(calls[0]?.body).toEqual({ enabled: false });
+    });
+
     it('searches the catalog the user may install from', async () => {
       const { session: value, calls } = session({
         'GET /v1/session/catalog': json({ items: [], total: 0, page: 1, pageSize: 25 }),

@@ -125,6 +125,8 @@ export interface PluginCandidate {
   /** The plugin's logo file inside the folder, only when the archive really holds it. */
   logo: string | null;
   componentCounts: Record<string, number>;
+  /** How the plugin's MCP servers connect, each kind once. */
+  mcpTransports: ('http' | 'stdio')[];
   /** Why the folder cannot be installed; null when it can. */
   problem: string | null;
 }
@@ -149,7 +151,8 @@ function candidateOf(
       componentCounts[component.kind] = (componentCounts[component.kind] ?? 0) + 1;
     }
     const logo = manifest.logo !== null && files.has(manifest.logo) ? manifest.logo : null;
-    return { path, manifest, label: null, logo, componentCounts, problem: null };
+    const mcpTransports = [...new Set(scan.mcpServers.map((server) => server.transport))].sort();
+    return { path, manifest, label: null, logo, componentCounts, mcpTransports, problem: null };
   } catch (error) {
     const problem =
       error instanceof IngestionError
@@ -161,6 +164,7 @@ function candidateOf(
       label: peekManifestLabel(files),
       logo: null,
       componentCounts: {},
+      mcpTransports: [],
       problem,
     };
   }
@@ -205,6 +209,7 @@ export function discoverPlugins(
         label: null,
         logo: null,
         componentCounts: {},
+        mcpTransports: [],
         problem: 'No plugin manifest in this folder.',
       });
     }

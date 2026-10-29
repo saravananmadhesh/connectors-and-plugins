@@ -370,6 +370,68 @@ describe('the state of a project user', () => {
     ]);
   });
 
+  it('keeps a component preference per user on a project plugin, and an admin off still wins', async () => {
+    const h = await createHost();
+    const plugin = await seedPlugin();
+    expect((await host(h, 'PUT', `/plugins/${plugin.pluginId}`, {})).status).toBeLessThan(300);
+    // An install for a user creates the user; this one is a different plugin, so both users
+    // still reach the project's plugin through the shared install.
+    const other = await seedPlugin();
+    for (const userId of ['ada', 'bob']) {
+      await host(h, 'PUT', `/user-plugins/${other.pluginId}`, { userId });
+    }
+    const componentOf = async (userId: string) =>
+      (await stateOf(h, userId)).find((item) => item.pluginId === plugin.pluginId)?.components[0];
+    const toggle = (userId: string, componentId: string, enabled: boolean) =>
+      host(h, 'PUT', `/user-plugins/${plugin.pluginId}/components/${componentId}`, {
+        userId,
+        enabled,
+      });
+
+    const start = await componentOf('ada');
+    expect(start?.enabled).toBe(true);
+    const componentId = start?.componentId ?? '';
+
+    expect((await toggle('ada', componentId, false)).status).toBe(200);
+    expect((await componentOf('ada'))?.enabled).toBe(false);
+    expect((await componentOf('bob'))?.enabled).toBe(true);
+
+    expect((await toggle('ada', componentId, true)).status).toBe(200);
+    expect((await componentOf('ada'))?.enabled).toBe(true);
+
+    await sql(
+      `UPDATE installation_component SET enabled = false
+       WHERE installation_id IN (SELECT id FROM installation WHERE project_id = $1)`,
+      [h.rawProjectId],
+    );
+    expect((await toggle('ada', componentId, true)).status).toBe(200);
+    expect((await componentOf('ada'))?.enabled).toBe(false);
+
+    expect((await toggle('ada', formatId('cmp', randomUUID()), false)).status).toBe(404);
+  });
+
+  it('clears a component preference so the user follows the install again', async () => {
+    const h = await createHost();
+    const plugin = await seedPlugin();
+    expect((await host(h, 'PUT', `/plugins/${plugin.pluginId}`, {})).status).toBeLessThan(300);
+    const other = await seedPlugin();
+    await host(h, 'PUT', `/user-plugins/${other.pluginId}`, { userId: 'ada' });
+    const componentOf = async () =>
+      (await stateOf(h, 'ada')).find((item) => item.pluginId === plugin.pluginId)?.components[0];
+    const componentId = (await componentOf())?.componentId ?? '';
+    const path = `/user-plugins/${plugin.pluginId}/components/${componentId}`;
+
+    await host(h, 'PUT', path, { userId: 'ada', enabled: false });
+    expect((await componentOf())?.enabled).toBe(false);
+
+    expect((await host(h, 'DELETE', `${path}?userId=ada`)).status).toBe(200);
+    expect((await componentOf())?.enabled).toBe(true);
+    expect((await host(h, 'DELETE', `${path}?userId=ada`)).status).toBe(200);
+
+    const missing = `/user-plugins/${plugin.pluginId}/components/${formatId('cmp', randomUUID())}`;
+    expect((await host(h, 'DELETE', `${missing}?userId=ada`)).status).toBe(404);
+  });
+
   it('leaves the sign-in out for a key without connections:read', async () => {
     const h = await createHost();
     const plugin = await seedPlugin();

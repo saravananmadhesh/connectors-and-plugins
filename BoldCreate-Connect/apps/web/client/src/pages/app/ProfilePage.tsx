@@ -7,13 +7,14 @@ import { qk } from '@/lib/query-keys';
 import { cn } from '@/lib/cn';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input, PasswordInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
 import { DeleteUserDialog } from '@/components/delete-user-dialog';
 import { Page } from '@/components/Page';
+import { UserAvatar } from '@/components/UserAvatar';
 import { PageHeader } from '@/components/PageHeader';
 
 /** One settings block: what it is on the left, the controls on the right. */
@@ -114,12 +115,11 @@ export function ProfilePage() {
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-4 p-6">
-          <span
-            aria-hidden="true"
-            className="grid size-14 shrink-0 place-items-center rounded-full bg-muted text-xl font-semibold uppercase"
-          >
-            {user?.displayName.slice(0, 1)}
-          </span>
+          <UserAvatar
+            name={user?.displayName ?? ''}
+            colorKey={user?.email ?? ''}
+            className="size-14 text-xl"
+          />
           <div className="min-w-0 flex-1 space-y-1">
             <p className="truncate text-lg leading-tight font-semibold">{user?.displayName}</p>
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -170,9 +170,8 @@ export function ProfilePage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="email-pw">Confirm with your password</Label>
-            <Input
+            <PasswordInput
               id="email-pw"
-              type="password"
               autoComplete="current-password"
               value={emailPassword}
               onChange={(e) => setEmailPassword(e.target.value)}
@@ -203,9 +202,8 @@ export function ProfilePage() {
           {pwError && <Alert variant="destructive">{pwError}</Alert>}
           <div className="space-y-1.5">
             <Label htmlFor="current-pw">Current password</Label>
-            <Input
+            <PasswordInput
               id="current-pw"
-              type="password"
               autoComplete="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -213,9 +211,8 @@ export function ProfilePage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-pw">New password</Label>
-            <Input
+            <PasswordInput
               id="new-pw"
-              type="password"
               autoComplete="new-password"
               placeholder="12+ characters"
               value={newPassword}

@@ -48,6 +48,8 @@ import { assertPasswordPolicy, type AuthContext, type AuthPolicy } from './auth-
 
 const RESET_TOKEN_TTL_SECONDS = 60 * 60; // 1 hour
 const PASSWORD_METHOD = 'password';
+/** The shortest wait between two verification mails for one address; the page counts it down. */
+export const VERIFICATION_RESEND_COOLDOWN_SECONDS = 60;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -205,6 +207,30 @@ export function isReservedAddress(normalizedEmail: string): boolean {
   return normalizedEmail.endsWith('.invalid');
 }
 
+/** Whether `token` is an open invite sent to this address: proof that the person reads the mailbox. */
+async function holdsOpenInvite(
+  db: Executor,
+  token: string | undefined,
+  normalizedEmail: string,
+  now: Date,
+): Promise<boolean> {
+  if (!token) return false;
+  const [row] = await db
+    .select({ id: emailTokenTable.id })
+    .from(emailTokenTable)
+    .where(
+      and(
+        eq(emailTokenTable.tokenHash, hashEmailToken(token)),
+        eq(emailTokenTable.purpose, 'invite'),
+        eq(emailTokenTable.targetEmailNormalized, normalizedEmail),
+        isNull(emailTokenTable.consumedAt),
+        gt(emailTokenTable.expiresAt, now),
+      ),
+    )
+    .limit(1);
+  return row !== undefined;
+}
+
 export async function signup(
   db: Executor,
   body: SignupBody,
@@ -217,16 +243,74 @@ export async function signup(
   if (isReservedAddress(normalized)) return { userId: randomUUID() };
 
   // Check for an existing user — generic response to avoid enumeration
+  const now = new Date();
+  const invited = await holdsOpenInvite(db, body.inviteToken, normalized, now);
   const existing = await db
-    .select({ id: userTable.id, kind: userTable.kind })
+    .select({
+      id: userTable.id,
+      kind: userTable.kind,
+      email: userTable.email,
+      emailVerifiedAt: userTable.emailVerifiedAt,
+    })
     .from(userTable)
     .where(eq(userTable.emailNormalized, normalized))
     .limit(1);
 
+  const [found] = existing;
+  if (found && invited && found.kind === 'human' && found.emailVerifiedAt === null) {
+    // Someone registered this address without ever proving it. The invite shows who reads the
+    // mailbox, so the new password replaces theirs and the address counts as verified.
+    const secretHash = await hashPassword(body.password);
+    await db.transaction(async (tx) => {
+      await tx
+        .update(authIdentityTable)
+        .set({ secretHash })
+        .where(
+          and(
+            eq(authIdentityTable.userId, found.id),
+            eq(authIdentityTable.provider, PASSWORD_METHOD),
+          ),
+        );
+      await tx
+        .update(userTable)
+        .set({
+          emailVerifiedAt: now,
+          starterOrgProvisionedAt: now,
+          displayName: body.displayName.trim(),
+          failedLoginCount: 0,
+          updatedAt: now,
+        })
+        .where(eq(userTable.id, found.id));
+      await tx
+        .update(emailTokenTable)
+        .set({ consumedAt: now })
+        .where(
+          and(
+            eq(emailTokenTable.purpose, 'verification'),
+            eq(emailTokenTable.targetUserId, found.id),
+            isNull(emailTokenTable.consumedAt),
+          ),
+        );
+    });
+    return { userId: found.id };
+  }
+
+  if (found && found.kind === 'human' && found.emailVerifiedAt === null) {
+    // Signed up before and never verified: the answer is the same as for a new address, and the
+    // link goes out again, so the person is not left waiting for a mail that will not come. Their
+    // password is not changed; whoever verifies this address keeps the one set the first time.
+    await sendVerificationLink(db, found);
+    return { userId: found.id };
+  }
+
+  if (found && found.kind === 'human') {
+    // A verified profile owns this address: say so, so the person signs in instead of waiting for
+    // a mail that will not come.
+    throw conflict();
+  }
   if (existing.length > 0) {
-    // Return success-like result; verification email will simply not arrive. The id of a project
-    // user is never handed out.
-    return { userId: existing[0]!.kind === 'human' ? existing[0]!.id : randomUUID() };
+    // A project user's address is never handed out: answer like a new address.
+    return { userId: randomUUID() };
   }
 
   const secretHash = await hashPassword(body.password);
@@ -242,6 +326,9 @@ export async function signup(
         displayName: body.displayName.trim(),
         status: 'active',
         failedLoginCount: 0,
+        // Someone invited into an organization joins that one; a personal organization of their
+        // own is made on request, so the starter one is marked as done without being created.
+        ...(invited ? { emailVerifiedAt: now, starterOrgProvisionedAt: now } : {}),
       });
       await tx.insert(authIdentityTable).values({
         userId,
@@ -249,6 +336,7 @@ export async function signup(
         subject: normalized,
         secretHash,
       });
+      if (invited) return;
       await tx.insert(emailTokenTable).values({
         id: randomUUID(),
         purpose: 'verification',
@@ -357,6 +445,57 @@ export async function verifyEmail(
 
 // ─── Resend verification ──────────────────────────────────────────────────────
 
+/**
+ * Mails a new verification link to someone who has not verified yet. A mail sent a moment ago
+ * means nothing goes out now, so the buttons that call this cannot be used to flood a mailbox.
+ * The new link closes the earlier ones: only the newest works.
+ */
+async function sendVerificationLink(
+  db: Executor,
+  user: Pick<typeof userTable.$inferSelect, 'id' | 'email'>,
+): Promise<void> {
+  const now = new Date();
+  const since = new Date(now.getTime() - VERIFICATION_RESEND_COOLDOWN_SECONDS * 1000);
+  const [recent] = await db
+    .select({ id: emailTokenTable.id })
+    .from(emailTokenTable)
+    .where(
+      and(
+        eq(emailTokenTable.purpose, 'verification'),
+        eq(emailTokenTable.targetUserId, user.id),
+        gt(emailTokenTable.createdAt, since),
+      ),
+    )
+    .limit(1);
+  if (recent) return;
+
+  const token = generateEmailToken(EMAIL_TOKEN_TTL_SECONDS);
+  await db.transaction(async (tx) => {
+    await tx
+      .update(emailTokenTable)
+      .set({ consumedAt: now })
+      .where(
+        and(
+          eq(emailTokenTable.purpose, 'verification'),
+          eq(emailTokenTable.targetUserId, user.id),
+          isNull(emailTokenTable.consumedAt),
+        ),
+      );
+    await tx.insert(emailTokenTable).values({
+      id: randomUUID(),
+      purpose: 'verification',
+      tokenHash: token.hash,
+      targetUserId: user.id,
+      expiresAt: token.expiresAt,
+    });
+    await enqueueEmail(tx, 'email_verification.requested', {
+      to: user.email,
+      token: token.raw,
+      userId: user.id,
+    });
+  });
+}
+
 export async function resendVerification(
   db: Executor,
   body: ResendVerificationBody,
@@ -371,21 +510,7 @@ export async function resendVerification(
 
   const user = rows[0];
   if (!user || user.kind !== 'human' || user.emailVerifiedAt !== null) return;
-
-  const token = generateEmailToken(EMAIL_TOKEN_TTL_SECONDS);
-  await db.insert(emailTokenTable).values({
-    id: randomUUID(),
-    purpose: 'verification',
-    tokenHash: token.hash,
-    targetUserId: user.id,
-    expiresAt: token.expiresAt,
-  });
-
-  await enqueueEmail(db, 'email_verification.requested', {
-    to: user.email,
-    token: token.raw,
-    userId: user.id,
-  });
+  await sendVerificationLink(db, user);
 }
 
 // ─── Sign-in ──────────────────────────────────────────────────────────────────

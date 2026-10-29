@@ -3,6 +3,9 @@
  * A 401 from a read or write clears the token and tells the app the session is gone.
  */
 import type {
+  AddAdminAllowedEmailBody,
+  AdminAllowedEmailListResponse,
+  AdminAllowedEmailResponse,
   AdminAuditListResponse,
   AdminAuditQuery,
   AdminCategoryListResponse,
@@ -39,6 +42,7 @@ import type {
 } from '@boldcreate-integrations/contracts';
 
 export type {
+  AdminAllowedEmailResponse,
   AdminAuditEntry,
   AdminAuditListResponse,
   AdminAuditQuery,
@@ -225,6 +229,14 @@ export const adminApi = {
   updateCategory: (id: string, body: { name?: string; description?: string }) =>
     request<AdminCategoryResponse>('PATCH', `/api/v1/admin/categories/${id}`, body),
   deleteCategory: (id: string) => request<void>('DELETE', `/api/v1/admin/categories/${id}`),
+  listAllowedEmails: () =>
+    request<AdminAllowedEmailListResponse>('GET', '/api/v1/admin/allowed-emails'),
+  addAllowedEmail: (body: AddAdminAllowedEmailBody) =>
+    request<AdminAllowedEmailResponse>('POST', '/api/v1/admin/allowed-emails', body),
+  inviteAllowedEmail: (email: string) =>
+    request<void>('POST', `/api/v1/admin/allowed-emails/${encodeURIComponent(email)}/invite`),
+  removeAllowedEmail: (email: string) =>
+    request<void>('DELETE', `/api/v1/admin/allowed-emails/${encodeURIComponent(email)}`),
   yankVersion: (id: string, force: boolean) =>
     request<AdminVersionDetailResponse>('POST', `/api/v1/admin/plugin-versions/${id}/yank`, {
       force,

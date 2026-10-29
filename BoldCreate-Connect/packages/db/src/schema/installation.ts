@@ -128,6 +128,47 @@ export const installationComponentTable = pgTable(
   ],
 );
 
+// ─── user_component_preference ──────────────────────────────────────────────────
+
+/**
+ * One user's own on/off choice for a component of a shared install (an organization or project
+ * install). The install's `enabled` stays the default an administrator sets; an override can only
+ * turn off what the install has on. No row means the user follows the install.
+ */
+export const userComponentPreferenceTable = pgTable(
+  'user_component_preference',
+  {
+    installationId: uuid('installation_id').notNull(),
+    organizationId: uuid('organization_id').notNull(),
+    componentId: uuid('component_id').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => userTable.id, { onDelete: 'cascade' }),
+    enabled: boolean('enabled').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: 'user_component_preference_pk',
+      columns: [t.installationId, t.componentId, t.userId],
+    }),
+    foreignKey({
+      name: 'user_component_preference_component_fk',
+      columns: [t.installationId, t.componentId],
+      foreignColumns: [
+        installationComponentTable.installationId,
+        installationComponentTable.componentId,
+      ],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'user_component_preference_installation_organization_fk',
+      columns: [t.installationId, t.organizationId],
+      foreignColumns: [installationTable.id, installationTable.organizationId],
+    }).onDelete('cascade'),
+  ],
+);
+
 // ─── installation_variable ────────────────────────────────────────────────────
 
 /** One value the installer set for a variable the plugin version declares; sealed, write-only. */

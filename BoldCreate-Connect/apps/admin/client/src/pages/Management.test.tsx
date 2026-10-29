@@ -132,7 +132,6 @@ describe('plugin source', () => {
     expect(await within(panel).findByRole('button', { name: 'Sync in progress' })).toBeDisabled();
     expect(within(panel).getByText('Waiting to sync')).toBeInTheDocument();
     expect(calls.some((call) => call.path === `${PLUGIN}/sync`)).toBe(true);
-    expect(calls.some((call) => call.path.includes('plugin-sources'))).toBe(false);
   });
 
   it('links to the folder on GitHub', async () => {

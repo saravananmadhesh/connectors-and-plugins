@@ -53,6 +53,43 @@ public class ContractTests
     }
 
     [Fact]
+    public async Task Users_set_one_component_on_or_off()
+    {
+        var (client, handler) = Make();
+        handler.Enqueue(HttpStatusCode.OK, UserPluginRow);
+
+        await client.Users.SetComponentEnabledAsync("u", "plg_1", "cmp/1", false);
+
+        Expect(handler, 0, HttpMethod.Put, "/v1/project/user-plugins/plg_1/components/cmp%2F1", "{\"userId\":\"u\",\"enabled\":false}");
+    }
+
+    [Fact]
+    public async Task Users_clear_one_component_preference()
+    {
+        var (client, handler) = Make();
+        handler.Enqueue(HttpStatusCode.OK, UserPluginRow);
+
+        await client.Users.ClearComponentEnabledAsync("u", "plg_1", "cmp/1");
+
+        Expect(handler, 0, HttpMethod.Delete, "/v1/project/user-plugins/plg_1/components/cmp%2F1?userId=u");
+    }
+
+    [Fact]
+    public async Task Session_turns_one_component_on_or_off_and_clears_it_again()
+    {
+        var (client, handler) = Make();
+        var session = await SessionOf(client, handler);
+        handler.Enqueue(HttpStatusCode.OK, UserPluginRow);
+        handler.Enqueue(HttpStatusCode.OK, UserPluginRow);
+
+        await session.Plugins.SetComponentEnabledAsync("plg_1", "cmp/1", false);
+        await session.Plugins.ClearComponentEnabledAsync("plg_1", "cmp/1");
+
+        Expect(handler, 1, HttpMethod.Put, "/v1/session/plugins/plg_1/components/cmp%2F1", "{\"enabled\":false}");
+        Expect(handler, 2, HttpMethod.Delete, "/v1/session/plugins/plg_1/components/cmp%2F1");
+    }
+
+    [Fact]
     public async Task Project_plugins_and_users()
     {
         var (client, handler) = Make();

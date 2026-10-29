@@ -6,7 +6,13 @@
  */
 import { beforeAll, describe, expect, it } from 'vitest';
 import { callApi } from './org-fixture.js';
-import { createSignedInUser, mailToken, sql, type SignedInUser } from './signed-in-user.js';
+import {
+  apiPost,
+  createSignedInUser,
+  mailToken,
+  sql,
+  type SignedInUser,
+} from './signed-in-user.js';
 
 interface Outcome {
   email: string;
@@ -160,6 +166,166 @@ describe('resending an invite', () => {
       [owner.rawOrgId],
     );
     expect(audit!.n).toBe(1);
+  });
+});
+
+describe('invite lifecycle', () => {
+  const expire = (inviteId: string) =>
+    sql(`UPDATE email_token SET expires_at = now() - interval '1 minute' WHERE id = $1`, [
+      inviteId.replace(/^inv_/, ''),
+    ]);
+
+  it('keeps an expired invite listed, refuses its link, and lets the sender resend it', async () => {
+    const person = await createSignedInUser('invite-expired');
+    const out = await results(await invite({ emails: [person.email], role: 'MEMBER' }));
+    const inviteId = out[0]!.invite!.id;
+    const link = await mailToken(person.email, 'invited');
+    await expire(out[0]!.invite!.id);
+
+    const listed = (await (await callApi('GET', invitesPath(), owner)).json()) as {
+      items: { id: string; expiresAt: string }[];
+    };
+    const row = listed.items.find((item) => item.id === inviteId);
+    expect(row).toBeDefined();
+    expect(new Date(row!.expiresAt).getTime()).toBeLessThan(Date.now());
+
+    expect((await callApi('POST', '/v1/invites/accept', person, { token: link })).status).toBe(400);
+    expect((await callApi('POST', `${invitesPath()}/${inviteId}/resend`, owner)).status).toBe(202);
+  });
+
+  it('replaces the earlier link when the same address is invited again', async () => {
+    const person = await createSignedInUser('invite-twice');
+    await results(await invite({ emails: [person.email], role: 'VIEWER' }));
+    await results(await invite({ emails: [person.email], role: 'VIEWER' }));
+    const listed = (await (await callApi('GET', invitesPath(), owner)).json()) as {
+      items: { email: string }[];
+    };
+    expect(listed.items.filter((item) => item.email === person.email)).toHaveLength(1);
+  });
+
+  it('closes an invite once it is revoked or accepted', async () => {
+    const person = await createSignedInUser('invite-closed');
+    const out = await results(await invite({ emails: [person.email], role: 'VIEWER' }));
+    const inviteId = out[0]!.invite!.id;
+    expect((await callApi('DELETE', `${invitesPath()}/${inviteId}`, owner)).status).toBe(204);
+    expect((await callApi('DELETE', `${invitesPath()}/${inviteId}`, owner)).status).toBe(404);
+    expect((await callApi('POST', `${invitesPath()}/${inviteId}/resend`, owner)).status).toBe(404);
+  });
+});
+
+describe('looking an invite up before sign-in', () => {
+  const preview = async (token: string) =>
+    (await (await apiPost('/v1/invites/preview', { token })).json()) as {
+      state: string;
+      email: string | null;
+      registered: boolean | null;
+    };
+
+  it('says whether the invited address is already registered', async () => {
+    const stranger = `preview-new-${Date.now()}@example.com`;
+    const known = await createSignedInUser('invite-preview-known');
+    await results(await invite({ emails: [stranger, known.email], role: 'VIEWER' }));
+    expect(await preview(await mailToken(stranger, 'invited'))).toMatchObject({
+      state: 'valid',
+      email: stranger,
+      registered: false,
+    });
+    expect(await preview(await mailToken(known.email, 'invited'))).toMatchObject({
+      state: 'valid',
+      registered: true,
+    });
+  });
+
+  it('answers the same for a link that never existed and for one that was revoked', async () => {
+    const nothing = { state: 'unavailable', email: null, registered: null };
+    expect(await preview('no-such-token')).toMatchObject(nothing);
+    const email = `preview-revoked-${Date.now()}@example.com`;
+    const out = await results(await invite({ emails: [email], role: 'VIEWER' }));
+    const token = await mailToken(email, 'invited');
+    await callApi('DELETE', `${invitesPath()}/${out[0]!.invite!.id}`, owner);
+    expect(await preview(token)).toMatchObject(nothing);
+  });
+});
+
+describe('signing up from an invite', () => {
+  const PASSWORD = 'a-long-test-password-1';
+  const signup = (email: string, extra: Record<string, unknown> = {}) =>
+    apiPost('/v1/auth/signup', {
+      email,
+      password: PASSWORD,
+      displayName: 'Invited Person',
+      ...extra,
+    });
+  const signin = (email: string) => apiPost('/v1/auth/signin', { email, password: PASSWORD });
+
+  it('verifies the address at sign-up, sends no verification mail, and lets the person sign in', async () => {
+    const email = `from-invite-${Date.now()}@example.com`;
+    await results(await invite({ emails: [email], role: 'MEMBER' }));
+    const token = await mailToken(email, 'invited');
+
+    expect((await signup(email, { inviteToken: token })).status).toBe(201);
+    const [user] = await sql<{ verified: boolean }>(
+      `SELECT email_verified_at IS NOT NULL AS verified FROM "user" WHERE email_normalized = $1`,
+      [email],
+    );
+    expect(user?.verified).toBe(true);
+    const [tokens] = await sql<{ n: number }>(
+      `SELECT count(*)::int AS n FROM email_token t JOIN "user" u ON u.id = t.target_user_id
+        WHERE u.email_normalized = $1 AND t.purpose = 'verification'`,
+      [email],
+    );
+    expect(tokens!.n).toBe(0);
+
+    const res = await signin(email);
+    expect(res.status).toBe(200);
+    const { sessionToken } = (await res.json()) as { sessionToken: string };
+    // No organization of their own: signing in does not create a starter one.
+    const memberships = () =>
+      sql<{ n: number }>(
+        `SELECT count(*)::int AS n FROM organization_member m JOIN "user" u ON u.id = m.user_id
+          WHERE u.email_normalized = $1`,
+        [email],
+      );
+    expect((await memberships())[0]!.n).toBe(0);
+    const accepted = await apiPost('/v1/invites/accept', { token }, sessionToken);
+    expect(accepted.status).toBe(200);
+    expect((await memberships())[0]!.n).toBe(1);
+  });
+
+  it('does not verify an address the invite was not sent to', async () => {
+    const sentTo = `sent-to-${Date.now()}@example.com`;
+    const email = `other-${Date.now()}@example.com`;
+    await results(await invite({ emails: [sentTo], role: 'VIEWER' }));
+    const token = await mailToken(sentTo, 'invited');
+    expect((await signup(email, { inviteToken: token })).status).toBe(201);
+    expect((await signin(email)).status).toBe(401);
+  });
+
+  it('takes over an address someone registered without verifying', async () => {
+    const email = `pre-registered-${Date.now()}@example.com`;
+    expect((await signup(email)).status).toBe(201);
+    expect((await signin(email)).status).toBe(401);
+    await results(await invite({ emails: [email], role: 'VIEWER' }));
+    const token = await mailToken(email, 'invited');
+
+    const mine = 'the-real-owners-password-9';
+    const res = await apiPost('/v1/auth/signup', {
+      email,
+      password: mine,
+      displayName: 'Real Owner',
+      inviteToken: token,
+    });
+    expect(res.status).toBe(201);
+    expect((await signin(email)).status).toBe(401);
+    expect((await apiPost('/v1/auth/signin', { email, password: mine })).status).toBe(200);
+  });
+
+  it('answers a verified address with a conflict and leaves it alone', async () => {
+    const res = await signup(second.email, { inviteToken: 'whatever' });
+    expect(res.status).toBe(409);
+    expect(
+      (await apiPost('/v1/auth/signin', { email: second.email, password: PASSWORD })).status,
+    ).toBe(401);
   });
 });
 

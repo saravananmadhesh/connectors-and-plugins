@@ -4,8 +4,11 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { auth, ApiError } from '@/lib/api';
 import { qk } from '@/lib/query-keys';
+import { InviteNotice } from '@/components/InviteNotice';
+import { ResendVerification } from '@/components/ResendVerification';
+import { pendingInvite, pendingInviteEmail } from '@/lib/pending-invite';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input, PasswordInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
@@ -15,6 +18,8 @@ export function SigninPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [serverError, setServerError] = useState('');
+  // Set when the password was right but the address was never verified: the way on is a new mail.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: auth.signin,
@@ -22,12 +27,20 @@ export function SigninPage() {
       qc.removeQueries({ queryKey: qk.me() });
       try {
         await qc.fetchQuery({ queryKey: qk.me(), queryFn: auth.me });
-        await navigate({ to: '/marketplace' });
+        const invite = pendingInvite();
+        await (invite
+          ? navigate({ to: '/accept-invite', search: { token: invite } })
+          : navigate({ to: '/orgs' }));
       } catch {
         setServerError('Signed in, but could not load your profile. Please try again.');
       }
     },
-    onError: (err) => {
+    onError: (err, value) => {
+      if (err instanceof ApiError && err.code === 'email_not_verified') {
+        setUnverifiedEmail(value.email.trim());
+        setServerError('');
+        return;
+      }
       setServerError(
         err instanceof ApiError && err.status === 401
           ? 'Incorrect email or password'
@@ -39,9 +52,10 @@ export function SigninPage() {
   });
 
   const form = useForm({
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: pendingInviteEmail() ?? '', password: '' },
     onSubmit: ({ value }) => {
       setServerError('');
+      setUnverifiedEmail(null);
       mutation.mutate(value);
     },
   });
@@ -61,7 +75,17 @@ export function SigninPage() {
           className="space-y-4"
           noValidate
         >
+          <InviteNotice action="sign in" />
           {serverError && <Alert variant="destructive">{serverError}</Alert>}
+          {unverifiedEmail !== null && (
+            <div className="space-y-3">
+              <Alert variant="destructive">
+                Your email address is not verified yet. Open the link we sent to{' '}
+                <strong>{unverifiedEmail}</strong>, or send it again.
+              </Alert>
+              <ResendVerification email={unverifiedEmail} />
+            </div>
+          )}
 
           <form.Field
             name="email"
@@ -106,9 +130,8 @@ export function SigninPage() {
                     Forgot password?
                   </Link>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   autoComplete="current-password"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}

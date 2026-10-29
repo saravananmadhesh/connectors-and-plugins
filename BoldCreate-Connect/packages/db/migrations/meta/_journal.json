@@ -22,6 +22,20 @@
       "when": 1792660417114,
       "tag": "0002_remove_teams",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793152126327,
+      "tag": "0003_user_component_preference",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793209780802,
+      "tag": "0004_admin_allowed_email",
+      "breakpoints": true
     }
   ]
 }

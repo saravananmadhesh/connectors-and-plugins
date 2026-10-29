@@ -218,6 +218,28 @@ export class ConnectSession {
     /** Sets the values a plugin asks for; a value is sent and never read back. */
     setVariables: (pluginId: string, values: Record<string, string | null>) =>
       this.#http.json<UserPlugin>('PUT', `${pluginPath(pluginId)}/variables`, { body: { values } }),
+
+    /**
+     * Turns one component on or off for the user. On the user's own install it changes the
+     * install; on a plugin the project provides it stores the user's own preference.
+     */
+    setComponentEnabled: (
+      pluginId: string,
+      componentId: string,
+      enabled: boolean,
+    ): Promise<UserPlugin> =>
+      this.#http.json<UserPlugin>(
+        'PUT',
+        `${pluginPath(pluginId)}/components/${encodeURIComponent(componentId)}`,
+        { body: { enabled } },
+      ),
+
+    /** Drops the user's own preference for one component, following the install again. */
+    clearComponentEnabled: (pluginId: string, componentId: string): Promise<UserPlugin> =>
+      this.#http.json<UserPlugin>(
+        'DELETE',
+        `${pluginPath(pluginId)}/components/${encodeURIComponent(componentId)}`,
+      ),
   };
 
   /** The plugin files to place. Pass the last revision to get `{ notModified: true }` when equal. */

@@ -65,6 +65,8 @@ export type { WorkloadAuthenticator };
 export async function buildApp(config: WebConfig, deps: WebDeps): Promise<HttpServer> {
   const csrfRoute = ROUTES.find((route) => route.id === 'csrf.get');
   if (!csrfRoute) throw new Error('route "csrf.get" is not in the registry');
+  const runtimeConfigRoute = ROUTES.find((route) => route.id === 'runtimeConfig.get');
+  if (!runtimeConfigRoute) throw new Error('route "runtimeConfig.get" is not in the registry');
   const indexFile = join(config.CLIENT_DIST_DIR, 'index.html');
   const hasClient = () =>
     access(indexFile).then(
@@ -78,7 +80,7 @@ export async function buildApp(config: WebConfig, deps: WebDeps): Promise<HttpSe
     metrics: deps.metrics,
     browserFacing: true,
     contentSecurityPolicy: CONTENT_SECURITY_POLICY,
-    registry: [...bffRegistry(), csrfRoute],
+    registry: [...bffRegistry(), csrfRoute, runtimeConfigRoute],
     ...(deps.onShutdown ? { onShutdown: deps.onShutdown } : {}),
     // Single-page app: unknown paths under /api and missing files are real errors, any other page
     // is the app shell. A missing script answered with the shell would fail as a wrong MIME type.
@@ -132,6 +134,14 @@ export async function buildApp(config: WebConfig, deps: WebDeps): Promise<HttpSe
     const csrfToken = reply.generateCsrf();
     return reply.header('cache-control', 'no-store').status(200).send({ csrfToken });
   });
+
+  // Public settings the app reads when it starts, so one build serves every environment.
+  server.register('runtimeConfig.get', async (_request: FastifyRequest, reply: FastifyReply) =>
+    reply
+      .header('cache-control', 'no-store')
+      .status(200)
+      .send({ gatewayUrl: config.PUBLIC_GATEWAY_URL }),
+  );
 
   registerProxy(server, {
     apiBaseUrl: config.API_BASE_URL,

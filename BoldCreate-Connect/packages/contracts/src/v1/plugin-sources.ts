@@ -46,6 +46,8 @@ export const DiscoveredPluginSchema = z.object({
   categories: z.array(z.string()),
   /** Number of components by kind, for example `{ mcp: 1, skill: 3 }`. */
   componentCounts: z.record(z.string(), z.number().int()),
+  /** How the plugin's MCP servers connect; empty when it has none. */
+  mcpTransports: z.array(z.enum(['http', 'stdio'])),
   /** Why this folder cannot be installed; null when it can. */
   problem: z.string().nullable(),
   /** The source already added for this folder, if any, and how it is doing. */

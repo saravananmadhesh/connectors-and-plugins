@@ -26,6 +26,13 @@ describe('buildTrail', () => {
       { label: 'Projects', to: '/orgs/o1/projects' },
       { label: 'Storefront' },
     ]);
+    expect(buildTrail('/orgs/o1/projects/p1/users', { ...names, project: 'Storefront' })).toEqual([
+      { label: 'Acme', to: '/orgs/o1' },
+      { label: 'Projects', to: '/orgs/o1/projects' },
+      { label: 'Storefront', to: '/orgs/o1/projects/p1' },
+      { label: 'Users' },
+    ]);
+    expect(buildTrail('/orgs/o1/projects/p1/nope', names)).toEqual([]);
     expect(buildTrail('/orgs/o1/projects/p1/extra/more', names)).toEqual([]);
   });
 
@@ -41,43 +48,44 @@ describe('buildTrail', () => {
     expect(buildTrail('/orgs/o1/teams', names)).toEqual([]);
   });
 
-  describe('pages of the active organization', () => {
-    const inOrg = { org: 'Acme', orgId: 'o1' };
-
+  describe('the plugin pages of an organization', () => {
     it('start at the organization, which links to its overview', () => {
-      expect(buildTrail('/marketplace', inOrg)).toEqual([
+      expect(buildTrail('/orgs/o1/marketplace', names)).toEqual([
         { label: 'Acme', to: '/orgs/o1' },
         { label: 'Marketplace' },
       ]);
-      expect(buildTrail('/installed', inOrg).map((c) => c.label)).toEqual(['Acme', 'Installed']);
-      expect(buildTrail('/get-started', inOrg).map((c) => c.label)).toEqual([
+      expect(buildTrail('/orgs/o1/installed', names).map((c) => c.label)).toEqual([
+        'Acme',
+        'Installed',
+      ]);
+      expect(buildTrail('/orgs/o1/get-started', names).map((c) => c.label)).toEqual([
         'Acme',
         'Get started',
       ]);
-      expect(buildTrail('/api-keys', inOrg).map((c) => c.label)).toEqual(['Acme', 'API keys']);
+      expect(buildTrail('/orgs/o1/api-keys', names).map((c) => c.label)).toEqual([
+        'Acme',
+        'API keys',
+      ]);
     });
 
-    it('put the plugin under the marketplace', () => {
-      expect(buildTrail('/marketplace/p1', inOrg)).toEqual([
+    it('put the plugin under the marketplace of the same organization', () => {
+      expect(buildTrail('/orgs/o1/marketplace/p1', names)).toEqual([
         { label: 'Acme', to: '/orgs/o1' },
-        { label: 'Marketplace', to: '/marketplace' },
+        { label: 'Marketplace', to: '/orgs/o1/marketplace' },
         { label: 'Plugin' },
       ]);
     });
 
     it('name the organization plainly while it loads', () => {
-      expect(buildTrail('/installed', { orgId: 'o1' })[0]).toEqual({
+      expect(buildTrail('/orgs/o1/installed')[0]).toEqual({
         label: 'Organization',
         to: '/orgs/o1',
       });
     });
 
-    it('have only the page when there is no organization', () => {
-      expect(buildTrail('/marketplace')).toEqual([{ label: 'Marketplace' }]);
-      expect(buildTrail('/marketplace/p1')).toEqual([
-        { label: 'Marketplace', to: '/marketplace' },
-        { label: 'Plugin' },
-      ]);
+    it('know nothing of the short addresses from before the organization was in them', () => {
+      expect(buildTrail('/marketplace')).toEqual([]);
+      expect(buildTrail('/orgs/o1/marketplace/p1/extra')).toEqual([]);
     });
   });
 
@@ -94,6 +102,7 @@ describe('buildTrail', () => {
       '/nowhere',
       '/',
       '/marketplace/p1/extra',
+      '/installed',
       '/orgs',
       '/orgs/o1/extra',
       '/orgs/o1/members/extra',
@@ -113,23 +122,33 @@ describe('buildTrail', () => {
 describe('trailTitle', () => {
   it('puts the page first and the product last', () => {
     expect(
-      trailTitle([{ label: 'Acme', to: '/orgs/o1' }, { label: 'Members' }], 'BoldCreate'),
-    ).toBe('Members · Acme · BoldCreate');
+      trailTitle([{ label: 'Acme', to: '/orgs/o1' }, { label: 'Members' }], 'BoldConnect'),
+    ).toBe('Members · Acme · BoldConnect');
   });
 
   it('is the product alone for an empty trail', () => {
-    expect(trailTitle([], 'BoldCreate')).toBe('BoldCreate');
+    expect(trailTitle([], 'BoldConnect')).toBe('BoldConnect');
   });
 });
 
 describe('scopeDestination', () => {
-  it('goes to the overview of the new organization', () => {
-    expect(scopeDestination('/marketplace', { orgId: 'o2' })).toBe('/orgs/o2');
-    expect(scopeDestination('/orgs/o1/settings', { orgId: 'o1' })).toBe('/orgs/o1');
+  it('stays on the same section of the new organization', () => {
+    expect(scopeDestination('/orgs/o1/marketplace', { orgId: 'o2' })).toBe('/orgs/o2/marketplace');
+    expect(scopeDestination('/orgs/o1/installed', { orgId: 'o2' })).toBe('/orgs/o2/installed');
+    expect(scopeDestination('/orgs/o1/settings', { orgId: 'o2' })).toBe('/orgs/o2/settings');
+    expect(scopeDestination('/orgs/o1/members/', { orgId: 'o2' })).toBe('/orgs/o2/members');
+    expect(scopeDestination('/orgs/o1/projects', { orgId: 'o2' })).toBe('/orgs/o2/projects');
   });
 
-  it('keeps the members page', () => {
-    expect(scopeDestination('/orgs/o1/members', { orgId: 'o2' })).toBe('/orgs/o2/members');
-    expect(scopeDestination('/orgs/o1/members/', { orgId: 'o2' })).toBe('/orgs/o2/members');
+  it('goes to the list when the page is one thing of the old organization', () => {
+    expect(scopeDestination('/orgs/o1/projects/p1', { orgId: 'o2' })).toBe('/orgs/o2/projects');
+    expect(scopeDestination('/orgs/o1/marketplace/p1', { orgId: 'o2' })).toBe(
+      '/orgs/o2/marketplace',
+    );
+  });
+
+  it('goes to the overview from a page that is not in an organization', () => {
+    expect(scopeDestination('/orgs/o1', { orgId: 'o2' })).toBe('/orgs/o2');
+    expect(scopeDestination('/profile', { orgId: 'o2' })).toBe('/orgs/o2');
   });
 });

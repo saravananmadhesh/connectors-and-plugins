@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { auth, ApiError } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
-import { Spinner } from '@/components/ui/spinner';
+import { PageLoader } from '@/components/PageLoader';
 
 /** Lands from the link mailed to a new address; confirming ends every session. */
 export function ConfirmEmailChangePage() {
@@ -38,11 +38,7 @@ export function ConfirmEmailChangePage() {
       </CardHeader>
       <CardContent className="space-y-4">
         {!search.token && <Alert variant="destructive">This link is missing its token.</Alert>}
-        {confirmMutation.isPending && (
-          <div className="flex justify-center py-6">
-            <Spinner className="h-8 w-8 text-muted-foreground" />
-          </div>
-        )}
+        {confirmMutation.isPending && <PageLoader label="Confirming your email" />}
         {serverError && <Alert variant="destructive">{serverError}</Alert>}
         {confirmMutation.isSuccess && (
           <Alert variant="success">

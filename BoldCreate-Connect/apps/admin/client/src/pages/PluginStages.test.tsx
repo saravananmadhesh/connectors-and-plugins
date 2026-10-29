@@ -29,7 +29,7 @@ const source = (
   ...overrides,
 });
 
-describe('review page', () => {
+describe('plugins page review stages', () => {
   it('lists only the plugins that wait for review and says so when none do', async () => {
     const calls = stubApi((_method, path) => {
       if (path.endsWith('/session')) return SESSION;
@@ -37,7 +37,7 @@ describe('review page', () => {
       if (path.startsWith('/api/v1/admin/plugins?')) return { status: 200, body: pageOf([]) };
       return { status: 200, body: { items: [] } };
     });
-    await renderApp('/review');
+    await renderApp('/plugins?stage=needs_review');
     expect(await screen.findByText('Nothing is waiting for review.')).toBeInTheDocument();
     expect(
       calls.some(
@@ -62,7 +62,7 @@ describe('review page', () => {
       }
       return { status: 200, body: { items: [] } };
     });
-    await renderApp('/review');
+    await renderApp('/plugins?stage=needs_review');
     expect(await screen.findByText('Sample plugin')).toBeInTheDocument();
     expect(screen.queryByText('2 to review')).not.toBeInTheDocument();
   });
@@ -73,32 +73,32 @@ describe('review page', () => {
       if (path.startsWith('/api/v1/admin/plugins?')) return { status: 200, body: pageOf([]) };
       return { status: 200, body: { items: [] } };
     });
-    await renderApp('/review');
+    await renderApp('/plugins');
     const user = userEvent.setup();
     const labels = (await screen.findAllByRole('tab')).map((tab) => tab.textContent);
     expect(labels).toEqual([
+      'All',
       'To review',
       'Awaiting approval',
       'Ready to publish',
       'Published',
       'Rejected',
       'Yanked',
-      'All',
     ]);
-    expect(screen.getByRole('tab', { name: 'To review' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
 
-    await user.click(screen.getByRole('tab', { name: 'Rejected' }));
+    await user.click(screen.getByRole('tab', { name: /^Rejected/ }));
     expect(await screen.findByText('No version was rejected.')).toBeInTheDocument();
     expect(calls.some((call) => call.path.includes('versionStatus=rejected'))).toBe(true);
 
-    await user.click(screen.getByRole('tab', { name: 'Ready to publish' }));
+    await user.click(screen.getByRole('tab', { name: /^Ready to publish/ }));
     expect(
       await screen.findByText('No approved version is waiting to be published.'),
     ).toBeInTheDocument();
     expect(calls.some((call) => call.path.includes('versionStatus=approved'))).toBe(true);
 
-    await user.click(screen.getByRole('tab', { name: 'All' }));
-    expect(await screen.findByText('No plugins yet.')).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: /^To review/ }));
+    expect(await screen.findByText('Nothing is waiting for review.')).toBeInTheDocument();
   });
 
   it('retries or removes the repositories that failed to sync', async () => {
@@ -123,7 +123,7 @@ describe('review page', () => {
       if (path.startsWith('/api/v1/admin/plugins?')) return { status: 200, body: pageOf([]) };
       return { status: 200, body: { items: [] } };
     });
-    await renderApp('/review');
+    await renderApp('/plugins?stage=needs_review');
     const user = userEvent.setup();
     const region = await screen.findByRole('region', { name: 'Failed syncs' });
     expect(region).toHaveTextContent('github.com/acme/plugins/one');

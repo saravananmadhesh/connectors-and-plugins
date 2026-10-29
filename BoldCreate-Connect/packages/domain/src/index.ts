@@ -32,6 +32,7 @@ export * from './access/catalog-stores.js';
 export * from './audit/write-audit.js';
 export * from './audit/list-audit.js';
 export * from './admin/admin-auth.js';
+export * from './admin/allowed-emails.js';
 export * from './ingestion/tar.js';
 export * from './ingestion/manifest.js';
 export * from './ingestion/scan.js';

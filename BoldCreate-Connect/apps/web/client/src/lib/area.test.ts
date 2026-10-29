@@ -13,12 +13,15 @@ import {
 beforeEach(() => window.localStorage.clear());
 
 describe('pathArea', () => {
-  it.each(['/get-started', '/marketplace', '/marketplace/p1', '/installed', '/api-keys/'])(
-    '%s belongs to For You',
-    (path) => {
-      expect(pathArea(path)).toBe('for-you');
-    },
-  );
+  it.each([
+    '/orgs/o1/get-started',
+    '/orgs/o1/marketplace',
+    '/orgs/o1/marketplace/p1',
+    '/orgs/o1/installed',
+    '/orgs/o1/api-keys/',
+  ])('%s belongs to For You', (path) => {
+    expect(pathArea(path)).toBe('for-you');
+  });
 
   it.each(['/orgs/o1/projects/p1', '/orgs/o1/projects/p1/'])('%s belongs to Platform', (path) => {
     expect(pathArea(path)).toBe('platform');
@@ -50,7 +53,7 @@ describe('resolveArea', () => {
   const both = availableAreas(true);
 
   it('lets the page decide when it has an area', () => {
-    expect(resolveArea('/installed', 'platform', both)).toBe('for-you');
+    expect(resolveArea('/orgs/o1/installed', 'platform', both)).toBe('for-you');
     expect(resolveArea('/orgs/o1/projects/p1', 'for-you', both)).toBe('platform');
   });
 
@@ -65,7 +68,7 @@ describe('resolveArea', () => {
 
   it('never returns an area that is not on offer', () => {
     const viewer = availableAreas(false);
-    expect(resolveArea('/installed', 'for-you', viewer)).toBe('platform');
+    expect(resolveArea('/orgs/o1/installed', 'for-you', viewer)).toBe('platform');
     expect(resolveArea('/profile', 'for-you', viewer)).toBe('platform');
   });
 });
@@ -111,8 +114,8 @@ describe('inProject', () => {
 
 describe('areaDestination', () => {
   it('lands on the first page of the area', () => {
-    expect(areaDestination('/installed', 'platform', 'o1')).toBe('/orgs/o1/projects');
-    expect(areaDestination('/orgs/o1/projects/p1', 'for-you', 'o1')).toBe('/marketplace');
+    expect(areaDestination('/orgs/o1/installed', 'platform', 'o1')).toBe('/orgs/o1/projects');
+    expect(areaDestination('/orgs/o1/projects/p1', 'for-you', 'o1')).toBe('/orgs/o1/marketplace');
   });
 
   it('stays on a page that already belongs to the area', () => {
@@ -120,11 +123,11 @@ describe('areaDestination', () => {
   });
 
   it('leaves a shared organization page for the default of the area', () => {
-    expect(areaDestination('/orgs/o1/members', 'for-you', 'o1')).toBe('/marketplace');
+    expect(areaDestination('/orgs/o1/members', 'for-you', 'o1')).toBe('/orgs/o1/marketplace');
     expect(areaDestination('/orgs/o1/members', 'platform', 'o1')).toBe('/orgs/o1/projects');
   });
 
-  it('falls back to the marketplace without an organization', () => {
-    expect(areaDestination('/profile', 'platform', undefined)).toBe('/marketplace');
+  it('sends someone in no organization to the home address', () => {
+    expect(areaDestination('/profile', 'platform', undefined)).toBe('/orgs');
   });
 });

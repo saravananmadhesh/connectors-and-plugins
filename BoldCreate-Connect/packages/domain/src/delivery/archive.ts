@@ -5,6 +5,7 @@
  */
 import { createHash } from 'node:crypto';
 import { and, eq, inArray } from 'drizzle-orm';
+import { effectiveEnabled } from './effective-enabled.js';
 import {
   componentTable,
   installationComponentTable,
@@ -69,7 +70,7 @@ export async function authorizeComponentArchive(
           installationComponentTable.installationId,
           installs.map((install) => install.installationId),
         ),
-        eq(installationComponentTable.enabled, true),
+        effectiveEnabled(principal.userId),
         eq(componentTable.archiveSha256, sha256),
       ),
     )

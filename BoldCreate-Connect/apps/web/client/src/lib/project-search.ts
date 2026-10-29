@@ -19,7 +19,7 @@ export const PROJECT_TABS: readonly { value: ProjectTab; label: string }[] = [
   { value: 'connections', label: 'Connections' },
   { value: 'catalog', label: 'Catalog' },
   { value: 'logs', label: 'Logs' },
-  { value: 'keys', label: 'Keys' },
+  { value: 'keys', label: 'API keys' },
   { value: 'settings', label: 'Settings' },
 ];
 

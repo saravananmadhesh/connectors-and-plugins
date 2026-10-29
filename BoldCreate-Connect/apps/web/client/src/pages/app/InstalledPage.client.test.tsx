@@ -60,7 +60,8 @@ function mockApi(leads: boolean) {
     })) as unknown as typeof apiModule.installations.list);
 }
 
-const render = (url = '/installed') => renderWithRouter(InstalledPage, '/installed', { url });
+const render = (url = `/orgs/${ORG_ID}/installed`) =>
+  renderWithRouter(InstalledPage, '/orgs/$orgId/installed', { url });
 
 describe('InstalledPage', () => {
   beforeEach(() => localStorage.clear());
@@ -100,7 +101,7 @@ describe('InstalledPage', () => {
   it('narrows the list by the search text', async () => {
     mockApi(false);
     const user = userEvent.setup();
-    await render('/installed?scope=org');
+    await render(`/orgs/${ORG_ID}/installed?scope=org`);
     await screen.findByText('org-plugin');
     await user.type(screen.getByLabelText('Search installed'), 'shared');
     expect(await screen.findByText('shared-tools')).toBeInTheDocument();
@@ -117,7 +118,7 @@ describe('InstalledPage', () => {
   it('says the sign-in worked after the sign-in service sends the member back', async () => {
     mockApi(false);
     vi.spyOn(apiModule.mcpServers, 'list').mockResolvedValue({ items: [], nextCursor: null });
-    await render('/installed?tab=mcp&oauth=connected');
+    await render(`/orgs/${ORG_ID}/installed?tab=mcp&oauth=connected`);
     expect(await screen.findByText('You are signed in to the server.')).toBeInTheDocument();
   });
 
@@ -125,7 +126,7 @@ describe('InstalledPage', () => {
     mockApi(false);
     vi.spyOn(apiModule.mcpServers, 'list').mockResolvedValue({ items: [], nextCursor: null });
     const user = userEvent.setup();
-    await render('/installed?tab=mcp&oauth=failed');
+    await render(`/orgs/${ORG_ID}/installed?tab=mcp&oauth=failed`);
     expect(await screen.findByText(/sign-in did not complete/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Dismiss' }));
     await waitFor(() =>

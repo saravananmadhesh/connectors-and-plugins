@@ -30,6 +30,7 @@ export type TableName =
   | 'installation'
   | 'installation_component'
   | 'installation_variable'
+  | 'user_component_preference'
   | 'mcp_server'
   | 'mcp_oauth_token'
   | 'auth_config'
@@ -42,6 +43,7 @@ export type TableName =
   | 'platform_admin_session'
   | 'oidc_login_attempt'
   | 'admin_setup_token'
+  | 'admin_allowed_email'
   | 'idempotency_key'
   | 'feature_flag'
   | 'kill_switch'
@@ -111,6 +113,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     installation: FULL,
     installation_component: FULL,
     installation_variable: FULL,
+    user_component_preference: FULL,
     mcp_server: FULL,
     mcp_oauth_token: FULL,
     auth_config: FULL,
@@ -132,6 +135,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     platform_admin_session: READ,
     oidc_login_attempt: NONE,
     admin_setup_token: NONE,
+    admin_allowed_email: NONE,
     idempotency_key: FULL,
     feature_flag: { privileges: ['select', 'insert', 'update'] },
     kill_switch: { privileges: ['select', 'insert', 'update'] },
@@ -173,6 +177,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     },
     installation_component: PURGE,
     installation_variable: PURGE,
+    user_component_preference: PURGE,
     mcp_server: PURGE,
     mcp_oauth_token: PURGE,
     auth_config: NONE,
@@ -199,6 +204,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     platform_admin_session: NONE,
     oidc_login_attempt: NONE,
     admin_setup_token: NONE,
+    admin_allowed_email: NONE,
     idempotency_key: { privileges: ['select', 'delete'] },
     feature_flag: READ,
     kill_switch: READ,
@@ -236,6 +242,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     installation: READ,
     installation_component: NONE,
     installation_variable: NONE,
+    user_component_preference: NONE,
     mcp_server: NONE,
     mcp_oauth_token: NONE,
     auth_config: NONE,
@@ -248,6 +255,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     platform_admin_session: { privileges: ['select', 'insert', 'update'] },
     oidc_login_attempt: { privileges: ['select', 'insert', 'update'] },
     admin_setup_token: { privileges: ['select', 'insert', 'update'] },
+    admin_allowed_email: { privileges: ['select', 'insert', 'update', 'delete'] },
     idempotency_key: NONE,
     feature_flag: { privileges: ['select', 'insert', 'update'] },
     kill_switch: { privileges: ['select', 'insert', 'update'] },
@@ -285,6 +293,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     installation: READ,
     installation_component: READ,
     installation_variable: READ,
+    user_component_preference: READ,
     mcp_server: READ,
     mcp_oauth_token: {
       privileges: ['select', 'update'],
@@ -306,6 +315,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     platform_admin_session: NONE,
     oidc_login_attempt: NONE,
     admin_setup_token: NONE,
+    admin_allowed_email: NONE,
     idempotency_key: NONE,
     feature_flag: READ,
     kill_switch: READ,
@@ -347,6 +357,7 @@ export const RLS_TABLES: Record<TableName, RlsEntry> = {
   },
   installation_component: { rls: 'tenant' },
   installation_variable: { rls: 'tenant' },
+  user_component_preference: { rls: 'tenant' },
   mcp_server: { rls: 'tenant' },
   mcp_oauth_token: { rls: 'tenant' },
   auth_config: { rls: 'tenant' },
@@ -369,6 +380,7 @@ export const RLS_TABLES: Record<TableName, RlsEntry> = {
   platform_admin_session: { rls: 'none', reason: GLOBAL },
   oidc_login_attempt: { rls: 'none', reason: GLOBAL },
   admin_setup_token: { rls: 'none', reason: GLOBAL },
+  admin_allowed_email: { rls: 'none', reason: GLOBAL },
   idempotency_key: {
     rls: 'none',
     reason: 'Scoped by principal key, claimed before a tenant is known',

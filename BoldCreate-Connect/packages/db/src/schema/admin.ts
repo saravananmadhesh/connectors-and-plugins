@@ -102,3 +102,22 @@ export const adminSetupTokenTable = pgTable(
   },
   (t) => [unique('admin_setup_token_hash_unique').on(t.tokenHash)],
 );
+
+// ─── admin_allowed_email ──────────────────────────────────────────────────────
+
+/**
+ * The addresses that may sign in to the admin app. Those named in the deployment's settings are
+ * written here at every start with source `config`; the others are added by an admin.
+ */
+export const adminAllowedEmailTable = pgTable(
+  'admin_allowed_email',
+  {
+    /** Lower-cased */
+    email: text('email').primaryKey(),
+    source: text('source').$type<'config' | 'added'>().notNull().default('added'),
+    /** Email of the admin who added it; `config` for those from the settings */
+    addedBy: text('added_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check('admin_allowed_email_source_check', sql`${t.source} IN ('config', 'added')`)],
+);

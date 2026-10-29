@@ -1,10 +1,9 @@
 import { cn } from '../lib/cn';
-import { PRODUCT } from '../lib/product';
 
 /** Read once when the page loads, so rendering stays free of the clock. */
 const CURRENT_YEAR = new Date().getFullYear();
 
-/** The page footer: the product line and the copyright, nothing else. */
+/** The page footer: the copyright only. The logo already names the product. */
 export function AppFooter({
   year = CURRENT_YEAR,
   className,
@@ -15,14 +14,11 @@ export function AppFooter({
   return (
     <footer
       className={cn(
-        'flex flex-wrap items-center justify-between gap-x-6 gap-y-1 border-t px-6 py-4 text-xs text-muted-foreground',
+        'flex flex-wrap items-center justify-center gap-x-6 gap-y-1 px-6 py-6 text-center text-xs text-muted-foreground',
         className,
       )}
     >
-      <span>
-        {PRODUCT.name} by {PRODUCT.maker} · {PRODUCT.console}
-      </span>
-      <span>© {year} Syncfusion, Inc. All rights reserved.</span>
+      <span>© {year} Syncfusion®, Inc. All rights reserved.</span>
     </footer>
   );
 }

@@ -249,7 +249,8 @@ export function InstallDialog({ pluginName, version, scope, onClose }: Props) {
               {result?.ok && (
                 <Button asChild variant="outline">
                   <Link
-                    to="/installed"
+                    to="/orgs/$orgId/installed"
+                    params={{ orgId: orgId ?? '' }}
                     search={{ scope: scope === 'user' ? 'me' : scope }}
                     onClick={onClose}
                   >

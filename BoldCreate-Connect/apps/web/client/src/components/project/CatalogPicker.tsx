@@ -14,7 +14,13 @@ import { QueryFrame } from './shared';
 import { messageOf } from './paging';
 
 const PAGE_SIZE = 8;
-const KINDS: readonly ComponentKind[] = ['mcp', 'skill', 'rule', 'hook', 'agent'];
+const KINDS: readonly { value: ComponentKind; label: string }[] = [
+  { value: 'mcp', label: 'MCP' },
+  { value: 'skill', label: 'Skills' },
+  { value: 'rule', label: 'Rules' },
+  { value: 'hook', label: 'Hooks' },
+  { value: 'agent', label: 'Agents' },
+];
 
 /**
  * A dialog that lists what the project may offer, with search, kind and category filters, and
@@ -104,7 +110,7 @@ export function CatalogPicker({
             </div>
             <Select
               aria-label="Kind"
-              className="w-32"
+              className="w-36"
               value={kind}
               onChange={(e) => {
                 setKind(e.target.value as ComponentKind | '');
@@ -113,8 +119,8 @@ export function CatalogPicker({
             >
               <option value="">All kinds</option>
               {KINDS.map((entry) => (
-                <option key={entry} value={entry}>
-                  {entry}
+                <option key={entry.value} value={entry.value}>
+                  {entry.label}
                 </option>
               ))}
             </Select>
@@ -146,11 +152,12 @@ export function CatalogPicker({
               <ul className="divide-y rounded-md border">
                 {items.map((plugin) => (
                   <li key={plugin.id} className="flex items-center justify-between gap-3 px-3 py-2">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{plugin.displayName}</p>
                       <p className="truncate text-xs text-muted-foreground">{plugin.summary}</p>
                     </div>
                     <Button
+                      className="w-20 shrink-0"
                       size="sm"
                       variant="outline"
                       disabled={taken.has(plugin.id) || busy !== null}

@@ -1,8 +1,9 @@
-import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { projects } from '@/lib/api';
 import { useAbilities } from '@/lib/abilities';
-import { PROJECT_TABS, type ProjectSearch, type ProjectTab } from '@/lib/project-search';
+import { PROJECT_TABS, type ProjectTab } from '@/lib/project-search';
+import { formatDate } from '@/lib/format';
 import { qk } from '@/lib/query-keys';
 import { Tabs } from '@/components/ui/tabs';
 import { Page } from '@/components/Page';
@@ -34,8 +35,11 @@ const PANELS: Record<ProjectTab, (props: TabProps, activeKeyCount: number) => Re
 };
 
 export function ProjectPage() {
-  const { orgId, projectId } = useParams({ strict: false }) as { orgId: string; projectId: string };
-  const { tab = 'overview' } = useSearch({ strict: false }) as ProjectSearch;
+  const {
+    orgId,
+    projectId,
+    tab = 'overview',
+  } = useParams({ strict: false }) as { orgId: string; projectId: string; tab?: ProjectTab };
   const navigate = useNavigate();
   const { can } = useAbilities(orgId);
   const project = useQuery({
@@ -75,7 +79,10 @@ export function ProjectPage() {
         error={project.error}
         onRetry={() => void project.refetch()}
       >
-        <PageHeader title={project.data?.name ?? ''} description={`Project ${projectId}`}>
+        <PageHeader
+          title={project.data?.name ?? ''}
+          description={project.data ? `Created ${formatDate(project.data.createdAt)}` : undefined}
+        >
           {project.data && <ProjectStatusBadge status={project.data.status} />}
         </PageHeader>
         <Tabs
@@ -85,12 +92,14 @@ export function ProjectPage() {
           tabs={tabs}
           value={shown}
           onChange={(next) =>
-            void navigate({
-              to: '/orgs/$orgId/projects/$projectId',
-              params: { orgId, projectId },
-              search: { tab: next === 'overview' ? undefined : next },
-              replace: true,
-            })
+            void navigate(
+              next === 'overview'
+                ? { to: '/orgs/$orgId/projects/$projectId', params: { orgId, projectId } }
+                : {
+                    to: '/orgs/$orgId/projects/$projectId/$tab',
+                    params: { orgId, projectId, tab: next },
+                  },
+            )
           }
         >
           {PANELS[shown](props, project.data?.activeKeyCount ?? 0)}

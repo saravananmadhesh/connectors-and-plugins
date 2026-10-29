@@ -400,6 +400,16 @@ async function stopOrphan(pidFile: string, ...expectedNames: string[]) {
   rmSync(pidFile, { force: true });
 }
 
+/** Stops every process an earlier run recorded in this data directory. */
+export async function stopLeftoverInfra(dataDir: string, includePostgres = true) {
+  if (includePostgres) await stopOrphan(join(dataDir, 'postgres', 'postmaster.pid'), 'postgres');
+  await stopOrphan(join(dataDir, 'mailpit.pid'), 'mailpit');
+  await stopOrphan(join(dataDir, 'redis.pid'), 'redis');
+  // Earlier versions served the store with rclone and a second browser process.
+  await stopOrphan(join(dataDir, 'object-store.pid'), 'weed', 'rclone');
+  await stopOrphan(join(dataDir, 'object-store-browser.pid'), 'rclone');
+}
+
 function runScript(script: string, env: NodeJS.ProcessEnv) {
   const result = spawnSync(
     process.execPath,
@@ -434,12 +444,7 @@ export async function startInfra(options: InfraOptions): Promise<Infra> {
   mkdirSync(options.logDir, { recursive: true });
   mkdirSync(options.dataDir, { recursive: true });
 
-  if (embeddedPostgres) await stopOrphan(join(pgDir, 'postmaster.pid'), 'postgres');
-  await stopOrphan(join(options.dataDir, 'mailpit.pid'), 'mailpit');
-  await stopOrphan(join(options.dataDir, 'redis.pid'), 'redis');
-  // Earlier versions served the store with rclone and a second browser process.
-  await stopOrphan(join(options.dataDir, 'object-store.pid'), 'weed', 'rclone');
-  await stopOrphan(join(options.dataDir, 'object-store-browser.pid'), 'rclone');
+  await stopLeftoverInfra(options.dataDir, embeddedPostgres);
 
   for (const [label, busyPort] of [
     ...(embeddedPostgres ? ([['PostgreSQL', port]] as const) : []),

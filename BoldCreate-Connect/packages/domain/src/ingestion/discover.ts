@@ -107,6 +107,7 @@ export async function discoverRepository(
       summary: candidate.manifest?.summary ?? null,
       categories: candidate.manifest?.categories ?? [],
       componentCounts: candidate.componentCounts,
+      mcpTransports: candidate.mcpTransports,
       problem: candidate.problem,
       installed: installedOf(installedByPath.get(candidate.path)),
     })),

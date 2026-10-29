@@ -34,3 +34,24 @@ export function ThemeToggle() {
     </div>
   );
 }
+
+const NEXT: Record<ThemeChoice, ThemeChoice> = { light: 'dark', dark: 'system', system: 'light' };
+
+/** One icon for the narrow sidebar: it shows the current theme and a click moves to the next. */
+export function ThemeCycleButton({ className }: { className?: string }) {
+  const [choice, setChoice] = useTheme();
+  const current = OPTIONS.find((option) => option.value === choice) ?? OPTIONS[2]!;
+  const next = OPTIONS.find((option) => option.value === NEXT[choice])!;
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label={`Theme: ${current.label}. Switch to ${next.label}`}
+      title={`Theme: ${current.label}. Switch to ${next.label}`}
+      onClick={() => setChoice(next.value)}
+      className={cn('size-8 text-sidebar-muted hover:text-sidebar-foreground', className)}
+    >
+      <current.icon className="size-4" />
+    </Button>
+  );
+}

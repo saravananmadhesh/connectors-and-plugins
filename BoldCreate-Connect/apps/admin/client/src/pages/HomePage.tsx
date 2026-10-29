@@ -248,7 +248,7 @@ export function HomePage() {
               <Alert variant="warning">
                 {data.needsReview} plugin{data.needsReview === 1 ? ' has' : 's have'} versions
                 waiting for review.{' '}
-                <Link to="/review" className="underline">
+                <Link to="/plugins" search={{ stage: 'needs_review' }} className="underline">
                   Review them
                 </Link>
                 .
@@ -258,7 +258,7 @@ export function HomePage() {
               <Alert variant="destructive" role="status">
                 {data.sourcesByStatus.failed} source{data.sourcesByStatus.failed === 1 ? '' : 's'}{' '}
                 failed the last sync.{' '}
-                <Link to="/review" className="underline">
+                <Link to="/plugins" search={{ stage: 'needs_review' }} className="underline">
                   See what failed
                 </Link>
                 .

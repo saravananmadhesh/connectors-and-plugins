@@ -101,13 +101,13 @@ describe('OrgPage', () => {
     expect(screen.getByRole('button', { name: 'Delete organization' })).toBeEnabled();
   });
 
-  it('queues organization deletion, navigates to the marketplace and clears affected caches', async () => {
+  it('queues organization deletion, navigates to the home address and clears affected caches', async () => {
     const deleteOrg = vi
       .spyOn(apiModule.orgs, 'delete')
       .mockResolvedValue({ status: 'deletion_pending', purgeAfter: '2026-01-01T00:00:00.000Z' });
     const { router, qc } = await renderWithRouter(OrgPage, ROUTE_PATH, {
       ...RENDER_OPTS,
-      extraRoutes: [...EXTRA, { path: '/marketplace', component: () => <div>marketplace</div> }],
+      extraRoutes: [...EXTRA, { path: '/orgs', component: () => <div>home</div> }],
       queryData: [
         ...RENDER_OPTS.queryData,
         { key: ['org', ORG_ID, 'members'], data: { items: [] } },
@@ -124,7 +124,7 @@ describe('OrgPage', () => {
     expect(dialog.getByRole('button', { name: 'Delete organization' })).toBeDisabled();
     await userEvent.click(dialog.getByRole('checkbox'));
     await userEvent.click(dialog.getByRole('button', { name: 'Delete organization' }));
-    await waitFor(() => expect(router.state.location.pathname).toBe('/marketplace'));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/orgs'));
     expect(deleteOrg).toHaveBeenCalledExactlyOnceWith(ORG_ID, ORG.slug);
     expect(qc.getQueriesData({ queryKey: ['org', ORG_ID] })).toEqual([]);
     expect(qc.getQueriesData({ queryKey: ['scope'] })).toEqual([]);
@@ -189,7 +189,7 @@ describe('OrgPage', () => {
     expect(await totals.findByRole('link', { name: /^2s*Active people/ })).toBeInTheDocument();
     expect(await totals.findByRole('link', { name: /^2s*Plugins for everyone/ })).toHaveAttribute(
       'href',
-      '/installed',
+      `/orgs/${ORG_ID}/installed`,
     );
   });
 

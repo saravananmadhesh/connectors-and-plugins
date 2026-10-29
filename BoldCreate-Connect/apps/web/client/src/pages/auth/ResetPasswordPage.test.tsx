@@ -26,7 +26,7 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => expect(screen.getByLabelText(/new password/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByLabelText(/^new password$/i)).toBeInTheDocument());
   });
 
   it('submit button is disabled when password is too short', async () => {
@@ -34,8 +34,9 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => screen.getByLabelText(/new password/i));
-    await userEvent.type(screen.getByLabelText(/new password/i), 'short');
+    await waitFor(() => screen.getByLabelText(/^new password$/i));
+    await userEvent.type(screen.getByLabelText(/^new password$/i), 'short');
+    await userEvent.type(screen.getByLabelText(/^repeat password$/i), 'short');
     expect(screen.getByRole('button', { name: /set new password/i })).toBeDisabled();
   });
 
@@ -45,8 +46,9 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => screen.getByLabelText(/new password/i));
-    await userEvent.type(screen.getByLabelText(/new password/i), 'newpassword123');
+    await waitFor(() => screen.getByLabelText(/^new password$/i));
+    await userEvent.type(screen.getByLabelText(/^new password$/i), 'newpassword123');
+    await userEvent.type(screen.getByLabelText(/^repeat password$/i), 'newpassword123');
     await userEvent.click(screen.getByRole('button', { name: /set new password/i }));
     await waitFor(() => expect(screen.getByText(/password updated/i)).toBeInTheDocument());
   });
@@ -59,8 +61,9 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => screen.getByLabelText(/new password/i));
-    await userEvent.type(screen.getByLabelText(/new password/i), 'newpassword123');
+    await waitFor(() => screen.getByLabelText(/^new password$/i));
+    await userEvent.type(screen.getByLabelText(/^new password$/i), 'newpassword123');
+    await userEvent.type(screen.getByLabelText(/^repeat password$/i), 'newpassword123');
     await userEvent.click(screen.getByRole('button', { name: /set new password/i }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Token expired'));
   });
@@ -71,8 +74,9 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => screen.getByLabelText(/new password/i));
-    await userEvent.type(screen.getByLabelText(/new password/i), 'newpassword123');
+    await waitFor(() => screen.getByLabelText(/^new password$/i));
+    await userEvent.type(screen.getByLabelText(/^new password$/i), 'newpassword123');
+    await userEvent.type(screen.getByLabelText(/^repeat password$/i), 'newpassword123');
     await userEvent.click(screen.getByRole('button', { name: /set new password/i }));
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent(/link may have expired/i),
@@ -85,8 +89,9 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => screen.getByLabelText(/new password/i));
-    await userEvent.type(screen.getByLabelText(/new password/i), 'newpassword123');
+    await waitFor(() => screen.getByLabelText(/^new password$/i));
+    await userEvent.type(screen.getByLabelText(/^new password$/i), 'newpassword123');
+    await userEvent.type(screen.getByLabelText(/^repeat password$/i), 'newpassword123');
     await userEvent.click(screen.getByRole('button', { name: /set new password/i }));
     expect(screen.getByRole('button', { name: /set new password/i })).toBeDisabled();
     expect(document.querySelector('svg')).toBeInTheDocument();
@@ -100,8 +105,9 @@ describe('ResetPasswordPage', () => {
     await act(async () => {
       await router.navigate({ to: '/reset-password', search: { token: 'abc123' } });
     });
-    await waitFor(() => screen.getByLabelText(/new password/i));
-    await userEvent.type(screen.getByLabelText(/new password/i), 'newpassword123');
+    await waitFor(() => screen.getByLabelText(/^new password$/i));
+    await userEvent.type(screen.getByLabelText(/^new password$/i), 'newpassword123');
+    await userEvent.type(screen.getByLabelText(/^repeat password$/i), 'newpassword123');
     await userEvent.click(screen.getByRole('button', { name: /set new password/i }));
     await waitFor(() => screen.getByText(/password updated/i));
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));

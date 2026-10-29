@@ -41,5 +41,41 @@ export function usersApi(http: Http) {
         query: { userId },
       });
     },
+
+    /**
+     * Turns one component on or off for the user. On the user's own install it changes the
+     * install; on a plugin the project provides it stores the user's own preference and the
+     * install's value stays the default.
+     */
+    setComponentEnabled: async (
+      userId: string,
+      pluginId: string,
+      componentId: string,
+      enabled: boolean,
+    ): Promise<UserPlugin> => {
+      checkUserId(userId);
+      return http.json<UserPlugin>(
+        'PUT',
+        `/v1/project/user-plugins/${encodeURIComponent(pluginId)}/components/${encodeURIComponent(componentId)}`,
+        { body: { userId, enabled } },
+      );
+    },
+
+    /**
+     * Drops the user's own preference for one component, so the user follows the install again. A
+     * plugin the user installed has no preference and is not found here.
+     */
+    clearComponentEnabled: async (
+      userId: string,
+      pluginId: string,
+      componentId: string,
+    ): Promise<UserPlugin> => {
+      checkUserId(userId);
+      return http.json<UserPlugin>(
+        'DELETE',
+        `/v1/project/user-plugins/${encodeURIComponent(pluginId)}/components/${encodeURIComponent(componentId)}`,
+        { query: { userId } },
+      );
+    },
   };
 }

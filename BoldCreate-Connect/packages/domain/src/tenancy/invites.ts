@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { eq, and, isNull, gt, desc } from 'drizzle-orm';
+import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
 import type { Executor } from '@boldcreate-integrations/db';
 import {
   organizationMemberTable,
+  organizationTable,
   emailTokenTable,
   userTable,
   setRlsContext,
@@ -20,6 +21,8 @@ import {
   type CreateInviteBody,
   type CreateInviteResponse,
   type AcceptInviteBody,
+  type PreviewInviteBody,
+  type InvitePreviewResponse,
   type InviteResponse,
   type Plain,
 } from '@boldcreate-integrations/contracts';
@@ -27,6 +30,26 @@ import { requireAction } from '../permissions/authorize.js';
 import { writeAudit } from '../audit/write-audit.js';
 import { appError, conflict, forbidden, notFound } from '../errors.js';
 import { enqueueEmail } from './shared.js';
+
+/** Who is inviting and to what, as the invitation mail names them. */
+async function mailContext(db: Executor, inviterId: string, orgId: string) {
+  const [[inviter], [org]] = await Promise.all([
+    db
+      .select({ name: userTable.displayName, email: userTable.email })
+      .from(userTable)
+      .where(eq(userTable.id, inviterId))
+      .limit(1),
+    db
+      .select({ name: organizationTable.name })
+      .from(organizationTable)
+      .where(eq(organizationTable.id, orgId))
+      .limit(1),
+  ]);
+  return {
+    ...(org ? { orgName: org.name } : {}),
+    ...(inviter ? { inviterName: inviter.name, inviterEmail: inviter.email } : {}),
+  };
+}
 
 /**
  * Invites every address to the org with one role. Someone already in the org is answered with
@@ -41,6 +64,7 @@ export async function createInvite(
 ): Promise<Plain<CreateInviteResponse>> {
   requireAction(principal, 'invite:create', { orgId });
   const inviterId = principal.userId;
+  const mail = await mailContext(db, inviterId, orgId);
 
   const results: Plain<CreateInviteResponse>['results'] = [];
   for (const email of new Set(body.emails.map((raw) => raw.toLowerCase().trim()))) {
@@ -70,6 +94,18 @@ export async function createInvite(
     const tokenId = randomUUID();
     const createdAt = new Date();
     await db.transaction(async (tx) => {
+      // One open invite per address and org: a new one replaces any earlier link.
+      await tx
+        .update(emailTokenTable)
+        .set({ consumedAt: createdAt })
+        .where(
+          and(
+            eq(emailTokenTable.purpose, 'invite'),
+            eq(emailTokenTable.orgId, orgId),
+            eq(emailTokenTable.targetEmailNormalized, email),
+            isNull(emailTokenTable.consumedAt),
+          ),
+        );
       await tx.insert(emailTokenTable).values({
         id: tokenId,
         purpose: 'invite',
@@ -85,6 +121,7 @@ export async function createInvite(
         token: token.raw,
         orgId,
         role: ROLE_LABELS[body.role],
+        ...mail,
       });
       await writeAudit(tx, {
         actor: { kind: 'user_session', id: inviterId },
@@ -115,7 +152,10 @@ function inviteRole(row: typeof emailTokenTable.$inferSelect): PublicRole {
   return row.invitedRole!;
 }
 
-/** Pending invites: not consumed and not expired. */
+/**
+ * Open invites: not accepted and not revoked. Those past `expiresAt` are included so the sender
+ * can see them and send a fresh link.
+ */
 export async function listInvites(
   db: Executor,
   principal: UserSessionPrincipal,
@@ -130,7 +170,6 @@ export async function listInvites(
         eq(emailTokenTable.purpose, 'invite'),
         eq(emailTokenTable.orgId, orgId),
         isNull(emailTokenTable.consumedAt),
-        gt(emailTokenTable.expiresAt, new Date()),
       ),
     )
     .orderBy(desc(emailTokenTable.createdAt));
@@ -163,13 +202,14 @@ export async function revokeInvite(
     )
     .limit(1);
 
-  if (!rows[0]) throw notFound();
+  // An accepted or already revoked invite has nothing left to revoke.
+  if (!rows[0] || rows[0].consumedAt !== null) throw notFound();
 
   await db.transaction(async (tx) => {
     await tx
       .update(emailTokenTable)
       .set({ consumedAt: new Date() })
-      .where(eq(emailTokenTable.id, tokenId));
+      .where(and(eq(emailTokenTable.id, tokenId), isNull(emailTokenTable.consumedAt)));
     await writeAudit(tx, {
       actor: { kind: 'user_session', id: principal.userId },
       action: 'invite.revoked',
@@ -199,11 +239,13 @@ export async function resendInvite(
     .limit(1);
 
   const tokenRow = rows[0];
-  if (!tokenRow || !isEmailTokenValid(tokenRow)) throw notFound();
+  // The sender may resend an invite that has run out; only an accepted or revoked one is closed.
+  if (!tokenRow || tokenRow.consumedAt !== null) throw notFound();
 
   // Only the hash is stored, so the earlier link cannot be sent again: a new token replaces it
   // and the old link stops working.
   const token = generateEmailToken(INVITE_TOKEN_TTL_SECONDS);
+  const mail = await mailContext(db, principal.userId, orgId);
   await db.transaction(async (tx) => {
     await tx
       .update(emailTokenTable)
@@ -215,6 +257,7 @@ export async function resendInvite(
       orgId,
       role: ROLE_LABELS[inviteRole(tokenRow)],
       resend: true,
+      ...mail,
     });
     await writeAudit(tx, {
       actor: { kind: 'user_session', id: principal.userId },
@@ -223,6 +266,71 @@ export async function resendInvite(
       orgId,
     });
   });
+}
+
+/**
+ * Says what an invite link stands for, for someone who is not signed in yet. Anyone holding the
+ * link may ask; the token is the only credential, so a link that is gone and one that never
+ * existed get the same answer.
+ */
+export async function previewInvite(
+  db: Executor,
+  body: PreviewInviteBody,
+): Promise<Plain<InvitePreviewResponse>> {
+  const unavailable = {
+    state: 'unavailable',
+    email: null,
+    organizationName: null,
+    role: null,
+    registered: null,
+  } as const;
+
+  const [row] = await db
+    .select()
+    .from(emailTokenTable)
+    .where(
+      and(
+        eq(emailTokenTable.tokenHash, hashEmailToken(body.token)),
+        eq(emailTokenTable.purpose, 'invite'),
+      ),
+    )
+    .limit(1);
+  if (!row || row.consumedAt !== null || !row.orgId) return unavailable;
+  if (!isEmailTokenValid(row)) return { ...unavailable, state: 'expired' };
+
+  const orgId = row.orgId;
+  const organizationName = await db.transaction(async (tx) => {
+    // The organization row is visible only inside its own tenant.
+    await setRlsContext(tx, { orgId });
+    const [org] = await tx
+      .select({ name: organizationTable.name })
+      .from(organizationTable)
+      .where(eq(organizationTable.id, orgId))
+      .limit(1);
+    return org?.name ?? null;
+  });
+  if (organizationName === null) return unavailable;
+
+  // An address someone registered but never verified counts as free: the invite can claim it.
+  const [registered] = await db
+    .select({ id: userTable.id })
+    .from(userTable)
+    .where(
+      and(
+        eq(userTable.emailNormalized, row.targetEmailNormalized!),
+        eq(userTable.kind, 'human'),
+        isNotNull(userTable.emailVerifiedAt),
+      ),
+    )
+    .limit(1);
+
+  return {
+    state: 'valid',
+    email: row.targetEmailNormalized!,
+    organizationName,
+    role: inviteRole(row),
+    registered: registered !== undefined,
+  };
 }
 
 export async function acceptInvite(
@@ -272,10 +380,13 @@ export async function acceptInvite(
   // Consume token and add membership atomically
   const now = new Date();
   await db.transaction(async (tx) => {
-    await tx
+    // Only one of two simultaneous accepts gets to consume the invite.
+    const consumed = await tx
       .update(emailTokenTable)
       .set({ consumedAt: now })
-      .where(eq(emailTokenTable.id, tokenRow.id));
+      .where(and(eq(emailTokenTable.id, tokenRow.id), isNull(emailTokenTable.consumedAt)))
+      .returning({ id: emailTokenTable.id });
+    if (consumed.length === 0) throw appError('token_invalid_or_expired');
 
     // The invite names the org, so the rows it creates are written as that org's.
     await setRlsContext(tx, { orgId, userId });

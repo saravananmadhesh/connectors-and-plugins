@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { auth, ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
@@ -13,6 +13,7 @@ export function ResetPasswordPage() {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { token?: string };
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [serverError, setServerError] = useState('');
   const [done, setDone] = useState(false);
 
@@ -79,9 +80,8 @@ export function ResetPasswordPage() {
           {serverError && <Alert variant="destructive">{serverError}</Alert>}
           <div className="space-y-1">
             <Label htmlFor="password">New password</Label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
               placeholder="12+ characters"
               value={password}
@@ -91,10 +91,24 @@ export function ResetPasswordPage() {
               }
             />
           </div>
+          <div className="space-y-1">
+            <Label htmlFor="confirm">Repeat password</Label>
+            <PasswordInput
+              id="confirm"
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              error={
+                confirm.length > 0 && confirm !== password
+                  ? 'The two passwords do not match'
+                  : undefined
+              }
+            />
+          </div>
           <Button
             type="submit"
             className="w-full"
-            disabled={mutation.isPending || password.length < 12}
+            disabled={mutation.isPending || password.length < 12 || confirm !== password}
           >
             {mutation.isPending && <Spinner className="mr-2" />}
             Set new password

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 interface Props {
   title: string;
-  description: string;
+  description?: string | undefined;
   /** The page's one primary action, or its controls, at the right. */
   children?: ReactNode;
 }

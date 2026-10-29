@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import type { DiscoveredPlugin, InstalledSource } from './api';
 import {
   candidateState,
+  canInstall,
   describeCounts,
   filterCandidates,
+  githubFolderUrl,
   needsAttention,
   sourceHealth,
+  usesStdio,
 } from './discover';
 
 const candidate = (overrides: Partial<DiscoveredPlugin> = {}): DiscoveredPlugin => ({
@@ -17,6 +20,7 @@ const candidate = (overrides: Partial<DiscoveredPlugin> = {}): DiscoveredPlugin 
   summary: null,
   categories: [],
   componentCounts: {},
+  mcpTransports: [],
   problem: null,
   installed: null,
   ...overrides,
@@ -156,5 +160,49 @@ describe('filterCandidates', () => {
   it('combines the words with the state filter', () => {
     expect(filterCandidates(list, 'chat', 'available')).toEqual([]);
     expect(paths(filterCandidates(list, 'chat', 'installed'))).toEqual(['tools/chat']);
+  });
+
+  it('hides installed plugins and plugins with a stdio MCP server, together or apart', () => {
+    const both = [
+      ...list,
+      candidate({ path: 'local', mcpTransports: ['stdio'] }),
+      candidate({ path: 'mixed', mcpTransports: ['http', 'stdio'] }),
+      candidate({ path: 'remote', mcpTransports: ['http'] }),
+    ];
+    expect(paths(filterCandidates(both, '', 'all', ['installed']))).not.toContain('tools/chat');
+    expect(paths(filterCandidates(both, '', 'all', ['stdio']))).toEqual([
+      'tools/mail',
+      'tools/chat',
+      'x',
+      'sync',
+      'remote',
+    ]);
+    expect(paths(filterCandidates(both, '', 'all', ['installed', 'stdio']))).toEqual([
+      'tools/mail',
+      'x',
+      'sync',
+      'remote',
+    ]);
+    expect(filterCandidates(both, '', 'all', [])).toHaveLength(7);
+  });
+
+  it('allows installing only what is new and has no stdio server', () => {
+    expect(usesStdio(candidate({ mcpTransports: ['http', 'stdio'] }))).toBe(true);
+    expect(usesStdio(candidate({ mcpTransports: ['http'] }))).toBe(false);
+    expect(canInstall(candidate())).toBe(true);
+    expect(canInstall(candidate({ mcpTransports: ['stdio'] }))).toBe(false);
+    expect(canInstall(candidate({ installed: installed() }))).toBe(false);
+  });
+});
+
+describe('githubFolderUrl', () => {
+  const repo = { owner: 'acme', repository: 'tools', ref: 'release/1.0' };
+  it('points at the folder on the inspected branch', () => {
+    expect(githubFolderUrl(repo, 'plugins/mail kit')).toBe(
+      'https://github.com/acme/tools/tree/release/1.0/plugins/mail%20kit',
+    );
+  });
+  it('points at the branch root for the repository root', () => {
+    expect(githubFolderUrl(repo, '')).toBe('https://github.com/acme/tools/tree/release/1.0');
   });
 });

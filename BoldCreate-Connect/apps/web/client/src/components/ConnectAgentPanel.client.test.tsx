@@ -1,9 +1,39 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { resetRuntimeConfig } from '@/lib/runtime-config';
 import { ConnectAgentPanel } from './ConnectAgentPanel';
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+  resetRuntimeConfig();
+});
+
 describe('ConnectAgentPanel', () => {
+  it('uses the gateway address the server publishes for its environment', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ gatewayUrl: 'https://mcp.example.com' })),
+    );
+    render(<ConnectAgentPanel />);
+    await waitFor(() =>
+      expect(screen.getByLabelText('Gateway address')).toHaveValue('https://mcp.example.com'),
+    );
+    expect(screen.getByText(/YOUR_API_KEY/, { selector: 'pre' }).textContent).toContain(
+      'https://mcp.example.com/mcp',
+    );
+  });
+
+  it('keeps the default when the server cannot be asked', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Promise.reject(new Error('offline'))),
+    );
+    render(<ConnectAgentPanel />);
+    await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalled());
+    expect(screen.getByLabelText('Gateway address')).toHaveValue('http://localhost:3002');
+  });
+
   it('shows a Cursor snippet with the key placeholder first', () => {
     render(<ConnectAgentPanel />);
     expect(screen.getByText(/YOUR_API_KEY/, { selector: 'pre' })).toBeInTheDocument();

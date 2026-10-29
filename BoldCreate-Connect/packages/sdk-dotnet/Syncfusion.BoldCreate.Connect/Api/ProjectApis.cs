@@ -112,6 +112,33 @@ public sealed class UsersApi
             query: new Query().Add("userId", userId), ct: ct);
     }
 
+    /// <summary>
+    /// Turns one component on or off for the user. On the user's own install it changes the install;
+    /// on a plugin the project provides it stores the user's own preference and the install's value
+    /// stays the default.
+    /// </summary>
+    public async Task<UserPlugin> SetComponentEnabledAsync(
+        string userId, string pluginId, string componentId, bool enabled, CancellationToken ct = default)
+    {
+        Checks.UserId(userId);
+        return await _http.JsonAsync<UserPlugin>(HttpMethod.Put,
+            $"/v1/project/user-plugins/{Paths.Id(pluginId)}/components/{Paths.Id(componentId)}",
+            new { userId, enabled }, ct: ct).ConfigureAwait(false) ?? throw Empty();
+    }
+
+    /// <summary>
+    /// Drops the user's own preference for one component, so the user follows the install again. A
+    /// plugin the user installed has no preference and is not found here.
+    /// </summary>
+    public async Task<UserPlugin> ClearComponentEnabledAsync(
+        string userId, string pluginId, string componentId, CancellationToken ct = default)
+    {
+        Checks.UserId(userId);
+        return await _http.JsonAsync<UserPlugin>(HttpMethod.Delete,
+            $"/v1/project/user-plugins/{Paths.Id(pluginId)}/components/{Paths.Id(componentId)}",
+            query: new Query().Add("userId", userId), ct: ct).ConfigureAwait(false) ?? throw Empty();
+    }
+
     internal static ConnectError Empty() => new("The answer had no body.", "empty_answer", 200);
 }
 

@@ -1,5 +1,5 @@
 /** ProjectPage: the tabs of one project, what each shows and what a member may change. */
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, projects } from '@/lib/api';
@@ -22,12 +22,24 @@ const RAW_KEY = 'prk_0123456789abcdef.rawsecretvalue';
 const SECRET = 'whsec_rawsecretvalue';
 
 const render = (tab?: string, role: TestRole = 'ADMIN') =>
-  renderWithRouter(ProjectPage, ROUTE, {
-    url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}${tab ? `?tab=${tab}` : ''}`,
+  renderWithRouter(ProjectPage, tab ? `${ROUTE}/$tab` : ROUTE, {
+    url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}${tab ? `/${tab}` : ''}`,
     queryData: baseData(role),
   });
 
 const withRaw = (over: Partial<ProjectKeyResponse> = {}) => ({ ...key(over), rawKey: RAW_KEY });
+
+/** The day of the usage below, as the overview shows it. */
+const DAY = new Date('2026-10-01T00:00:00Z').toLocaleDateString(undefined, {
+  timeZone: 'UTC',
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+});
+
+/** The queries inside the section the heading opens. */
+const section = async (name: string) =>
+  within((await screen.findByRole('heading', { name })).closest('section') as HTMLElement);
 
 describe('ProjectPage', () => {
   beforeEach(() => {
@@ -44,14 +56,28 @@ describe('ProjectPage', () => {
   it('shows the name, the status and the overview first', async () => {
     await render();
     expect(await screen.findByRole('heading', { name: 'Storefront' })).toBeInTheDocument();
-    expect(screen.getByText('active')).toBeInTheDocument();
-    expect(await screen.findByText('2026-10-01')).toBeInTheDocument();
+    expect(screen.getAllByText('active').length).toBeGreaterThan(0);
+    expect(await screen.findByText(DAY)).toBeInTheDocument();
     expect(screen.getAllByText('12', { selector: 'td' }).length).toBe(2);
+  });
+
+  it('lays the overview out as details, activity totals, days and top users', async () => {
+    await render();
+    const details = await section('Details');
+    expect(details.getByText('https://shop.example.com')).toBeInTheDocument();
+    expect(details.getByText('Active keys')).toBeInTheDocument();
+    expect(details.getByText('Return addresses')).toBeInTheDocument();
+    const activity = await section('Activity');
+    expect(activity.getByText('16.7% of calls')).toBeInTheDocument();
+    expect(activity.getByText('The last 1 day.')).toBeInTheDocument();
+    const top = await section('Top users');
+    expect(top.getByText('host-user-1')).toBeInTheDocument();
+    expect(top.getByText('100%')).toBeInTheDocument();
   });
 
   it('does not offer the Create key shortcut when an active project key exists', async () => {
     await render();
-    await screen.findByText('2026-10-01');
+    await screen.findByText(DAY);
     expect(screen.queryByRole('link', { name: 'Create key' })).toBeNull();
   });
 
@@ -67,9 +93,9 @@ describe('ProjectPage', () => {
     expect(link).toHaveAttribute('href', `/orgs/${ORG_ID}/projects/${PROJECT_ID}?tab=keys`);
   });
 
-  it('offers a viewer no Create key shortcut', async () => {
-    await render(undefined, 'VIEWER');
-    await screen.findByText('2026-10-01');
+  it('leaves key creation to the API keys tab', async () => {
+    await render();
+    await screen.findByText(DAY);
     expect(screen.queryByRole('link', { name: 'Create key' })).toBeNull();
   });
 
@@ -94,7 +120,7 @@ describe('ProjectPage', () => {
       'Connections',
       'Catalog',
       'Logs',
-      'Keys',
+      'API keys',
     ]) {
       expect(await screen.findByRole('tab', { name })).toBeInTheDocument();
     }
@@ -104,7 +130,7 @@ describe('ProjectPage', () => {
   it('leaves the keys and settings tabs out for a viewer', async () => {
     await render('keys', 'VIEWER');
     await screen.findByRole('tab', { name: 'Overview' });
-    expect(screen.queryByRole('tab', { name: 'Keys' })).toBeNull();
+    expect(screen.queryByRole('tab', { name: 'API keys' })).toBeNull();
     expect(screen.queryByRole('tab', { name: 'Settings' })).toBeNull();
     expect(projects.keys).not.toHaveBeenCalled();
   });

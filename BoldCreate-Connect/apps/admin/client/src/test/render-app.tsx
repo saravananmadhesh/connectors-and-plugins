@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createMemoryHistory } from '@tanstack/react-router';
 import { vi } from 'vitest';
 import type { AdminAuditListResponse, AdminStatsResponse } from '../lib/api';
+import { clearDiscoverSession } from '../lib/discover-session';
 import { createAdminRouter } from '../router';
 import { EMPTY_STATS } from './stats';
 
@@ -54,6 +55,7 @@ export const ERROR = (code: string, status: number): FakeReply => ({
 });
 
 export async function renderApp(url: string) {
+  clearDiscoverSession();
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createAdminRouter(queryClient, createMemoryHistory({ initialEntries: [url] }));
   await router.load();

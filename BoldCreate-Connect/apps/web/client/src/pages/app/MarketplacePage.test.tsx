@@ -67,10 +67,10 @@ const ME = {
   memberships: [{ organizationId: ORG_ID, organizationName: 'Acme' }],
 } as unknown as apiModule.MeResponse;
 
-const EXTRA = [{ path: '/marketplace/$pluginId', component: () => <div>detail</div> }];
+const EXTRA = [{ path: '/orgs/$orgId/marketplace/$pluginId', component: () => <div>detail</div> }];
 
-function renderPage(url = '/marketplace') {
-  return renderWithRouter(MarketplacePage, '/marketplace', { extraRoutes: EXTRA, url });
+function renderPage(url = `/orgs/${ORG_ID}/marketplace`) {
+  return renderWithRouter(MarketplacePage, '/orgs/$orgId/marketplace', { extraRoutes: EXTRA, url });
 }
 
 function mockList(result = page([plugin(1), plugin(2)])) {
@@ -120,7 +120,7 @@ describe('MarketplacePage', () => {
     expect(screen.queryByText('Summary 1')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open Plugin 1 details' })).toHaveAttribute(
       'href',
-      '/marketplace/plg_1',
+      `/orgs/${ORG_ID}/marketplace/plg_1`,
     );
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
@@ -141,7 +141,7 @@ describe('MarketplacePage', () => {
   it('sends the search, ticked categories and sort to the API and returns to the first page', async () => {
     const list = mockList(page([plugin(1)], 60));
     const user = userEvent.setup();
-    await renderPage('/marketplace');
+    await renderPage();
     await screen.findByText('Plugin 1');
 
     await user.click(screen.getByRole('button', { name: 'Page 2' }));
@@ -225,7 +225,7 @@ describe('MarketplacePage', () => {
     const list = vi
       .spyOn(apiModule.marketplace, 'listPlugins')
       .mockResolvedValue(page([plugin(1)], 30, 1));
-    await renderPage('/marketplace?page=9');
+    await renderPage(`/orgs/${ORG_ID}/marketplace?page=9`);
     await waitFor(() =>
       expect(list).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })),
     );

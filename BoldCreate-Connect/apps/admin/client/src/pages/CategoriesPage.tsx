@@ -5,6 +5,7 @@ import { Alert } from '../components/ui/alert';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
+import { Skeleton } from '../components/ui/skeleton';
 import { Label } from '../components/ui/label';
 import {
   Table,
@@ -215,7 +216,7 @@ export function CategoriesPage() {
         description="A plugin with no category is filed under General."
       />
       <AddCategoryForm />
-      {categories.isPending && <p className="text-sm text-muted-foreground">Loading categories…</p>}
+      {categories.isPending && <Skeleton className="h-24" aria-label="Loading categories" />}
       {categories.isError && (
         <Alert variant="destructive" role="alert">
           {errorMessage(categories.error)}

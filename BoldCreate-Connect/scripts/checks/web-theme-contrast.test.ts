@@ -1,39 +1,18 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { contrastRatio as contrast, themeLuminances } from './theme-tokens.js';
 
 const source = join(import.meta.dirname, '..', '..', 'apps', 'web', 'client', 'src');
 const css = readFileSync(join(source, 'index.css'), 'utf8');
-
-/** The tokens of one theme block, as lightness values; only plain grey tokens (no chroma, no alpha). */
-function greys(selector: string): Map<string, number> {
-  const start = css.indexOf(`${selector} {`);
-  const block = css.slice(start, css.indexOf('}', start));
-  const tokens = new Map<string, number>();
-  for (const [, name, lightness, chroma, alpha] of block.matchAll(
-    /--([a-z-]+):\s*oklch\(([\d.]+)\s+([\d.]+)\s+[\d.]+(?:\s*\/\s*([\d.]+%))?\)/g,
-  )) {
-    if (Number(chroma) === 0 && alpha === undefined) tokens.set(name!, Number(lightness));
-  }
-  return tokens;
-}
-
-/** Relative luminance of a grey: for oklch with no chroma it is the lightness cubed. */
-const luminance = (lightness: number) => lightness ** 3;
-
-function contrast(theme: Map<string, number>, foreground: string, background: string): number {
-  const a = luminance(theme.get(foreground) ?? Number.NaN);
-  const b = luminance(theme.get(background) ?? Number.NaN);
-  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-}
 
 describe.each([
   ['light', ':root'],
   ['dark', '.dark'],
 ])('web %s theme contrast', (_name, selector) => {
-  const theme = greys(selector);
+  const theme = themeLuminances(css, selector);
 
-  it('reads the grey tokens it checks', () => {
+  it('reads the colour tokens it checks', () => {
     for (const token of ['foreground', 'muted-foreground', 'card', 'background', 'input', 'ring']) {
       expect([token, theme.has(token)]).toEqual([token, true]);
     }

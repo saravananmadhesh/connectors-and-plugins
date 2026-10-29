@@ -13,8 +13,8 @@ import { TableCell, TableRow } from './ui/table';
 
 interface Props {
   plugin: AdminPluginSummary;
-  /** Present while rows can be picked for a bulk action. */
-  selection?: { selected: boolean; onToggle: () => void };
+  /** Picks the row for a bulk action. */
+  selection: { selected: boolean; onToggle: () => void };
   /** The optional columns that are shown. */
   columns: ReadonlySet<PluginColumn>;
 }
@@ -62,19 +62,17 @@ export function PluginRow({ plugin, selection, columns }: Props) {
 
   return (
     <TableRow
-      data-state={selection?.selected ? 'selected' : undefined}
+      data-state={selection.selected ? 'selected' : undefined}
       onClick={open}
       className="cursor-pointer"
     >
-      {selection && (
-        <TableCell className="w-8">
-          <Checkbox
-            checked={selection.selected}
-            onChange={selection.onToggle}
-            aria-label={`Select ${plugin.displayName}`}
-          />
-        </TableCell>
-      )}
+      <TableCell className="w-8">
+        <Checkbox
+          checked={selection.selected}
+          onChange={selection.onToggle}
+          aria-label={`Select ${plugin.displayName}`}
+        />
+      </TableCell>
       <TableCell className="max-w-80">
         <div className="flex items-center gap-3">
           <PluginLogo src={plugin.logoUrl} />

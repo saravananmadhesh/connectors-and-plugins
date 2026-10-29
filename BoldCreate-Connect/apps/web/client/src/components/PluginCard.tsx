@@ -16,11 +16,14 @@ const COUNT_LABELS: readonly { kind: ComponentKind; label: string }[] = [
 /** A marketplace card: logo, name and what the plugin customizes, with an install menu by scope. */
 export function PluginCard({
   plugin,
+  orgId,
   scopes,
   installed,
   onInstall,
 }: {
   plugin: PluginListItemResponse;
+  /** The organization whose marketplace this is; the plugin's page is under it. */
+  orgId: string;
   /** The scopes still open to install into. */
   scopes: readonly InstallScope[];
   /** The plugin is installed in at least one scope. */
@@ -32,8 +35,8 @@ export function PluginCard({
   return (
     <article className="flex min-h-[66px] items-center gap-3 rounded-lg border bg-card p-3 transition-colors focus-within:ring-2 focus-within:ring-ring hover:bg-muted/40">
       <Link
-        to="/marketplace/$pluginId"
-        params={{ pluginId: plugin.id }}
+        to="/orgs/$orgId/marketplace/$pluginId"
+        params={{ orgId, pluginId: plugin.id }}
         aria-label={`Open ${plugin.displayName} details`}
         className="flex min-w-0 flex-1 items-center gap-3 rounded-md outline-none"
       >

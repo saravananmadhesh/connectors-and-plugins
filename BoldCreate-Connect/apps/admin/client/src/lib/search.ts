@@ -55,3 +55,18 @@ export const parseDiscoverSearch = (search: Record<string, unknown>): { tab?: Di
   const tab = oneOf(DISCOVER_TABS, search['tab']);
   return tab ? { tab } : {};
 };
+
+export const PLUGIN_STAGES = [
+  'needs_review',
+  'pending',
+  'approved',
+  'published',
+  'rejected',
+  'yanked',
+  'all',
+] as const;
+export type PluginStage = (typeof PLUGIN_STAGES)[number];
+export const parsePluginsSearch = (search: Record<string, unknown>): { stage?: PluginStage } => {
+  const stage = oneOf(PLUGIN_STAGES, search['stage']);
+  return stage ? { stage } : {};
+};

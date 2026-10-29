@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, useParams } from '@tanstack/react-router';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import { ClickableRow } from '@/components/ClickableRow';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Boxes, Plus } from 'lucide-react';
 import { projects } from '@/lib/api';
@@ -100,6 +101,7 @@ function CreateProjectDialog({ orgId, onClose }: { orgId: string; onClose: () =>
 
 export function ProjectsPage() {
   const { orgId } = useParams({ strict: false }) as { orgId: string };
+  const navigate = useNavigate();
   const { can } = useAbilities(orgId);
   const paging = useCursorPaging();
   const [creating, setCreating] = useState(false);
@@ -152,7 +154,15 @@ export function ProjectsPage() {
                 </TableHeader>
                 <TableBody>
                   {items.map((project) => (
-                    <TableRow key={project.id}>
+                    <ClickableRow
+                      key={project.id}
+                      onActivate={() =>
+                        void navigate({
+                          to: '/orgs/$orgId/projects/$projectId',
+                          params: { orgId, projectId: project.id },
+                        })
+                      }
+                    >
                       <TableCell className="font-medium">
                         <Link
                           to="/orgs/$orgId/projects/$projectId"
@@ -167,7 +177,7 @@ export function ProjectsPage() {
                       </TableCell>
                       <TableCell>{project.activeKeyCount}</TableCell>
                       <TableCell>{relativeTime(project.createdAt)}</TableCell>
-                    </TableRow>
+                    </ClickableRow>
                   ))}
                 </TableBody>
               </Table>

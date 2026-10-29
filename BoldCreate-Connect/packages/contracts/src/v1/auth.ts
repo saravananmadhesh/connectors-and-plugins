@@ -14,6 +14,11 @@ export const SignupBodySchema = z.strictObject({
   email: EmailSchema,
   password: PasswordSchema,
   displayName: DisplayNameSchema,
+  /**
+   * The token of an open invite sent to `email`. It proves the person reads that mailbox, so the
+   * address is verified at once and no verification mail is sent.
+   */
+  inviteToken: z.string().min(1).max(512).optional(),
 });
 export type SignupBody = z.infer<typeof SignupBodySchema>;
 
