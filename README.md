@@ -1,6 +1,6 @@
 # Syncfusion BoldCreate Plugins
 
-Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds two kinds of plugin, each in its own directory with its own manifests:
+Syncfusion's BoldCreate plugins for BoldCreate Connect and Claude Code. The repository holds two kinds of plugin, each in its own directory with its own manifests:
 
 - **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-toolkit/` gives agents one software delivery lifecycle on any stack.
 - **MCP plugins** under `third_party/`. Each connects agents to a vendor's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
@@ -8,7 +8,6 @@ Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. 
 ## Install
 
 - **BoldCreate Connect:** open **Marketplace**, find the plugin, and click **Install**.
-- **Cursor:** add this repository as a team marketplace, then install the plugin.
 - **Claude Code:** `/plugin marketplace add syncfusion/BoldCreate-Plugins`, then `/plugin install <name>@boldcreate-plugins`.
 
 Secrets such as API keys are never stored in this repository. Each MCP plugin declares them as install-time variables, and you enter them when you install it. See each plugin's README for setup.
@@ -74,16 +73,15 @@ This is a multi-plugin marketplace repository. The root marketplace files list e
 
 ```
 .boldcreate-plugin/marketplace.json   # BoldCreate Connect marketplace (generated)
-.cursor-plugin/marketplace.json       # Cursor marketplace (generated)
 .claude-plugin/marketplace.json       # Claude Code marketplace (generated)
 boldcreate-toolkit/                   # Syncfusion plugin
-├── .cursor-plugin/plugin.json        # Manifest
+├── .cursor-plugin/plugin.json        # Source manifest
 ├── .claude-plugin/plugin.json        # Claude Code manifest (generated)
 ├── .boldcreate-plugin/plugin.json    # BoldCreate Connect manifest (generated)
 ├── boldcreate.json                   # BoldCreate Connect metadata
 ├── skills/<name>/                    # Skills: SKILL.md plus the templates and checklists it reads
 ├── agents/                           # Agents
-├── rules/                            # Cursor rules
+├── rules/                            # Plugin rules
 ├── hooks/claude-hooks.json           # Claude Code hooks
 ├── tests/scenarios/<skill>.md        # One scenario per skill
 ├── assets/logo.svg
