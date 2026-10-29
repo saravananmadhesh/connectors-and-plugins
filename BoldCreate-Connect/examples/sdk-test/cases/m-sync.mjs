@@ -8,7 +8,7 @@
  * Every case below states its scenario and its expected result in the comment above it.
  * Results: examples/sdk-test/.local/ts-results-m.json (this file alone).
  */
-import { readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ConnectSession } from '../../../packages/sdk/dist/index.js';
 import { syncPlugins } from '../../../packages/sdk/dist/sync.js';
