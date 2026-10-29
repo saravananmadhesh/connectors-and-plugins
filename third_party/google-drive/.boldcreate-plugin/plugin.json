@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-drive",
   "displayName": "Google Drive",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Search, read, and create files in Google Drive.",
   "author": {
     "name": "Syncfusion"

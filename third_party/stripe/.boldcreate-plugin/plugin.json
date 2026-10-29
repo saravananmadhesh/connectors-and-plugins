@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "stripe",
   "displayName": "Stripe",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
   "author": {
     "name": "Syncfusion"

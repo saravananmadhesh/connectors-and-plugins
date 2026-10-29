@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-stitch",
   "displayName": "Stitch",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Generate UI designs and front-end code with Google Stitch.",
   "author": {
     "name": "Syncfusion"

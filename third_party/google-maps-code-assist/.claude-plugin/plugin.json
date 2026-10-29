@@ -1,7 +1,7 @@
 {
   "name": "google-maps-code-assist",
   "displayName": "Google Maps Code Assist",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Get up-to-date Google Maps Platform docs and code samples while you write Maps code.",
   "author": {
     "name": "Syncfusion"

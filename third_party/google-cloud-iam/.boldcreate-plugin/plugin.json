@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-cloud-iam",
   "displayName": "Google Cloud IAM",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Review IAM roles, policies, and service accounts.",
   "author": {
     "name": "Syncfusion"

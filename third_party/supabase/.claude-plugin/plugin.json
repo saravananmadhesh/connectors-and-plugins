@@ -1,7 +1,7 @@
 {
   "name": "supabase",
   "displayName": "Supabase",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
   "author": {
     "name": "Syncfusion"

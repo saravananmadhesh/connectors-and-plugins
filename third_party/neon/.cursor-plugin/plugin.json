@@ -1,7 +1,7 @@
 {
   "name": "neon",
   "displayName": "Neon",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
