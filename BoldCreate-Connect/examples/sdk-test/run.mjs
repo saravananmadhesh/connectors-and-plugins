@@ -11,7 +11,9 @@
  *   Options: SDK_TEST_BASE_URL (default http://localhost:3002, the gateway), SDK_TEST_STATE
  *   (default examples/sdk-test/.local/state.json), SDK_TEST_ONLY=A,K (another way to pick groups),
  *   SDK_TEST_WEBHOOK_LOG (deliveries your webhook receiver saved, checked in J7) and
- *   SDK_TEST_MCP_LOG (what the MCP servers received, checked in L4).
+ *   SDK_TEST_MCP_LOG (what the MCP servers received, checked in L4), and SDK_TEST_SYNC_DIR (keep
+ *   the files groups M and Q sync, under <dir>/ts-<run id>/; by default they go to a temporary
+ *   folder that is deleted at the end).
  *   Results: one line per case on stdout, then "<passed>/<total> passed". A full run writes
  *   examples/sdk-test/.local/ts-results.json; a partial run writes ts-results-<groups>.json.
  *

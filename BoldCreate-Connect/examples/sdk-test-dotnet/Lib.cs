@@ -170,8 +170,15 @@ internal static class Lib
         return components.Value;
     }
 
-    /// <summary>The temporary folder the sync groups (M, Q) sync into.</summary>
-    public static readonly string syncRoot = Directory.CreateTempSubdirectory("sdk-net-sync-").FullName;
+    /// <summary>
+    /// The folder the sync groups (M, Q) write the synced plugin files into. By default a temporary
+    /// folder deleted when the run ends. Set SDK_TEST_SYNC_DIR to keep the files: each run then
+    /// writes to &lt;SDK_TEST_SYNC_DIR&gt;/net-&lt;run id&gt;/, one subfolder per case.
+    /// </summary>
+    public static readonly string? keepSync = Environment.GetEnvironmentVariable("SDK_TEST_SYNC_DIR");
+    public static readonly string syncRoot = keepSync is { Length: > 0 }
+        ? Directory.CreateDirectory(Path.Combine(Path.GetFullPath(keepSync), $"net-{run}")).FullName
+        : Directory.CreateTempSubdirectory("sdk-net-sync-").FullName;
 
     public static string FindRepoRoot()
     {
