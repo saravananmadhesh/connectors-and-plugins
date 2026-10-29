@@ -5,6 +5,7 @@ import {
   destinationOf,
   extractArchive,
   hashOnDisk,
+  isScript,
   placeFiles,
   readLock,
   removeFile,
@@ -113,9 +114,12 @@ async function apply(
     const files = new Map<string, Uint8Array>();
     const conflicts: string[] = [];
     const hashes: Record<string, string> = {};
+    const scripts = new Set<string>();
     for (const [path, bytes] of archive) {
       const destination = destinationOf(dir, wanted.pluginName, path);
       files.set(destination, bytes);
+      // The agent runs a hook's scripts itself, so they must be runnable once hooks are allowed.
+      if (wanted.kind === 'hook' && isScript(bytes)) scripts.add(destination);
       hashes[path] = sha256Hex(bytes);
       const current = await hashOnDisk(destination);
       if (current === undefined || current === hashes[path]) continue;
@@ -126,7 +130,7 @@ async function apply(
       result.modified.push(...conflicts);
       return false;
     }
-    await placeFiles(dir, files);
+    await placeFiles(dir, files, scripts);
     next.components[wanted.componentId] = {
       pluginName: wanted.pluginName,
       kind: wanted.kind,

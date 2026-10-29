@@ -79,7 +79,7 @@ The route registry in `packages/contracts` is the single source. `pnpm build` wr
 
 ## Per component archives and no MCP configuration in archives
 
-- **What it does.** Packing removes `mcp.json` from the plugin archive. Each skill, rule and agent, and the shared hook file, is its own deterministic archive stored by content hash, with its hash and size on the `component` row. The sync manifest lists each component's hash, the MCP entries with their gateway address, and what setup is missing. Clients compare hashes and download only what changed.
+- **What it does.** Packing removes `mcp.json` from the plugin archive. Each skill, rule and agent, and the shared hook file with the scripts its commands run (everything in `hooks/` and any plugin file a command names), is its own deterministic archive stored by content hash, with its hash and size on the `component` row. The sync manifest lists each component's hash, the MCP entries with their gateway address, and what setup is missing. Clients compare hashes and download only what changed.
 - **Why.** An agent must reach MCP only through the gateway, which holds the secrets and audits calls. Per component hashes keep updates small and let an unchanged component skip a download across versions.
 - **Archives are shared.** Two components with the same files use one object. The worker removes an object only when neither a version nor a component still points at it.
 - **Rejected.** Rewriting `mcp.json` inside the archive (the upstream address would still ship and a client could use it). One archive per plugin with a client side diff (re-downloads everything for one change).

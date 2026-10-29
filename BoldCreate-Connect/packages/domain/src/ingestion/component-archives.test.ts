@@ -1,3 +1,4 @@
+import { gunzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { packComponentArchives } from './component-archives.js';
 import type { ScannedComponent } from './scan.js';
@@ -15,6 +16,29 @@ const component = (
 
 const files = (entries: Record<string, string>) =>
   new Map(Object.entries(entries).map(([name, body]) => [name, Buffer.from(body)]));
+
+/** The file names in a tar.gz, sorted. */
+function namesIn(bytes: Buffer): string[] {
+  const tar = gunzipSync(bytes);
+  const names: string[] = [];
+  for (let offset = 0; offset + 512 <= tar.length;) {
+    const name = tar
+      .subarray(offset, offset + 100)
+      .toString('utf8')
+      .replace(/\0.*$/s, '');
+    if (name === '') break;
+    const size = parseInt(
+      tar
+        .subarray(offset + 124, offset + 136)
+        .toString('ascii')
+        .trim(),
+      8,
+    );
+    names.push(name);
+    offset += 512 + Math.ceil(size / 512) * 512;
+  }
+  return names.sort();
+}
 
 describe('packComponentArchives', () => {
   const tree = files({
@@ -60,6 +84,33 @@ describe('packComponentArchives', () => {
       component('hook', 'h2', 'hooks/hooks.json'),
     ]);
     expect(out.get('hook:h1')?.sha256).toBe(out.get('hook:h2')?.sha256);
+  });
+
+  it('carries the scripts the hooks run with the hook file', () => {
+    const plugin = files({
+      'hooks/hooks.json': '{}',
+      'hooks/stop.sh': '#!/bin/sh',
+      'scripts/check.sh': '#!/bin/sh',
+      'scripts/lint.py': 'print()',
+      'scripts/unused.sh': '#!/bin/sh',
+      'skills/a/SKILL.md': 'a',
+    });
+    const hook = (name: string, commands: string[]): ScannedComponent => ({
+      ...component('hook', name, 'hooks/hooks.json'),
+      metadata: { path: 'hooks/hooks.json', commands },
+    });
+    const out = packComponentArchives(plugin, [
+      hook('stop', ['./hooks/stop.sh']),
+      hook('start', ['bash "${CLAUDE_PLUGIN_ROOT}/scripts/check.sh"', 'python3 scripts/lint.py']),
+    ]);
+    const archive = out.get('hook:stop');
+    expect(out.get('hook:start')?.sha256).toBe(archive?.sha256);
+    expect(namesIn(archive!.bytes)).toEqual([
+      'hooks/hooks.json',
+      'hooks/stop.sh',
+      'scripts/check.sh',
+      'scripts/lint.py',
+    ]);
   });
 
   it('leaves out a component with no path or no files', () => {

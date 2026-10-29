@@ -205,6 +205,21 @@ public sealed class SyncTests : IDisposable
     }
 
     [Fact]
+    public async Task Makes_a_hooks_scripts_runnable_and_nothing_else()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        var hook = Add(("hooks/hooks.json", "{}"), ("hooks/stop.sh", "#!/bin/sh\nexit 0\n"));
+        var skill = Add(("skills/a/run.sh", "#!/bin/sh\n"));
+        _manifest = Manifest("r1", ("cmp_h", "alpha", "hook", "h", hook), ("cmp_s", "alpha", "skill", "a", skill));
+        await Session().SyncPluginsAsync(new SyncOptions { Dir = _dir, AllowHooks = true });
+
+        const UnixFileMode run = UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+        Assert.Equal(run, File.GetUnixFileMode(Path.Combine(_dir, "alpha", "hooks", "stop.sh")) & run);
+        Assert.Equal((UnixFileMode)0, File.GetUnixFileMode(Path.Combine(_dir, "alpha", "hooks", "hooks.json")) & run);
+        Assert.Equal((UnixFileMode)0, File.GetUnixFileMode(Path.Combine(_dir, "alpha", "skills", "a", "run.sh")) & run);
+    }
+
+    [Fact]
     public async Task Drops_an_older_revision_once_something_is_left_out()
     {
         // A plugin added (its hook skipped) and then removed brings the server back to the first

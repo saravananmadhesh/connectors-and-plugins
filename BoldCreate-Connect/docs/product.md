@@ -41,13 +41,13 @@ Conventions: kebab-case files; DB `snake_case` singular; JSON `camelCase`; enum 
 
 One package type, five component kinds in one `component` table (`kind` plus a Zod-validated payload).
 
-| Kind    | Source in repo      | Delivery                                          |
-| ------- | ------------------- | ------------------------------------------------- |
-| `mcp`   | `mcp.json`          | Registered as `mcp_server`, called via gateway    |
-| `skill` | `skills/*/SKILL.md` | Sync and download                                 |
-| `rule`  | `rules/*.{md,mdc}`  | Sync and download                                 |
-| `hook`  | `hooks/hooks.json`  | Sync and download; never executed by the platform |
-| `agent` | `agents/*.md`       | Sync and download                                 |
+| Kind    | Source in repo      | Delivery                                                                   |
+| ------- | ------------------- | -------------------------------------------------------------------------- |
+| `mcp`   | `mcp.json`          | Registered as `mcp_server`, called via gateway                             |
+| `skill` | `skills/*/SKILL.md` | Sync and download                                                          |
+| `rule`  | `rules/*.{md,mdc}`  | Sync and download                                                          |
+| `hook`  | `hooks/hooks.json`  | Sync and download with the scripts it runs; never executed by the platform |
+| `agent` | `agents/*.md`       | Sync and download                                                          |
 
 - Manifest precedence: `plugin.json`, then `.cursor-plugin/plugin.json`, then a multi-plugin `marketplace.json`. Paths must stay inside the repo. Invalid input yields a structured error list; nothing is dropped silently. stdio MCP entries are rejected with a reason.
 - Names: 1–64 chars, `[a-z0-9.-]`, alphanumeric at both ends, no `--` or `..`. A missing version is an error.

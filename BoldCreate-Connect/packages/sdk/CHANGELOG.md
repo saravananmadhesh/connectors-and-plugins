@@ -2,6 +2,11 @@
 
 Both SDKs (`@syncfusion/boldcreate-connect` and `Syncfusion.BoldCreate.Connect`) use the same version number and share this log. Semantic versioning: a new method or option is a minor version; a removed or changed one is a major version announced one minor version before.
 
+## Unreleased
+
+- A sync that left something out no longer keeps an older revision either: it keeps none, so the next call always compares the whole manifest. Before, a server that came back to that older revision (a plugin added, then removed) answered "not modified" and the removed plugin's files stayed.
+- With hooks allowed, a hook's scripts (files that start with `#!`) are made runnable; every other file keeps the fixed mode without the execute bit.
+
 ## 0.1.0
 
 - First release of both SDKs. Same names and behavior: `ConnectClient`, `ConnectSession`, the six error classes, `toMcpConfig` / `ToMcpConfig`, `syncPlugins` / `SyncPluginsAsync`, webhook verification, and the shared lock file format.
