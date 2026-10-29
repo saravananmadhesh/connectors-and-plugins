@@ -31,6 +31,10 @@ Optional settings: `SDK_TEST_BASE_URL` (default `http://localhost:3002`, the gat
 deliveries your receiver saved, checked with `webhooks.verify`), and `SDK_TEST_MCP_LOG` (what the
 MCP servers received, to check that a session token never reaches them).
 
+Group Q turns single components on and off for one user (`users.setComponentEnabled`,
+`users.clearComponentEnabled` and the same two calls on `session.plugins`), and checks that the
+manifest, component downloads, file sync and MCP listing follow it.
+
 ## Plugins used
 
 Non-MCP: `boldcreate-toolkit`, `cursor-team-kit`, `ralph-loop`, `continual-learning`, `teaching`,
