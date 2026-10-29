@@ -164,6 +164,5 @@ internal static class GroupMSync
             return new { dotnetAdded = first.Added.Count, ts = output };
         });
 
-        try { Directory.Delete(syncRoot, true); } catch (IOException) { }
     }
 }

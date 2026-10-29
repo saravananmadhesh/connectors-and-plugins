@@ -36,7 +36,8 @@ dotnet run --project examples/sdk-test-dotnet -- K M   # only groups K and M
 Optional settings: `SDK_TEST_BASE_URL` (default `http://localhost:3002`, the gateway),
 `SDK_TEST_ONLY=A,K` (another way to pick groups), `SDK_TEST_WEBHOOK_LOG` (a JSON-lines file of
 webhook deliveries your receiver saved, checked with `webhooks.verify`), and `SDK_TEST_MCP_LOG`
-(what the MCP servers received, to check that a session token never reaches them).
+(what the MCP servers received, to check that a session token never reaches them), and
+`SDK_TEST_SYNC_DIR` (keep the plugin files that groups M and Q sync; see below).
 
 ## Groups
 
@@ -67,6 +68,13 @@ session groups K, L and O use, the sync folder) is made by `cases/lib.mjs` or `L
 
 - Manifest (`GET /v1/sync`): K16, K17. Component download (`GET /v1/sync/components/{sha256}`):
   K18, K19, K20. Sync report (`POST /v1/sync/report`): K21, M12.
+- Only the sync cases write files to disk: `syncPlugins` / `SyncPluginsAsync` (groups M and Q,
+  and N3) place each plugin's skills, rules, agents and hooks in a folder, one subfolder per case.
+  That folder is temporary and is deleted when the run ends. To look at the files, set
+  `SDK_TEST_SYNC_DIR`, for example `SDK_TEST_SYNC_DIR=examples/sdk-test/.local/synced`; each run
+  then writes to `ts-<run id>/` or `net-<run id>/` there and keeps it. The download cases K18 to
+  K20 call `component()` / `ComponentAsync`, which return the archive bytes in memory and check
+  their hash; they do not write a file.
 - File sync end to end: M1 to M13 (and M14 in .NET, which checks the lock is shared with the
   TypeScript SDK). For You key sync: N2, N3. Sync after turning a component off and on: Q5, Q6.
 

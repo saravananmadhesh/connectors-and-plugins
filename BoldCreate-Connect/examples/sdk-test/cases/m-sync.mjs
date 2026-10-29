@@ -236,5 +236,3 @@ await test('M12', 'sync is reported to Connect', async () => {
   const user = (await connect.users.list({ userId: userM })).items[0];
   return { actions: [...new Set(actions)], lastSyncedAt: user?.lastSyncedAt };
 });
-
-await rm(syncRoot, { recursive: true, force: true });

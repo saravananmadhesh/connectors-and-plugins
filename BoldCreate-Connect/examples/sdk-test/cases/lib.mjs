@@ -6,13 +6,13 @@
  * writes the results to examples/sdk-test/.local/ (ts-results.json for a full run of run.mjs,
  * ts-results-<groups>.json when only some groups ran).
  *
- * Settings: SDK_TEST_BASE_URL (default http://localhost:3002, the gateway), SDK_TEST_STATE
+ * Settings: SDK_TEST_SYNC_DIR (keep the synced files there; see syncRoot), SDK_TEST_BASE_URL (default http://localhost:3002, the gateway), SDK_TEST_STATE
  * (default examples/sdk-test/.local/state.json), SDK_TEST_ONLY=A,K (run only those groups).
  */
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { ConnectClient, ConnectError } from '../../../packages/sdk/dist/index.js';
 
 export const BASE = process.env.SDK_TEST_BASE_URL ?? 'http://localhost:3002';
@@ -156,8 +156,16 @@ export async function sharedSession(name) {
   return sessions.get(name);
 }
 
-/** The temporary folder the sync groups (M, Q) sync into. */
-export const syncRoot = await mkdtemp(join(tmpdir(), 'sdk-sync-'));
+/**
+ * The folder the sync groups (M, Q) write the synced plugin files into. By default a temporary
+ * folder that is deleted when the run ends. Set SDK_TEST_SYNC_DIR to keep the files: each run then
+ * writes to <SDK_TEST_SYNC_DIR>/ts-<run id>/, one subfolder per case (for example ts-…-mia/).
+ */
+const KEEP_SYNC = process.env.SDK_TEST_SYNC_DIR;
+export const syncRoot = KEEP_SYNC
+  ? join(resolve(KEEP_SYNC), `ts-${RUN}`)
+  : await mkdtemp(join(tmpdir(), 'sdk-sync-'));
+mkdirSync(syncRoot, { recursive: true });
 
 // ─── Summary when the run ends ────────────────────────────────────────────────────────────────
 
@@ -176,5 +184,7 @@ process.on('beforeExit', () => {
     join(LOCAL, file),
     `${JSON.stringify({ run: RUN, base: BASE, results }, null, 2)}\n`,
   );
+  if (KEEP_SYNC) line(`synced files kept in ${syncRoot}`);
+  else rmSync(syncRoot, { recursive: true, force: true });
   process.exitCode = passed === results.length ? 0 : 1;
 });

@@ -8,7 +8,8 @@
 //      dotnet run --project examples/sdk-test-dotnet -- K M  only groups K and M
 //   Options: SDK_TEST_BASE_URL (default http://localhost:3002, the gateway), SDK_TEST_STATE
 //   (default examples/sdk-test/.local/state.json), SDK_TEST_ONLY=A,K (another way to pick groups),
-//   SDK_TEST_WEBHOOK_LOG (deliveries your webhook receiver saved, checked in J7).
+//   SDK_TEST_WEBHOOK_LOG (deliveries your webhook receiver saved, checked in J7), and
+//   SDK_TEST_SYNC_DIR (keep the files groups M and Q sync, under <dir>/net-<run id>/).
 //   Results: one line per case, then "<passed>/<total> passed". A full run writes
 //   examples/sdk-test/.local/dotnet-results.json; a partial run writes dotnet-results-<groups>.json.
 //
@@ -74,4 +75,6 @@ var file = picked.Count == 0 && only is null ? "dotnet-results.json" : $"dotnet-
 var outFile = Path.Combine(root, "examples", "sdk-test", ".local", file);
 Directory.CreateDirectory(Path.GetDirectoryName(outFile)!);
 await File.WriteAllTextAsync(outFile, JsonSerializer.Serialize(new { run, @base = baseUrl, results }, new JsonSerializerOptions { WriteIndented = true }));
+if (keepSync is { Length: > 0 }) Console.WriteLine($"synced files kept in {syncRoot}");
+else try { Directory.Delete(syncRoot, true); } catch (IOException) { }
 return passed == results.Count ? 0 : 1;
