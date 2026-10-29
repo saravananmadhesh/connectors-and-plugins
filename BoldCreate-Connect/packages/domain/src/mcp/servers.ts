@@ -29,7 +29,7 @@ import { fieldSubjectId, type Sealer, type Unsealer } from '@boldcreate-integrat
 import { requireAction } from '../permissions/authorize.js';
 import { resourceOfScope } from '../permissions/context.js';
 import { writeAudit } from '../audit/write-audit.js';
-import { appError, notFound } from '../errors.js';
+import { AppError, appError, notFound } from '../errors.js';
 import type { ProjectReturn } from './project-oauth.js';
 import { resolveAccess, serverSubject, tokenSubject, type AccessDeps } from './access.js';
 import {
@@ -928,11 +928,22 @@ export async function exchangeOAuthCode(
     });
   } catch (error) {
     if (error instanceof OAuthError) {
-      throw appError(
+      throw new OAuthExchangeError(
         error.code === 'oauth_issuer_mismatch' ? 'oauth_issuer_mismatch' : 'oauth_exchange_failed',
+        error.detail,
       );
     }
     throw error;
+  }
+}
+
+/** A failed code exchange, carrying what the authorization server said so the member can see it. */
+export class OAuthExchangeError extends AppError {
+  constructor(
+    code: 'oauth_issuer_mismatch' | 'oauth_exchange_failed',
+    readonly detail: string | undefined,
+  ) {
+    super(code);
   }
 }
 

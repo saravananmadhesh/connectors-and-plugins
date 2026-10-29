@@ -27,22 +27,29 @@ export interface InstalledSearch {
   oauth?: OAuthResult | undefined;
   /** The error code of a sign-in that did not complete, when the server named one. */
   reason?: string | undefined;
+  /** What the sign-in service said when it refused, such as `invalid_grant`. */
+  detail?: string | undefined;
 }
 
 const REASON = /^[a-z0-9_]{1,64}$/;
+const DETAIL = /^[A-Za-z0-9_.-]{1,64}$/;
 
 /**
  * Reads how a sign-in ended. The web server answers `failed` with a `reason`; the api names its
  * error code (or `denied`) as the outcome itself. Anything but `connected` is a failure.
  */
-function signInOutcome(search: Record<string, unknown>): Pick<InstalledSearch, 'oauth' | 'reason'> {
-  const { oauth, reason } = search;
-  if (oauth === 'connected') return { oauth: 'connected', reason: undefined };
-  if (typeof oauth !== 'string' || oauth === '') return { oauth: undefined, reason: undefined };
+function signInOutcome(
+  search: Record<string, unknown>,
+): Pick<InstalledSearch, 'oauth' | 'reason' | 'detail'> {
+  const { oauth, reason, detail } = search;
+  const none = { reason: undefined, detail: undefined };
+  if (oauth === 'connected') return { oauth: 'connected', ...none };
+  if (typeof oauth !== 'string' || oauth === '') return { oauth: undefined, ...none };
   const named = oauth === 'failed' ? reason : oauth;
   return {
     oauth: 'failed',
     reason: typeof named === 'string' && REASON.test(named) ? named : undefined,
+    detail: typeof detail === 'string' && DETAIL.test(detail) ? detail : undefined,
   };
 }
 
