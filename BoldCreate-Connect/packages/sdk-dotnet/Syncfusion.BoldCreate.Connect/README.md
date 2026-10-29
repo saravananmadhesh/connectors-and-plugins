@@ -58,7 +58,7 @@ var result = await session.SyncPluginsAsync(new SyncOptions { Dir = "/data/agent
 // result.Added, Updated, Removed, Unchanged, Skipped, Modified, Stale
 ```
 
-Files are checked against their hash before they are placed. A file changed by hand is kept and listed in `Modified` (`OnConflict = ConflictMode.Overwrite` replaces it). Hooks are placed only with `AllowHooks = true`. The token is never written to disk. The lock file is the same as the TypeScript package's, so one folder can be synced by either.
+Files are checked against their hash before they are placed. A file changed by hand is kept and listed in `Modified` (`OnConflict = ConflictMode.Overwrite` replaces it). Hooks are placed only with `AllowHooks = true`; their scripts (files that start with `#!`) are then made runnable, and no other file is. The token is never written to disk. The lock file is the same as the TypeScript package's, so one folder can be synced by either.
 
 ## Webhooks
 

@@ -377,6 +377,24 @@ describe('syncPlugins', () => {
       expect((await stat(join(dir, 'alpha', 'hooks', 'hooks.json'))).mode & 0o111).toBe(0);
     });
 
+    it("makes a hook's scripts runnable, and nothing else", async () => {
+      const w = world([
+        {
+          id: 'cmp_h',
+          kind: 'hook',
+          files: { 'hooks/hooks.json': '{}', 'hooks/stop.sh': '#!/bin/sh\nexit 0\n' },
+        },
+        { id: 'cmp_s', kind: 'skill', files: { 'skills/a/run.sh': '#!/bin/sh\n' } },
+      ]);
+      await syncPlugins(open({ 'GET /v1/sync': json(w.manifest), ...w.routes }).session, {
+        dir,
+        allowHooks: true,
+      });
+      expect((await stat(join(dir, 'alpha', 'hooks', 'stop.sh'))).mode & 0o777).toBe(0o755);
+      expect((await stat(join(dir, 'alpha', 'hooks', 'hooks.json'))).mode & 0o111).toBe(0);
+      expect((await stat(join(dir, 'alpha', 'skills', 'a', 'run.sh'))).mode & 0o111).toBe(0);
+    });
+
     it('keeps asking for the whole manifest while something was left out', async () => {
       const w = world([{ id: 'cmp_h', kind: 'hook', files: { 'hooks/hooks.json': '{}' } }], 'rev9');
       await syncPlugins(open({ 'GET /v1/sync': json(w.manifest), ...w.routes }).session, { dir });
