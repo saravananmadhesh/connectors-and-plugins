@@ -41,3 +41,14 @@ describe('sign-in outcome', () => {
     expect(search.reason).toBeUndefined();
   });
 });
+
+describe('sign-in detail', () => {
+  it('keeps what the sign-in service said, when it is a plain code', () => {
+    expect(
+      validateInstalledSearch({ oauth: 'oauth_exchange_failed', detail: 'invalid_grant' }),
+    ).toMatchObject({ oauth: 'failed', reason: 'oauth_exchange_failed', detail: 'invalid_grant' });
+    expect(
+      validateInstalledSearch({ oauth: 'oauth_exchange_failed', detail: 'a b <c>' }).detail,
+    ).toBeUndefined();
+  });
+});

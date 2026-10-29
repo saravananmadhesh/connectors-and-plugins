@@ -38,6 +38,7 @@ export function InstalledPage() {
     q = '',
     oauth,
     reason,
+    detail,
   } = useSearch({
     strict: false,
   }) as InstalledSearch;
@@ -114,12 +115,12 @@ export function InstalledPage() {
           <span>
             {oauth === 'connected'
               ? 'You are signed in to the server.'
-              : `The sign-in did not complete${reason ? ` (${reason})` : ''}. Try again from the server details.`}
+              : `The sign-in did not complete${reason ? ` (${reason}${detail ? `: ${detail}` : ''})` : ''}. Try again from the server details.`}
           </span>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setSearch({ oauth: undefined, reason: undefined })}
+            onClick={() => setSearch({ oauth: undefined, reason: undefined, detail: undefined })}
           >
             Dismiss
           </Button>
