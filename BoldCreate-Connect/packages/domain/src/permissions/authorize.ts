@@ -39,7 +39,7 @@ const POLICY_GATED: Partial<Record<Action, PolicyGate>> = {
 };
 
 /** Admins and members manage the organization; a viewer only reads Platform. */
-function managesOrg(role: OrgRole | undefined): boolean {
+export function managesOrg(role: OrgRole | undefined): boolean {
   return role === 'ADMIN' || role === 'MEMBER';
 }
 

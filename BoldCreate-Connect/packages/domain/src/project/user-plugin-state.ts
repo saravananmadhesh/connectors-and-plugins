@@ -5,6 +5,7 @@
  * Values and tokens never appear.
  */
 import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm';
+import { effectiveEnabled } from '../delivery/effective-enabled.js';
 import {
   authConfigTable,
   componentTable,
@@ -130,7 +131,7 @@ export async function allStates(
           componentId: componentTable.id,
           kind: componentTable.kind,
           name: componentTable.name,
-          enabled: installationComponentTable.enabled,
+          enabled: effectiveEnabled(principal.userId),
         })
         .from(installationComponentTable)
         .innerJoin(componentTable, eq(componentTable.id, installationComponentTable.componentId))

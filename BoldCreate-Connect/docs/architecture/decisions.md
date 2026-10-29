@@ -192,3 +192,50 @@ The route registry in `packages/contracts` is the single source. `pnpm build` wr
 - **Moving.** The api now has an internal route that authenticates a key for the gateway, and the gateway can use it with `DATA_SOURCE=api`. The default is still the database until the per-call routes and the cache exist.
 - **Temporary.** The plan removes the grant and the role (S2.1 to S2.6); this entry is replaced by "The gateway does not read the database" when that lands.
 - **Rejected.** Keeping the role for good with row-level security applied (the role would still see every tenant when a pod is compromised) and a read replica (the same blast radius on a second server).
+
+## The For You key serves its maker's own installs
+
+- **What it does.** A `fyk_` key names the admin who made it. Sync, archive downloads and the MCP gateway serve the organization's installs and that admin's own For me installs (user scope, no project), and nothing of any other user. Component switches of that user and their MCP connections apply. The key stops working when its maker leaves, is suspended or becomes a Viewer.
+- **Why.** The key reached only organization installs, so plugins installed under For me were never synced, downloaded or callable.
+- **One-way door.** Keys already issued start serving their maker's personal files; there is no schema change.
+- **Rejected.** One `fyk_` key per user (changes the key shape and constraints) and keeping the key organization only (For me stays unreachable by key).
+
+## The admin allow-list is a table
+
+- **Decision.** Who may sign in to the admin app is the `admin_allowed_email` table. The addresses in `ADMIN_ALLOWED_EMAILS` are written to it as `config` rows at every admin start, and a `config` row whose address left the settings is removed. An admin adds others in the app (`added` rows); each gets the mailed one-time setup link, and removal ends that address's sessions because every request re-checks the table.
+- **Why.** The list was an environment variable, so adding an admin meant a redeploy.
+- **One-way door.** New table with `app_admin` only grants. The admin app needs migration `0004` applied before it starts, and fails at start otherwise.
+- **Rejected.** Keeping the variable as the only list, and making the variable a one-time seed (it would stop being the source of truth for deployment admins).
+
+## An invite link can be looked up before sign-in
+
+- **Decision.** `POST /v1/invites/preview` takes an invite token and needs no session. It answers `valid` (with the invited address, the organization name and the role), `expired`, or `unavailable`. A link that was replaced by a resend, revoked, accepted or never issued is `unavailable`; the three are not told apart.
+- **Why.** The accept page had to sign a person in or up before it could say that the link had run out. An expired link now shows its message and a sign-up button at once, and a valid one shows who invited them and for which address, which the sign-up form then fills in.
+- **What it exposes.** Anyone holding a link learns the address, organization name and role it was sent for, and whether that address already has a verified user (so the page offers sign-in to one and a password form to the other). The token is 256 random bits, so a link cannot be guessed, but one that leaks now says who was invited where. Nothing else is readable with it, and accepting still needs a session for that address.
+- **Limit.** The route has no throttle of its own yet, like the other routes that take no session (S10.3 in [plans/security-hardening-migration.md](../plans/security-hardening-migration.md)).
+- **One-way door.** A public route and its response shape in the contract.
+- **Rejected.** Telling only after sign-in (a person signs up and verifies an address to learn the link is dead) and putting the address in the email link (it would sit in mail logs and browser history).
+
+## Signing up from an invite verifies the address
+
+- **Decision.** `POST /v1/auth/signup` takes an optional `inviteToken`. When it is an open invite sent to the same address, the account is created with the address already verified and no verification mail goes out; the web app then signs the person in and accepts the invite. If someone had registered that address earlier without verifying it, the invite replaces that password, display name and verification state, and the earlier unused verification links are closed. A token for a different address, a spent or expired token, or an address that already has a verified account changes nothing and gets the normal answer.
+- **No starter organization.** A person who signs up from an invite gets no personal organization (the user row is marked as provisioned without creating one). They join the invited organization and can make their own from "New organization". Everyone else still gets the starter organization when they verify or sign in.
+- **Why.** The invite mail already shows who reads the mailbox, so a second mail only added a step. Without the takeover, anyone could register an invitee's address first and leave the real owner locked out.
+- **What it exposes.** An invite link now also lets its holder set the first password for that address. That is the same trust the verification link carries, and the link is single use through accept.
+- **One-way door.** A new optional field on a public route, and an invite token counting as proof of the mailbox.
+- **Rejected.** A separate invite sign-up route (two paths to keep equal) and issuing the session from sign-up (it would make sign-up a session-issuing route in the web proxy and break idempotent replay).
+
+## Sign-up says when an address is already registered
+
+- **Decision.** `POST /v1/auth/signup` answers `409` when the address already has a verified profile, and the page says so with links to sign in and to reset the password. An address that signed up but never verified gets the verification link again (one mail a minute) and the same answer as a new address. Project users and reserved addresses still get the answer of a new address.
+- **Why.** The old answer was the same "check your email" for a registered address, and no mail followed, so the person waited for nothing. This is what sign-up pages of Slack, GitHub and similar products do.
+- **What it exposes.** Anyone can ask whether an address has a verified profile. Sign-in, password reset and email change already answer generically, so this is the one place that tells. The route has no throttle of its own yet (S10.3 in [plans/security-hardening-migration.md](../plans/security-hardening-migration.md)), which is what limits how fast addresses can be tested.
+- **Rejected.** Keeping the generic answer and mailing a notice to the registered address (a new mail type, and anyone could trigger a mail to a registered person).
+- **No organization.** A signed-in person who belongs to none (removed from the one they were invited to, or it was deleted) sees a page that offers to create one. No starter organization is made for them: that is made once, for people who sign up by themselves.
+
+## Every organization page has the organization in its address
+
+- **Decision.** Get started, Marketplace (and a plugin), Installed and API keys moved to `/orgs/:orgId/get-started`, `/orgs/:orgId/marketplace[/:pluginId]`, `/orgs/:orgId/installed` and `/orgs/:orgId/api-keys`. The area (For You or Platform) follows from the address: those four sections are For You, projects are Platform, and the overview, members and settings belong to neither. Switching organization keeps the section. `/`, `/orgs` and the old short addresses redirect to the same page of the last organization used (else the first), keeping the filters in the address; someone in no organization stays on `/orgs`, which offers to create one.
+- **Why.** These pages took their organization from a value remembered in the browser, so an address did not say what it showed, could not be shared, and the For You / Platform buttons and the organization switcher had to guess where to land. Pages show names, not ids; the project page no longer prints its id.
+- **One-way door.** The old addresses keep working only through the redirect; links built from the new ones do not exist in older builds.
+- **Rejected.** Keeping the short addresses and adding the organization as a query parameter (the address would still be ambiguous without it), and putting a slug in the address (a rename would break every link).

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { Alert } from '../components/ui/alert';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { Input, PasswordInput } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { adminApi } from '../lib/api';
@@ -80,8 +80,7 @@ function ChoosePassword({ token }: { token: string }) {
     >
       <Label>
         New password
-        <Input
-          type="password"
+        <PasswordInput
           autoComplete="new-password"
           required
           value={password}
@@ -90,8 +89,7 @@ function ChoosePassword({ token }: { token: string }) {
       </Label>
       <Label>
         Repeat password
-        <Input
-          type="password"
+        <PasswordInput
           autoComplete="new-password"
           required
           value={confirm}

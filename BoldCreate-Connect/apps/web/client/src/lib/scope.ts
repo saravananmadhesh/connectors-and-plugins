@@ -1,3 +1,5 @@
+import { PROJECT_TABS } from './project-search';
+
 const clean = (pathname: string) => (pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname);
 
 export interface Crumb {
@@ -13,12 +15,12 @@ export interface TrailNames {
   project?: string | undefined;
 }
 
-/** Pages that belong to the active organization. */
-const ORG_PAGES: Record<string, string> = {
-  '/get-started': 'Get started',
-  '/marketplace': 'Marketplace',
-  '/installed': 'Installed',
-  '/api-keys': 'API keys',
+/** The sections of an organization about using plugins, as the breadcrumb names them. */
+const FOR_YOU_PAGES: Record<string, string> = {
+  'get-started': 'Get started',
+  marketplace: 'Marketplace',
+  installed: 'Installed',
+  'api-keys': 'API keys',
 };
 
 /** Pages that belong to the person, not to an organization. */
@@ -44,32 +46,35 @@ export function buildTrail(pathname: string, names: TrailNames = {}): Crumb[] {
 function trailFor(path: string, names: TrailNames): Crumb[] {
   const personal = PERSONAL_PAGES[path];
   if (personal) return [{ label: PERSONAL_GROUP }, { label: personal, to: path }];
-  // Without an organization there is nothing to put first, and a lone page is its own title.
-  const root: Crumb[] = names.orgId
-    ? [{ label: names.org ?? 'Organization', to: `/orgs/${names.orgId}` }]
-    : [];
-  const orgPage = ORG_PAGES[path];
-  if (orgPage) return [...root, { label: orgPage, to: path }];
-
   const parts = path.split('/').filter(Boolean);
-  if (parts[0] === 'marketplace') {
-    return parts.length === 2
-      ? [...root, { label: 'Marketplace', to: '/marketplace' }, { label: 'Plugin' }]
-      : [];
-  }
   if (parts[0] !== 'orgs' || !parts[1]) return [];
   const [, orgId, section, projectId] = parts;
   const org: Crumb = { label: names.org ?? 'Organization', to: `/orgs/${orgId}` };
   if (!section) return [org, { label: 'Overview', to: path }];
+  const forYou = FOR_YOU_PAGES[section];
+  if (forYou) {
+    if (parts.length === 3) return [org, { label: forYou, to: path }];
+    if (section === 'marketplace' && parts.length === 4) {
+      return [org, { label: forYou, to: `/orgs/${orgId}/marketplace` }, { label: 'Plugin' }];
+    }
+    return [];
+  }
   if (section === 'members' || section === 'settings') {
     if (parts.length !== 3) return [];
     return [org, { label: section === 'members' ? 'Members' : 'Settings', to: path }];
   }
   if (section === 'projects') {
-    if (parts.length > 4) return [];
+    if (parts.length > 5) return [];
     const projects: Crumb = { label: 'Projects', to: `/orgs/${orgId}/projects` };
     if (!projectId) return [org, projects];
-    return [org, projects, { label: names.project ?? 'Project', to: path }];
+    const project: Crumb = {
+      label: names.project ?? 'Project',
+      to: `/orgs/${orgId}/projects/${projectId}`,
+    };
+    if (parts.length === 4) return [org, projects, project];
+    // A section of the project: the project is a step up that leads back to its overview.
+    const tab = PROJECT_TABS.find((item) => item.value === parts[4]);
+    return tab ? [org, projects, project, { label: tab.label, to: path }] : [];
   }
   return [];
 }
@@ -79,11 +84,17 @@ export function trailTitle(trail: readonly Crumb[], product: string): string {
   return [...trail.map((crumb) => crumb.label).reverse(), product].join(' · ');
 }
 
+/** The pages every organization has, which a switch of organization keeps the person on. */
+const KEPT_SECTIONS = new Set([...Object.keys(FOR_YOU_PAGES), 'members', 'settings', 'projects']);
+
 /**
- * Where a switch lands. The user keeps the members page when the new organization has one;
- * anything else lands on the overview of the new organization.
+ * Where a switch lands: the same section of the new organization (the marketplace stays the
+ * marketplace, the members page stays the members page). A page inside one thing of the old
+ * organization (a project, a plugin) has no twin there, so it lands on that section's list;
+ * anything else lands on the overview.
  */
 export function scopeDestination(pathname: string, target: { orgId: string }): string {
   const base = `/orgs/${target.orgId}`;
-  return clean(pathname).endsWith('/members') ? `${base}/members` : base;
+  const [root, , section] = clean(pathname).split('/').filter(Boolean);
+  return root === 'orgs' && section && KEPT_SECTIONS.has(section) ? `${base}/${section}` : base;
 }

@@ -58,7 +58,9 @@ let ownerWireId: string;
 
 function urlOf(route: RouteDef): string {
   const query =
-    route.id === 'projectUserPluginsConsole.list' || route.id === 'projectUserPluginsConsole.delete'
+    route.id === 'projectUserPluginsConsole.list' ||
+    route.id === 'projectUserPluginsConsole.delete' ||
+    route.id === 'projectUserPluginComponentsConsole.delete'
       ? '?userId=sample-user'
       : '';
   return path(route) + query;
@@ -78,7 +80,9 @@ const isWrite = (route: RouteDef) => route.method !== 'GET';
 const bodyOf = (route: RouteDef) => {
   if (!isWrite(route)) return undefined;
   const bodies: Record<string, unknown> = {
-    'projectAuthConfigsConsole.putVariables': { values: { API_TOKEN: 'sample-value' } },
+    'projectAuthConfigsConsole.putVariables': {
+      values: { API_TOKEN: 'sample-value' },
+    },
     'projectAuthConfigsConsole.create': {
       componentId: formatId('cmp', randomUUID()),
       name: 'sample',
@@ -93,7 +97,10 @@ const bodyOf = (route: RouteDef) => {
       userId: 'sample-user',
       values: { API_TOKEN: 'sample-value' },
     },
-    'projectUserPluginComponentsConsole.put': { userId: 'sample-user', enabled: true },
+    'projectUserPluginComponentsConsole.put': {
+      userId: 'sample-user',
+      enabled: true,
+    },
     'projectWebhookConsole.put': {
       url: 'https://hooks.example.com/hook',
       events: ['user.created'],

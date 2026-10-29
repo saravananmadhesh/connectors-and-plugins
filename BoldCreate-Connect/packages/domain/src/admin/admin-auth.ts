@@ -1,5 +1,5 @@
 /**
- * Admin sign-in. Admins are not self-registered: an email must be on the configured allow-list,
+ * Admin sign-in. Admins are not self-registered: an email must be on the allow-list table,
  * proves it owns the address once through a mailed one-time link, chooses a password, and signs
  * in with it after that. The allow-list is checked again on every request, so removing an email
  * ends its sessions at once.
@@ -15,6 +15,7 @@ import {
 } from '@boldcreate-integrations/db';
 import { hashPassword } from '@boldcreate-integrations/security';
 import { appError } from '../errors.js';
+import { isAdminEmailListed } from './allowed-emails.js';
 import { writeAudit } from '../audit/write-audit.js';
 import {
   assertPasswordPolicy,
@@ -36,7 +37,7 @@ const LOCAL_TENANT = 'local';
 const SETUP_RESEND_SECONDS = 60;
 
 export interface AdminAuthPolicy extends AuthPolicy {
-  /** Emails that may be admins; compared lower-cased. */
+  /** Emails from the settings; written to the allow-list table at every start. */
   allowedEmails: readonly string[];
   setupTtlSeconds: number;
   /** Absolute URL of the page that finishes setup; the token is added as `token`. */
@@ -50,14 +51,6 @@ export interface AdminSession {
 }
 
 const normalize = (email: string): string => email.trim().toLowerCase();
-
-export function isAdminEmailAllowed(
-  policy: Pick<AdminAuthPolicy, 'allowedEmails'>,
-  email: string,
-): boolean {
-  const wanted = normalize(email);
-  return policy.allowedEmails.some((allowed) => normalize(allowed) === wanted);
-}
 
 const digest = (email: string): string =>
   createHash('sha256').update(email).digest('hex').slice(0, 16);
@@ -106,9 +99,11 @@ export async function requestAdminSetup(
   policy: AdminAuthPolicy,
   rawEmail: string,
   now: Date = new Date(),
+  /** The admin who added the address; the mail then reads as an invitation from them. */
+  invitedBy?: string,
 ): Promise<void> {
   const email = normalize(rawEmail);
-  if (!isAdminEmailAllowed(policy, email)) return;
+  if (!(await isAdminEmailListed(db, email))) return;
 
   const recent = new Date(now.getTime() - SETUP_RESEND_SECONDS * 1000);
   const [pending] = await db
@@ -131,7 +126,7 @@ export async function requestAdminSetup(
     });
     await insertOutbox(tx, {
       type: 'admin_setup.requested',
-      payload: { to: email, url: url.toString() },
+      payload: { to: email, url: url.toString(), ...(invitedBy ? { invitedBy } : {}) },
     });
   });
 }
@@ -154,7 +149,7 @@ export async function completeAdminSetup(
     row.consumedAt !== null ||
     now >= row.expiresAt ||
     !isEmailTokenValid({ expiresAt: row.expiresAt, consumedAt: row.consumedAt }) ||
-    !isAdminEmailAllowed(policy, row.email)
+    !(await isAdminEmailListed(db, row.email))
   ) {
     throw appError('token_invalid_or_expired');
   }
@@ -222,7 +217,7 @@ export async function signInAdmin(
   now: Date = new Date(),
 ): Promise<{ sessionToken: string; email: string }> {
   const email = normalize(body.email);
-  const [identity] = isAdminEmailAllowed(policy, email)
+  const [identity] = (await isAdminEmailListed(db, email))
     ? await db
         .select()
         .from(platformAdminIdentityTable)
@@ -300,7 +295,7 @@ export async function authenticateAdminSession(
     .limit(1);
   if (!found) return null;
   const { session, identity } = found;
-  if (identity.status !== 'active' || !isAdminEmailAllowed(policy, identity.oid)) return null;
+  if (identity.status !== 'active' || !(await isAdminEmailListed(db, identity.oid))) return null;
 
   const decision = evaluateSession(session, now, policy.session);
   if (decision.state === 'revoked') return null;

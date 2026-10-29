@@ -94,7 +94,10 @@ async function newPlugin(withNextVersion = false): Promise<{
         randomUUID(),
         id,
         `contract_tool_${id.slice(0, 8)}`,
-        JSON.stringify({ transport: 'http', url: 'http://localhost:19999/mcp' }),
+        JSON.stringify({
+          transport: 'http',
+          url: 'http://localhost:19999/mcp',
+        }),
       ],
     );
   }
@@ -135,7 +138,10 @@ async function newMcpInstallation(
     200,
     'list components',
   );
-  return { installationId: installation.id, componentId: list.items[0]?.componentId as string };
+  return {
+    installationId: installation.id,
+    componentId: list.items[0]?.componentId as string,
+  };
 }
 
 /** A key that may sync and download, and the bearer headers a client sends with it. */
@@ -179,7 +185,10 @@ async function newMember(seed: Seed, role: 'ADMIN' | 'MEMBER' = 'MEMBER'): Promi
 async function newOrg(seed: Seed): Promise<{ orgId: string; slug: string; rawOrgId: string }> {
   const slug = `contract-${randomUUID().slice(0, 12)}`;
   const created = await json<{ id: string }>(
-    await callApi('POST', '/v1/orgs', seed.owner, { name: `Contract ${slug}`, slug }),
+    await callApi('POST', '/v1/orgs', seed.owner, {
+      name: `Contract ${slug}`,
+      slug,
+    }),
     201,
     'create org',
   );
@@ -409,7 +418,10 @@ const FIXED: Record<string, Fixture> = {
   'sync.report': async (seed) =>
     fetch(`${apiUrl}/v1/sync/reports`, {
       method: 'POST',
-      headers: { ...(await newDeliveryKey(seed)), 'Content-Type': 'application/json' },
+      headers: {
+        ...(await newDeliveryKey(seed)),
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ applied: [], skipped: [] }),
     }),
   'health.get': () => apiGet('/healthz'),
@@ -424,7 +436,9 @@ const FIXED: Record<string, Fixture> = {
     }),
   'auth.verifyEmail': async () => {
     const { email } = await unverifiedUser();
-    return apiPost('/v1/auth/verify-email', { token: await verificationToken(email) });
+    return apiPost('/v1/auth/verify-email', {
+      token: await verificationToken(email),
+    });
   },
   'auth.resendVerification': async () => {
     const { email } = await unverifiedUser();
@@ -432,7 +446,10 @@ const FIXED: Record<string, Fixture> = {
   },
   'auth.signin': async () => {
     const user = await createSignedInUser('contract-signin');
-    return apiPost('/v1/auth/signin', { email: user.email, password: TEST_PASSWORD });
+    return apiPost('/v1/auth/signin', {
+      email: user.email,
+      password: TEST_PASSWORD,
+    });
   },
   'auth.signout': async () => {
     const user = await createSignedInUser('contract-signout');
@@ -450,7 +467,10 @@ const FIXED: Record<string, Fixture> = {
     const user = await createSignedInUser('contract-reset');
     await json(await apiPost('/v1/auth/forgot-password', { email: user.email }), 202, 'forgot');
     const token = await mailToken(user.email, 'Reset your password');
-    return apiPost('/v1/auth/reset-password', { token, newPassword: 'AnotherPassword456!' });
+    return apiPost('/v1/auth/reset-password', {
+      token,
+      newPassword: 'AnotherPassword456!',
+    });
   },
   'auth.changePassword': async () => {
     const user = await createSignedInUser('contract-change-password');
@@ -520,11 +540,16 @@ const FIXED: Record<string, Fixture> = {
   'orgs.list': (seed) => callApi('GET', '/v1/orgs', seed.owner),
   'orgs.create': (seed) => {
     const slug = `contract-${randomUUID().slice(0, 12)}`;
-    return callApi('POST', '/v1/orgs', seed.owner, { name: `Contract ${slug}`, slug });
+    return callApi('POST', '/v1/orgs', seed.owner, {
+      name: `Contract ${slug}`,
+      slug,
+    });
   },
   'orgs.get': (seed) => callApi('GET', `/v1/orgs/${seed.owner.orgId}`, seed.owner),
   'orgs.update': (seed) =>
-    callApi('PATCH', `/v1/orgs/${seed.owner.orgId}`, seed.owner, { name: 'Contract renamed' }),
+    callApi('PATCH', `/v1/orgs/${seed.owner.orgId}`, seed.owner, {
+      name: 'Contract renamed',
+    }),
   'orgs.delete': async (seed) => {
     const org = await newOrg(seed);
     return callApi('DELETE', `/v1/orgs/${org.orgId}?confirmSlug=${org.slug}`, seed.owner);
@@ -569,6 +594,11 @@ const FIXED: Record<string, Fixture> = {
   'invites.resend': async (seed) => {
     const invite = await newInvite(seed);
     return callApi('POST', `/v1/orgs/${seed.owner.orgId}/invites/${invite.id}/resend`, seed.owner);
+  },
+  'invites.preview': async (seed) => {
+    const invitee = address('contract-preview');
+    await newInvite(seed, invitee);
+    return apiPost('/v1/invites/preview', { token: await mailToken(invitee, 'invited') });
   },
   'invites.accept': async (seed) => {
     const invitee = await createSignedInUser('contract-accept');
@@ -900,7 +930,10 @@ function catalogFixtures(): Record<string, Fixture> {
   ];
   const newSet = async (call: Call, plugins: string[] = []): Promise<{ id: string }> =>
     json<{ id: string }>(
-      await call('POST', '/plugin-sets', { name: `Set ${randomUUID().slice(0, 10)}`, plugins }),
+      await call('POST', '/plugin-sets', {
+        name: `Set ${randomUUID().slice(0, 10)}`,
+        plugins,
+      }),
       201,
       'create plugin set',
     );
@@ -931,7 +964,9 @@ function catalogFixtures(): Record<string, Fixture> {
     });
     put('projectPluginSets.list', (call) => call('GET', '/plugin-sets'));
     put('projectPluginSets.create', (call) =>
-      call('POST', '/plugin-sets', { name: `Set ${randomUUID().slice(0, 10)}` }),
+      call('POST', '/plugin-sets', {
+        name: `Set ${randomUUID().slice(0, 10)}`,
+      }),
     );
     put('projectPluginSets.get', async (call) =>
       call('GET', `/plugin-sets/${(await newSet(call)).id}`),
@@ -972,7 +1007,11 @@ function catalogFixtures(): Record<string, Fixture> {
         items: { pluginId: string; components: { componentId: string }[] }[];
       }>(await call('GET', `/user-plugins?userId=${userId}`), 200, 'read user plugins');
       const item = page.items.find((entry) => entry.pluginId === plugin.pluginId);
-      return { pluginId: plugin.pluginId, userId, componentId: item!.components[0]!.componentId };
+      return {
+        pluginId: plugin.pluginId,
+        userId,
+        componentId: item!.components[0]!.componentId,
+      };
     };
     put('projectUserPluginVariables.put', async (call) => {
       const { pluginId, userId } = await installed(call);
@@ -987,6 +1026,19 @@ function catalogFixtures(): Record<string, Fixture> {
         userId,
         enabled: false,
       });
+    });
+    put('projectUserPluginComponents.delete', async (call) => {
+      const shared = await newPlugin();
+      await json(await call('PUT', `/plugins/${shared.pluginId}`, {}), 201, 'install for project');
+      const { userId } = await installed(call);
+      const page = await json<{
+        items: { pluginId: string; components: { componentId: string }[] }[];
+      }>(await call('GET', `/user-plugins?userId=${userId}`), 200, 'read user plugins');
+      const item = page.items.find((entry) => entry.pluginId === shared.pluginId);
+      return call(
+        'DELETE',
+        `/user-plugins/${shared.pluginId}/components/${item!.components[0]!.componentId}?userId=${userId}`,
+      );
     });
     put('projectUserPlugins.delete', async (call) => {
       const plugin = await newPlugin();
@@ -1193,7 +1245,9 @@ function sessionFixtures(): Record<string, Fixture> {
   const openInstall = async (seed: Seed) => {
     const { key } = await sharedDelivery(seed);
     await json(
-      await asProject(key, 'PUT', '/v1/project/user-install-mode', { mode: 'any' }),
+      await asProject(key, 'PUT', '/v1/project/user-install-mode', {
+        mode: 'any',
+      }),
       200,
       'open user installs',
     );
@@ -1281,23 +1335,32 @@ function sessionFixtures(): Record<string, Fixture> {
       });
     },
     'sessionPluginComponents.put': async (seed) => {
-      await openInstall(seed);
-      const plugin = await newPlugin();
+      const delivery = await sharedDelivery(seed);
+      const pluginId = await freshPlugin(delivery, false);
       const { token } = await newSession(seed);
-      await json(
-        await asSession(token, 'PUT', `/v1/session/plugins/${plugin.pluginId}`, {}),
-        201,
-        'install for session user',
-      );
       const page = await json<{
         items: { pluginId: string; components: { componentId: string }[] }[];
       }>(await asSession(token, 'GET', '/v1/session/plugins'), 200, 'read session plugins');
-      const item = page.items.find((entry) => entry.pluginId === plugin.pluginId);
+      const item = page.items.find((entry) => entry.pluginId === pluginId);
       return asSession(
         token,
         'PUT',
-        `/v1/session/plugins/${plugin.pluginId}/components/${item!.components[0]!.componentId}`,
+        `/v1/session/plugins/${pluginId}/components/${item!.components[0]!.componentId}`,
         { enabled: false },
+      );
+    },
+    'sessionPluginComponents.delete': async (seed) => {
+      const delivery = await sharedDelivery(seed);
+      const pluginId = await freshPlugin(delivery, false);
+      const { token } = await newSession(seed);
+      const page = await json<{
+        items: { pluginId: string; components: { componentId: string }[] }[];
+      }>(await asSession(token, 'GET', '/v1/session/plugins'), 200, 'read session plugins');
+      const item = page.items.find((entry) => entry.pluginId === pluginId);
+      return asSession(
+        token,
+        'DELETE',
+        `/v1/session/plugins/${pluginId}/components/${item!.components[0]!.componentId}`,
       );
     },
     'sessionPlugins.put': async (seed) => {

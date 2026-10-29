@@ -77,6 +77,12 @@ describe('tar', () => {
     expect(() => extractTarGz(repoArchive({ big: 'x'.repeat(11) }), limits)).toThrow('too large');
   });
 
+  it('accepts a repository with thousands of files by default', () => {
+    const entries: Record<string, string> = {};
+    for (let i = 0; i < 3000; i += 1) entries[`plugin-${i % 30}/file-${i}.md`] = 'x';
+    expect(extractTarGz(repoArchive(entries)).files.size).toBe(3000);
+  });
+
   it('rejects data that is not a gzip archive', () => {
     expect(() => extractTarGz(Buffer.from('not an archive'))).toThrow(IngestionError);
   });

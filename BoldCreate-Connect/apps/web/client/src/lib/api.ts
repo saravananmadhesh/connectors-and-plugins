@@ -30,6 +30,7 @@ import type {
   UpdateOrgPolicyBody,
   UpdateOrgMemberBody,
   AcceptInviteResponse,
+  InvitePreviewResponse,
   CreateInviteResponse,
   InviteResponse,
   UiRole,
@@ -97,6 +98,7 @@ export type {
   OrgMemberResponse,
   OrgPolicyResponse,
   InviteResponse,
+  InvitePreviewResponse,
   PluginSummaryResponse,
   PluginListItemResponse,
   PluginPageResponse,
@@ -234,7 +236,7 @@ async function idempotentRequest<T>(method: string, path: string, body: unknown)
 
 export const auth = {
   me: () => request<MeResponse>('GET', '/api/v1/auth/me'),
-  signup: (body: { email: string; password: string; displayName: string }) =>
+  signup: (body: { email: string; password: string; displayName: string; inviteToken?: string }) =>
     idempotentRequest<{ userId: string }>('POST', '/api/v1/auth/signup', body),
   signin: (body: { email: string; password: string }) =>
     request<{ user: SafeUser }>('POST', '/api/v1/auth/signin', body, true),
@@ -297,12 +299,16 @@ export const orgs = {
     request<OrgPolicyResponse>('PATCH', `/api/v1/orgs/${orgId}/policy`, body, true),
   removeMember: (orgId: string, userId: string) =>
     request<void>('DELETE', `/api/v1/orgs/${orgId}/members/${userId}`, undefined, true),
+  listInvites: (orgId: string) =>
+    request<{ items: InviteResponse[] }>('GET', `/api/v1/orgs/${orgId}/invites`),
   createInvite: (orgId: string, body: { emails: string[]; role: UiRole }) =>
     idempotentRequest<CreateInviteResponse>('POST', `/api/v1/orgs/${orgId}/invites`, body),
   revokeInvite: (orgId: string, inviteId: string) =>
     request<void>('DELETE', `/api/v1/orgs/${orgId}/invites/${inviteId}`, undefined, true),
   resendInvite: (orgId: string, inviteId: string) =>
     request<void>('POST', `/api/v1/orgs/${orgId}/invites/${inviteId}/resend`, undefined, true),
+  previewInvite: (token: string) =>
+    request<InvitePreviewResponse>('POST', '/api/v1/invites/preview', { token }, true),
   acceptInvite: (token: string) =>
     request<AcceptInviteResponse>('POST', '/api/v1/invites/accept', { token }, true),
 };

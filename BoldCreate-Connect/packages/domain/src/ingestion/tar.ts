@@ -20,9 +20,11 @@ export interface ArchiveLimits {
 }
 
 export const DEFAULT_ARCHIVE_LIMITS: ArchiveLimits = {
-  maxFiles: 2000,
+  // Whole repository archives are read here, and marketplace repositories hold many plugins
+  // (cursor/plugins is ~2,800 files), so the caps are sized for a repository, not one plugin.
+  maxFiles: 20000,
   maxFileBytes: 5 * 1024 * 1024,
-  maxTotalBytes: 50 * 1024 * 1024,
+  maxTotalBytes: 200 * 1024 * 1024,
 };
 
 export interface SkippedItem {

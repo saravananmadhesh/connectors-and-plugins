@@ -30,6 +30,7 @@ import {
   SessionListQuerySchema,
 } from '@boldcreate-integrations/contracts';
 import {
+  clearUserPluginComponent,
   createSession,
   getProject,
   getSession,
@@ -239,6 +240,17 @@ export async function projectSessionRoutes(
     const { pluginId, componentId } = req.params as { pluginId: string; componentId: string };
     const state = await sessionCall(req, 'plugin:install', async (tx, caller, userId) => {
       await setUserPluginComponent(tx, caller, userId, pluginId, componentId, body.enabled);
+      return userPluginStateOf(tx, projectUserPrincipal(caller, userId), pluginId, {
+        connections: true,
+      });
+    });
+    return reply.send(serializeUserPluginState(state));
+  });
+
+  app.delete('/session/plugins/:pluginId/components/:componentId', async (req, reply) => {
+    const { pluginId, componentId } = req.params as { pluginId: string; componentId: string };
+    const state = await sessionCall(req, 'plugin:install', async (tx, caller, userId) => {
+      await clearUserPluginComponent(tx, caller, userId, pluginId, componentId);
       return userPluginStateOf(tx, projectUserPrincipal(caller, userId), pluginId, {
         connections: true,
       });

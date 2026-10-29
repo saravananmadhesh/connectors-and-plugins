@@ -12,6 +12,7 @@ import {
   UpdateOrgPolicyBodySchema,
   CreateInviteBodySchema,
   AcceptInviteBodySchema,
+  PreviewInviteBodySchema,
   PageQuerySchema,
   AppError,
 } from '@boldcreate-integrations/contracts';
@@ -30,6 +31,7 @@ import {
   revokeInvite,
   resendInvite,
   acceptInvite,
+  previewInvite,
   listInvites,
   getOrgMe,
   requireAction,
@@ -237,6 +239,15 @@ export async function orgRoutes(
 
     await inTenant(db, principal, (tx) => resendInvite(tx, principal, orgId, inviteId));
     return reply.status(202).send({});
+  });
+
+  // POST /v1/invites/preview — no session: the person may not have an account yet
+  app.post('/invites/preview', async (req, reply) => {
+    const parsed = PreviewInviteBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new AppError('validation_failed', []);
+    }
+    return reply.status(200).send(await previewInvite(db, parsed.data));
   });
 
   // POST /v1/invites/accept

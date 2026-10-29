@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import {
-  ArrowDown,
-  ArrowUp,
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  Columns3,
-  Search,
-} from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Columns3, Search } from 'lucide-react';
 import {
   adminApi,
   type AdminPluginListQuery,
@@ -92,7 +84,6 @@ export function PluginTable({ fixed = {}, empty }: Props) {
   const [filters, setFilters] = useState<Filters>(INITIAL);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
-  const [selecting, setSelecting] = useState(false);
   const [columns, setColumns] = useState<ReadonlySet<PluginColumn>>(new Set(DEFAULT_COLUMNS));
 
   // Typing waits a moment before it asks the server.
@@ -228,17 +219,6 @@ export function PluginTable({ fixed = {}, empty }: Props) {
             {filters.direction === 'asc' ? <ArrowUp /> : <ArrowDown />}
           </Button>
         </div>
-        <Button
-          variant={selecting ? 'secondary' : 'outline'}
-          aria-pressed={selecting}
-          onClick={() => {
-            setSelecting((current) => !current);
-            setSelected([]);
-          }}
-        >
-          <CheckSquare />
-          Select
-        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
@@ -268,7 +248,7 @@ export function PluginTable({ fixed = {}, empty }: Props) {
         </DropdownMenu>
       </div>
 
-      {selecting && selected.length > 0 && (
+      {selected.length > 0 && (
         <PluginBulkBar
           ids={selected}
           onClear={() => setSelected([])}
@@ -303,21 +283,19 @@ export function PluginTable({ fixed = {}, empty }: Props) {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                {selecting && (
-                  <TableHead className="w-8">
-                    <Checkbox
-                      checked={allOnPage}
-                      onChange={() =>
-                        setSelected((current) =>
-                          allOnPage
-                            ? current.filter((id) => !pageIds.includes(id))
-                            : [...new Set([...current, ...pageIds])],
-                        )
-                      }
-                      aria-label="Select all shown"
-                    />
-                  </TableHead>
-                )}
+                <TableHead className="w-8">
+                  <Checkbox
+                    checked={allOnPage}
+                    onChange={() =>
+                      setSelected((current) =>
+                        allOnPage
+                          ? current.filter((id) => !pageIds.includes(id))
+                          : [...new Set([...current, ...pageIds])],
+                      )
+                    }
+                    aria-label="Select all shown"
+                  />
+                </TableHead>
                 <TableHead>Plugin</TableHead>
                 {columns.has('category') && <TableHead>Category</TableHead>}
                 {columns.has('source') && <TableHead>Source</TableHead>}
@@ -336,14 +314,10 @@ export function PluginTable({ fixed = {}, empty }: Props) {
                   key={plugin.id}
                   plugin={plugin}
                   columns={columns}
-                  {...(selecting
-                    ? {
-                        selection: {
-                          selected: selected.includes(plugin.id),
-                          onToggle: () => toggle(plugin.id),
-                        },
-                      }
-                    : {})}
+                  selection={{
+                    selected: selected.includes(plugin.id),
+                    onToggle: () => toggle(plugin.id),
+                  }}
                 />
               ))}
             </TableBody>

@@ -20,6 +20,14 @@ import { handlePluginIngestionRequested } from './handlers/plugin-ingestion.js';
 import { handlePluginArchivePurgeRequested } from './handlers/plugin-archive-purge.js';
 import { handleOrgKeyRequested, type OrgKeyHandlerDeps } from './handlers/org-key.js';
 import { handleRevisionBumped, type RevisionHandlerDeps } from './handlers/revision.js';
+import {
+  adminSetupEmail,
+  deletionEmail,
+  emailChangeEmail,
+  inviteEmail,
+  passwordResetEmail,
+  verificationEmail,
+} from './email-templates.js';
 
 const LEASE_MS = 60_000;
 const BATCH_SIZE = 10;
@@ -65,7 +73,21 @@ function parseEmailPayload(raw: unknown) {
     throw new Error('Invalid email recipient or token');
   }
   const role = parseRoleLabel('role' in payload ? payload['role'] : ROLE_LABELS.MEMBER);
-  return { to, token, role };
+  return {
+    to,
+    token,
+    role,
+    organizationName: optionalName(payload['orgName']),
+    inviterName: optionalName(payload['inviterName']),
+    inviterEmail: optionalName(payload['inviterEmail']),
+  };
+}
+
+/** A name the invite mail may show; anything else is left out and the mail words around it. */
+function optionalName(raw: unknown): string | undefined {
+  return typeof raw === 'string' && raw.trim() !== '' && raw.length <= 200 && !/\p{Cc}/u.test(raw)
+    ? raw.trim()
+    : undefined;
 }
 
 function parseDeletionPayload(raw: unknown): {
@@ -91,52 +113,30 @@ function parseDeletionPayload(raw: unknown): {
   return { to, displayName, resourceKind, resourceName, resourceSlug };
 }
 
-const emailTemplates = {
-  'email_verification.requested': {
-    path: '/verify-email',
-    subject: 'Verify your email address',
-    ttl: '24 hours',
-  },
-  'password_reset.requested': {
-    path: '/reset-password',
-    subject: 'Reset your password',
-    ttl: '1 hour',
-  },
-  'email_change.requested': {
-    path: '/confirm-email-change',
-    subject: 'Confirm your new email address',
-    ttl: '24 hours',
-  },
-  'invite.created': {
-    path: '/accept-invite',
-    subject: "You've been invited to join an organization",
-    ttl: '7 days',
-  },
-};
-
-const emailActions = {
-  'email_verification.requested': 'verify your email address',
-  'password_reset.requested': 'reset your password',
-  'email_change.requested': 'confirm your new email address',
+const linkPaths = {
+  'email_verification.requested': '/verify-email',
+  'password_reset.requested': '/reset-password',
+  'email_change.requested': '/confirm-email-change',
+  'invite.created': '/accept-invite',
 } as const;
 
 type Handler = (job: ClaimedJob, options: JobOptions) => Promise<void>;
 
-function linkEmailHandler(type: keyof typeof emailTemplates): Handler {
+function linkEmailHandler(type: keyof typeof linkPaths): Handler {
   return async (job, options) => {
-    const template = emailTemplates[type];
     const payload = parseEmailPayload(job.payload);
-    const link = new URL(template.path, options.baseUrl);
+    const link = new URL(linkPaths[type], options.baseUrl);
     link.searchParams.set('token', payload.token);
-    const text =
+    const url = link.toString();
+    const mail =
       type === 'invite.created'
-        ? `You've been invited as ${payload.role}.\n\nAccept the invitation:\n\n${link}\n\nThis link expires in ${template.ttl}.`
-        : `Click the link to ${emailActions[type]}:
-
-${link}
-
-This link expires in ${template.ttl}.`;
-    await options.emailAdapter.send({ to: payload.to, subject: template.subject, text });
+        ? inviteEmail({ link: url, ...payload }, options.baseUrl)
+        : type === 'email_verification.requested'
+          ? verificationEmail(url, options.baseUrl)
+          : type === 'password_reset.requested'
+            ? passwordResetEmail(url, options.baseUrl)
+            : emailChangeEmail(url, options.baseUrl);
+    await options.emailAdapter.send({ to: payload.to, ...mail });
   };
 }
 
@@ -171,24 +171,15 @@ const handlers: Record<EventType, Handler> = {
     }
     await options.emailAdapter.send({
       to,
-      subject: 'Set up your admin password',
-      text: `Click the link to choose your admin password:\n\n${url}\n\nThis link expires in 30 minutes and works once. If you did not ask for it, ignore this message.`,
+      ...adminSetupEmail(url, options.baseUrl, optionalName(payload['invitedBy'])),
     });
   },
   'deletion.requested': async (job, options) => {
     const payload = parseDeletionPayload(job.payload);
-    const kindLabel = 'organization';
-    const subject = `Your ${kindLabel} "${payload.resourceName}" has been deleted`;
-    const text = [
-      `Hi ${payload.displayName},`,
-      '',
-      `The ${kindLabel} "${payload.resourceName}" (${payload.resourceSlug}) has been permanently deleted.`,
-      '',
-      'All associated API keys, connections, and installations have been removed.',
-      '',
-      'If you did not expect this, contact your administrator.',
-    ].join('\n');
-    await options.emailAdapter.send({ to: payload.to, subject, text });
+    await options.emailAdapter.send({
+      to: payload.to,
+      ...deletionEmail(payload, options.baseUrl),
+    });
   },
 };
 

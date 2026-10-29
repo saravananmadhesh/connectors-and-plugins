@@ -4,11 +4,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { auth, ApiError } from '@/lib/api';
 import { qk } from '@/lib/query-keys';
+import { pendingInvite } from '@/lib/pending-invite';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
+import { PageLoader } from '@/components/PageLoader';
 import { Spinner } from '@/components/ui/spinner';
 
 // A verification token works once, and the page can mount more than once while the router
@@ -32,7 +34,10 @@ export function VerifyEmailPage() {
       qc.removeQueries({ queryKey: qk.me() });
       try {
         await qc.fetchQuery({ queryKey: qk.me(), queryFn: auth.me });
-        await navigate({ to: '/marketplace' });
+        const invite = pendingInvite();
+        await (invite
+          ? navigate({ to: '/accept-invite', search: { token: invite } })
+          : navigate({ to: '/orgs' }));
       } catch {
         setServerError('Email verified, but could not load your profile. Please try again.');
       }
@@ -64,14 +69,7 @@ export function VerifyEmailPage() {
   });
 
   if (verifyMutation.isPending) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-3 py-10">
-          <Spinner className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Verifying your email…</p>
-        </CardContent>
-      </Card>
-    );
+    return <PageLoader label="Verifying your email" />;
   }
 
   return (

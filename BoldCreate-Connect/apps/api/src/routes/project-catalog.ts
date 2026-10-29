@@ -39,6 +39,7 @@ import {
 import {
   addAllowedPlugin,
   addSetMember,
+  clearUserPluginComponent,
   createPluginSet,
   deletePluginSet,
   ensureUserByRef,
@@ -343,6 +344,24 @@ function operations(): Op<unknown>[] {
         call.params['pluginId']!,
         call.params['componentId']!,
         body.enabled,
+      );
+      return { status: 200, body: await stateOf(call, userId) };
+    },
+  });
+  op({
+    method: 'delete',
+    suffix: '/user-plugins/:pluginId/components/:componentId',
+    access: 'write',
+    parse: (req) => parseWith(UserPluginRemoveQuerySchema, req.query),
+    run: async (call, query) => {
+      const userId = await findUserByRef(call.tx, call.caller, query.userId);
+      if (!userId) throw new AppError('not_found');
+      await clearUserPluginComponent(
+        call.tx,
+        call.caller,
+        userId,
+        call.params['pluginId']!,
+        call.params['componentId']!,
       );
       return { status: 200, body: await stateOf(call, userId) };
     },

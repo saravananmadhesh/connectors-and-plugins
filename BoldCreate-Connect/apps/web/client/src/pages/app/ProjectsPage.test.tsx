@@ -32,6 +32,14 @@ describe('ProjectsPage', () => {
     expect(screen.getByText('active')).toBeInTheDocument();
   });
 
+  it('opens a project from any column of its row', async () => {
+    const { router } = await render();
+    await userEvent.click(await screen.findByText('active'));
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe(`/orgs/${ORG_ID}/projects/${PROJECT_ID}`),
+    );
+  });
+
   it('says so when there are no projects, and offers to create one', async () => {
     await render([]);
     expect(await screen.findByText('No projects yet')).toBeInTheDocument();

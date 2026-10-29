@@ -6,6 +6,7 @@
  */
 import { createHash } from 'node:crypto';
 import { and, eq, inArray } from 'drizzle-orm';
+import { effectiveEnabled } from './effective-enabled.js';
 import {
   componentTable,
   installationComponentTable,
@@ -135,7 +136,7 @@ async function componentsOf(tx: Executor, principal: ApiKeyPrincipal, installs: 
       metadata: componentTable.metadata,
       archiveSha256: componentTable.archiveSha256,
       archiveSizeBytes: componentTable.archiveSizeBytes,
-      enabled: installationComponentTable.enabled,
+      enabled: effectiveEnabled(principal.userId),
       alias: installationComponentTable.alias,
     })
     .from(installationComponentTable)

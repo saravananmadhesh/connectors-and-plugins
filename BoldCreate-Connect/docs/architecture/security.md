@@ -10,12 +10,12 @@
 
 ## API keys
 
-| Key               | Created by          | Sees                                            | Uses OAuth tokens of |
-| ----------------- | ------------------- | ----------------------------------------------- | -------------------- |
-| For You (`fyk_`)  | Org admin           | org installs and the For You project            | Nothing personal     |
-| Platform (`plk_`) | Org admin or member | manages the organization, with its maker's role | Nothing personal     |
-| Project (`prk_`)  | Org admin           | one Platform project                            | Its project users    |
-| Session (`stk_`)  | A project key       | one project user                                | That user            |
+| Key               | Created by          | Sees                                             | Uses OAuth tokens of |
+| ----------------- | ------------------- | ------------------------------------------------ | -------------------- |
+| For You (`fyk_`)  | Org admin           | org installs and its maker's own For me installs | Its maker's own      |
+| Platform (`plk_`) | Org admin or member | manages the organization, with its maker's role  | Nothing personal     |
+| Project (`prk_`)  | Org admin           | one Platform project                             | Its project users    |
+| Session (`stk_`)  | A project key       | one project user                                 | That user            |
 
 - An organization key (`fyk_`, `plk_`) is created in the website by an org admin. Format `<keyId>.<secret>` where `keyId` is `fyk_`, `plk_`, `prk_`, `stk_` plus 16 hex characters; the stored row, not the prefix, decides the kind. Lookup by `keyId`, constant-time SHA-256 hash compare; shown once; bound to one org. An `fyk_` key reaches the For You routes only (sync, downloads, tool calls, session creation); any other route answers the same `401` as a wrong prefix. A `plk_` key reaches only the organization management routes listed in `platform-route-access.ts` (organization, policy, members, invitations, projects and project keys); it acts with the organization role of the member who made it, read on every request, so a maker who becomes a Viewer or leaves loses the key at once (`401`). An Admin or Member may make a `plk_` key; a Viewer may not. Personal, team and per-user keys (`pak_`, `tmk_`, `ork_`) no longer exist.
 - Presets: `agent` = `mcp:list`, `mcp:call`, `artifact:sync`, `artifact:download`; `read_only` = `mcp:list`, `artifact:sync`. Effective rights = preset ∩ creator's current rights ∩ org policy, computed per call.

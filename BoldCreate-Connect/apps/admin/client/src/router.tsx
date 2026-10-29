@@ -13,16 +13,17 @@ import {
   parseAuditSearch,
   parseDiscoverSearch,
   parsePluginSearch,
+  parsePluginsSearch,
   parseVersionSearch,
 } from './lib/search';
 import { SESSION_KEY } from './lib/session';
 import { AuditPage } from './pages/AuditPage';
+import { AllowedEmailsPage } from './pages/AllowedEmailsPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { HomePage } from './pages/HomePage';
 import { PluginDetailPage } from './pages/PluginDetailPage';
 import { PluginsPage } from './pages/PluginsPage';
-import { ReviewPage } from './pages/ReviewPage';
 import { SetupPage } from './pages/SetupPage';
 import { SignInPage } from './pages/SignInPage';
 import { VersionPage } from './pages/VersionPage';
@@ -65,12 +66,16 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
   const review = createRoute({
     getParentRoute: () => app,
     path: '/review',
-    component: ReviewPage,
+    beforeLoad: () => {
+      // oxlint-disable-next-line only-throw-error
+      throw redirect({ to: '/plugins', search: { stage: 'needs_review' } });
+    },
   });
   const plugins = createRoute({
     getParentRoute: () => app,
     path: '/plugins',
     component: PluginsPage,
+    validateSearch: parsePluginsSearch,
   });
   const pluginDetail = createRoute({
     getParentRoute: () => app,
@@ -88,6 +93,11 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
     getParentRoute: () => app,
     path: '/categories',
     component: CategoriesPage,
+  });
+  const allowedEmails = createRoute({
+    getParentRoute: () => app,
+    path: '/allowed-users',
+    component: AllowedEmailsPage,
   });
   const audit = createRoute({
     getParentRoute: () => app,
@@ -109,6 +119,7 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
   });
 
   return createRouter({
+    defaultPreload: 'intent',
     routeTree: root.addChildren([
       app.addChildren([
         home,
@@ -118,6 +129,7 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
         pluginDetail,
         versionDetail,
         categories,
+        allowedEmails,
         audit,
       ]),
       signin,

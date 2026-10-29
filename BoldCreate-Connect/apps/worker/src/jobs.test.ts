@@ -150,12 +150,64 @@ describe('dispatch', () => {
   );
 });
 
+describe('invitation mail', () => {
+  it('names the inviter and the organization when the payload has them', async () => {
+    const { options } = createMock();
+    await dispatchJob(
+      {
+        ...job,
+        payload: {
+          to: 'new@example.test',
+          token: 'tok',
+          role: 'Viewer',
+          orgName: 'Acme Corp',
+          inviterName: 'Ada Lovelace',
+          inviterEmail: 'ada@example.test',
+        },
+      },
+      options,
+    );
+    expect(options.emailAdapter.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: 'Ada Lovelace has invited you to join Acme Corp on BoldConnect',
+        html: expect.stringContaining('Acme Corp'),
+        text: expect.stringContaining('token=tok'),
+      }),
+    );
+  });
+
+  it('still sends an invitation queued before the names were added', async () => {
+    const { options } = createMock();
+    await dispatchJob(job, options);
+    expect(options.emailAdapter.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: "You've been invited to join an organization on BoldConnect",
+      }),
+    );
+  });
+});
+
 describe('admin setup mail', () => {
   const setup: ClaimedJob = {
     ...job,
     type: 'admin_setup.requested',
     payload: { to: 'ops@example.test', url: 'https://admin.example.test/setup?token=abc' },
   };
+
+  it('reads as an invitation from the admin who added the address', async () => {
+    const { options } = createMock();
+    await dispatchJob(
+      { ...setup, payload: { ...(setup.payload as object), invitedBy: 'lead@example.test' } },
+      options,
+    );
+    expect(options.emailAdapter.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: 'lead@example.test has invited you to be an admin of BoldConnect',
+        html: expect.stringContaining('Accept invitation'),
+        text: expect.stringContaining('https://admin.example.test/setup?token=abc'),
+      }),
+    );
+  });
 
   it('sends the link', async () => {
     const { options } = createMock();

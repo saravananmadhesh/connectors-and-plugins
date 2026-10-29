@@ -1,0 +1,77 @@
+/**
+ * Full-page loader: the two BoldConnect blocks slide together, connect and drift apart again.
+ * Drawn with SVG animation, so it keeps moving with reduced motion on, being the only sign that
+ * the page is working.
+ */
+export function PageLoader({ label = 'Loading' }: { label?: string }) {
+  return (
+    <div
+      role="status"
+      aria-label={label}
+      className="fixed inset-0 z-50 grid place-items-center bg-background"
+    >
+      <svg viewBox="110 232 530 436" className="h-24 w-auto" aria-hidden="true">
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="-22 17;0 0;-22 17"
+            keyTimes="0;0.5;1"
+            calcMode="spline"
+            keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+            dur="1.6s"
+            repeatCount="indefinite"
+          />
+          <path
+            d="M190 380 L262 342 Q270 339 280 345 L322 366 Q337 375 337 392 L337 460 Q337 475 350 482 L392 507 Q410 518 410 540 L410 580 Q410 600 392 610 L372 622 Q348 632 325 620 L190 540 Q177 530 177 515 L177 400 Q177 388 190 380 Z"
+            fill="#FF6A1F"
+          />
+          <path
+            d="M296 372 L322 366 Q337 375 337 392 L337 460 Q337 475 350 482 L392 507 L330 490 Q282 462 284 420 Q286 392 296 372 Z"
+            fill="#FF4800"
+          >
+            <animate
+              attributeName="opacity"
+              values="0.3;1;0.3"
+              keyTimes="0;0.5;1"
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+              dur="1.6s"
+              repeatCount="indefinite"
+            />
+          </path>
+        </g>
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="22 -17;0 0;22 -17"
+            keyTimes="0;0.5;1"
+            calcMode="spline"
+            keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+            dur="1.6s"
+            repeatCount="indefinite"
+          />
+          <path
+            d="M360 295 Q372 282 392 274 Q410 268 430 278 L548 350 Q572 366 572 395 L572 490 Q572 515 550 528 L520 545 Q500 552 480 542 L365 470 Q347 458 347 435 L347 320 Q347 305 360 295 Z"
+            fill="#FF6A1F"
+          />
+          <path
+            d="M349 338 L432 388 Q470 410 470 450 L470 478 L365 470 Q347 458 347 435 Z"
+            fill="#FF4800"
+          >
+            <animate
+              attributeName="opacity"
+              values="0.3;1;0.3"
+              keyTimes="0;0.5;1"
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+              dur="1.6s"
+              repeatCount="indefinite"
+            />
+          </path>
+        </g>
+      </svg>
+    </div>
+  );
+}

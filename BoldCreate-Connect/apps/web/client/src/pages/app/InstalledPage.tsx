@@ -53,7 +53,8 @@ export function InstalledPage() {
 
   const setSearch = (patch: InstalledSearch) =>
     void navigate({
-      to: '/installed',
+      to: '/orgs/$orgId/installed',
+      params: { orgId },
       search: (previous) => ({ ...previous, ...patch }) as InstalledSearch,
       replace: true,
     });
@@ -93,7 +94,7 @@ export function InstalledPage() {
     <Page className="space-y-6">
       <PageHeader title="Installed" description="Plugins and components that are active for you.">
         <Button asChild>
-          <Link to="/marketplace">
+          <Link to="/orgs/$orgId/marketplace" params={{ orgId }}>
             <Store />
             Browse marketplace
           </Link>

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Alert } from '../components/ui/alert';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { Input, PasswordInput } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { adminApi } from '../lib/api';
@@ -43,8 +43,7 @@ export function SignInPage() {
         </Label>
         <Label>
           Password
-          <Input
-            type="password"
+          <PasswordInput
             autoComplete="current-password"
             required
             value={password}

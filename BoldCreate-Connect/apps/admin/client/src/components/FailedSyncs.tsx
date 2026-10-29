@@ -1,27 +1,25 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Trash2 } from 'lucide-react';
-import { PageHeader } from '../components/PageHeader';
-import { PluginTable } from '../components/PluginTable';
-import { Alert } from '../components/ui/alert';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { adminApi } from '../lib/api';
 import { errorMessage } from '../lib/messages';
 import { PLUGINS_KEY, REVIEW_COUNT_KEY, SOURCES_KEY } from '../lib/plugins';
+import { Alert } from './ui/alert';
+import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 /**
  * Repositories whose sync failed and that have no plugin to show it on, for example a link that
  * was wrong. They can be tried again or removed in one go.
  */
-function FailedSyncs() {
+export function FailedSyncs() {
   const queryClient = useQueryClient();
   const [notice, setNotice] = useState<string | null>(null);
   const sources = useQuery({
     queryKey: SOURCES_KEY,
     queryFn: adminApi.listSources,
     refetchInterval: (query) =>
-      query.state.data?.items.some(
+      query.state.data?.items?.some(
         (item) => item.lastStatus === 'queued' || item.lastStatus === 'running',
       )
         ? 2000
@@ -118,88 +116,5 @@ function FailedSyncs() {
         )}
       </CardContent>
     </Card>
-  );
-}
-
-type Stage = 'needs_review' | 'pending' | 'approved' | 'published' | 'rejected' | 'yanked' | 'all';
-
-/** The review cycle in order: pending, approved, then published; rejected and yanked end it. */
-const STAGES: { id: Stage; label: string; hint: string; empty: string }[] = [
-  {
-    id: 'needs_review',
-    label: 'To review',
-    hint: 'Versions waiting to be approved or published.',
-    empty: 'Nothing is waiting for review.',
-  },
-  {
-    id: 'pending',
-    label: 'Awaiting approval',
-    hint: 'New versions that nobody has approved or rejected yet.',
-    empty: 'No version is awaiting approval.',
-  },
-  {
-    id: 'approved',
-    label: 'Ready to publish',
-    hint: 'Approved versions that members cannot install until they are published.',
-    empty: 'No approved version is waiting to be published.',
-  },
-  {
-    id: 'published',
-    label: 'Published',
-    hint: 'Versions members can install.',
-    empty: 'No version is published yet.',
-  },
-  {
-    id: 'rejected',
-    label: 'Rejected',
-    hint: 'Versions that were turned down. They stay on record and are not published.',
-    empty: 'No version was rejected.',
-  },
-  {
-    id: 'yanked',
-    label: 'Yanked',
-    hint: 'Published versions that were withdrawn from new installs.',
-    empty: 'No version was yanked.',
-  },
-  {
-    id: 'all',
-    label: 'All',
-    hint: 'Every plugin, whatever state its versions are in.',
-    empty: 'No plugins yet.',
-  },
-];
-
-/** Every stage of the review cycle, one tab each, plus the syncs that failed. */
-export function ReviewPage() {
-  const [stage, setStage] = useState<Stage>('needs_review');
-  const current = STAGES.find((item) => item.id === stage) ?? STAGES[0]!;
-  return (
-    <div className="mx-auto max-w-7xl p-6">
-      <PageHeader
-        title="Review"
-        description="Follow each version through the review cycle: approve it, publish it, or reject it."
-      />
-      <FailedSyncs />
-      <div role="tablist" aria-label="Review stage" className="mb-2 flex flex-wrap gap-2">
-        {STAGES.map((item) => (
-          <Button
-            key={item.id}
-            role="tab"
-            aria-selected={item.id === stage}
-            variant={item.id === stage ? 'secondary' : 'outline'}
-            size="sm"
-            onClick={() => setStage(item.id)}
-          >
-            {item.label}
-          </Button>
-        ))}
-      </div>
-      <p className="mb-4 text-sm text-muted-foreground">{current.hint}</p>
-      <PluginTable
-        key={stage}
-        fixed={stage === 'all' ? {} : { versionStatus: stage }}
-        empty={current.empty}
-      />
-    </div>
   );
 }

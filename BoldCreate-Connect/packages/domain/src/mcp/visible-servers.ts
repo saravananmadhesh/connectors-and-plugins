@@ -3,6 +3,7 @@
  * Shared by the gateway and by the api route that answers the gateway.
  */
 import { and, eq, inArray } from 'drizzle-orm';
+import { effectiveEnabled } from '../delivery/effective-enabled.js';
 import {
   componentTable,
   installationComponentTable,
@@ -66,7 +67,7 @@ export async function loadVisibleServers(
           installationComponentTable.installationId,
           installs.map((install) => install.installationId),
         ),
-        eq(installationComponentTable.enabled, true),
+        effectiveEnabled(principal.userId),
         eq(componentTable.kind, 'mcp'),
       ),
     );

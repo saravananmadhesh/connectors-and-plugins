@@ -12,6 +12,7 @@ export * from './v1/principal.js';
 export * from './v1/auth.js';
 export * from './v1/admin-auth.js';
 export * from './v1/plugin-sources.js';
+export * from './v1/admin-allowed-emails.js';
 export * from './v1/categories.js';
 export * from './v1/admin-audit.js';
 export * from './v1/admin-plugins.js';

@@ -1,5 +1,6 @@
+import { ExternalLink } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import { MAX_INSTALL_PATHS, candidateState, describeCounts } from '../lib/discover';
+import { MAX_INSTALL_PATHS, candidateState, describeCounts, usesStdio } from '../lib/discover';
 import { cn } from '../lib/cn';
 import { PluginLogo } from './PluginLogo';
 import { Badge } from './ui/badge';
@@ -9,16 +10,25 @@ import type { DiscoveredPlugin } from '../lib/api';
 interface Props {
   plugin: DiscoveredPlugin;
   checked: boolean;
+  /** The plugin's folder on GitHub. */
+  githubUrl: string;
   /** The selection is full, so an unchecked plugin cannot be added. */
   limitReached?: boolean;
   onToggle: () => void;
 }
 
 /** One plugin folder found in a repository, as a card: what it is, what it holds and where it stands. */
-export function DiscoverCandidate({ plugin, checked, limitReached = false, onToggle }: Props) {
+export function DiscoverCandidate({
+  plugin,
+  checked,
+  githubUrl,
+  limitReached = false,
+  onToggle,
+}: Props) {
   const state = candidateState(plugin);
   const title = plugin.displayName ?? plugin.name ?? (plugin.path || 'Repository root');
   const contents = describeCounts(plugin.componentCounts);
+  const stdio = usesStdio(plugin);
   return (
     <li
       className={cn(
@@ -39,7 +49,7 @@ export function DiscoverCandidate({ plugin, checked, limitReached = false, onTog
         </div>
         <Checkbox
           checked={checked}
-          disabled={state.key !== 'available' || (limitReached && !checked)}
+          disabled={state.key !== 'available' || stdio || (limitReached && !checked)}
           onChange={onToggle}
           aria-label={`Select ${title}`}
         />
@@ -50,15 +60,39 @@ export function DiscoverCandidate({ plugin, checked, limitReached = false, onTog
         <p className="text-sm text-muted-foreground">No description.</p>
       )}
       <div className="mt-auto flex flex-col gap-1.5 text-xs text-muted-foreground">
-        {contents && <span className="text-foreground">{contents}</span>}
-        <code className="truncate font-mono" title={plugin.path}>
-          {plugin.path === '' ? 'repository root' : plugin.path}
-        </code>
+        {contents && (
+          <span className="flex flex-wrap items-center gap-1.5 text-foreground">
+            {contents}
+            {plugin.mcpTransports.map((transport) => (
+              <Badge key={transport} variant="outline" title={`MCP server over ${transport}`}>
+                MCP {transport}
+              </Badge>
+            ))}
+          </span>
+        )}
+        <a
+          href={githubUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="flex min-w-0 items-center gap-1 underline-offset-2 hover:underline"
+          aria-label={`Open ${title} on GitHub`}
+        >
+          <ExternalLink className="size-3 shrink-0" />
+          <code className="truncate font-mono" title={plugin.path}>
+            {plugin.path === '' ? 'repository root' : plugin.path}
+          </code>
+        </a>
         {plugin.categories.length > 0 && (
           <span className="truncate">{plugin.categories.join(', ')}</span>
         )}
       </div>
-      {state.key === 'available' && limitReached && !checked && (
+      {state.key === 'available' && stdio && (
+        <p className="text-sm text-muted-foreground">
+          Cannot be installed yet: MCP servers that run as a local command (stdio) are not
+          supported.
+        </p>
+      )}
+      {state.key === 'available' && !stdio && limitReached && !checked && (
         <p className="text-sm text-muted-foreground">
           Cannot be selected: one install takes at most {MAX_INSTALL_PATHS} plugins.
         </p>

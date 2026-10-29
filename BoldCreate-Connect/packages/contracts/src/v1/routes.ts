@@ -6,6 +6,12 @@ import {
   AdminSigninBodySchema,
 } from './admin-auth.js';
 import {
+  AddAdminAllowedEmailBodySchema,
+  AdminAllowedEmailListResponseSchema,
+  AdminAllowedEmailParamsSchema,
+  AdminAllowedEmailResponseSchema,
+} from './admin-allowed-emails.js';
+import {
   AdminCategoryListResponseSchema,
   AdminCategoryParamsSchema,
   AdminCategoryResponseSchema,
@@ -168,6 +174,8 @@ import {
 import {
   AcceptInviteBodySchema,
   AcceptInviteResponseSchema,
+  InvitePreviewResponseSchema,
+  PreviewInviteBodySchema,
   CreateInviteResponseSchema,
   CreateInviteBodySchema,
   CreateOrgBodySchema,
@@ -394,6 +402,16 @@ const auth: RouteDef[] = [
     { principals: ['none'], responses: { 200: z.object({ csrfToken: z.string() }) } },
     { app: 'web', exposure: 'public' },
   ),
+  route(
+    'runtimeConfig.get',
+    'GET',
+    '/api/runtime-config',
+    {
+      principals: ['none'],
+      responses: { 200: z.object({ gatewayUrl: z.string() }) },
+    },
+    { app: 'web', exposure: 'public' },
+  ),
 ];
 
 /** What the gateway asks of the api so it does not need the database itself. */
@@ -538,6 +556,11 @@ const organizations: RouteDef[] = [
     params: inviteParams,
     responses: { 202: EmptyObject },
     idempotency: 'optional',
+  }),
+  route('invites.preview', 'POST', '/v1/invites/preview', {
+    principals: ['none'],
+    body: PreviewInviteBodySchema,
+    responses: { 200: InvitePreviewResponseSchema },
   }),
   route('invites.accept', 'POST', '/v1/invites/accept', {
     action: 'invite:accept',
@@ -1232,6 +1255,16 @@ const CATALOG_SPECS: CatalogSpec[] = [
     responses: { 200: UserPluginStateResponseSchema },
   },
   {
+    group: 'projectUserPluginComponents',
+    verb: 'delete',
+    method: 'DELETE',
+    suffix: '/user-plugins/{pluginId}/components/{componentId}',
+    access: 'write',
+    params: userPluginComponentParams,
+    query: UserPluginRemoveQuerySchema,
+    responses: { 200: UserPluginStateResponseSchema },
+  },
+  {
     group: 'projectUserPlugins',
     verb: 'put',
     method: 'PUT',
@@ -1423,6 +1456,18 @@ const sessionSelf: RouteDef[] = [
       action: 'plugin:install',
       params: UserPluginComponentParamsSchema,
       body: PutSessionPluginComponentBodySchema,
+      responses: { 200: UserPluginStateResponseSchema },
+    },
+    { exposure: 'public' },
+  ),
+  route(
+    'sessionPluginComponents.delete',
+    'DELETE',
+    '/v1/session/plugins/{pluginId}/components/{componentId}',
+    {
+      principals: ['key'],
+      action: 'plugin:install',
+      params: UserPluginComponentParamsSchema,
       responses: { 200: UserPluginStateResponseSchema },
     },
     { exposure: 'public' },
@@ -1905,6 +1950,21 @@ const adminPlugins: RouteDef[] = [
   }),
   adminRoute('adminCategories.delete', 'DELETE', '/api/v1/admin/categories/{categoryId}', {
     params: AdminCategoryParamsSchema,
+    responses: { 204: NoContent },
+  }),
+  adminRoute('adminAllowedEmails.list', 'GET', '/api/v1/admin/allowed-emails', {
+    responses: { 200: AdminAllowedEmailListResponseSchema },
+  }),
+  adminRoute('adminAllowedEmails.add', 'POST', '/api/v1/admin/allowed-emails', {
+    body: AddAdminAllowedEmailBodySchema,
+    responses: { 201: AdminAllowedEmailResponseSchema },
+  }),
+  adminRoute('adminAllowedEmails.invite', 'POST', '/api/v1/admin/allowed-emails/{email}/invite', {
+    params: AdminAllowedEmailParamsSchema,
+    responses: { 204: NoContent },
+  }),
+  adminRoute('adminAllowedEmails.remove', 'DELETE', '/api/v1/admin/allowed-emails/{email}', {
+    params: AdminAllowedEmailParamsSchema,
     responses: { 204: NoContent },
   }),
   adminRoute('adminPluginVersions.get', 'GET', '/api/v1/admin/plugin-versions/{versionId}', {

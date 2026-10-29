@@ -34,6 +34,7 @@ export const PROJECT_ROUTE_SCOPES: Readonly<Record<string, ProjectKeyScope>> = {
   'projectUserPlugins.delete': 'plugins:write',
   'projectUserPluginVariables.put': 'plugins:write',
   'projectUserPluginComponents.put': 'plugins:write',
+  'projectUserPluginComponents.delete': 'plugins:write',
   'projectSessions.create': 'sessions:write',
   'projectSessions.list': 'sessions:read',
   'projectSessions.get': 'sessions:read',

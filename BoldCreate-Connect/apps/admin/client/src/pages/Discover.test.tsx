@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 /** The plugin cards only; the filter above them has its own words for the same states. */
-const cards = () => within(screen.getByRole('list'));
+const cards = () => within(screen.getAllByRole('list').at(-1) as HTMLElement);
 
 const SESSION: FakeReply = { status: 200, body: { email: 'ops@example.test' } };
 const SOURCE_ID = '00000000-0000-4000-8000-000000000001';
@@ -36,6 +36,7 @@ const plugin = (path: string, overrides: Partial<Candidate> = {}): Candidate => 
   summary: `Does ${path}`,
   categories: [],
   componentCounts: { skill: 2 },
+  mcpTransports: [],
   problem: null,
   installed: null,
   ...overrides,
@@ -63,11 +64,88 @@ async function inspect(
 }
 
 describe('discover page', () => {
+  it('keeps the inspection when switching tabs, and Clear starts over', async () => {
+    stubApi((_method, path) => {
+      if (path.endsWith('/session')) return SESSION;
+      if (path.endsWith('/discover'))
+        return { status: 200, body: found([plugin('a'), plugin('b')]) };
+      return { status: 200, body: { items: [] } };
+    });
+    await renderApp('/discover');
+    const user = userEvent.setup();
+    await inspect(user);
+    expect(await screen.findByText(/lists 2 plugins/)).toBeInTheDocument();
+    await user.click(screen.getByRole('checkbox', { name: /Plugin a/ }));
+
+    await user.click(screen.getByRole('tab', { name: /Added repositories/ }));
+    await user.click(await screen.findByRole('tab', { name: 'Find plugins' }));
+    expect(await screen.findByText(/lists 2 plugins/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/GitHub URL/)).toHaveValue('https://github.com/acme/plugins');
+    expect(screen.getByRole('checkbox', { name: /Plugin a/ })).toBeChecked();
+
+    await user.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(screen.queryByText(/lists 2 plugins/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/GitHub URL/)).toHaveValue('');
+  });
+
   it('sends a visitor without a session to the sign-in page', async () => {
     stubApi(() => ERROR('unauthenticated', 401));
     await renderApp('/discover');
     expect(await screen.findByRole('heading', { name: 'Admin sign in' })).toBeInTheDocument();
   });
+
+  it('moves an installed plugin to Installed and reloads the other tabs once its sync finishes', async () => {
+    let installedYet = false;
+    let polls = 0;
+    const source = (lastStatus: 'queued' | 'succeeded') => ({
+      id: SOURCE_ID,
+      owner: 'acme',
+      repository: 'plugins',
+      ref: 'main',
+      path: 'stored-differently',
+      lastCommitSha: null,
+      lastSyncedAt: null,
+      lastStatus,
+      lastError: null,
+      lastNote: null,
+      createdAt: '2026-10-11T00:00:00.000Z',
+      plugin:
+        lastStatus === 'succeeded'
+          ? { id: PLUGIN_UUID, name: 'plugin-b', displayName: 'Plugin b', status: 'active' }
+          : null,
+    });
+    const calls = stubApi((method, path) => {
+      if (path.endsWith('/session')) return SESSION;
+      if (path.endsWith('/discover')) return { status: 200, body: found([plugin('b')]) };
+      if (path.endsWith('/install')) {
+        installedYet = true;
+        return {
+          status: 200,
+          body: { items: [{ path: 'b', outcome: 'added', source: { id: SOURCE_ID } }] },
+        };
+      }
+      if (method === 'GET' && path.endsWith('/plugin-sources')) {
+        if (!installedYet) return { status: 200, body: { items: [] } };
+        polls += 1;
+        return { status: 200, body: { items: [source(polls < 2 ? 'queued' : 'succeeded')] } };
+      }
+      return { status: 200, body: { items: [], total: 0 } };
+    });
+    await renderApp('/discover');
+    const user = userEvent.setup();
+    await inspect(user);
+    await user.click(await screen.findByRole('checkbox', { name: /Plugin b/ }));
+    await user.click(screen.getByRole('button', { name: 'Install 1 selected plugin' }));
+
+    expect(await cards().findByText('Installing')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Install result' })).toBeInTheDocument();
+    const pluginLoads = () =>
+      calls.filter((call) => call.method === 'GET' && call.path.includes('/admin/plugins')).length;
+    const before = pluginLoads();
+    expect(await cards().findByText('Installed', {}, { timeout: 8000 })).toBeInTheDocument();
+    await waitFor(() => expect(pluginLoads()).toBeGreaterThan(before));
+    expect(screen.queryByRole('region', { name: 'Install result' })).not.toBeInTheDocument();
+  }, 20000);
 
   it('lists the plugins of a multi-plugin repository and installs only the chosen ones', async () => {
     const calls = stubApi((_method, path) => {
@@ -77,7 +155,7 @@ describe('discover page', () => {
           status: 200,
           body: found([
             plugin('a'),
-            plugin('b', { categories: ['Tools'] }),
+            plugin('b', { categories: ['Tools'], mcpTransports: ['http'] }),
             plugin('c', { installed: installedAs() }),
             plugin('d', { name: null, displayName: null, problem: 'No plugin manifest.' }),
           ]),
@@ -103,6 +181,11 @@ describe('discover page', () => {
     expect(await screen.findByText(/lists 4 plugins/)).toBeInTheDocument();
     expect(screen.getAllByText('2 skills')).toHaveLength(4);
     expect(screen.getByText('Tools')).toBeInTheDocument();
+    expect(screen.getAllByText('MCP http')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Open Plugin a on GitHub' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(new RegExp('^https://github.com/.+/tree/.+/a$')),
+    );
     expect(cards().getAllByText('Not installed')).toHaveLength(2);
     expect(cards().getByText('Installed')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open plugin' })).toBeInTheDocument();
@@ -130,6 +213,46 @@ describe('discover page', () => {
       visibility: 'public',
     });
     expect(within(result).getByRole('link', { name: /Review/ })).toBeInTheDocument();
+  });
+
+  it('locks plugins with a stdio MCP server and can hide them and installed ones', async () => {
+    stubApi((_method, path) => {
+      if (path.endsWith('/session')) return SESSION;
+      if (path.endsWith('/discover')) {
+        return {
+          status: 200,
+          body: found([
+            plugin('a'),
+            plugin('local', { mcpTransports: ['stdio'] }),
+            plugin('c', { installed: installedAs() }),
+          ]),
+        };
+      }
+      return { status: 200, body: { items: [] } };
+    });
+    await renderApp('/discover');
+    const user = userEvent.setup();
+    await inspect(user);
+
+    expect(await screen.findByRole('checkbox', { name: /Plugin a/ })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /Plugin local/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide (1)' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Hide (1)' }));
+    await user.click(await screen.findByRole('menuitemcheckbox', { name: 'MCP stdio' }));
+    await user.keyboard('{Escape}');
+    expect(await screen.findByRole('checkbox', { name: /Plugin local/ })).toBeDisabled();
+    expect(screen.getByText(/Cannot be installed yet/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Select all that can be installed' }));
+    expect(screen.getByRole('button', { name: 'Install 1 selected plugin' })).toBeEnabled();
+
+    await user.click(screen.getByRole('button', { name: 'Hide' }));
+    await user.click(await screen.findByRole('menuitemcheckbox', { name: 'MCP stdio' }));
+    expect(screen.queryByRole('checkbox', { name: /Plugin local/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('menuitemcheckbox', { name: 'Installed' }));
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('checkbox', { name: /Plugin c/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Plugin a/ })).toBeInTheDocument();
+    expect(screen.getByText('Showing 1 of 3')).toBeInTheDocument();
   });
 
   it('reads the repository, branch and folder from one link', async () => {

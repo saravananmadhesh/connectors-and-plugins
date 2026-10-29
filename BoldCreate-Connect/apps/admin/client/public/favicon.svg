@@ -1,17 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <style>
-    .tile { fill: #0a0a0a; }
-    .glyph { stroke: #fff; }
-    .dot { fill: #fff; }
-    @media (prefers-color-scheme: dark) {
-      .tile { fill: #fafafa; }
-      .glyph { stroke: #0a0a0a; }
-      .dot { fill: #0a0a0a; }
-    }
-  </style>
-  <rect class="tile" width="64" height="64" rx="14" />
-  <g transform="translate(9.6 9.6) scale(.7)">
-    <path class="glyph" d="M20 12v40M20 12h14a9 9 0 0 1 0 20H20m0 0h17a10 10 0 0 1 0 20H20" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-    <circle class="dot" cx="50" cy="14" r="4" />
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="170 262 410 376"><path d="M190 380 L262 342 Q270 339 280 345 L322 366 Q337 375 337 392 L337 460 Q337 475 350 482 L392 507 Q410 518 410 540 L410 580 Q410 600 392 610 L372 622 Q348 632 325 620 L190 540 Q177 530 177 515 L177 400 Q177 388 190 380 Z" fill="#FF6A1F"/><path d="M296 372 L322 366 Q337 375 337 392 L337 460 Q337 475 350 482 L392 507 L330 490 Q282 462 284 420 Q286 392 296 372 Z" fill="#FF4800"/><path d="M360 295 Q372 282 392 274 Q410 268 430 278 L548 350 Q572 366 572 395 L572 490 Q572 515 550 528 L520 545 Q500 552 480 542 L365 470 Q347 458 347 435 L347 320 Q347 305 360 295 Z" fill="#FF6A1F"/><path d="M349 338 L432 388 Q470 410 470 450 L470 478 L365 470 Q347 458 347 435 Z" fill="#FF4800"/></svg>

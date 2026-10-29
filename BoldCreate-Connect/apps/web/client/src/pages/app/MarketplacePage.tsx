@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Package, RefreshCw, Search, SearchX } from 'lucide-react';
 import { marketplace, type PluginListItemResponse } from '@/lib/api';
 import { qk } from '@/lib/query-keys';
 import { useInstallOptions } from '@/lib/install-options';
 import { cn } from '@/lib/cn';
+import { Tooltip } from '@/components/ui/tooltip';
 import { DEFAULT_SORT, SORTS, type MarketplaceSearch } from '@/lib/marketplace-search';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ function CardSkeletons() {
 
 export function MarketplacePage() {
   const navigate = useNavigate();
+  const { orgId } = useParams({ strict: false }) as { orgId: string };
   const {
     q = '',
     categories: picked = [],
@@ -51,7 +53,8 @@ export function MarketplacePage() {
   // Any filter change goes back to the first page; only the page buttons keep the page.
   const setFilters = (patch: MarketplaceSearch) =>
     void navigate({
-      to: '/marketplace',
+      to: '/orgs/$orgId/marketplace',
+      params: { orgId },
       search: (previous: MarketplaceSearch) => ({ ...previous, page: undefined, ...patch }),
       replace: true,
     });
@@ -61,7 +64,8 @@ export function MarketplacePage() {
     if (typed === q) return;
     const timer = setTimeout(() => {
       void navigate({
-        to: '/marketplace',
+        to: '/orgs/$orgId/marketplace',
+        params: { orgId },
         search: (previous: MarketplaceSearch) => ({
           ...previous,
           q: typed || undefined,
@@ -71,7 +75,7 @@ export function MarketplacePage() {
       });
     }, 250);
     return () => clearTimeout(timer);
-  }, [typed, q, navigate]);
+  }, [typed, q, navigate, orgId]);
 
   const categories = useQuery({
     queryKey: qk.marketplaceCategories(),
@@ -101,7 +105,8 @@ export function MarketplacePage() {
 
   const goToPage = (next: number) =>
     void navigate({
-      to: '/marketplace',
+      to: '/orgs/$orgId/marketplace',
+      params: { orgId },
       search: (previous: MarketplaceSearch) => ({ ...previous, page: next > 1 ? next : undefined }),
       replace: true,
     });
@@ -110,14 +115,15 @@ export function MarketplacePage() {
   useEffect(() => {
     if (!data || page <= lastPage) return;
     void navigate({
-      to: '/marketplace',
+      to: '/orgs/$orgId/marketplace',
+      params: { orgId },
       search: (previous: MarketplaceSearch) => ({
         ...previous,
         page: lastPage > 1 ? lastPage : undefined,
       }),
       replace: true,
     });
-  }, [data, page, lastPage, navigate]);
+  }, [data, page, lastPage, navigate, orgId]);
 
   return (
     <Page className="space-y-6">
@@ -154,15 +160,17 @@ export function MarketplacePage() {
             value={sort}
             onChange={(next) => setFilters({ sort: next === DEFAULT_SORT ? undefined : next })}
           />
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Refresh"
-            disabled={isFetching}
-            onClick={() => void refetch()}
-          >
-            <RefreshCw className={cn(isFetching && 'animate-spin')} aria-hidden="true" />
-          </Button>
+          <Tooltip label="Check for new and updated plugins">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Refresh"
+              disabled={isFetching}
+              onClick={() => void refetch()}
+            >
+              <RefreshCw className={cn(isFetching && 'animate-spin')} aria-hidden="true" />
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
@@ -194,7 +202,12 @@ export function MarketplacePage() {
                 variant="outline"
                 onClick={() => {
                   setTyped('');
-                  void navigate({ to: '/marketplace', search: {}, replace: true });
+                  void navigate({
+                    to: '/orgs/$orgId/marketplace',
+                    params: { orgId },
+                    search: {},
+                    replace: true,
+                  });
                 }}
               >
                 Clear filters
@@ -209,6 +222,7 @@ export function MarketplacePage() {
               <PluginCard
                 key={plugin.id}
                 plugin={plugin}
+                orgId={orgId}
                 scopes={installOptions.available(plugin.name)}
                 installed={installOptions.installedIn(plugin.name).length > 0}
                 onInstall={(scope) => setInstalling({ plugin, scope })}

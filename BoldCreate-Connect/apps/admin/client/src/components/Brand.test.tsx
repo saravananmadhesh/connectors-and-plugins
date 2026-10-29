@@ -7,25 +7,23 @@ import { Brand } from './Brand';
 describe('brand', () => {
   it('names the product, its maker and this console', () => {
     expect(PRODUCT).toEqual({
-      name: 'BoldCreate',
-      edition: 'Connect',
+      name: 'BoldConnect',
       maker: 'Syncfusion',
-      console: 'Integrations Admin Console',
+      console: 'Admin Console',
     });
   });
 
   it('shows the lockup in the sidebar: name, "by Syncfusion" and the console name', () => {
     render(<Brand />);
-    expect(screen.getByText('BoldCreate')).toBeInTheDocument();
-    expect(screen.getByText('Connect')).toBeInTheDocument();
-    expect(screen.getByText('by Syncfusion')).toBeInTheDocument();
-    expect(screen.getByText('Integrations Admin Console')).toBeInTheDocument();
+    expect(screen.getByText('BoldConnect')).toBeInTheDocument();
+    expect(screen.getByText('by Syncfusion®')).toBeInTheDocument();
+    expect(screen.getByText('Admin Console')).toBeInTheDocument();
   });
 
   it('shows the stacked lockup for the sign-in page', () => {
     const { container } = render(<Brand layout="stacked" />);
-    expect(container).toHaveTextContent('BoldCreate Connect by Syncfusion');
-    expect(screen.getByText('Integrations Admin Console')).toBeInTheDocument();
+    expect(container).toHaveTextContent('BoldConnect by Syncfusion');
+    expect(screen.getByText('Admin Console')).toBeInTheDocument();
   });
 
   it('keeps the decorative mark out of the accessibility tree', () => {
@@ -35,11 +33,11 @@ describe('brand', () => {
 });
 
 describe('footer', () => {
-  it('shows the product line and the copyright for the given year', () => {
+  it('shows only the copyright for the given year', () => {
     render(<AppFooter year={2031} />);
     const footer = screen.getByRole('contentinfo');
-    expect(footer).toHaveTextContent('BoldCreate by Syncfusion · Integrations Admin Console');
-    expect(footer).toHaveTextContent('© 2031 Syncfusion, Inc. All rights reserved.');
+    expect(footer).not.toHaveTextContent('BoldConnect');
+    expect(footer).toHaveTextContent('© 2031 Syncfusion®, Inc. All rights reserved.');
   });
 
   it('uses the current year when none is given', () => {

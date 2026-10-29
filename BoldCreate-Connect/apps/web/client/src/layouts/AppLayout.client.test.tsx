@@ -51,9 +51,9 @@ async function show(path: string, url: string, options: Options = {}) {
       ...(path === '/orgs/$orgId/projects'
         ? []
         : [{ path: '/orgs/$orgId/projects', component: () => <p>Projects</p> }]),
-      ...(path === '/marketplace'
+      ...(path === '/orgs/$orgId/marketplace'
         ? []
-        : [{ path: '/marketplace', component: () => <p>Marketplace</p> }]),
+        : [{ path: '/orgs/$orgId/marketplace', component: () => <p>Marketplace</p> }]),
     ],
   });
 }
@@ -80,20 +80,18 @@ describe('AppLayout', () => {
         'Marketplace',
         'Installed',
         'API keys',
-        'Overview',
         'Members',
         'Settings',
         'Profile',
       ]);
-      expect(within(sidebar()).getByRole('link', { name: 'Overview' })).toHaveAttribute(
-        'aria-current',
-        'page',
-      );
+      // The overview is about running the organization, so it lives in Platform only; the
+      // breadcrumb still leads to it.
+      expect(within(sidebar()).queryByRole('link', { name: 'Overview' })).not.toBeInTheDocument();
     });
 
     it('hides Settings from someone who cannot change the policy', async () => {
       await show('/orgs/$orgId', `/orgs/${ORG_ID}`, { role: 'VIEWER' });
-      await screen.findByRole('link', { name: 'Overview' });
+      await screen.findByRole('link', { name: 'Projects' });
       expect(within(sidebar()).queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument();
     });
 
@@ -120,6 +118,19 @@ describe('AppLayout', () => {
       expect(back).not.toHaveAttribute('aria-current');
       expect(within(sidebar()).queryByText('Organization')).not.toBeInTheDocument();
       expect(within(sidebar()).queryByRole('link', { name: 'Members' })).not.toBeInTheDocument();
+      // Nothing personal inside a project either: Profile is one step up.
+      expect(within(sidebar()).queryByRole('link', { name: 'Profile' })).not.toBeInTheDocument();
+      expect(within(sidebar()).queryByText('Personal')).not.toBeInTheDocument();
+    });
+
+    it('lists the organization overview in Platform, above projects', async () => {
+      window.localStorage.setItem(AREA_STORAGE_KEY, 'platform');
+      await show('/orgs/$orgId', `/orgs/${ORG_ID}`);
+      expect(await within(sidebar()).findByRole('link', { name: 'Overview' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      );
+      expect(names(sidebar())).toEqual(['Overview', 'Projects', 'Members', 'Settings', 'Profile']);
     });
 
     it('lists the sections of the open project in the sidebar', async () => {
@@ -129,7 +140,7 @@ describe('AppLayout', () => {
       expect(overview).toHaveAttribute('aria-current', 'page');
       expect(within(sidebar()).getByRole('link', { name: 'Users' })).toHaveAttribute(
         'href',
-        `/orgs/${ORG_ID}/projects/prj_1?tab=users`,
+        `/orgs/${ORG_ID}/projects/prj_1/users`,
       );
       expect(within(sidebar()).getByRole('link', { name: 'Users' })).not.toHaveAttribute(
         'aria-current',
@@ -144,7 +155,7 @@ describe('AppLayout', () => {
 
     it('titles the window and shows the breadcrumb of the overview', async () => {
       await show('/orgs/$orgId', `/orgs/${ORG_ID}`);
-      await waitFor(() => expect(document.title).toBe('Overview · Acme · BoldCreate'));
+      await waitFor(() => expect(document.title).toBe('Overview · Acme · BoldConnect'));
       const crumbs = await screen.findByRole('navigation', { name: 'Breadcrumb' });
       expect(within(crumbs).getByRole('link', { name: 'Acme' })).toHaveAttribute(
         'href',
@@ -157,7 +168,7 @@ describe('AppLayout', () => {
       await show('/orgs/$orgId', `/orgs/${ORG_ID}`);
       expect(await within(sidebar()).findByRole('link', { name: 'Get started' })).toHaveAttribute(
         'href',
-        '/get-started',
+        `/orgs/${ORG_ID}/get-started`,
       );
     });
   });
@@ -166,13 +177,24 @@ describe('AppLayout', () => {
     const segment = (name: RegExp) => screen.findByRole('button', { name });
 
     it('lists For You and Platform for an admin, with the current one pressed', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       expect(await segment(/For You/)).toHaveAttribute('aria-pressed', 'true');
       expect(await segment(/Platform/)).toHaveAttribute('aria-pressed', 'false');
     });
 
+    it('opens the pages of the area from an organization page that belongs to neither', async () => {
+      // No area was chosen yet, so For You is only highlighted on the members page: a click on it
+      // must still open the marketplace of this organization, and Platform its projects.
+      const { router } = await show('/orgs/$orgId/members', `/orgs/${ORG_ID}/members`);
+      expect(await segment(/For You/)).toHaveAttribute('aria-pressed', 'true');
+      await userEvent.click(await segment(/For You/));
+      await waitFor(() =>
+        expect(router.state.location.pathname).toBe(`/orgs/${ORG_ID}/marketplace`),
+      );
+    });
+
     it('goes to the projects of Platform and remembers the choice', async () => {
-      const { router } = await show('/marketplace', '/marketplace');
+      const { router } = await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       await userEvent.click(await segment(/Platform/));
       await waitFor(() => expect(router.state.location.pathname).toBe(`/orgs/${ORG_ID}/projects`));
       expect(window.localStorage.getItem(AREA_STORAGE_KEY)).toBe('platform');
@@ -182,7 +204,9 @@ describe('AppLayout', () => {
       window.localStorage.setItem(AREA_STORAGE_KEY, 'platform');
       const { router } = await show('/orgs/$orgId/members', `/orgs/${ORG_ID}/members`);
       await userEvent.click(await segment(/For You/));
-      await waitFor(() => expect(router.state.location.pathname).toBe('/marketplace'));
+      await waitFor(() =>
+        expect(router.state.location.pathname).toBe(`/orgs/${ORG_ID}/marketplace`),
+      );
     });
 
     it('shows the organization and project pages alone in Platform', async () => {
@@ -195,7 +219,7 @@ describe('AppLayout', () => {
 
     it('lets a For You page decide the area, whatever was chosen last', async () => {
       window.localStorage.setItem(AREA_STORAGE_KEY, 'platform');
-      await show('/installed', '/installed');
+      await show('/orgs/$orgId/installed', `/orgs/${ORG_ID}/installed`);
       expect(await segment(/For You/)).toHaveAttribute('aria-pressed', 'true');
       expect(within(sidebar()).getByRole('link', { name: 'Installed' })).toBeInTheDocument();
     });
@@ -208,7 +232,7 @@ describe('AppLayout', () => {
     });
 
     it('keeps the organization switcher at the foot of the sidebar, above the user', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       const org = await screen.findByRole('button', { name: 'Switch organization' });
       const user = screen.getByRole('region', { name: 'Signed-in user' });
       const area = screen.getByRole('group', { name: 'Area' });
@@ -218,34 +242,54 @@ describe('AppLayout', () => {
       expect(follows(org, user)).toBe(true);
     });
 
-    it('shows a viewer not found on a For You address, not the page', async () => {
-      await show('/installed', '/installed', { role: 'VIEWER' });
-      expect(await screen.findByText('Page not found')).toBeInTheDocument();
-      expect(within(sidebar()).queryByRole('link', { name: 'Installed' })).not.toBeInTheDocument();
+    it('takes a viewer from a For You address to the projects of their organization', async () => {
+      await show('/orgs/$orgId/installed', `/orgs/${ORG_ID}/installed`, { role: 'VIEWER' });
+      expect(await screen.findByText('Projects')).toBeInTheDocument();
+      expect(screen.queryByText('Page not found')).not.toBeInTheDocument();
+    });
+
+    it('says what to do, and offers to create one, when the person is in no organization', async () => {
+      const me = { ...meWith('ADMIN'), memberships: [] };
+      vi.spyOn(apiModule.auth, 'me').mockResolvedValue(me);
+      await renderWithRouter(AppLayout, '/orgs', {
+        queryData: [{ key: ['me'], data: me }],
+        url: '/orgs',
+      });
+      expect(await screen.findByText('You are not in an organization')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Create organization' })).toBeInTheDocument();
+      expect(
+        within(sidebar()).queryByRole('link', { name: 'Marketplace' }),
+      ).not.toBeInTheDocument();
+      expect(within(sidebar()).getByRole('link', { name: 'Profile' })).toBeInTheDocument();
+    });
+
+    it('takes a viewer who signs in (the marketplace is the home address) to the projects', async () => {
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`, { role: 'VIEWER' });
+      expect(await screen.findByText('Projects')).toBeInTheDocument();
     });
   });
 
   describe('on a page outside any organization', () => {
     it('keeps the organization group', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       expect(await within(sidebar()).findByText('Organization')).toBeInTheDocument();
     });
 
     it('remembers that the marketplace was visited, and only then', async () => {
-      await show('/installed', '/installed');
+      await show('/orgs/$orgId/installed', `/orgs/${ORG_ID}/installed`);
       await screen.findByRole('navigation', { name: 'Breadcrumb' });
       expect(readSetupFlag('browsed-marketplace', ORG_ID)).toBe(false);
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       await waitFor(() => expect(readSetupFlag('browsed-marketplace', ORG_ID)).toBe(true));
     });
 
     it('titles the window with the page and the product', async () => {
-      await show('/marketplace', '/marketplace');
-      await waitFor(() => expect(document.title).toBe('Marketplace · Acme · BoldCreate'));
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
+      await waitFor(() => expect(document.title).toBe('Marketplace · Acme · BoldConnect'));
     });
 
     it('starts the breadcrumb at the organization, which links to its overview', async () => {
-      await show('/installed', '/installed');
+      await show('/orgs/$orgId/installed', `/orgs/${ORG_ID}/installed`);
       const crumbs = await screen.findByRole('navigation', { name: 'Breadcrumb' });
       expect(within(crumbs).getByRole('link', { name: 'Acme' })).toHaveAttribute(
         'href',
@@ -268,11 +312,11 @@ describe('AppLayout', () => {
     });
 
     it('shows the plugin page under the marketplace', async () => {
-      await show('/marketplace/$pluginId', '/marketplace/p1');
+      await show('/orgs/$orgId/marketplace/$pluginId', `/orgs/${ORG_ID}/marketplace/p1`);
       const crumbs = await screen.findByRole('navigation', { name: 'Breadcrumb' });
       expect(within(crumbs).getByRole('link', { name: 'Marketplace' })).toHaveAttribute(
         'href',
-        '/marketplace',
+        `/orgs/${ORG_ID}/marketplace`,
       );
       expect(within(crumbs).getByText('Plugin')).toHaveAttribute('aria-current', 'page');
     });
@@ -281,13 +325,13 @@ describe('AppLayout', () => {
       await show('/somewhere', '/somewhere');
       await screen.findByRole('link', { name: 'Marketplace' });
       expect(screen.queryByRole('navigation', { name: 'Breadcrumb' })).not.toBeInTheDocument();
-      await waitFor(() => expect(document.title).toBe('BoldCreate'));
+      await waitFor(() => expect(document.title).toBe('BoldConnect'));
     });
   });
 
   describe('keyboard', () => {
     it('opens the search for an organization with Ctrl+K', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       await screen.findByRole('button', { name: 'Switch organization' });
       await userEvent.keyboard('{Control>}k{/Control}');
       expect(
@@ -297,7 +341,7 @@ describe('AppLayout', () => {
     });
 
     it('opens it with the Command key too, and ignores other shortcuts', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       await screen.findByRole('button', { name: 'Switch organization' });
       await userEvent.keyboard('{Control>}j{/Control}');
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -306,14 +350,14 @@ describe('AppLayout', () => {
     });
 
     it('offers a link that skips the navigation, to the main content', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       const skip = await screen.findByRole('link', { name: 'Skip to main content' });
       expect(skip).toHaveAttribute('href', '#main-content');
       expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
     });
 
     it('closes the open navigation drawer with Escape', async () => {
-      await show('/marketplace', '/marketplace');
+      await show('/orgs/$orgId/marketplace', `/orgs/${ORG_ID}/marketplace`);
       await userEvent.click(await screen.findByRole('button', { name: 'Open navigation' }));
       expect(screen.getAllByRole('button', { name: 'Close navigation' }).length).toBeGreaterThan(0);
       await userEvent.keyboard('{Escape}');
@@ -326,7 +370,7 @@ describe('AppLayout', () => {
   describe('when the profile does not load', () => {
     it('says so and offers to try again', async () => {
       vi.spyOn(apiModule.auth, 'me').mockRejectedValue(new Error('down'));
-      await renderWithRouter(AppLayout, '/marketplace', { queryData: [] });
+      await renderWithRouter(AppLayout, '/orgs/$orgId/marketplace', { queryData: [] });
       expect(await screen.findByText(/could not load your profile/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
     });

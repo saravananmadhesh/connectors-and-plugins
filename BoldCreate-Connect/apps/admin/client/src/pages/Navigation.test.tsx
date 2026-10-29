@@ -34,20 +34,19 @@ describe('admin navigation', () => {
     expect(within(nav).getByText('System')).toBeInTheDocument();
   });
 
-  it('shows the BoldCreate brand in the sidebar and a footer on every page', async () => {
+  it('shows the BoldConnect brand in the sidebar and no footer inside the app', async () => {
     stub();
     await renderApp('/');
     const home = await screen.findByRole('link', {
-      name: 'BoldCreate by Syncfusion, Integrations Admin Console',
+      name: 'BoldConnect by Syncfusion, Admin Console',
     });
     expect(home).toHaveAttribute('href', '/');
-    expect(within(home).getByText('by Syncfusion')).toBeInTheDocument();
-    expect(screen.getByRole('contentinfo')).toHaveTextContent('Syncfusion, Inc.');
+    expect(within(home).getByText('by Syncfusion®')).toBeInTheDocument();
     await userEvent.setup().click(within(screen.getByRole('navigation')).getByText('Categories'));
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Categories' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
   });
 
   it('opens the audit page by its address', async () => {
@@ -64,7 +63,6 @@ describe('admin navigation', () => {
     for (const [name, heading] of [
       ['Plugins', 'Plugins'],
       ['Discover', 'Discover plugins'],
-      ['Review', 'Review'],
       ['Categories', 'Categories'],
       ['Audit', 'Audit'],
       ['Dashboard', 'Dashboard'],
@@ -96,7 +94,7 @@ describe('admin navigation', () => {
     );
   });
 
-  it('shows how many plugins wait for review next to Review', async () => {
+  it('shows how many plugins wait for review next to Plugins', async () => {
     stub(4);
     await renderApp('/');
     const nav = await screen.findByRole('navigation', { name: 'Admin sections' });

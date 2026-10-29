@@ -56,6 +56,7 @@ export const DEFAULT_COLUMNS: readonly PluginColumn[] = [
 ];
 
 export const CATEGORIES_KEY = ['admin', 'categories'] as const;
+export const ALLOWED_EMAILS_KEY = ['admin', 'allowed-emails'] as const;
 
 export type PluginAction = 'deprecate' | 'suspend' | 'delete';
 

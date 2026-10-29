@@ -1,3 +1,4 @@
+import { ClickableRow } from '@/components/ClickableRow';
 import { useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { Server } from 'lucide-react';
@@ -97,7 +98,12 @@ export function InstalledMcpServers({ orgId, scopeKey, items, canUpdate }: Props
           </TableHeader>
           <TableBody>
             {rows.map(({ installation, server }) => (
-              <TableRow key={`${installation.id}-${server.componentId}`}>
+              <ClickableRow
+                key={`${installation.id}-${server.componentId}`}
+                onActivate={() =>
+                  setOpen({ installationId: installation.id, componentId: server.componentId })
+                }
+              >
                 <TableCell className="font-mono text-xs">{server.name}</TableCell>
                 <TableCell className="text-muted-foreground">
                   <div className="flex items-center gap-2">
@@ -132,7 +138,7 @@ export function InstalledMcpServers({ orgId, scopeKey, items, canUpdate }: Props
                     Details
                   </Button>
                 </TableCell>
-              </TableRow>
+              </ClickableRow>
             ))}
           </TableBody>
         </Table>

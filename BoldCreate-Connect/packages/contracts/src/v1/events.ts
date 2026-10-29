@@ -51,6 +51,8 @@ export const AUDIT_ACTIONS = [
   'admin.sign_in_failed',
   'admin.signed_out',
   'admin.password_set',
+  'admin.email_allowed',
+  'admin.email_removed',
   'plugin_source.created',
   'plugin_source.updated',
   'plugin_source.deleted',

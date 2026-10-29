@@ -32,11 +32,7 @@ export function PluginInstallButton({
   }
   return (
     <InstallMenu onPick={onInstall} scopes={scopes}>
-      <Button
-        size={size}
-        variant={installed ? 'outline' : 'default'}
-        aria-label={`Install ${pluginName}`}
-      >
+      <Button size={size} aria-label={`Install ${pluginName}`}>
         <Download aria-hidden="true" />
         Install
         <ChevronDown aria-hidden="true" className="opacity-60" />

@@ -23,7 +23,7 @@ const VERIFIED_USER = {
 };
 
 const EXTRA = [
-  { path: '/marketplace', component: () => <div>marketplace</div> },
+  { path: '/orgs', component: () => <div>marketplace</div> },
   { path: '/signin', component: () => <div>signin</div> },
 ];
 
@@ -115,13 +115,15 @@ describe('VerifyEmailPage', () => {
     );
   });
 
-  it('shows verifying spinner while auto-verify is in flight', async () => {
+  it('shows the full-page loader while auto-verify is in flight', async () => {
     vi.spyOn(apiModule.auth, 'verifyEmail').mockReturnValue(new Promise(() => {}));
     await renderWithRouter(VerifyEmailPage, '/verify-email', {
       extraRoutes: EXTRA,
       url: '/verify-email?token=abc123',
     });
-    await waitFor(() => expect(screen.getByText(/verifying your email/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('status', { name: /verifying your email/i })).toBeInTheDocument(),
+    );
   });
 
   it('shows spinner while resend is pending', async () => {

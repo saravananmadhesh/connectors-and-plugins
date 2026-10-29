@@ -115,7 +115,7 @@ describe('plugin list', () => {
     expect(within(second).getByText('None published')).toBeInTheDocument();
     expect(within(second).getByText('No source')).toBeInTheDocument();
     expect(within(second).getByText('—')).toBeInTheDocument();
-    expect(first.querySelector('input[type="checkbox"]')).toBeNull();
+    expect(first.querySelector('input[type="checkbox"]')).not.toBeNull();
   });
 
   it('lists the count per type when the total is hovered or focused', async () => {
@@ -193,7 +193,6 @@ describe('plugin list', () => {
     expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Previous/ })).toBeDisabled();
 
-    await user.click(screen.getByRole('button', { name: 'Select' }));
     await user.click(screen.getByLabelText('Select Plugin 1'));
     await user.click(screen.getByRole('button', { name: /Next/ }));
     await screen.findByText('Page 2 of 3');
@@ -205,7 +204,6 @@ describe('plugin list', () => {
     stubList([plugin(1), plugin(2), plugin(3)]);
     await renderApp('/plugins');
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Select' }));
     await user.click(await screen.findByLabelText('Select all shown'));
     const bar = screen.getByRole('region', { name: 'Bulk actions' });
     expect(within(bar).getByText('3 selected')).toBeInTheDocument();
@@ -213,16 +211,12 @@ describe('plugin list', () => {
     expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
   });
 
-  it('leaves selecting mode and forgets the selection when Select is pressed again', async () => {
+  it('shows a checkbox on every row without a select mode', async () => {
     stubList([plugin(1), plugin(2)]);
     await renderApp('/plugins');
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Select' }));
-    await user.click(screen.getByLabelText('Select Plugin 1'));
+    await user.click(await screen.findByLabelText('Select Plugin 1'));
     expect(screen.getByRole('region', { name: 'Bulk actions' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Select' }));
-    expect(screen.queryByRole('region', { name: 'Bulk actions' })).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Select Plugin 1')).not.toBeInTheDocument();
   });
 });
 
@@ -231,7 +225,6 @@ describe('bulk actions on plugins', () => {
 
   async function selectTwo() {
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Select' }));
     await user.click(await screen.findByLabelText('Select Plugin 1'));
     await user.click(screen.getByLabelText('Select Plugin 2'));
     return { user, bar: screen.getByRole('region', { name: 'Bulk actions' }) };

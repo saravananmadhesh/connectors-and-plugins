@@ -75,6 +75,27 @@ export const AcceptInviteBodySchema = z.strictObject({
 });
 export type AcceptInviteBody = z.infer<typeof AcceptInviteBodySchema>;
 
+/** Looks an invite link up before anyone is signed in. */
+export const PreviewInviteBodySchema = z.strictObject({
+  token: z.string().min(1).max(512),
+});
+export type PreviewInviteBody = z.infer<typeof PreviewInviteBodySchema>;
+
+/**
+ * What the link stands for. `unavailable` covers a link that was never issued, was replaced by a
+ * newer one, or was revoked or accepted, so it does not tell the three apart. The address, the
+ * organization and the role are given only while the invite can still be accepted.
+ */
+export const InvitePreviewResponseSchema = z.object({
+  state: z.enum(['valid', 'expired', 'unavailable']),
+  email: z.string().nullable(),
+  organizationName: z.string().nullable(),
+  role: PublicRoleSchema.nullable(),
+  /** Whether the invited address already has a verified user, so the page can offer sign-in or sign-up. */
+  registered: z.boolean().nullable(),
+});
+export type InvitePreviewResponse = z.infer<typeof InvitePreviewResponseSchema>;
+
 export const InviteResponseSchema = z.object({
   id: IdSchema('inv'),
   organizationId: IdSchema('org'),

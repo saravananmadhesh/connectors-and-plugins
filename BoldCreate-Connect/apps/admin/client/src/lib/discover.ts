@@ -117,15 +117,39 @@ export const CANDIDATE_FILTERS: ReadonlyArray<{ value: CandidateFilter; label: s
   { value: 'attention', label: 'Needs attention' },
 ];
 
-/** The folders that match the search words (every word, anywhere in the card text) and the state filter. */
+export type HideOption = 'installed' | 'stdio';
+
+/** Hidden until the admin asks to see them: plugins that cannot be installed yet. */
+export const DEFAULT_HIDE: readonly HideOption[] = ['stdio'];
+
+export const HIDE_OPTIONS: ReadonlyArray<{ value: HideOption; label: string }> = [
+  { value: 'installed', label: 'Installed' },
+  { value: 'stdio', label: 'MCP stdio' },
+];
+
+/** A plugin with an MCP server that runs as a local command; only http servers are supported for now. */
+export const usesStdio = (plugin: DiscoveredPlugin): boolean =>
+  plugin.mcpTransports.includes('stdio');
+
+/** Can be selected and installed: not installed yet, and without a stdio MCP server. */
+export const canInstall = (plugin: DiscoveredPlugin): boolean =>
+  candidateState(plugin).key === 'available' && !usesStdio(plugin);
+
+/**
+ * The folders that match the search words (every word, anywhere in the card text) and the state
+ * filter, leaving out the kinds the admin chose to hide.
+ */
 export function filterCandidates(
   plugins: readonly DiscoveredPlugin[],
   query: string,
   filter: CandidateFilter,
+  hide: readonly HideOption[] = [],
 ): DiscoveredPlugin[] {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   return plugins.filter((plugin) => {
     const key = candidateState(plugin).key;
+    if (hide.includes('installed') && key === 'installed') return false;
+    if (hide.includes('stdio') && usesStdio(plugin)) return false;
     if (filter === 'available' && key !== 'available') return false;
     if (filter === 'installed' && key !== 'installed') return false;
     if (filter === 'attention' && (key === 'available' || key === 'installed')) return false;
@@ -141,4 +165,14 @@ export function filterCandidates(
       .toLowerCase();
     return words.every((word) => text.includes(word));
   });
+}
+
+/** The plugin's folder on GitHub, at the branch that was inspected. */
+export function githubFolderUrl(
+  found: { owner: string; repository: string; ref: string },
+  path: string,
+): string {
+  const encode = (value: string) => value.split('/').map(encodeURIComponent).join('/');
+  const base = `https://github.com/${encodeURIComponent(found.owner)}/${encodeURIComponent(found.repository)}/tree/${encode(found.ref)}`;
+  return path === '' ? base : `${base}/${encode(path)}`;
 }

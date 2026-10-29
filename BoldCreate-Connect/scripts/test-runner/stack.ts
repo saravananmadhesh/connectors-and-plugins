@@ -3,13 +3,15 @@
  * six app processes, all on non-default ports so a running
  * development stack is never touched.
  */
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import {
   createWriteStream,
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
+  rmSync,
   type WriteStream,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -17,7 +19,14 @@ import { join } from 'node:path';
 import { loadDevEnv } from '../../packages/config/src/env.js';
 import { APP_ENTRIES, appEnv, baseProcessEnv, type AppName } from '../app-env.js';
 import { ensureDevSecrets, withSuperuserLogin } from '../dev-secrets.js';
-import { repoRoot, sleep, startInfra, waitFor, type Infra } from '../local-infra.js';
+import {
+  repoRoot,
+  sleep,
+  startInfra,
+  stopLeftoverInfra,
+  waitFor,
+  type Infra,
+} from '../local-infra.js';
 import { resolvePostgresSettings } from '../postgres-docker.js';
 
 export interface StackPorts {
@@ -59,6 +68,42 @@ export interface RunningStack {
   stop: () => Promise<void>;
 }
 
+/**
+ * Every run keeps its database and pid files in a new temporary directory, so a run that was
+ * killed leaves its services holding the default ports. Stops those and removes the directories.
+ */
+async function stopStaleStacks() {
+  for (const entry of readdirSync(tmpdir())) {
+    if (!entry.startsWith('boldcreate-test-')) continue;
+    const staleDir = join(tmpdir(), entry);
+    await stopLeftoverInfra(staleDir);
+    try {
+      rmSync(staleDir, { recursive: true, force: true });
+    } catch {
+      // still locked by a process that is shutting down; the next run removes it
+    }
+  }
+}
+
+/**
+ * A killed run can leave postgres child processes alive after their postmaster and its pid
+ * file are gone, still holding the port. Stops embedded PostgreSQL processes that own the
+ * isolated test port, or are children of its owner. Windows only; elsewhere the pid file works.
+ */
+function stopPostgresHoldingPort(port: number) {
+  if (process.platform !== 'win32') return;
+  const script = [
+    `$owners = @(Get-NetTCPConnection -LocalPort ${port} -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $_.OwningProcess } | Sort-Object -Unique)`,
+    'if ($owners.Count -eq 0) { exit 0 }',
+    'Get-CimInstance Win32_Process -Filter "Name=\'postgres.exe\'" |',
+    '  Where-Object { $owners -contains $_.ProcessId -or $owners -contains $_.ParentProcessId } |',
+    '  ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }',
+  ].join('\n');
+  spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
+    stdio: 'ignore',
+  });
+}
+
 export async function startStack(options: {
   logDir: string;
   ports?: Partial<StackPorts>;
@@ -67,6 +112,9 @@ export async function startStack(options: {
   mkdirSync(options.logDir, { recursive: true });
 
   loadDevEnv();
+  await stopStaleStacks();
+  stopPostgresHoldingPort(ports.postgres);
+  await sleep(500);
   // Secrets are new on every run and live only in this temporary directory, which also
   // holds the database and is removed when the stack stops.
   const dataDir = mkdtempSync(join(tmpdir(), 'boldcreate-test-'));

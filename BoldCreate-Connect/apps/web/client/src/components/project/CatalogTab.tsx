@@ -41,36 +41,41 @@ function InstallMode({ orgId, projectId, canWrite }: TabProps) {
   });
   const current = mode.data?.mode;
   return (
-    <QueryFrame
-      label="the install mode"
-      isPending={mode.isPending}
-      error={mode.error}
-      onRetry={() => void mode.refetch()}
+    <Section
+      title="Who may install"
+      description="What the people of this project may add for themselves."
     >
-      <div className="space-y-2">
-        {error && <Alert variant="destructive">{error}</Alert>}
-        <Label htmlFor="install-mode">Who may install</Label>
-        <Select
-          id="install-mode"
-          className="max-w-xs"
-          value={current}
-          disabled={!canWrite || save.isPending}
-          onChange={(e) => {
-            setError('');
-            save.mutate(e.target.value as UserInstallMode);
-          }}
-        >
-          {MODES.map((entry) => (
-            <option key={entry.value} value={entry.value}>
-              {entry.label}
-            </option>
-          ))}
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          {MODES.find((entry) => entry.value === current)?.help}
-        </p>
-      </div>
-    </QueryFrame>
+      <QueryFrame
+        label="the install mode"
+        isPending={mode.isPending}
+        error={mode.error}
+        onRetry={() => void mode.refetch()}
+      >
+        <Card className="space-y-2 p-4">
+          {error && <Alert variant="destructive">{error}</Alert>}
+          <Select
+            id="install-mode"
+            aria-label="Who may install"
+            className="max-w-xs"
+            value={current}
+            disabled={!canWrite || save.isPending}
+            onChange={(e) => {
+              setError('');
+              save.mutate(e.target.value as UserInstallMode);
+            }}
+          >
+            {MODES.map((entry) => (
+              <option key={entry.value} value={entry.value}>
+                {entry.label}
+              </option>
+            ))}
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {MODES.find((entry) => entry.value === current)?.help}
+          </p>
+        </Card>
+      </QueryFrame>
+    </Section>
   );
 }
 
@@ -115,27 +120,30 @@ function AllowedPlugins({ orgId, projectId, canWrite }: TabProps) {
           <p className="text-sm text-muted-foreground">No plugin is allowed yet.</p>
         ) : (
           <div className="space-y-3">
-            <ul className="divide-y rounded-md border">
-              {items.map((plugin) => (
-                <li
-                  key={plugin.pluginId}
-                  className="flex items-center justify-between gap-3 px-3 py-2"
-                >
-                  <span className="text-sm">{plugin.displayName}</span>
-                  {canWrite && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      aria-label={`Disallow ${plugin.displayName}`}
-                      disabled={remove.isPending}
-                      onClick={() => remove.mutate(plugin.pluginId)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <Card>
+              <ul className="divide-y">
+                {items.map((plugin) => (
+                  <li
+                    key={plugin.pluginId}
+                    className="flex items-center justify-between gap-3 px-4 py-2.5"
+                  >
+                    <span className="min-w-0 truncate text-sm">{plugin.displayName}</span>
+                    {canWrite && (
+                      <Button
+                        className="shrink-0"
+                        size="sm"
+                        variant="outline"
+                        aria-label={`Disallow ${plugin.displayName}`}
+                        disabled={remove.isPending}
+                        onClick={() => remove.mutate(plugin.pluginId)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Card>
             <CursorPager
               hasPrevious={paging.hasPrevious}
               nextCursor={allowed.data?.nextCursor}
@@ -283,11 +291,21 @@ function PluginSets({ orgId, projectId, canWrite }: TabProps) {
             {items.map((set) => (
               <Card key={set.id} className="space-y-2 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium">{set.name}</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{set.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {set.plugins.length === 1 ? '1 plugin' : `${set.plugins.length} plugins`}
+                    </p>
+                  </div>
                   {canWrite && (
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setFilling(set)}>
-                        {`Add to ${set.name}`}
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        aria-label={`Add to ${set.name}`}
+                        onClick={() => setFilling(set)}
+                      >
+                        Add plugins
                       </Button>
                       <Button
                         size="sm"
@@ -317,9 +335,10 @@ function PluginSets({ orgId, projectId, canWrite }: TabProps) {
                         key={plugin.pluginId}
                         className="flex items-center justify-between gap-3 px-3 py-1.5"
                       >
-                        <span className="text-sm">{plugin.displayName}</span>
+                        <span className="min-w-0 truncate text-sm">{plugin.displayName}</span>
                         {canWrite && (
                           <Button
+                            className="shrink-0"
                             size="sm"
                             variant="outline"
                             aria-label={`Remove ${plugin.displayName} from ${set.name}`}

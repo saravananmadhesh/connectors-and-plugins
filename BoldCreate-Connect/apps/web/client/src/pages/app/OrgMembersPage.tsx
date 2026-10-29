@@ -1,6 +1,7 @@
 import { useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { UserAvatar } from '@/components/UserAvatar';
 import { UserPlus, Trash2, Ban, RotateCcw } from 'lucide-react';
 import { orgs, auth, ApiError } from '@/lib/api';
 import type { CreateInviteResponse, OrgRole, UiRole } from '@/lib/api';
@@ -48,6 +49,7 @@ function InviteDialog({ orgId, onClose }: { orgId: string; onClose: () => void }
     onSuccess: (response) => {
       setResult(response);
       void qc.invalidateQueries({ queryKey: qk.orgMembers(orgId) });
+      void qc.invalidateQueries({ queryKey: qk.orgInvites(orgId) });
     },
     onError: (err) => setServerError(err instanceof ApiError ? err.message : 'Failed to invite'),
   });
@@ -179,6 +181,31 @@ export function OrgMembersPage() {
     onError: (err) => setRemoveError(err instanceof ApiError ? err.message : 'Failed to update'),
   });
 
+  const canListInvites = can('invite:list');
+  const invitesQuery = useQuery({
+    queryKey: qk.orgInvites(orgId),
+    queryFn: () => orgs.listInvites(orgId),
+    enabled: canListInvites,
+    select: (page) =>
+      page.items.map((invite) => ({
+        ...invite,
+        expired: new Date(invite.expiresAt) <= new Date(),
+      })),
+  });
+  const invites = invitesQuery.data ?? [];
+
+  const resendMutation = useMutation({
+    mutationFn: (inviteId: string) => orgs.resendInvite(orgId, inviteId),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: qk.orgInvites(orgId) }),
+    onError: (err) => setRemoveError(err instanceof ApiError ? err.message : 'Failed to resend'),
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: (inviteId: string) => orgs.revokeInvite(orgId, inviteId),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: qk.orgInvites(orgId) }),
+    onError: (err) => setRemoveError(err instanceof ApiError ? err.message : 'Failed to revoke'),
+  });
+
   const members = membersQuery.data?.items ?? [];
 
   return (
@@ -201,9 +228,7 @@ export function OrgMembersPage() {
           <ul className="divide-y">
             {members.map((m) => (
               <li key={m.userId} className="flex items-center gap-3 px-4 py-3">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted text-xs font-medium text-muted-foreground uppercase">
-                  {m.displayName.charAt(0)}
-                </span>
+                <UserAvatar name={m.displayName} colorKey={m.email} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{m.displayName}</p>
                   <p className="truncate text-xs text-muted-foreground">{m.email}</p>
@@ -276,6 +301,63 @@ export function OrgMembersPage() {
             ))}
           </ul>
         </Card>
+      )}
+
+      {canListInvites && invites.length > 0 && (
+        <section className="space-y-2" aria-label="Pending invitations">
+          <h2 className="text-sm font-medium">Invitations</h2>
+          <Card>
+            <ul className="divide-y">
+              {invites.map((invite) => {
+                const { expired } = invite;
+                return (
+                  <li key={invite.id} className="flex items-center gap-3 px-4 py-3">
+                    <UserAvatar name={invite.email} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{invite.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {expired ? 'Send it again to give a new link' : 'Link valid until '}
+                        {!expired && new Date(invite.expiresAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <RoleBadge role={invite.role} />
+                    <Badge variant={expired ? 'warning' : 'outline'}>
+                      {expired ? 'Expired' : 'Pending'}
+                    </Badge>
+                    {can('invite:resend') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setRemoveError('');
+                          resendMutation.mutate(invite.id);
+                        }}
+                        disabled={resendMutation.isPending}
+                        aria-label={`Resend invitation to ${invite.email}`}
+                      >
+                        Resend
+                      </Button>
+                    )}
+                    {can('invite:revoke') && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setRemoveError('');
+                          revokeMutation.mutate(invite.id);
+                        }}
+                        disabled={revokeMutation.isPending}
+                        aria-label={`Revoke invitation to ${invite.email}`}
+                      >
+                        Revoke
+                      </Button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        </section>
       )}
 
       {showInvite && <InviteDialog orgId={orgId} onClose={() => setShowInvite(false)} />}

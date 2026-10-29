@@ -66,15 +66,18 @@ export function ScopeSwitcher({ memberships, orgId, paletteOpen, onPaletteOpenCh
           <DropdownMenuTrigger
             aria-label="Switch organization"
             aria-keyshortcuts="Control+K Meta+K"
-            className="flex w-full items-center gap-2.5 rounded-md border bg-card px-2.5 py-2 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex w-full items-center gap-2.5 rounded-md border bg-card px-2.5 py-2 group-data-[collapsed=true]/sb:md:justify-center group-data-[collapsed=true]/sb:md:px-0 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="grid size-7 shrink-0 place-items-center rounded-md bg-sidebar-accent text-sidebar-foreground">
               <Building2 className="size-4" />
             </span>
-            <span className="min-w-0 flex-1 leading-tight">
+            <span className="min-w-0 flex-1 leading-tight group-data-[collapsed=true]/sb:md:hidden">
               <span className="block truncate text-sm font-medium">{org.organizationName}</span>
             </span>
-            <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-sidebar-muted" />
+            <ChevronsUpDown
+              aria-hidden="true"
+              className="size-4 shrink-0 text-sidebar-muted group-data-[collapsed=true]/sb:md:hidden"
+            />
           </DropdownMenuTrigger>
         </Tooltip>
         <DropdownMenuContent side="top" align="start" className="w-72">

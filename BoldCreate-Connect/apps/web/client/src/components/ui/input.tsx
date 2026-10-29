@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 /**
@@ -22,6 +24,31 @@ export function Input({ className, error, type = 'text', ...props }: InputProps)
         {...props}
       />
       {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+/** A password field with a control to show what was typed, so a slip is seen before it is sent. */
+export function PasswordInput({ className, error, ...props }: Omit<InputProps, 'type'>) {
+  const [shown, setShown] = useState(false);
+  const Icon = shown ? EyeOff : Eye;
+  return (
+    <div className="relative">
+      <Input
+        error={error}
+        type={shown ? 'text' : 'password'}
+        className={cn('pr-10', className)}
+        {...props}
+      />
+      <button
+        type="button"
+        aria-label={shown ? 'Hide password' : 'Show password'}
+        aria-pressed={shown}
+        onClick={() => setShown((value) => !value)}
+        className="absolute top-0 right-0 grid size-9 place-items-center rounded-md text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+      >
+        <Icon aria-hidden="true" className="size-4" />
+      </button>
     </div>
   );
 }

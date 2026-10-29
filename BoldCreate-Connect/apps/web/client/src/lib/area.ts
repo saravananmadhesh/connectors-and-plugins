@@ -30,7 +30,8 @@ export function saveArea(area: AreaKind): void {
 
 const clean = (pathname: string) => (pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname);
 
-const FOR_YOU_PATH = /^\/(get-started|marketplace|installed|api-keys)(\/|$)/;
+/** The pages of one organization about using plugins; every one carries its organization. */
+const FOR_YOU_PATH = /^\/orgs\/[^/]+\/(get-started|marketplace|installed|api-keys)(\/|$)/;
 const PROJECT_PATH = /^\/orgs\/[^/]+\/projects\/[^/]+(\/|$)/;
 
 /** Whether the address is a page of one project, which has its own sections. */
@@ -82,8 +83,9 @@ export function areaDestination(
   orgId: string | undefined,
 ): string {
   if (pathArea(pathname) === area) return clean(pathname);
-  if (area === 'for-you') return '/marketplace';
-  return orgId ? `/orgs/${orgId}/projects` : '/marketplace';
+  // Without an organization there is nothing to open; the home address says what to do.
+  if (!orgId) return '/orgs';
+  return area === 'for-you' ? `/orgs/${orgId}/marketplace` : `/orgs/${orgId}/projects`;
 }
 
 /** The area for the current address, remembered for the pages that have none of their own. */

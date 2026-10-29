@@ -13,6 +13,7 @@ import {
 import { orgs, projects, auth, installations } from '@/lib/api';
 import { useAbilities } from '@/lib/abilities';
 import { formatDate } from '@/lib/format';
+import { PUBLIC_ROLE_LABELS } from '@/lib/role-labels';
 import type { MeResponse } from '@/lib/api';
 import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
@@ -22,6 +23,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteResourceDialog } from '@/components/delete-resource-dialog';
 import { Page, Section } from '@/components/Page';
 import { PageHeader } from '@/components/PageHeader';
+
+const ROLE_NAMES: Record<string, string> = PUBLIC_ROLE_LABELS;
 
 /** Order and names of the organization roles in the breakdown. */
 const ROLES = [
@@ -50,7 +53,7 @@ function StatTile({ stat }: { stat: Stat }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-2xl leading-none font-semibold tabular-nums">
-            {stat.value ?? '–'}
+            {stat.value?.toLocaleString() ?? '–'}
           </span>
           <span className="mt-1 block truncate text-sm font-medium">{stat.label}</span>
           <span className="block truncate text-xs text-muted-foreground">{stat.hint}</span>
@@ -135,12 +138,12 @@ export function OrgPage() {
       value: installedQuery.data?.items.length,
       hint: 'Installed for the whole organization',
       icon: PackageCheck,
-      to: '/installed',
+      to: `/orgs/${orgId}/installed`,
     },
   ];
   const details: { label: string; value: string; mono?: boolean }[] = [
     { label: 'Slug', value: `/${org?.slug ?? ''}`, mono: true },
-    { label: 'Your role', value: myRole ?? '–' },
+    { label: 'Your role', value: myRole ? (ROLE_NAMES[myRole] ?? myRole) : '–' },
     { label: 'Created', value: org ? formatDate(org.createdAt) : '–' },
     { label: 'Updated', value: org ? formatDate(org.updatedAt) : '–' },
     ...(policy
@@ -283,7 +286,7 @@ export function OrgPage() {
             // Nested resource caches do not carry organization IDs, so clear the scope caches too.
             qc.removeQueries({ queryKey: ['scope'] });
             await qc.invalidateQueries({ queryKey: qk.me(), refetchType: 'none' });
-            await navigate({ to: '/marketplace', replace: true });
+            await navigate({ to: '/orgs', replace: true });
           }}
           onClose={() => setShowDelete(false)}
         />
