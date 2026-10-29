@@ -49,8 +49,20 @@ describe('ProjectPage', () => {
     expect(screen.getAllByText('12', { selector: 'td' }).length).toBe(2);
   });
 
-  it('offers a Create key shortcut on the overview, to the keys tab', async () => {
+  it('does not offer the Create key shortcut when an active project key exists', async () => {
     await render();
+    await screen.findByText('2026-10-01');
+    expect(screen.queryByRole('link', { name: 'Create key' })).toBeNull();
+  });
+
+  it('offers a Create key shortcut when the project has no active keys', async () => {
+    await renderWithRouter(ProjectPage, ROUTE, {
+      url: `/orgs/${ORG_ID}/projects/${PROJECT_ID}`,
+      queryData: [
+        baseData()[0]!,
+        { key: ['org', ORG_ID, 'projects', PROJECT_ID], data: project({ activeKeyCount: 0 }) },
+      ],
+    });
     const link = await screen.findByRole('link', { name: 'Create key' });
     expect(link).toHaveAttribute('href', `/orgs/${ORG_ID}/projects/${PROJECT_ID}?tab=keys`);
   });
@@ -108,6 +120,20 @@ describe('ProjectPage', () => {
   });
 
   describe('sessions', () => {
+    it('shows all plugins when there is no plugin allow-list', async () => {
+      vi.spyOn(projects, 'sessions').mockResolvedValue(page([{ ...session(), plugins: [] }]));
+      await render('sessions');
+      expect(await screen.findByText('All plugins')).toBeInTheDocument();
+    });
+
+    it('does not show an expiry for a revoked session', async () => {
+      vi.spyOn(projects, 'sessions').mockResolvedValue(page([{ ...session(), status: 'revoked' }]));
+      await render('sessions');
+      const row = (await screen.findByText('revoked')).closest('tr');
+      expect(row).toHaveTextContent('—');
+      expect(row).not.toHaveTextContent('in 30 days');
+    });
+
     it('lists sessions and ends one after a confirm', async () => {
       const revoke = vi.spyOn(projects, 'revokeSession').mockResolvedValue(undefined);
       await render('sessions');

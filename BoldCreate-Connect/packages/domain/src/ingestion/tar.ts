@@ -25,17 +25,6 @@ export const DEFAULT_ARCHIVE_LIMITS: ArchiveLimits = {
   maxTotalBytes: 50 * 1024 * 1024,
 };
 
-/**
- * A repository tarball holds every plugin in it plus docs and vendored files, so reading one
- * whole (discovery, inspection, ingestion) needs headroom far beyond a single plugin's archive.
- * The packed result still goes out under the default limits.
- */
-export const REPOSITORY_ARCHIVE_LIMITS: ArchiveLimits = {
-  maxFiles: 20000,
-  maxFileBytes: 5 * 1024 * 1024,
-  maxTotalBytes: 500 * 1024 * 1024,
-};
-
 export interface SkippedItem {
   path: string;
   reason: string;

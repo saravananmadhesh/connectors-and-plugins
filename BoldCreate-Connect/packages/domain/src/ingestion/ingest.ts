@@ -23,7 +23,7 @@ import { parseManifest, peekManifestLabel, type ParsedManifest } from './manifes
 import { scanPlugin, type ScanReport } from './scan.js';
 import { queueIngestion } from './sources.js';
 import {
-  REPOSITORY_ARCHIVE_LIMITS,
+  DEFAULT_ARCHIVE_LIMITS,
   extractTarGz,
   IngestionError,
   packTarGz,
@@ -75,7 +75,7 @@ function prepareFiles(files: Map<string, Buffer>, skipped: SkippedItem[]): Prepa
 export function prepareIngestion(
   tarball: Uint8Array,
   folder: string,
-  limits: ArchiveLimits = REPOSITORY_ARCHIVE_LIMITS,
+  limits: ArchiveLimits = DEFAULT_ARCHIVE_LIMITS,
 ): PreparedPlugin {
   const extracted = extractTarGz(tarball, limits);
   return prepareFiles(filesUnder(extracted.files, folder), extracted.skipped);
@@ -94,7 +94,7 @@ export type InspectedSource =
 export function inspectSource(
   tarball: Uint8Array,
   folder: string,
-  limits: ArchiveLimits = REPOSITORY_ARCHIVE_LIMITS,
+  limits: ArchiveLimits = DEFAULT_ARCHIVE_LIMITS,
 ): InspectedSource {
   const extracted = extractTarGz(tarball, limits);
   const files = filesUnder(extracted.files, folder);
@@ -174,7 +174,7 @@ function candidateOf(
 export function discoverPlugins(
   tarball: Uint8Array,
   folder: string,
-  limits: ArchiveLimits = REPOSITORY_ARCHIVE_LIMITS,
+  limits: ArchiveLimits = DEFAULT_ARCHIVE_LIMITS,
 ): Discovery {
   const extracted = extractTarGz(tarball, limits);
   const files = filesUnder(extracted.files, folder);

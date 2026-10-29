@@ -79,7 +79,9 @@ export function SessionsTab({ orgId, projectId, canWrite }: TabProps) {
                   {items.map((session) => (
                     <TableRow key={session.id}>
                       <TableCell className="font-medium">{session.userId}</TableCell>
-                      <TableCell>{session.plugins.length}</TableCell>
+                      <TableCell>
+                        {session.plugins.length === 0 ? 'All plugins' : session.plugins.length}
+                      </TableCell>
                       <TableCell>{policySummary(session)}</TableCell>
                       <TableCell>
                         <Badge variant={session.status === 'active' ? 'secondary' : 'outline'}>
@@ -87,7 +89,7 @@ export function SessionsTab({ orgId, projectId, canWrite }: TabProps) {
                         </Badge>
                       </TableCell>
                       <TableCell title={formatDateTime(session.expiresAt)}>
-                        {relativeTime(session.expiresAt)}
+                        {session.status === 'revoked' ? '—' : relativeTime(session.expiresAt)}
                       </TableCell>
                       <TableCell>
                         {canWrite && session.status === 'active' && (

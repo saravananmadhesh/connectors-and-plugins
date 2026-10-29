@@ -700,22 +700,4 @@ describe('discoverPlugins', () => {
   it('fails when the folder does not exist in the repository', () => {
     expect(() => discoverPlugins(repoArchive({ 'a.txt': 'x' }), 'nope')).toThrow(IngestionError);
   });
-
-  it('lists a repository with more files than a single plugin archive may hold', () => {
-    const entries: Record<string, string> = {
-      '.cursor-plugin/marketplace.json': JSON.stringify({
-        plugins: [{ name: 'a', source: './plugins/a' }],
-      }),
-      'plugins/a/plugin.json': manifest(),
-    };
-    // A repository tarball also carries docs and vendored files; only the packed plugin
-    // result must fit the single-plugin limits.
-    for (let index = 0; index < 2500; index += 1) {
-      entries[`third-party/vendor-${index}.txt`] = 'x';
-    }
-    const found = discoverPlugins(repoArchive(entries), '');
-    expect(found.layout).toBe('collection');
-    expect(found.candidates).toHaveLength(1);
-    expect(found.candidates[0]).toMatchObject({ path: 'plugins/a', problem: null });
-  });
 });
