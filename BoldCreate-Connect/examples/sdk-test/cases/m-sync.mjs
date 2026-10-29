@@ -62,8 +62,8 @@ await test('M2', 'second sync changes nothing', async () => {
 });
 
 // Scenario: sync with allowHooks: true. Expected: hooks placed (ralph-loop, continual-learning,
-// toolkit), and the scripts the hooks run are on disk too.
-await test('M3', 'allowHooks places hooks and their scripts', async () => {
+// toolkit), and the scripts the hooks run are on disk and runnable.
+await test('M3', 'allowHooks places hooks and their runnable scripts', async () => {
   const r = await syncPlugins(sessionM, { dir: dirM, allowHooks: true });
   const files = await tree(dirM);
   const hookFiles = files.filter((f) => f.includes('hooks'));
@@ -76,6 +76,13 @@ await test('M3', 'allowHooks places hooks and their scripts', async () => {
     ralph.some((f) => f.endsWith('.sh')),
     `ralph-loop hook scripts missing: ${ralph}`,
   );
+  if (process.platform !== 'win32') {
+    const notRunnable = [];
+    for (const f of ralph.filter((x) => x.endsWith('.sh'))) {
+      if (((await stat(join(dirM, f))).mode & 0o100) === 0) notRunnable.push(f);
+    }
+    ok(notRunnable.length === 0, `hook scripts not runnable: ${notRunnable}`);
+  }
   return { hooks: r.added.filter((c) => c.kind === 'hook').map((c) => c.pluginName), hookFiles };
 });
 

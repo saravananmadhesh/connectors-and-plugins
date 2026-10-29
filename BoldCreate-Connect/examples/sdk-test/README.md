@@ -27,7 +27,7 @@ dotnet run --project examples/sdk-test-dotnet          # every .NET group
 dotnet run --project examples/sdk-test-dotnet -- K M   # only groups K and M
 ```
 
-`setup-local.mjs` reads `syncfusion/BoldCreate-Plugins` at `master` by default; set
+`setup-local.mjs` reads `syncfusion/BoldCreate-Plugins` at `main` by default; set
 `SDK_TEST_REF` (and `SDK_TEST_OWNER`) to read another branch. It writes the keys to
 `.local/state.json`, which git ignores. A full run writes `.local/ts-results.json` and
 `.local/dotnet-results.json`; a run of some groups writes `ts-results-<groups>.json` or

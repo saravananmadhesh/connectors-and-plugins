@@ -28,6 +28,7 @@ import {
   PutSessionPluginComponentBodySchema,
   PutVariablesBodySchema,
   SessionListQuerySchema,
+  parseId,
 } from '@boldcreate-integrations/contracts';
 import {
   clearUserPluginComponent,
@@ -261,8 +262,9 @@ export async function projectSessionRoutes(
   app.put('/session/plugins/:pluginId', async (req, reply) => {
     const body = parse(PutSessionPluginBodySchema, req.body);
     const pluginId = (req.params as { pluginId: string }).pluginId;
+    const versionId = body.versionId ? parseId('pv', body.versionId) : undefined;
     const result = await sessionCall(req, 'plugin:install', (tx, caller, userId) =>
-      installForUser(tx, caller, userId, pluginId, body.versionId, { checkAllowed: true }),
+      installForUser(tx, caller, userId, pluginId, versionId, { checkAllowed: true }),
     );
     return reply.status(result.created ? 201 : 200).send(serializeProjectPlugin(result.plugin));
   });

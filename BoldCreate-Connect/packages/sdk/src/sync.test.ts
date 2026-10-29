@@ -377,6 +377,24 @@ describe('syncPlugins', () => {
       expect((await stat(join(dir, 'alpha', 'hooks', 'hooks.json'))).mode & 0o111).toBe(0);
     });
 
+    it("makes a hook's scripts runnable, and nothing else", async () => {
+      const w = world([
+        {
+          id: 'cmp_h',
+          kind: 'hook',
+          files: { 'hooks/hooks.json': '{}', 'hooks/stop.sh': '#!/bin/sh\nexit 0\n' },
+        },
+        { id: 'cmp_s', kind: 'skill', files: { 'skills/a/run.sh': '#!/bin/sh\n' } },
+      ]);
+      await syncPlugins(open({ 'GET /v1/sync': json(w.manifest), ...w.routes }).session, {
+        dir,
+        allowHooks: true,
+      });
+      expect((await stat(join(dir, 'alpha', 'hooks', 'stop.sh'))).mode & 0o777).toBe(0o755);
+      expect((await stat(join(dir, 'alpha', 'hooks', 'hooks.json'))).mode & 0o111).toBe(0);
+      expect((await stat(join(dir, 'alpha', 'skills', 'a', 'run.sh'))).mode & 0o111).toBe(0);
+    });
+
     it('keeps asking for the whole manifest while something was left out', async () => {
       const w = world([{ id: 'cmp_h', kind: 'hook', files: { 'hooks/hooks.json': '{}' } }], 'rev9');
       await syncPlugins(open({ 'GET /v1/sync': json(w.manifest), ...w.routes }).session, { dir });
@@ -386,6 +404,35 @@ describe('syncPlugins', () => {
       await syncPlugins(session, { dir, allowHooks: true });
       expect(calls[0]?.headers['if-none-match']).toBeUndefined();
       expect((await readLock(dir))?.revision).toBe('rev9');
+    });
+
+    it('drops an older revision once something is left out', async () => {
+      // A plugin added (its hook skipped) and then removed brings the server back to the first
+      // revision; the folder must still be compared with the whole manifest.
+      const first = world([{ id: 'cmp_1', kind: 'skill', files: { 'a.md': 'one' } }], 'rev1');
+      await syncPlugins(open({ 'GET /v1/sync': json(first.manifest), ...first.routes }).session, {
+        dir,
+      });
+      expect((await readLock(dir))?.revision).toBe('rev1');
+
+      const added = world(
+        [
+          { id: 'cmp_1', kind: 'skill', files: { 'a.md': 'one' } },
+          { id: 'cmp_2', kind: 'skill', plugin: 'beta', files: { 'b.md': 'two' } },
+          { id: 'cmp_h', kind: 'hook', plugin: 'beta', files: { 'hooks/hooks.json': '{}' } },
+        ],
+        'rev2',
+      );
+      await syncPlugins(open({ 'GET /v1/sync': json(added.manifest), ...added.routes }).session, {
+        dir,
+      });
+      expect((await readLock(dir))?.revision).toBe('');
+
+      const { session, calls } = open({ 'GET /v1/sync': json(first.manifest), ...first.routes });
+      const result = await syncPlugins(session, { dir });
+      expect(calls[0]?.headers['if-none-match']).toBeUndefined();
+      expect(names(result.removed)).toEqual(['cmp_2']);
+      expect(await readdir(dir)).not.toContain('beta');
     });
 
     it('passes the plugin filter on', async () => {

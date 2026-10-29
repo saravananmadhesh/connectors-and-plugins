@@ -533,6 +533,21 @@ describe('the catalog a session sees', () => {
     ).toBe(404);
   });
 
+  it('installs and updates a chosen version by its id', async () => {
+    const h = await createHost();
+    const plugin = await seedPlugin();
+    expect((await host(h, 'PUT', '/user-install-mode', { mode: 'any' })).status).toBe(200);
+    const session = await mint(h);
+    const body = { versionId: plugin.versionWire };
+    const path = `/v1/session/plugins/${plugin.pluginId}`;
+    const created = await bearer(session.token, 'PUT', path, body);
+    expect(created.status).toBe(201);
+    expect(((await created.json()) as { versionId: string }).versionId).toBe(plugin.versionWire);
+    const again = await bearer(session.token, 'PUT', path, body);
+    expect(again.status).toBe(200);
+    expect(((await again.json()) as { versionId: string }).versionId).toBe(plugin.versionWire);
+  });
+
   it('shows the state of an install and lets the user change their own values and components', async () => {
     const h = await createHost();
     const plugin = await seedPlugin();

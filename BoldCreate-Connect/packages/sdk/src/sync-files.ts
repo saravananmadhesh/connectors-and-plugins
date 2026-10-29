@@ -11,6 +11,7 @@ export const MAX_TOTAL_BYTES = 50 * 1024 * 1024;
 
 const BLOCK = 512;
 const FILE_MODE = 0o644;
+const SCRIPT_MODE = 0o755;
 const STATE_DIR = '.connect';
 
 const unsafe = (message: string) =>
@@ -122,10 +123,17 @@ export async function hashOnDisk(path: string): Promise<string | undefined> {
   }
 }
 
-/** Puts files in place: written beside the folder first, then renamed, with a fixed mode. */
+/** True for a file that starts with `#!`, the scripts a hook runs. */
+export const isScript = (bytes: Uint8Array): boolean => bytes[0] === 0x23 && bytes[1] === 0x21;
+
+/**
+ * Puts files in place: written beside the folder first, then renamed, with a fixed mode. The files
+ * named in `scripts` (a hook's own scripts) are made runnable; the archive's modes are never used.
+ */
 export async function placeFiles(
   dir: string,
   files: ReadonlyMap<string, Uint8Array>,
+  scripts: ReadonlySet<string> = new Set(),
 ): Promise<void> {
   const staging = join(stateDir(dir), 'tmp', randomUUID());
   await mkdir(staging, { recursive: true });
@@ -135,8 +143,9 @@ export async function placeFiles(
     for (const [destination, bytes] of files) {
       const source = join(staging, String(index));
       index += 1;
-      await writeFile(source, bytes, { mode: FILE_MODE });
-      await chmod(source, FILE_MODE);
+      const mode = scripts.has(destination) ? SCRIPT_MODE : FILE_MODE;
+      await writeFile(source, bytes, { mode });
+      await chmod(source, mode);
       staged.push([source, destination]);
     }
     for (const [source, destination] of staged) {

@@ -5,6 +5,7 @@ import {
   destinationOf,
   extractArchive,
   hashOnDisk,
+  isScript,
   placeFiles,
   readLock,
   removeFile,
@@ -113,9 +114,12 @@ async function apply(
     const files = new Map<string, Uint8Array>();
     const conflicts: string[] = [];
     const hashes: Record<string, string> = {};
+    const scripts = new Set<string>();
     for (const [path, bytes] of archive) {
       const destination = destinationOf(dir, wanted.pluginName, path);
       files.set(destination, bytes);
+      // The agent runs a hook's scripts itself, so they must be runnable once hooks are allowed.
+      if (wanted.kind === 'hook' && isScript(bytes)) scripts.add(destination);
       hashes[path] = sha256Hex(bytes);
       const current = await hashOnDisk(destination);
       if (current === undefined || current === hashes[path]) continue;
@@ -126,7 +130,7 @@ async function apply(
       result.modified.push(...conflicts);
       return false;
     }
-    await placeFiles(dir, files);
+    await placeFiles(dir, files, scripts);
     next.components[wanted.componentId] = {
       pluginName: wanted.pluginName,
       kind: wanted.kind,
@@ -167,9 +171,10 @@ async function apply(
     result.removed.push(gone);
   }
 
-  // Anything left out (a kept file, a hook) must be looked at again, so the revision stays where it
-  // was and the next call asks for the whole manifest instead of "not modified".
-  if (result.modified.length > 0 || result.skipped.length > 0) next.revision = lock.revision;
+  // Anything left out (a kept file, a hook) must be looked at again, so no revision is kept and the
+  // next call asks for the whole manifest. Keeping an older revision is not enough: the server can
+  // come back to that same revision (a plugin added, then removed) and answer "not modified".
+  if (result.modified.length > 0 || result.skipped.length > 0) next.revision = '';
   await writeLock(dir, next);
   return { result, applied };
 }

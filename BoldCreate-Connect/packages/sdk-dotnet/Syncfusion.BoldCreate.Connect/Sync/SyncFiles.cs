@@ -174,8 +174,14 @@ internal static class SyncFiles
         }
     }
 
-    /// <summary>Puts files in place: written in a staging folder first, then moved, with a fixed mode.</summary>
-    public static async Task PlaceFilesAsync(string dir, IReadOnlyDictionary<string, byte[]> files, CancellationToken ct)
+    /// <summary>True for a file that starts with <c>#!</c>, the scripts a hook runs.</summary>
+    public static bool IsScript(byte[] bytes) => bytes.Length >= 2 && bytes[0] == (byte)'#' && bytes[1] == (byte)'!';
+
+    /// <summary>
+    /// Puts files in place: written in a staging folder first, then moved, with a fixed mode. The files
+    /// named in <paramref name="scripts"/> (a hook's own scripts) are made runnable; the archive's modes are never used.
+    /// </summary>
+    public static async Task PlaceFilesAsync(string dir, IReadOnlyDictionary<string, byte[]> files, CancellationToken ct, IReadOnlySet<string>? scripts = null)
     {
         var staging = Path.Combine(StateDir(dir), "tmp", Guid.NewGuid().ToString());
         Directory.CreateDirectory(staging);
@@ -189,7 +195,9 @@ internal static class SyncFiles
                 await File.WriteAllBytesAsync(source, bytes, ct).ConfigureAwait(false);
                 if (!OperatingSystem.IsWindows())
                 {
-                    File.SetUnixFileMode(source, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
+                    var mode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead;
+                    if (scripts?.Contains(destination) == true) mode |= UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+                    File.SetUnixFileMode(source, mode);
                 }
 
                 staged.Add((source, destination));

@@ -199,10 +199,46 @@ public sealed class SyncTests : IDisposable
         Assert.Equal("hooks_not_allowed", Assert.Single(skipped.Skipped).Reason);
         Assert.False(File.Exists(Path.Combine(_dir, "alpha", "h.sh")));
 
-        // The lock now holds r1, so a change of options alone gets "not modified"; a new revision brings the hook in.
-        _manifest = Manifest("r2", ("cmp_1", "alpha", "hook", "h", hook));
+        // A skipped hook keeps no revision in the lock, so allowing hooks brings it in on the same revision.
         var allowed = await Session().SyncPluginsAsync(new SyncOptions { Dir = _dir, AllowHooks = true });
         Assert.Single(allowed.Added);
+    }
+
+    [Fact]
+    public async Task Makes_a_hooks_scripts_runnable_and_nothing_else()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        var hook = Add(("hooks/hooks.json", "{}"), ("hooks/stop.sh", "#!/bin/sh\nexit 0\n"));
+        var skill = Add(("skills/a/run.sh", "#!/bin/sh\n"));
+        _manifest = Manifest("r1", ("cmp_h", "alpha", "hook", "h", hook), ("cmp_s", "alpha", "skill", "a", skill));
+        await Session().SyncPluginsAsync(new SyncOptions { Dir = _dir, AllowHooks = true });
+
+        const UnixFileMode run = UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+        Assert.Equal(run, File.GetUnixFileMode(Path.Combine(_dir, "alpha", "hooks", "stop.sh")) & run);
+        Assert.Equal((UnixFileMode)0, File.GetUnixFileMode(Path.Combine(_dir, "alpha", "hooks", "hooks.json")) & run);
+        Assert.Equal((UnixFileMode)0, File.GetUnixFileMode(Path.Combine(_dir, "alpha", "skills", "a", "run.sh")) & run);
+    }
+
+    [Fact]
+    public async Task Drops_an_older_revision_once_something_is_left_out()
+    {
+        // A plugin added (its hook skipped) and then removed brings the server back to the first
+        // revision; the folder must still be compared with the whole manifest.
+        var skill = Add(("a.md", "one"));
+        var other = Add(("b.md", "two"));
+        var hook = Add(("hooks/hooks.json", "{}"));
+        var first = Manifest("r1", ("cmp_1", "alpha", "skill", "a", skill));
+        _manifest = first;
+        await Session().SyncPluginsAsync(new SyncOptions { Dir = _dir });
+
+        _manifest = Manifest("r2", ("cmp_1", "alpha", "skill", "a", skill), ("cmp_2", "beta", "skill", "b", other), ("cmp_h", "beta", "hook", "h", hook));
+        await Session().SyncPluginsAsync(new SyncOptions { Dir = _dir });
+        Assert.Equal("", JsonDocument.Parse(Read(".connect/lock.json")).RootElement.GetProperty("revision").GetString());
+
+        _manifest = first;
+        var result = await Session().SyncPluginsAsync(new SyncOptions { Dir = _dir });
+        Assert.Equal(["cmp_2"], result.Removed.Select(a => a.ComponentId));
+        Assert.False(Directory.Exists(Path.Combine(_dir, "beta")));
     }
 
     [Fact]

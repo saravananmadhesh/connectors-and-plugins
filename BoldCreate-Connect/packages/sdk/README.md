@@ -42,7 +42,7 @@ const result = await syncPlugins(session, { dir: '/data/agents/user-42' });
 const text = toMcpConfig(await session.mcp(), { format: 'standard' });
 ```
 
-Files are checked against their hash before they are placed. A file changed by hand is kept and listed in `modified` (pass `onConflict: 'overwrite'` to replace it). Hooks are placed only with `allowHooks: true`. The token is never written to disk.
+Files are checked against their hash before they are placed. A file changed by hand is kept and listed in `modified` (pass `onConflict: 'overwrite'` to replace it). Hooks are placed only with `allowHooks: true`; their scripts (files that start with `#!`) are then made runnable, and no other file is. The token is never written to disk.
 
 ## Webhooks
 
