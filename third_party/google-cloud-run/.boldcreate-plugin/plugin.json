@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-cloud-run",
   "displayName": "Google Cloud Run",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Deploy and manage Cloud Run services and jobs.",
   "author": {
     "name": "Syncfusion"

@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "neon",
   "displayName": "Neon",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
   "author": {
     "name": "Syncfusion"

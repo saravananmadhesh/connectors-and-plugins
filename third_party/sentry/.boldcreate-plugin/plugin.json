@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "sentry",
   "displayName": "Sentry",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Investigate Sentry errors, stack traces, and issues for a project.",
   "author": {
     "name": "Syncfusion"

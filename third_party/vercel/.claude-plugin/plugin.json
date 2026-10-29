@@ -1,7 +1,7 @@
 {
   "name": "vercel",
   "displayName": "Vercel",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
   "author": {
     "name": "Syncfusion"
