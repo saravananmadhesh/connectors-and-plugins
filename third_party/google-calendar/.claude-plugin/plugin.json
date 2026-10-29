@@ -1,7 +1,7 @@
 {
   "name": "google-calendar",
   "displayName": "Google Calendar",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "List calendars, read events, and check free/busy time.",
   "author": {
     "name": "Syncfusion"

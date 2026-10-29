@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "deepwiki",
   "displayName": "DeepWiki",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Ask questions about any public GitHub repository and read its generated wiki.",
   "author": {
     "name": "Syncfusion"

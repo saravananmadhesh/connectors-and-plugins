@@ -1,7 +1,7 @@
 {
   "name": "google-cloud-agent-platform",
   "displayName": "Gemini Enterprise Agent Platform (Vertex AI)",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Generate content, run predictions, and manage models, endpoints, tuning, and evaluation on Vertex AI.",
   "author": {
     "name": "Syncfusion"

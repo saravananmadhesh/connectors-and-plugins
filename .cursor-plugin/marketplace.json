@@ -43,11 +43,6 @@
       "source": "third_party/figma"
     },
     {
-      "name": "firebase-sql-connect",
-      "description": "Work with Firebase SQL Connect (Data Connect) services, schemas, and queries.",
-      "source": "third_party/firebase-sql-connect"
-    },
-    {
       "name": "gitea",
       "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server.",
       "source": "third_party/gitea"
@@ -78,19 +73,9 @@
       "source": "third_party/google-chat"
     },
     {
-      "name": "google-classroom",
-      "description": "Read courses, rosters, and coursework, and post announcements in Google Classroom.",
-      "source": "third_party/google-classroom"
-    },
-    {
       "name": "google-cloud-agent-platform",
       "description": "Generate content, run predictions, and manage models, endpoints, tuning, and evaluation on Vertex AI.",
       "source": "third_party/google-cloud-agent-platform"
-    },
-    {
-      "name": "google-cloud-alloydb",
-      "description": "Manage AlloyDB for PostgreSQL clusters and run queries.",
-      "source": "third_party/google-cloud-alloydb"
     },
     {
       "name": "google-cloud-bigquery",
@@ -98,19 +83,9 @@
       "source": "third_party/google-cloud-bigquery"
     },
     {
-      "name": "google-cloud-bigtable",
-      "description": "Manage Bigtable instances, clusters, and tables.",
-      "source": "third_party/google-cloud-bigtable"
-    },
-    {
       "name": "google-cloud-cli",
       "description": "Run gcloud commands through Google's hosted Cloud CLI server.",
       "source": "third_party/google-cloud-cli"
-    },
-    {
-      "name": "google-cloud-error-reporting",
-      "description": "Review grouped application errors from Error Reporting.",
-      "source": "third_party/google-cloud-error-reporting"
     },
     {
       "name": "google-cloud-firestore",
@@ -123,26 +98,6 @@
       "source": "third_party/google-cloud-iam"
     },
     {
-      "name": "google-cloud-logging",
-      "description": "Query and analyze Cloud Logging log entries.",
-      "source": "third_party/google-cloud-logging"
-    },
-    {
-      "name": "google-cloud-memorystore",
-      "description": "Manage Memorystore for Redis, Redis Cluster, and Valkey instances.",
-      "source": "third_party/google-cloud-memorystore"
-    },
-    {
-      "name": "google-cloud-monitoring",
-      "description": "Read Cloud Monitoring metrics, alerts, and dashboards.",
-      "source": "third_party/google-cloud-monitoring"
-    },
-    {
-      "name": "google-cloud-pubsub",
-      "description": "Manage Pub/Sub topics and subscriptions and publish messages.",
-      "source": "third_party/google-cloud-pubsub"
-    },
-    {
       "name": "google-cloud-resource-manager",
       "description": "Browse Google Cloud organizations, folders, and projects.",
       "source": "third_party/google-cloud-resource-manager"
@@ -153,11 +108,6 @@
       "source": "third_party/google-cloud-run"
     },
     {
-      "name": "google-cloud-spanner",
-      "description": "Manage Spanner instances and databases and run SQL.",
-      "source": "third_party/google-cloud-spanner"
-    },
-    {
       "name": "google-cloud-sql",
       "description": "Manage Cloud SQL for MySQL, PostgreSQL, and SQL Server instances and run queries.",
       "source": "third_party/google-cloud-sql"
@@ -166,11 +116,6 @@
       "name": "google-cloud-storage",
       "description": "List, read, and manage Cloud Storage buckets and objects.",
       "source": "third_party/google-cloud-storage"
-    },
-    {
-      "name": "google-cloud-trace",
-      "description": "Find and read Cloud Trace spans to debug latency.",
-      "source": "third_party/google-cloud-trace"
     },
     {
       "name": "google-compute-engine",
@@ -221,11 +166,6 @@
       "name": "google-maps-grounding-lite",
       "description": "Ground agents in Google Maps data: places, routes, and weather.",
       "source": "third_party/google-maps-grounding-lite"
-    },
-    {
-      "name": "google-pay-wallet",
-      "description": "Manage Google Pay merchant setup and read Google Wallet issuer data.",
-      "source": "third_party/google-pay-wallet"
     },
     {
       "name": "google-sheets",

@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-cloud-firestore",
   "displayName": "Google Cloud Firestore",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Read and write Firestore documents and collections.",
   "author": {
     "name": "Syncfusion"

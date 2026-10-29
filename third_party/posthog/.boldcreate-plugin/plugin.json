@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "posthog",
   "displayName": "PostHog",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
   "author": {
     "name": "Syncfusion"

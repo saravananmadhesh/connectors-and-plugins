@@ -2,7 +2,7 @@
   "$schema": "../../schemas/boldcreate-plugin.schema.json",
   "name": "boldcreate-toolkit",
   "displayName": "BoldCreate Toolkit",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
   "author": {
     "name": "Syncfusion"

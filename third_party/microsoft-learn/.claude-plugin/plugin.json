@@ -1,7 +1,7 @@
 {
   "name": "microsoft-learn",
   "displayName": "Microsoft Learn",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
   "author": {
     "name": "Syncfusion"

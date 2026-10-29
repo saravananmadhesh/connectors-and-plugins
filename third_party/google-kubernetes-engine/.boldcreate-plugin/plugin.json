@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-kubernetes-engine",
   "displayName": "Google Kubernetes Engine",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Inspect and manage GKE clusters and workloads.",
   "author": {
     "name": "Syncfusion"

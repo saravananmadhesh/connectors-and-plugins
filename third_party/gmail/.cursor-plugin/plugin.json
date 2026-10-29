@@ -1,7 +1,7 @@
 {
   "name": "gmail",
   "displayName": "Gmail",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "minClientVersions": {
     "cursor": "3.19.0"
   },

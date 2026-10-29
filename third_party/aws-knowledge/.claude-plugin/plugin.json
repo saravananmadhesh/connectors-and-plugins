@@ -1,7 +1,7 @@
 {
   "name": "aws-knowledge",
   "displayName": "AWS Knowledge",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Search AWS documentation, API references, and regional availability.",
   "author": {
     "name": "Syncfusion"

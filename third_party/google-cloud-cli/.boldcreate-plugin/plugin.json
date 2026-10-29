@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-cloud-cli",
   "displayName": "Google Cloud CLI",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Run gcloud commands through Google's hosted Cloud CLI server.",
   "author": {
     "name": "Syncfusion"

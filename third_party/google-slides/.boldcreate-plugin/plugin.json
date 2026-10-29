@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-slides",
   "displayName": "Google Slides",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Read, create, and edit Google Slides presentations.",
   "author": {
     "name": "Syncfusion"

@@ -1,7 +1,7 @@
 {
   "name": "gitea",
   "displayName": "Gitea",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server.",
   "author": {
     "name": "Syncfusion"
