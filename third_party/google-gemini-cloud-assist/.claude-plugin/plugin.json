@@ -1,7 +1,7 @@
 {
   "name": "google-gemini-cloud-assist",
   "displayName": "Gemini Cloud Assist",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resources.",
   "author": {
     "name": "Syncfusion"

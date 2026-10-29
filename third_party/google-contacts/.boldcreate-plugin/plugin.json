@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-contacts",
   "displayName": "Google Contacts",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Look up contacts and people in your Google Workspace directory.",
   "author": {
     "name": "Syncfusion"

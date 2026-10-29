@@ -2,6 +2,10 @@
 
 All notable changes to this plugin will be documented here.
 
+## 0.7.0 - 2026-10-29
+
+- Updated plugin version for marketplace release.
+
 ## 0.6.0 - 2026-10-28
 
 - Every skill now works when BoldCreate Connect delivers it on its own. The templates moved into the skills that use them (`prd-template.md` in `define-product`, `roadmap-template.md` in `plan-slices`, `spec-template.md` in `write-spec`, `project-template.yml` and `principles-template.md` in `setup`), and the review checklists moved into `review-doc` as `lens-<name>.md`. The kit-level `templates/` and `lenses/` folders are gone.

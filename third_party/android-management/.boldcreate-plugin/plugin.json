@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "android-management",
   "displayName": "Android Management",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Manage enterprise Android devices, policies, and apps with the Android Management API.",
   "author": {
     "name": "Syncfusion"

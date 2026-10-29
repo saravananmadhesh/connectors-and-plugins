@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-design",
   "displayName": "Google Design",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Get Google design guidance and assets, such as Material Design, while you build UI.",
   "author": {
     "name": "Syncfusion"

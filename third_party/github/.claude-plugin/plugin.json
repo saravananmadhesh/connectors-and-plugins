@@ -1,7 +1,7 @@
 {
   "name": "github",
   "displayName": "GitHub",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Manage repos, issues, pull requests, and Actions.",
   "author": {
     "name": "Syncfusion"

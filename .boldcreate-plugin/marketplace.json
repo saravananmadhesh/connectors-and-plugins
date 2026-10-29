@@ -12,7 +12,7 @@
     {
       "name": "android-management",
       "displayName": "Android Management",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Manage enterprise Android devices, policies, and apps with the Android Management API.",
       "source": "third_party/android-management",
       "logo": "third_party/android-management/assets/logo.svg",
@@ -36,7 +36,7 @@
     {
       "name": "atlassian",
       "displayName": "Atlassian (Jira + Confluence)",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Search and update Jira issues and Confluence pages.",
       "source": "third_party/atlassian",
       "logo": "third_party/atlassian/assets/logo.svg",
@@ -60,7 +60,7 @@
     {
       "name": "aws-knowledge",
       "displayName": "AWS Knowledge",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Search AWS documentation, API references, and regional availability.",
       "source": "third_party/aws-knowledge",
       "logo": "third_party/aws-knowledge/assets/logo.svg",
@@ -84,7 +84,7 @@
     {
       "name": "boldcreate-toolkit",
       "displayName": "BoldCreate Toolkit",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
       "source": "boldcreate-toolkit",
       "logo": "boldcreate-toolkit/assets/logo.svg",
@@ -106,7 +106,7 @@
     {
       "name": "context7",
       "displayName": "Context7",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
       "source": "third_party/context7",
       "logo": "third_party/context7/assets/logo.svg",
@@ -130,7 +130,7 @@
     {
       "name": "deepwiki",
       "displayName": "DeepWiki",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Ask questions about any public GitHub repository and read its generated wiki.",
       "source": "third_party/deepwiki",
       "logo": "third_party/deepwiki/assets/logo.svg",
@@ -154,7 +154,7 @@
     {
       "name": "figma",
       "displayName": "Figma",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Turn Figma frames into code and read design tokens, components, and variables.",
       "source": "third_party/figma",
       "logo": "third_party/figma/assets/logo.svg",
@@ -176,33 +176,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "firebase-sql-connect",
-      "displayName": "Firebase SQL Connect",
-      "version": "0.1.0",
-      "description": "Work with Firebase SQL Connect (Data Connect) services, schemas, and queries.",
-      "source": "third_party/firebase-sql-connect",
-      "logo": "third_party/firebase-sql-connect/assets/logo.svg",
-      "category": "database",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "gitea",
       "displayName": "Gitea",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server.",
       "source": "third_party/gitea",
       "logo": "third_party/gitea/assets/logo.svg",
@@ -226,7 +202,7 @@
     {
       "name": "github",
       "displayName": "GitHub",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Manage repos, issues, pull requests, and Actions.",
       "source": "third_party/github",
       "logo": "third_party/github/assets/logo.svg",
@@ -250,7 +226,7 @@
     {
       "name": "gitlab",
       "displayName": "GitLab",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search.",
       "source": "third_party/gitlab",
       "logo": "third_party/gitlab/assets/logo.svg",
@@ -274,7 +250,7 @@
     {
       "name": "gmail",
       "displayName": "Gmail",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Search, read, and draft Gmail messages and threads.",
       "source": "third_party/gmail",
       "logo": "third_party/gmail/assets/logo.svg",
@@ -298,7 +274,7 @@
     {
       "name": "google-calendar",
       "displayName": "Google Calendar",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "List calendars, read events, and check free/busy time.",
       "source": "third_party/google-calendar",
       "logo": "third_party/google-calendar/assets/logo.svg",
@@ -322,7 +298,7 @@
     {
       "name": "google-chat",
       "displayName": "Google Chat",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Read Google Chat spaces and messages, and post messages.",
       "source": "third_party/google-chat",
       "logo": "third_party/google-chat/assets/logo.svg",
@@ -344,33 +320,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-classroom",
-      "displayName": "Google Classroom",
-      "version": "0.1.0",
-      "description": "Read courses, rosters, and coursework, and post announcements in Google Classroom.",
-      "source": "third_party/google-classroom",
-      "logo": "third_party/google-classroom/assets/logo.svg",
-      "category": "productivity",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-cloud-agent-platform",
       "displayName": "Gemini Enterprise Agent Platform (Vertex AI)",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Generate content, run predictions, and manage models, endpoints, tuning, and evaluation on Vertex AI.",
       "source": "third_party/google-cloud-agent-platform",
       "logo": "third_party/google-cloud-agent-platform/assets/logo.svg",
@@ -392,33 +344,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-cloud-alloydb",
-      "displayName": "Google Cloud AlloyDB",
-      "version": "0.1.0",
-      "description": "Manage AlloyDB for PostgreSQL clusters and run queries.",
-      "source": "third_party/google-cloud-alloydb",
-      "logo": "third_party/google-cloud-alloydb/assets/logo.svg",
-      "category": "database",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-cloud-bigquery",
       "displayName": "Google Cloud BigQuery",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Explore datasets and tables and run SQL queries.",
       "source": "third_party/google-cloud-bigquery",
       "logo": "third_party/google-cloud-bigquery/assets/logo.png",
@@ -440,33 +368,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-cloud-bigtable",
-      "displayName": "Google Cloud Bigtable",
-      "version": "0.1.0",
-      "description": "Manage Bigtable instances, clusters, and tables.",
-      "source": "third_party/google-cloud-bigtable",
-      "logo": "third_party/google-cloud-bigtable/assets/logo.svg",
-      "category": "database",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-cloud-cli",
       "displayName": "Google Cloud CLI",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Run gcloud commands through Google's hosted Cloud CLI server.",
       "source": "third_party/google-cloud-cli",
       "logo": "third_party/google-cloud-cli/assets/logo.svg",
@@ -488,33 +392,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-cloud-error-reporting",
-      "displayName": "Google Cloud Error Reporting",
-      "version": "0.1.0",
-      "description": "Review grouped application errors from Error Reporting.",
-      "source": "third_party/google-cloud-error-reporting",
-      "logo": "third_party/google-cloud-error-reporting/assets/logo.svg",
-      "category": "observability",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-cloud-firestore",
       "displayName": "Google Cloud Firestore",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Read and write Firestore documents and collections.",
       "source": "third_party/google-cloud-firestore",
       "logo": "third_party/google-cloud-firestore/assets/logo.svg",
@@ -538,7 +418,7 @@
     {
       "name": "google-cloud-iam",
       "displayName": "Google Cloud IAM",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Review IAM roles, policies, and service accounts.",
       "source": "third_party/google-cloud-iam",
       "logo": "third_party/google-cloud-iam/assets/logo.svg",
@@ -560,105 +440,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-cloud-logging",
-      "displayName": "Google Cloud Logging",
-      "version": "0.1.0",
-      "description": "Query and analyze Cloud Logging log entries.",
-      "source": "third_party/google-cloud-logging",
-      "logo": "third_party/google-cloud-logging/assets/logo.svg",
-      "category": "observability",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
-      "name": "google-cloud-memorystore",
-      "displayName": "Google Cloud Memorystore",
-      "version": "0.1.0",
-      "description": "Manage Memorystore for Redis, Redis Cluster, and Valkey instances.",
-      "source": "third_party/google-cloud-memorystore",
-      "logo": "third_party/google-cloud-memorystore/assets/logo.svg",
-      "category": "database",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
-      "name": "google-cloud-monitoring",
-      "displayName": "Google Cloud Monitoring",
-      "version": "0.1.0",
-      "description": "Read Cloud Monitoring metrics, alerts, and dashboards.",
-      "source": "third_party/google-cloud-monitoring",
-      "logo": "third_party/google-cloud-monitoring/assets/logo.svg",
-      "category": "observability",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
-      "name": "google-cloud-pubsub",
-      "displayName": "Google Cloud Pub/Sub",
-      "version": "0.1.0",
-      "description": "Manage Pub/Sub topics and subscriptions and publish messages.",
-      "source": "third_party/google-cloud-pubsub",
-      "logo": "third_party/google-cloud-pubsub/assets/logo.svg",
-      "category": "messaging",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-cloud-resource-manager",
       "displayName": "Google Cloud Resource Manager",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Browse Google Cloud organizations, folders, and projects.",
       "source": "third_party/google-cloud-resource-manager",
       "logo": "third_party/google-cloud-resource-manager/assets/logo.svg",
@@ -682,7 +466,7 @@
     {
       "name": "google-cloud-run",
       "displayName": "Google Cloud Run",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Deploy and manage Cloud Run services and jobs.",
       "source": "third_party/google-cloud-run",
       "logo": "third_party/google-cloud-run/assets/logo.svg",
@@ -704,33 +488,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-cloud-spanner",
-      "displayName": "Google Cloud Spanner",
-      "version": "0.1.0",
-      "description": "Manage Spanner instances and databases and run SQL.",
-      "source": "third_party/google-cloud-spanner",
-      "logo": "third_party/google-cloud-spanner/assets/logo.svg",
-      "category": "database",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-cloud-sql",
       "displayName": "Google Cloud SQL",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Manage Cloud SQL for MySQL, PostgreSQL, and SQL Server instances and run queries.",
       "source": "third_party/google-cloud-sql",
       "logo": "third_party/google-cloud-sql/assets/logo.svg",
@@ -754,7 +514,7 @@
     {
       "name": "google-cloud-storage",
       "displayName": "Google Cloud Storage",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "List, read, and manage Cloud Storage buckets and objects.",
       "source": "third_party/google-cloud-storage",
       "logo": "third_party/google-cloud-storage/assets/logo.svg",
@@ -776,33 +536,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-cloud-trace",
-      "displayName": "Google Cloud Trace",
-      "version": "0.1.0",
-      "description": "Find and read Cloud Trace spans to debug latency.",
-      "source": "third_party/google-cloud-trace",
-      "logo": "third_party/google-cloud-trace/assets/logo.svg",
-      "category": "observability",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-compute-engine",
       "displayName": "Google Compute Engine",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Manage Compute Engine VMs, disks, and networks.",
       "source": "third_party/google-compute-engine",
       "logo": "third_party/google-compute-engine/assets/logo.svg",
@@ -826,7 +562,7 @@
     {
       "name": "google-contacts",
       "displayName": "Google Contacts",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Look up contacts and people in your Google Workspace directory.",
       "source": "third_party/google-contacts",
       "logo": "third_party/google-contacts/assets/logo.svg",
@@ -850,7 +586,7 @@
     {
       "name": "google-design",
       "displayName": "Google Design",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Get Google design guidance and assets, such as Material Design, while you build UI.",
       "source": "third_party/google-design",
       "logo": "third_party/google-design/assets/logo.svg",
@@ -874,7 +610,7 @@
     {
       "name": "google-developer-knowledge",
       "displayName": "Google Developer Knowledge",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Search official Google developer documentation for Android, Firebase, Google Cloud, and Maps.",
       "source": "third_party/google-developer-knowledge",
       "logo": "third_party/google-developer-knowledge/assets/logo.svg",
@@ -898,7 +634,7 @@
     {
       "name": "google-docs",
       "displayName": "Google Docs",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Read, create, and edit Google Docs.",
       "source": "third_party/google-docs",
       "logo": "third_party/google-docs/assets/logo.svg",
@@ -922,7 +658,7 @@
     {
       "name": "google-drive",
       "displayName": "Google Drive",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Search, read, and create files in Google Drive.",
       "source": "third_party/google-drive",
       "logo": "third_party/google-drive/assets/logo.svg",
@@ -946,7 +682,7 @@
     {
       "name": "google-gemini-cloud-assist",
       "displayName": "Gemini Cloud Assist",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resources.",
       "source": "third_party/google-gemini-cloud-assist",
       "logo": "third_party/google-gemini-cloud-assist/assets/logo.svg",
@@ -970,7 +706,7 @@
     {
       "name": "google-kubernetes-engine",
       "displayName": "Google Kubernetes Engine",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Inspect and manage GKE clusters and workloads.",
       "source": "third_party/google-kubernetes-engine",
       "logo": "third_party/google-kubernetes-engine/assets/logo.svg",
@@ -994,7 +730,7 @@
     {
       "name": "google-maps-code-assist",
       "displayName": "Google Maps Code Assist",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Get up-to-date Google Maps Platform docs and code samples while you write Maps code.",
       "source": "third_party/google-maps-code-assist",
       "logo": "third_party/google-maps-code-assist/assets/logo.svg",
@@ -1018,7 +754,7 @@
     {
       "name": "google-maps-grounding-lite",
       "displayName": "Google Maps Grounding Lite",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Ground agents in Google Maps data: places, routes, and weather.",
       "source": "third_party/google-maps-grounding-lite",
       "logo": "third_party/google-maps-grounding-lite/assets/logo.svg",
@@ -1040,33 +776,9 @@
       "supportedByGateway": true
     },
     {
-      "name": "google-pay-wallet",
-      "displayName": "Google Pay and Wallet",
-      "version": "0.1.0",
-      "description": "Manage Google Pay merchant setup and read Google Wallet issuer data.",
-      "source": "third_party/google-pay-wallet",
-      "logo": "third_party/google-pay-wallet/assets/logo.svg",
-      "category": "payments",
-      "components": [
-        "mcp"
-      ],
-      "transports": [
-        "streamable-http"
-      ],
-      "auth": [
-        "oauth"
-      ],
-      "requiresSecrets": true,
-      "rollout": {
-        "phase": 2,
-        "wave": "B"
-      },
-      "supportedByGateway": true
-    },
-    {
       "name": "google-sheets",
       "displayName": "Google Sheets",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Read, create, and update Google Sheets spreadsheets.",
       "source": "third_party/google-sheets",
       "logo": "third_party/google-sheets/assets/logo.svg",
@@ -1090,7 +802,7 @@
     {
       "name": "google-slides",
       "displayName": "Google Slides",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Read, create, and edit Google Slides presentations.",
       "source": "third_party/google-slides",
       "logo": "third_party/google-slides/assets/logo.svg",
@@ -1114,7 +826,7 @@
     {
       "name": "google-stitch",
       "displayName": "Stitch",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Generate UI designs and front-end code with Google Stitch.",
       "source": "third_party/google-stitch",
       "logo": "third_party/google-stitch/assets/logo.svg",
@@ -1138,7 +850,7 @@
     {
       "name": "google-workspace-search",
       "displayName": "Google Workspace Search",
-      "version": "0.1.0",
+      "version": "0.7.0",
       "description": "Search across Gmail, Drive, Calendar, and other Google Workspace content in one place.",
       "source": "third_party/google-workspace-search",
       "logo": "third_party/google-workspace-search/assets/logo.svg",
@@ -1162,7 +874,7 @@
     {
       "name": "linear",
       "displayName": "Linear",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Find, create, and update Linear issues, projects, and cycles.",
       "source": "third_party/linear",
       "logo": "third_party/linear/assets/logo.svg",
@@ -1186,7 +898,7 @@
     {
       "name": "microsoft-learn",
       "displayName": "Microsoft Learn",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
       "source": "third_party/microsoft-learn",
       "logo": "third_party/microsoft-learn/assets/logo.svg",
@@ -1210,7 +922,7 @@
     {
       "name": "neon",
       "displayName": "Neon",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
       "source": "third_party/neon",
       "logo": "third_party/neon/assets/logo.svg",
@@ -1234,7 +946,7 @@
     {
       "name": "notion",
       "displayName": "Notion",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Search, read, and update Notion pages and databases.",
       "source": "third_party/notion",
       "logo": "third_party/notion/assets/logo.svg",
@@ -1258,7 +970,7 @@
     {
       "name": "posthog",
       "displayName": "PostHog",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
       "source": "third_party/posthog",
       "logo": "third_party/posthog/assets/logo.png",
@@ -1282,7 +994,7 @@
     {
       "name": "sentry",
       "displayName": "Sentry",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Investigate Sentry errors, stack traces, and issues for a project.",
       "source": "third_party/sentry",
       "logo": "third_party/sentry/assets/logo.svg",
@@ -1306,7 +1018,7 @@
     {
       "name": "stripe",
       "displayName": "Stripe",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
       "source": "third_party/stripe",
       "logo": "third_party/stripe/assets/logo.svg",
@@ -1330,7 +1042,7 @@
     {
       "name": "supabase",
       "displayName": "Supabase",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
       "source": "third_party/supabase",
       "logo": "third_party/supabase/assets/logo.svg",
@@ -1354,7 +1066,7 @@
     {
       "name": "vercel",
       "displayName": "Vercel",
-      "version": "0.2.0",
+      "version": "0.7.0",
       "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
       "source": "third_party/vercel",
       "logo": "third_party/vercel/assets/logo.svg",

@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "context7",
   "displayName": "Context7",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
   "author": {
     "name": "Syncfusion"

@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-docs",
   "displayName": "Google Docs",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Read, create, and edit Google Docs.",
   "author": {
     "name": "Syncfusion"

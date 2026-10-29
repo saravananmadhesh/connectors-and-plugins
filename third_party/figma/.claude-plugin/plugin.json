@@ -1,7 +1,7 @@
 {
   "name": "figma",
   "displayName": "Figma",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "description": "Turn Figma frames into code and read design tokens, components, and variables.",
   "author": {
     "name": "Syncfusion"

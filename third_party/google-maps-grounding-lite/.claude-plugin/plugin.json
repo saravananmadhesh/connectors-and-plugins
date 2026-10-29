@@ -1,7 +1,7 @@
 {
   "name": "google-maps-grounding-lite",
   "displayName": "Google Maps Grounding Lite",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Ground agents in Google Maps data: places, routes, and weather.",
   "author": {
     "name": "Syncfusion"

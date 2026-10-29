@@ -29,32 +29,21 @@ Secrets such as API keys are never stored in this repository. Each MCP plugin de
 | `context7` | [Context7](third_party/context7/) | Documentation | Pull up-to-date, version-specific library docs and code examples into the prompt. |
 | `deepwiki` | [DeepWiki](third_party/deepwiki/) | Documentation | Ask questions about any public GitHub repository and read its generated wiki. |
 | `figma` | [Figma](third_party/figma/) | Design | Turn Figma frames into code and read design tokens, components, and variables. |
-| `firebase-sql-connect` | [Firebase SQL Connect](third_party/firebase-sql-connect/) | Database | Work with Firebase SQL Connect (Data Connect) services, schemas, and queries. |
 | `gitea` | [Gitea](third_party/gitea/) | Source Control | Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server. |
 | `github` | [GitHub](third_party/github/) | Source Control | Manage repos, issues, pull requests, and Actions. |
 | `gitlab` | [GitLab](third_party/gitlab/) | Source Control | Work with GitLab projects, issues, merge requests, pipelines, and code search. |
 | `gmail` | [Gmail](third_party/gmail/) | Productivity | Search, read, and draft Gmail messages and threads. |
 | `google-calendar` | [Google Calendar](third_party/google-calendar/) | Productivity | List calendars, read events, and check free/busy time. |
 | `google-chat` | [Google Chat](third_party/google-chat/) | Productivity | Read Google Chat spaces and messages, and post messages. |
-| `google-classroom` | [Google Classroom](third_party/google-classroom/) | Productivity | Read courses, rosters, and coursework, and post announcements in Google Classroom. |
 | `google-cloud-agent-platform` | [Gemini Enterprise Agent Platform (Vertex AI)](third_party/google-cloud-agent-platform/) | AI | Generate content, run predictions, and manage models, endpoints, tuning, and evaluation on Vertex AI. |
-| `google-cloud-alloydb` | [Google Cloud AlloyDB](third_party/google-cloud-alloydb/) | Database | Manage AlloyDB for PostgreSQL clusters and run queries. |
 | `google-cloud-bigquery` | [Google Cloud BigQuery](third_party/google-cloud-bigquery/) | Database | Explore datasets and tables and run SQL queries. |
-| `google-cloud-bigtable` | [Google Cloud Bigtable](third_party/google-cloud-bigtable/) | Database | Manage Bigtable instances, clusters, and tables. |
 | `google-cloud-cli` | [Google Cloud CLI](third_party/google-cloud-cli/) | Cloud | Run gcloud commands through Google's hosted Cloud CLI server. |
-| `google-cloud-error-reporting` | [Google Cloud Error Reporting](third_party/google-cloud-error-reporting/) | Observability | Review grouped application errors from Error Reporting. |
 | `google-cloud-firestore` | [Google Cloud Firestore](third_party/google-cloud-firestore/) | Database | Read and write Firestore documents and collections. |
 | `google-cloud-iam` | [Google Cloud IAM](third_party/google-cloud-iam/) | Security | Review IAM roles, policies, and service accounts. |
-| `google-cloud-logging` | [Google Cloud Logging](third_party/google-cloud-logging/) | Observability | Query and analyze Cloud Logging log entries. |
-| `google-cloud-memorystore` | [Google Cloud Memorystore](third_party/google-cloud-memorystore/) | Database | Manage Memorystore for Redis, Redis Cluster, and Valkey instances. |
-| `google-cloud-monitoring` | [Google Cloud Monitoring](third_party/google-cloud-monitoring/) | Observability | Read Cloud Monitoring metrics, alerts, and dashboards. |
-| `google-cloud-pubsub` | [Google Cloud Pub/Sub](third_party/google-cloud-pubsub/) | Messaging | Manage Pub/Sub topics and subscriptions and publish messages. |
 | `google-cloud-resource-manager` | [Google Cloud Resource Manager](third_party/google-cloud-resource-manager/) | Cloud | Browse Google Cloud organizations, folders, and projects. |
 | `google-cloud-run` | [Google Cloud Run](third_party/google-cloud-run/) | Hosting | Deploy and manage Cloud Run services and jobs. |
-| `google-cloud-spanner` | [Google Cloud Spanner](third_party/google-cloud-spanner/) | Database | Manage Spanner instances and databases and run SQL. |
 | `google-cloud-sql` | [Google Cloud SQL](third_party/google-cloud-sql/) | Database | Manage Cloud SQL for MySQL, PostgreSQL, and SQL Server instances and run queries. |
 | `google-cloud-storage` | [Google Cloud Storage](third_party/google-cloud-storage/) | Storage | List, read, and manage Cloud Storage buckets and objects. |
-| `google-cloud-trace` | [Google Cloud Trace](third_party/google-cloud-trace/) | Observability | Find and read Cloud Trace spans to debug latency. |
 | `google-compute-engine` | [Google Compute Engine](third_party/google-compute-engine/) | Hosting | Manage Compute Engine VMs, disks, and networks. |
 | `google-contacts` | [Google Contacts](third_party/google-contacts/) | Productivity | Look up contacts and people in your Google Workspace directory. |
 | `google-design` | [Google Design](third_party/google-design/) | Design | Get Google design guidance and assets, such as Material Design, while you build UI. |
@@ -65,7 +54,6 @@ Secrets such as API keys are never stored in this repository. Each MCP plugin de
 | `google-kubernetes-engine` | [Google Kubernetes Engine](third_party/google-kubernetes-engine/) | Hosting | Inspect and manage GKE clusters and workloads. |
 | `google-maps-code-assist` | [Google Maps Code Assist](third_party/google-maps-code-assist/) | Documentation | Get up-to-date Google Maps Platform docs and code samples while you write Maps code. |
 | `google-maps-grounding-lite` | [Google Maps Grounding Lite](third_party/google-maps-grounding-lite/) | Data | Ground agents in Google Maps data: places, routes, and weather. |
-| `google-pay-wallet` | [Google Pay and Wallet](third_party/google-pay-wallet/) | Payments | Manage Google Pay merchant setup and read Google Wallet issuer data. |
 | `google-sheets` | [Google Sheets](third_party/google-sheets/) | Productivity | Read, create, and update Google Sheets spreadsheets. |
 | `google-slides` | [Google Slides](third_party/google-slides/) | Productivity | Read, create, and edit Google Slides presentations. |
 | `google-stitch` | [Stitch](third_party/google-stitch/) | Design | Generate UI designs and front-end code with Google Stitch. |
