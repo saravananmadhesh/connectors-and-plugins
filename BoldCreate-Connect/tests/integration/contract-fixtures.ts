@@ -384,6 +384,26 @@ async function unverifiedUser(): Promise<{ email: string }> {
 
 const wireUser = (user: SignedInUser) => formatId('usr', user.rawUserId);
 
+async function newGatewayKey(seed: Seed): Promise<string> {
+  const created = await json<{ rawKey: string }>(
+    await callApi('POST', `${base(seed, 'org')}/api-keys`, seed.owner, {
+      name: `Gateway ${randomUUID().slice(0, 8)}`,
+      permissions: ['mcp:list', 'mcp:call'],
+    }),
+    201,
+    'create gateway key',
+  );
+  return created.rawKey;
+}
+
+function gatewayCall(path: string, body: unknown): Promise<Response> {
+  return fetch(`${apiUrl}${path}`, {
+    method: 'POST',
+    headers: { ...workloadHeaders, 'x-caller-id': 'gateway' },
+    body: JSON.stringify(body),
+  });
+}
+
 const FIXED: Record<string, Fixture> = {
   'sync.get': async (seed) => fetch(`${apiUrl}/v1/sync`, { headers: await newDeliveryKey(seed) }),
   'sync.report': async (seed) =>
@@ -478,6 +498,23 @@ const FIXED: Record<string, Fixture> = {
       method: 'POST',
       headers: { ...workloadHeaders, 'x-caller-id': 'gateway' },
       body: JSON.stringify({ key: 'nope' }),
+    }),
+  'gateway.servers': async (seed) =>
+    gatewayCall('/v1/gateway/servers', { key: await newGatewayKey(seed) }),
+  'gateway.access': async (seed) =>
+    gatewayCall('/v1/gateway/access', {
+      key: await newGatewayKey(seed),
+      installationId: 'fixture-installation',
+      componentId: 'fixture-component',
+    }),
+  'gateway.usage': async (seed) =>
+    gatewayCall('/v1/gateway/usage', {
+      key: await newGatewayKey(seed),
+      server: 'fixture-server',
+      tool: 'fixture-tool',
+      outcome: 'ok',
+      durationMs: 1,
+      requestId: 'fixture-request',
     }),
 
   'orgs.list': (seed) => callApi('GET', '/v1/orgs', seed.owner),

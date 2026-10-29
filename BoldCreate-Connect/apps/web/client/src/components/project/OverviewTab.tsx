@@ -17,7 +17,11 @@ import { Section } from '@/components/Page';
 import { QueryFrame, type TabProps } from './shared';
 
 /** Activity per day for the last weeks, and the users who called the most. */
-export function OverviewTab({ orgId, projectId }: TabProps) {
+export function OverviewTab({
+  orgId,
+  projectId,
+  activeKeyCount,
+}: TabProps & { activeKeyCount: number }) {
   const { can } = useAbilities(orgId);
   const usage = useQuery({
     queryKey: qk.projectPart(orgId, projectId, 'usage'),
@@ -35,7 +39,7 @@ export function OverviewTab({ orgId, projectId }: TabProps) {
       onRetry={() => void usage.refetch()}
     >
       <div className="space-y-6">
-        {can('project-key:create') && (
+        {can('project-key:create') && activeKeyCount === 0 && (
           <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
             <div>
               <p className="text-sm font-medium">Connect your product</p>

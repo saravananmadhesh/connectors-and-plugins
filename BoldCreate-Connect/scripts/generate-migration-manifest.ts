@@ -57,7 +57,8 @@ export function generateMigrationManifest(options: MigrationManifestOptions = {}
   const namespace = options.namespace ?? DEFAULT_NAMESPACES[env] ?? `boldcreate-${env}`;
   const image = options.image ?? DEFAULT_IMAGES[env] ?? DEFAULT_IMAGES.staging;
   const jobName = options.jobName ?? 'boldcreate-migration-job';
-  let databaseUrl = options.databaseUrl ?? process.env.DATABASE_URL;
+  let databaseUrl =
+    options.databaseUrl ?? (options.databaseUrlSecretName ? undefined : process.env.DATABASE_URL);
 
   // If no database URL or secretKeyRef is configured, default to the staging app_migrator URL
   if (!databaseUrl && !options.databaseUrlSecretName) {

@@ -20,8 +20,8 @@ import { QueryFrame, type TabProps } from '@/components/project/shared';
 import { ProjectStatusBadge } from '@/components/project/status';
 import { UsersTab } from '@/components/project/UsersTab';
 
-const PANELS: Record<ProjectTab, (props: TabProps) => React.ReactNode> = {
-  overview: (props) => <OverviewTab {...props} />,
+const PANELS: Record<ProjectTab, (props: TabProps, activeKeyCount: number) => React.ReactNode> = {
+  overview: (props, activeKeyCount) => <OverviewTab {...props} activeKeyCount={activeKeyCount} />,
   users: (props) => <UsersTab {...props} />,
   sessions: (props) => <SessionsTab {...props} />,
   plugins: (props) => <PluginsTab {...props} />,
@@ -62,7 +62,11 @@ export function ProjectPage() {
     keys: 'project-key:create',
     settings: 'project-webhook:write',
   };
-  const props: TabProps = { orgId, projectId, canWrite: can(WRITE[shown]) };
+  const props: TabProps = {
+    orgId,
+    projectId,
+    canWrite: can(WRITE[shown]),
+  };
   return (
     <Page>
       <QueryFrame
@@ -89,7 +93,7 @@ export function ProjectPage() {
             })
           }
         >
-          {PANELS[shown](props)}
+          {PANELS[shown](props, project.data?.activeKeyCount ?? 0)}
         </Tabs>
       </QueryFrame>
     </Page>
