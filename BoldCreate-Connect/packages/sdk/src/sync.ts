@@ -167,9 +167,10 @@ async function apply(
     result.removed.push(gone);
   }
 
-  // Anything left out (a kept file, a hook) must be looked at again, so the revision stays where it
-  // was and the next call asks for the whole manifest instead of "not modified".
-  if (result.modified.length > 0 || result.skipped.length > 0) next.revision = lock.revision;
+  // Anything left out (a kept file, a hook) must be looked at again, so no revision is kept and the
+  // next call asks for the whole manifest. Keeping an older revision is not enough: the server can
+  // come back to that same revision (a plugin added, then removed) and answer "not modified".
+  if (result.modified.length > 0 || result.skipped.length > 0) next.revision = '';
   await writeLock(dir, next);
   return { result, applied };
 }

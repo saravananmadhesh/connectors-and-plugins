@@ -229,9 +229,10 @@ public static class SessionSyncExtensions
             removed.Add(gone);
         }
 
-        // Anything left out (a kept file, a hook) must be looked at again, so the revision stays where it
-        // was and the next call asks for the whole manifest instead of "not modified".
-        if (modified.Count > 0 || plan.Skipped.Count > 0) next = next with { Revision = lockFile.Revision };
+        // Anything left out (a kept file, a hook) must be looked at again, so no revision is kept and the
+        // next call asks for the whole manifest. Keeping an older revision is not enough: the server can
+        // come back to that same revision (a plugin added, then removed) and answer "not modified".
+        if (modified.Count > 0 || plan.Skipped.Count > 0) next = next with { Revision = string.Empty };
         await SyncFiles.WriteLockAsync(dir, next, ct).ConfigureAwait(false);
         return (new SyncResult
         {
