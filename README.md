@@ -105,12 +105,6 @@ schemas/                              # JSON schemas for the manifests
 scripts/                              # build.mjs, validate.mjs and check-kit.mjs
 ```
 
-## Contributing
-
-1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a Syncfusion plugin. Don't edit generated files by hand.
-2. Run `npm ci`, then `npm run build` and `npm run validate`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
-3. Open a pull request. CI runs the same checks and the Claude Code plugin validator.
-
 ## License
 
 MIT. Logos are trademarks of their owners.
