@@ -12,6 +12,7 @@ import { useActiveOrg } from '@/lib/active-org';
 import { qk } from '@/lib/query-keys';
 import {
   INSTALLED_TABS,
+  recalledSignInScope,
   type InstalledScope,
   type InstalledSearch,
   type InstalledTab,
@@ -33,13 +34,17 @@ export function InstalledPage() {
   const navigate = useNavigate();
   const {
     tab = 'plugins',
-    scope: wanted,
+    scope: named,
     q = '',
     oauth,
+    reason,
   } = useSearch({
     strict: false,
   }) as InstalledSearch;
   const [typed, setTyped] = useState(q);
+  // A failed sign-in comes back without the scope; open the list it started from.
+  const [recalled] = useState(() => (oauth ? recalledSignInScope() : undefined));
+  const wanted = named ?? recalled;
 
   const me = useQuery({ queryKey: qk.me(), queryFn: auth.me });
   const orgIds = me.data?.memberships.map((m) => m.organizationId) ?? [];
@@ -109,9 +114,13 @@ export function InstalledPage() {
           <span>
             {oauth === 'connected'
               ? 'You are signed in to the server.'
-              : 'The sign-in did not complete. Try again from the server details.'}
+              : `The sign-in did not complete${reason ? ` (${reason})` : ''}. Try again from the server details.`}
           </span>
-          <Button size="sm" variant="outline" onClick={() => setSearch({ oauth: undefined })}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setSearch({ oauth: undefined, reason: undefined })}
+          >
             Dismiss
           </Button>
         </Alert>

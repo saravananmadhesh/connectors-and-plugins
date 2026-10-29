@@ -12,3 +12,32 @@ describe('validateInstalledSearch', () => {
     expect(validateInstalledSearch({})).toEqual({ tab: undefined });
   });
 });
+
+describe('sign-in outcome', () => {
+  it('keeps a completed sign-in', () => {
+    expect(validateInstalledSearch({ oauth: 'connected' })).toMatchObject({ oauth: 'connected' });
+  });
+
+  it('reads the web server failure and its reason', () => {
+    expect(
+      validateInstalledSearch({ oauth: 'failed', reason: 'oauth_state_invalid' }),
+    ).toMatchObject({ oauth: 'failed', reason: 'oauth_state_invalid' });
+  });
+
+  it('treats an api error code as the outcome as a failure with that reason', () => {
+    expect(validateInstalledSearch({ oauth: 'oauth_exchange_failed' })).toMatchObject({
+      oauth: 'failed',
+      reason: 'oauth_exchange_failed',
+    });
+    expect(validateInstalledSearch({ oauth: 'denied' })).toMatchObject({
+      oauth: 'failed',
+      reason: 'denied',
+    });
+  });
+
+  it('drops a reason that is not an error code', () => {
+    const search = validateInstalledSearch({ oauth: 'failed', reason: '<b>hi</b>' });
+    expect(search.oauth).toBe('failed');
+    expect(search.reason).toBeUndefined();
+  });
+});

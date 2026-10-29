@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, installations, mcpServers, type ScopeKey } from '@/lib/api';
 import { connectionLabel } from '@/lib/mcp-auth';
 import { setupNeeds, signInServers } from '@/lib/install-setup';
+import { rememberSignInScope } from '@/lib/installed-search';
 import { leaveTo } from '@/lib/navigate';
 import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
@@ -66,6 +67,7 @@ export function InstallSetupPanel({ orgId, scopeKey, installationId, pluginName,
     mutationFn: (componentId: string) =>
       mcpServers.oauthStart(orgId, scopeKey, installationId, componentId),
     onSuccess: ({ authorizeUrl }) => {
+      rememberSignInScope(scopeKey);
       if (!leaveTo(authorizeUrl))
         setError('The sign-in service returned an address that cannot be used.');
     },
