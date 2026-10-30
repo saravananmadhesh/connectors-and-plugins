@@ -101,8 +101,11 @@ function stateOf(state: VersionLike['state']): KmsVersionState {
 const versionIdOf = (name: string | null | undefined): string | undefined =>
   name?.split('/').pop() || undefined;
 
+/** Plain bytes the caller owns: the SDK's Buffers can be views into a shared pool. */
 const toBytes = (value: Bytes): Uint8Array =>
-  typeof value === 'string' ? Buffer.from(value, 'base64') : (value ?? new Uint8Array());
+  new Uint8Array(
+    typeof value === 'string' ? Buffer.from(value, 'base64') : (value ?? new Uint8Array()),
+  );
 
 export function createCloudKms(options: CloudKmsOptions): KmsPort {
   const keyName = options.keyName;
