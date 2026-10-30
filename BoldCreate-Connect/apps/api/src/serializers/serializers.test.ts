@@ -194,6 +194,7 @@ describe('serializers', () => {
       repositoryUrl: null,
       createdAt: now,
       latestVersion: version,
+      variables: [],
       components: [
         {
           id: uuid(),

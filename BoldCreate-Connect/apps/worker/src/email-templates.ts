@@ -283,3 +283,58 @@ export function deletionEmail(
     baseUrl,
   );
 }
+
+export interface ErrorAlertGroup {
+  groupId: string;
+  title: string;
+  service: string;
+  area: string | null;
+  /** Times the failure happened in total. */
+  count: number;
+  reason: 'new' | 'spike';
+}
+
+const ALERT_REASON: Record<ErrorAlertGroup['reason'], string> = {
+  new: 'First seen recently',
+  spike: 'Happening much more often',
+};
+
+/**
+ * The mail that tells operators a new or spiking error needs a look. Titles are text the services
+ * produced, so they are only ever drawn as text. `adminUrl` is the admin app's address; without it
+ * the mail names the errors but links nowhere.
+ */
+export function errorAlertEmail(
+  groups: readonly ErrorAlertGroup[],
+  baseUrl: string,
+  adminUrl?: string,
+): RenderedEmail {
+  const link = (path: string): string | undefined =>
+    adminUrl ? new URL(path, adminUrl).toString() : undefined;
+  const services = [...new Set(groups.map((group) => group.service))];
+  const subject =
+    groups.length === 1
+      ? `Error needs attention in ${services[0]}: ${groups[0]?.title ?? ''}`.slice(0, 120)
+      : `${groups.length} errors need attention in ${services.join(', ')}`;
+  const listLink = link('/observability');
+  return render(
+    {
+      subject,
+      preheader: `${ALERT_REASON[groups[0]?.reason ?? 'new']}. Open the admin app to see where it happens.`,
+      heading:
+        groups.length === 1 ? 'An error needs attention' : `${groups.length} errors need attention`,
+      paragraphs: groups.map((group): Paragraph => {
+        const where = group.area ? `${group.service} · ${group.area}` : group.service;
+        const detail = link(`/observability/errors/${group.groupId}`);
+        return [
+          { strong: group.title },
+          ` (${where}). ${ALERT_REASON[group.reason]}; ${group.count.toLocaleString('en')} in total.`,
+          ...(detail ? [` ${detail}`] : []),
+        ];
+      }),
+      ...(listLink ? { button: { label: 'Open errors', url: listLink } } : {}),
+      note: 'You get one mail per error until it has been quiet for a while. Mark an error resolved or ignored in the admin app to stop it being reported again.',
+    },
+    baseUrl,
+  );
+}

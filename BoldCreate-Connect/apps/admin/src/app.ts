@@ -10,6 +10,11 @@ import {
   ROUTES,
   type AdminActionBody,
   type AdminAuditQuery,
+  type AdminErrorGroupStatusBody,
+  type AdminErrorGroupsQuery,
+  type AdminObservabilityOverviewQuery,
+  type AdminObservabilityPurgeBody,
+  type AdminOpsEventsQuery,
   type AdminPluginBulkUpdateBody,
   type AdminPluginSourceBody,
   type AdminPluginListQuery,
@@ -69,6 +74,8 @@ import {
   versionImpact,
   requestSync,
   listAuditLog,
+  createPostgresObservabilityReader,
+  type ObservabilityReader,
   updatePluginSource,
   requestAdminSetup,
   signInAdmin,
@@ -77,13 +84,19 @@ import {
   type AdminSession,
 } from '@boldcreate-integrations/domain';
 import { createServer, type HttpServer } from '@boldcreate-integrations/http-server';
-import type { Metrics } from '@boldcreate-integrations/observability';
+import type { ErrorReporter, Metrics } from '@boldcreate-integrations/observability';
 import { ADMIN_CSRF_COOKIE, ADMIN_SESSION_COOKIE, type AdminConfig } from './config.js';
 
 export interface AdminDeps {
   logger: Logger;
   metrics: Metrics;
+  errors?: ErrorReporter;
   db: Db;
+  /** Where errors and events are stored; the main database when unset. */
+  /** Where errors and events are stored; the main database when unset. */
+  observabilityDb?: Db;
+  /** A reader for another backend; overrides `observabilityDb`. */
+  observabilityReader?: ObservabilityReader;
   /** Readiness probe of the database; `SELECT 1` in the real wiring. */
   pingDb: () => Promise<unknown>;
   /** Resolves a ref to a commit and downloads it, to inspect a repository before installing. */
@@ -127,6 +140,14 @@ const ADMIN_ROUTE_IDS = [
   'adminPlugins.update',
   'adminPlugins.updateSource',
   'adminAudit.list',
+  'adminObservability.listErrors',
+  'adminObservability.getError',
+  'adminObservability.setErrorStatus',
+  'adminObservability.deleteError',
+  'adminObservability.listEvents',
+  'adminObservability.storage',
+  'adminObservability.overview',
+  'adminObservability.purge',
   'adminPlugins.bulkDelete',
   'adminPlugins.bulkUpdate',
   'adminPlugins.bulkSync',
@@ -209,11 +230,19 @@ export async function buildApp(config: AdminConfig, deps: AdminDeps): Promise<Ht
     () => false,
   );
 
+  const observability =
+    deps.observabilityReader ??
+    createPostgresObservabilityReader({
+      store: deps.observabilityDb ?? deps.db,
+      audit: deps.db,
+      maxTotalBytes: config.OBSERVABILITY_MAX_TOTAL_BYTES,
+    });
   const server = createServer({
     service: 'admin',
     config,
     logger: deps.logger,
     metrics: deps.metrics,
+    ...(deps.errors ? { errors: deps.errors } : {}),
     readinessChecks: { db: deps.pingDb },
     browserFacing: true,
     contentSecurityPolicy: CONTENT_SECURITY_POLICY,
@@ -471,6 +500,63 @@ export async function buildApp(config: AdminConfig, deps: AdminDeps): Promise<Ht
     return noStore(reply)
       .status(200)
       .send(await listAuditLog(deps.db, request.query as AdminAuditQuery));
+  });
+
+  const groupIdOf = (request: FastifyRequest) => (request.params as { groupId: string }).groupId;
+
+  server.register('adminObservability.listErrors', async (request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(await observability.listErrorGroups(request.query as AdminErrorGroupsQuery));
+  });
+
+  server.register('adminObservability.getError', async (request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(await observability.getErrorGroup(groupIdOf(request)));
+  });
+
+  server.register('adminObservability.setErrorStatus', async (request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(
+        await observability.setErrorGroupStatus(
+          groupIdOf(request),
+          request.body as AdminErrorGroupStatusBody,
+          actorOf(request),
+        ),
+      );
+  });
+
+  server.register('adminObservability.deleteError', async (request, reply) => {
+    await observability.deleteErrorGroup(groupIdOf(request), actorOf(request));
+    return noStore(reply).status(204).send();
+  });
+
+  server.register('adminObservability.listEvents', async (request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(await observability.listOpsEvents(request.query as AdminOpsEventsQuery));
+  });
+
+  server.register('adminObservability.storage', async (_request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(await observability.getStorage());
+  });
+
+  server.register('adminObservability.overview', async (request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(await observability.getOverview(request.query as AdminObservabilityOverviewQuery));
+  });
+
+  server.register('adminObservability.purge', async (request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send(
+        await observability.purge(request.body as AdminObservabilityPurgeBody, actorOf(request)),
+      );
   });
 
   server.register('adminPlugins.bulkDelete', async (request, reply) => {

@@ -48,6 +48,7 @@ import {
   UpdateProjectBodySchema,
 } from '@boldcreate-integrations/contracts';
 import type { Sealer } from '@boldcreate-integrations/credentials';
+import type { UpstreamFetch } from '@boldcreate-integrations/domain';
 import type { SsrfGuard } from '@boldcreate-integrations/security';
 import {
   createProject,
@@ -75,7 +76,9 @@ import {
   projectUsage,
   projectUserPrincipal,
   putProjectAuthConfigVariables,
-  putProjectPlugin,
+  discoverOAuthScopes,
+  planProjectOAuthDiscovery,
+  putProjectPluginWithConfig,
   removeProjectPlugin,
   requireAction,
   requireProjectUser,
@@ -106,6 +109,7 @@ interface Options {
   sealerFor: (db: Executor) => Sealer;
   allowLocalOrigins: boolean;
   redirectUri: string;
+  fetcher: UpstreamFetch;
   webhookGuard: SsrfGuard;
 }
 
@@ -369,6 +373,26 @@ export async function projectRoutes(app: FastifyInstance, opts: Options): Promis
     return reply.status(200).send(serializePage(page, serializeProjectPlugin));
   });
 
+  app.post(
+    '/orgs/:orgId/projects/:projectId/plugins/:pluginId/mcp-servers/:serverName/oauth/discover',
+    async (req, reply) => {
+      const { orgId, projectId, pluginId, serverName } = req.params as {
+        orgId: string;
+        projectId: string;
+        pluginId: string;
+        serverName: string;
+      };
+      const principal = await authenticate(db, req, orgId);
+      const url = await inTenant(db, principal, async (tx) => {
+        requireAction(principal, 'project-plugin:write', { orgId });
+        await getProject(tx, principal, orgId, projectId);
+        return planProjectOAuthDiscovery(tx, orgId, pluginId, serverName);
+      });
+      const found = await discoverOAuthScopes(opts.fetcher, url);
+      return reply.status(200).send({ ...found, callbackUrl: opts.redirectUri });
+    },
+  );
+
   app.put('/orgs/:orgId/projects/:projectId/plugins/:pluginId', async (req, reply) => {
     const { orgId, projectId, pluginId } = pluginParams(req);
     const principal = await authenticate(db, req, orgId);
@@ -378,7 +402,14 @@ export async function projectRoutes(app: FastifyInstance, opts: Options): Promis
     const { created, plugin } = await inTenant(db, principal, async (tx) => {
       requireAction(principal, 'project-plugin:write', { orgId });
       await getProject(tx, principal, orgId, projectId);
-      return putProjectPlugin(tx, callerOf(principal, orgId, projectId), pluginId, versionId);
+      return putProjectPluginWithConfig(
+        tx,
+        callerOf(principal, orgId, projectId),
+        pluginId,
+        { versionId, authConfigs: body.data.authConfigs, variables: body.data.variables },
+        sealerFor(tx),
+        { callbackUrl: opts.redirectUri },
+      );
     });
     return reply.status(created ? 201 : 200).send(serializeProjectPlugin(plugin));
   });

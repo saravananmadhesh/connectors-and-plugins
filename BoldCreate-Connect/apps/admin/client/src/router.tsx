@@ -12,6 +12,7 @@ import { adminApi } from './lib/api';
 import {
   parseAuditSearch,
   parseDiscoverSearch,
+  parseObservabilitySearch,
   parsePluginSearch,
   parsePluginsSearch,
   parseVersionSearch,
@@ -21,7 +22,9 @@ import { AuditPage } from './pages/AuditPage';
 import { AllowedEmailsPage } from './pages/AllowedEmailsPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { DiscoverPage } from './pages/DiscoverPage';
+import { ErrorDetailPage } from './pages/ErrorDetailPage';
 import { HomePage } from './pages/HomePage';
+import { ObservabilityPage } from './pages/ObservabilityPage';
 import { PluginDetailPage } from './pages/PluginDetailPage';
 import { PluginsPage } from './pages/PluginsPage';
 import { SetupPage } from './pages/SetupPage';
@@ -105,6 +108,17 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
     component: AuditPage,
     validateSearch: parseAuditSearch,
   });
+  const observability = createRoute({
+    getParentRoute: () => app,
+    path: '/observability',
+    component: ObservabilityPage,
+    validateSearch: parseObservabilitySearch,
+  });
+  const errorDetail = createRoute({
+    getParentRoute: () => app,
+    path: '/observability/errors/$groupId',
+    component: ErrorDetailPage,
+  });
   const signin = createRoute({
     getParentRoute: () => root,
     path: '/signin',
@@ -130,6 +144,8 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
         versionDetail,
         categories,
         allowedEmails,
+        observability,
+        errorDetail,
         audit,
       ]),
       signin,

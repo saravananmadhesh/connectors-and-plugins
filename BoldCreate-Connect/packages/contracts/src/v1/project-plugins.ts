@@ -1,13 +1,25 @@
 import * as z from 'zod/v4';
 import { IsoDateTimeSchema, PageSchema } from './common.js';
 import { IdInputSchema, IdSchema } from './ids.js';
-import { VariableStatusSchema } from './variables.js';
+import { PutVariablesBodySchema, VariableStatusSchema } from './variables.js';
 
-/** Which version a project plugin runs: the one named, or the latest published one when absent. */
-export const PutProjectPluginBodySchema = z.strictObject({
-  versionId: IdSchema('pv').optional(),
+/**
+ * Where a plugin stands for the project's admins, worked out on read: `needs_values` when a
+ * required value has no value, `no_auth` for a plugin without an MCP server, `ready` when every
+ * server has a default sign-in, `no_sign_in` when one has none (its users connect without auth).
+ */
+export const ProjectPluginSetupSchema = z.object({
+  status: z.enum(['ready', 'needs_values', 'no_sign_in', 'no_auth']),
+  missing: z.array(z.string()),
 });
-export type PutProjectPluginBody = z.infer<typeof PutProjectPluginBodySchema>;
+
+/** One MCP server of a project plugin and how its users sign in. */
+export const ProjectPluginServerSchema = z.object({
+  name: z.string(),
+  componentId: IdSchema('cmp'),
+  authMode: z.enum(['dcr', 'oauth_client', 'shared_secret', 'user_form']).nullable(),
+  defaultAuthConfigId: IdSchema('acf').nullable(),
+});
 
 export const ProjectPluginResponseSchema = z.object({
   pluginId: IdSchema('plg'),
@@ -17,6 +29,11 @@ export const ProjectPluginResponseSchema = z.object({
   version: z.string(),
   createdAt: IsoDateTimeSchema,
   updatedAt: IsoDateTimeSchema,
+  /** Servers whose config of the requested name already existed and was left untouched. */
+  existingAuthConfigs: z.array(z.string()).optional(),
+  /** Present on the project's plugin list. */
+  setup: ProjectPluginSetupSchema.optional(),
+  servers: z.array(ProjectPluginServerSchema).optional(),
 });
 export type ProjectPluginResponse = z.infer<typeof ProjectPluginResponseSchema>;
 
@@ -69,42 +86,73 @@ const ClientIdSchema = z.string().trim().min(1).max(512);
 const SecretValueSchema = z.string().min(1).max(8192);
 const ScopesSchema = z.string().trim().max(1000);
 
+const authConfigFields = {
+  name: AuthConfigNameSchema,
+  authMode: AuthConfigInputModeSchema,
+  isDefault: z.boolean().optional(),
+  clientId: ClientIdSchema.optional(),
+  clientSecret: SecretValueSchema.optional(),
+  scopes: ScopesSchema.optional(),
+  secret: SecretValueSchema.optional(),
+};
+
+/** What each mode carries; shared by the create body and the config an add carries. */
+function checkAuthConfigFields(
+  body: {
+    authMode: z.infer<typeof AuthConfigInputModeSchema>;
+    clientId?: string | undefined;
+    clientSecret?: string | undefined;
+    scopes?: string | undefined;
+    secret?: string | undefined;
+  },
+  ctx: z.core.$RefinementCtx,
+): void {
+  const fail = (path: string, message: string) =>
+    ctx.addIssue({ code: 'custom', path: [path], message });
+  const oauth = body.authMode === 'oauth_client';
+  if (oauth && body.clientId === undefined) fail('clientId', 'is required');
+  if (!oauth && body.clientId !== undefined) fail('clientId', 'applies to oauth_client only');
+  if (!oauth && body.clientSecret !== undefined) {
+    fail('clientSecret', 'applies to oauth_client only');
+  }
+  if (body.authMode === 'shared_secret' && body.secret === undefined) {
+    fail('secret', 'is required');
+  }
+  if (body.authMode !== 'shared_secret' && body.secret !== undefined) {
+    fail('secret', 'applies to shared_secret only');
+  }
+  if (body.authMode === 'shared_secret' && body.scopes !== undefined) {
+    fail('scopes', 'applies to OAuth modes only');
+  }
+}
+
 /**
  * Makes an auth config for the MCP server a component stands for. The mode decides what it
  * carries: `oauth_client` a client id (and secret), `shared_secret` one secret every user shares,
  * `dcr` nothing, since the server registers a client itself.
  */
 export const CreateAuthConfigBodySchema = z
-  .strictObject({
-    componentId: IdInputSchema('cmp'),
-    name: AuthConfigNameSchema,
-    authMode: AuthConfigInputModeSchema,
-    isDefault: z.boolean().optional(),
-    clientId: ClientIdSchema.optional(),
-    clientSecret: SecretValueSchema.optional(),
-    scopes: ScopesSchema.optional(),
-    secret: SecretValueSchema.optional(),
-  })
-  .superRefine((body, ctx) => {
-    const fail = (path: string, message: string) =>
-      ctx.addIssue({ code: 'custom', path: [path], message });
-    const oauth = body.authMode === 'oauth_client';
-    if (oauth && body.clientId === undefined) fail('clientId', 'is required');
-    if (!oauth && body.clientId !== undefined) fail('clientId', 'applies to oauth_client only');
-    if (!oauth && body.clientSecret !== undefined) {
-      fail('clientSecret', 'applies to oauth_client only');
-    }
-    if (body.authMode === 'shared_secret' && body.secret === undefined) {
-      fail('secret', 'is required');
-    }
-    if (body.authMode !== 'shared_secret' && body.secret !== undefined) {
-      fail('secret', 'applies to shared_secret only');
-    }
-    if (body.authMode === 'shared_secret' && body.scopes !== undefined) {
-      fail('scopes', 'applies to OAuth modes only');
-    }
-  });
+  .strictObject({ componentId: IdInputSchema('cmp'), ...authConfigFields })
+  .superRefine(checkAuthConfigFields);
 export type CreateAuthConfigBody = z.infer<typeof CreateAuthConfigBodySchema>;
+
+/** An auth config that comes with the add of a plugin; the server is the key it is filed under. */
+export const PluginAuthConfigSchema = z
+  .strictObject(authConfigFields)
+  .superRefine(checkAuthConfigFields);
+export type PluginAuthConfig = z.infer<typeof PluginAuthConfigSchema>;
+
+/**
+ * Which version a project plugin runs: the one named, or the latest published one when absent.
+ * `authConfigs` (by MCP server name) and `variables` set the plugin up in the same save: either all
+ * of it is stored or none. A config whose name the server already has is left as it is.
+ */
+export const PutProjectPluginBodySchema = z.strictObject({
+  versionId: IdSchema('pv').optional(),
+  authConfigs: z.record(z.string().min(1).max(200), PluginAuthConfigSchema).optional(),
+  variables: PutVariablesBodySchema.shape.values.optional(),
+});
+export type PutProjectPluginBody = z.infer<typeof PutProjectPluginBodySchema>;
 
 /**
  * Changes an auth config; the mode and the component stay. A secret or client secret is write
@@ -132,6 +180,9 @@ export const ConsoleProjectPluginParamsSchema = z.object({
   orgId: IdSchema('org'),
   projectId: IdSchema('prj'),
   pluginId: IdSchema('plg'),
+});
+export const ConsoleProjectPluginServerParamsSchema = ConsoleProjectPluginParamsSchema.extend({
+  serverName: z.string().min(1).max(200),
 });
 export const ConsoleProjectAuthConfigParamsSchema = z.object({
   orgId: IdSchema('org'),

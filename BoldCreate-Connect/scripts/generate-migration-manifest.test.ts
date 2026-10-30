@@ -1,11 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   generateMigrationManifest,
   getMigrationFiles,
   parseCliArgs,
 } from './generate-migration-manifest.js';
 
+afterEach(() => vi.unstubAllEnvs());
+
 describe('generate-migration-manifest', () => {
+  it.each(['staging', 'preproduction', 'production'] as const)(
+    'defaults to a database Secret reference for %s without credentials',
+    (env) => {
+      vi.stubEnv('DATABASE_URL', undefined);
+      const manifest = generateMigrationManifest({ env });
+      expect(manifest).toContain(`name: boldcreate-integrations-api-secrets-${env}`);
+      expect(manifest).toContain('key: DATABASE_URL');
+      expect(manifest).not.toContain('postgresql://');
+    },
+  );
   it('reads all sql migration files from packages/db/migrations', () => {
     const files = getMigrationFiles();
     expect(files.length).toBeGreaterThanOrEqual(3);
@@ -35,7 +47,9 @@ describe('generate-migration-manifest', () => {
   it('generates production manifest with namespace boldcreate-prod', () => {
     const manifest = generateMigrationManifest({ env: 'production' });
     expect(manifest).toContain('namespace: boldcreate-prod');
-    expect(manifest).toContain('boldcreate-prod-integrations-api:latest');
+    expect(manifest).toContain(
+      'image: us-east4-docker.pkg.dev/syncfusioncody/synccodestudio/boldcreate-production-integrations-api:latest',
+    );
   });
 
   it('embeds direct DATABASE_URL when supplied', () => {

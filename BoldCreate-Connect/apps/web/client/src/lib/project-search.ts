@@ -3,9 +3,7 @@ export type ProjectTab =
   | 'users'
   | 'sessions'
   | 'plugins'
-  | 'auth-configs'
   | 'connections'
-  | 'catalog'
   | 'logs'
   | 'keys'
   | 'settings';
@@ -15,9 +13,7 @@ export const PROJECT_TABS: readonly { value: ProjectTab; label: string }[] = [
   { value: 'users', label: 'Users' },
   { value: 'sessions', label: 'Sessions' },
   { value: 'plugins', label: 'Plugins' },
-  { value: 'auth-configs', label: 'Auth configs' },
   { value: 'connections', label: 'Connections' },
-  { value: 'catalog', label: 'Catalog' },
   { value: 'logs', label: 'Logs' },
   { value: 'keys', label: 'API keys' },
   { value: 'settings', label: 'Settings' },

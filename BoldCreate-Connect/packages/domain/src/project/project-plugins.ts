@@ -6,13 +6,15 @@
  * has checked their role.
  */
 import { randomUUID } from 'node:crypto';
-import { and, asc, desc, eq, isNull, ne, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, ne, or, sql, type SQL } from 'drizzle-orm';
 import {
+  authConfigTable,
   componentTable,
   decodeCursor,
   encodeCursor,
   installationComponentTable,
   installationTable,
+  installationVariableTable,
   mcpServerTable,
   pluginTable,
   pluginVersionTable,
@@ -31,6 +33,7 @@ import type { Sealer } from '@boldcreate-integrations/credentials';
 import { writeAudit, type AuditEntry } from '../audit/write-audit.js';
 import { conflict, isUniqueViolation, limitExceeded, notFound } from '../errors.js';
 import { writeVariables } from '../installation/variables.js';
+import { scanOf } from '../marketplace/admin-plugins.js';
 import type { ProjectScope } from './project-users.js';
 import { revokeSessionsForPlugin } from './sessions.js';
 
@@ -71,7 +74,104 @@ export async function listProjectPlugins(
   project: ProjectScope,
   query: PageQuery,
 ): Promise<{ items: PluginView[]; nextCursor: string | null }> {
-  return installPage(tx, projectInstalls(project), query);
+  const page = await installPage(tx, projectInstalls(project), query);
+  return { ...page, items: await withSetup(tx, project, page.items) };
+}
+
+/**
+ * Adds the setup and the servers to a page of plugins in a fixed number of queries: one for the
+ * installs, one for their MCP servers, one for the default configs and one for the values set.
+ */
+async function withSetup(
+  tx: Executor,
+  project: ProjectScope,
+  items: PluginView[],
+): Promise<PluginView[]> {
+  if (items.length === 0) return items;
+  const pluginIds = items.map((item) => item.pluginId);
+  const installs = await tx
+    .select({
+      id: installationTable.id,
+      pluginId: installationTable.pluginId,
+      version: pluginVersionTable,
+    })
+    .from(installationTable)
+    .innerJoin(pluginVersionTable, eq(pluginVersionTable.id, installationTable.pluginVersionId))
+    .where(and(projectInstalls(project), inArray(installationTable.pluginId, pluginIds)));
+  const installIds = installs.map((install) => install.id);
+  const [servers, defaults, stored] = await Promise.all([
+    tx
+      .select({
+        installationId: installationComponentTable.installationId,
+        componentId: componentTable.id,
+        name: componentTable.name,
+      })
+      .from(installationComponentTable)
+      .innerJoin(componentTable, eq(componentTable.id, installationComponentTable.componentId))
+      .where(
+        and(
+          inArray(installationComponentTable.installationId, installIds),
+          eq(componentTable.kind, 'mcp'),
+        ),
+      )
+      .orderBy(asc(componentTable.name)),
+    tx
+      .select({
+        id: authConfigTable.id,
+        pluginId: authConfigTable.pluginId,
+        serverName: authConfigTable.serverName,
+        authMode: authConfigTable.authMode,
+      })
+      .from(authConfigTable)
+      .where(
+        and(
+          eq(authConfigTable.projectId, project.projectId),
+          inArray(authConfigTable.pluginId, pluginIds),
+          eq(authConfigTable.isDefault, true),
+          eq(authConfigTable.status, 'active'),
+        ),
+      ),
+    tx
+      .select({
+        installationId: installationVariableTable.installationId,
+        name: installationVariableTable.name,
+      })
+      .from(installationVariableTable)
+      .where(inArray(installationVariableTable.installationId, installIds)),
+  ]);
+  const installOf = new Map(installs.map((install) => [install.pluginId, install]));
+  return items.map((item) => {
+    const install = installOf.get(item.pluginId);
+    if (!install) return item;
+    const have = new Set(
+      stored.filter((row) => row.installationId === install.id).map((row) => row.name),
+    );
+    const missing = (scanOf(install.version)?.variables ?? [])
+      .filter((variable) => variable.required && !have.has(variable.name))
+      .map((variable) => variable.name);
+    const own = servers
+      .filter((server) => server.installationId === install.id)
+      .map((server) => {
+        const config = defaults.find(
+          (row) => row.pluginId === item.pluginId && row.serverName === server.name,
+        );
+        return {
+          name: server.name,
+          componentId: server.componentId,
+          authMode: config?.authMode ?? null,
+          defaultAuthConfigId: config?.id ?? null,
+        };
+      });
+    const status =
+      missing.length > 0
+        ? 'needs_values'
+        : own.length === 0
+          ? 'no_auth'
+          : own.some((server) => server.defaultAuthConfigId !== null) || have.size > 0
+            ? 'ready'
+            : 'no_sign_in';
+    return { ...item, servers: own, setup: { status, missing } } as PluginView;
+  });
 }
 
 /** One page of installations, oldest first, shown as the plugins they install. */
@@ -340,7 +440,7 @@ export async function putProjectPlugin(
   };
 }
 
-/** Removes the plugin and its settings from the project. A plugin the project does not have is `not_found`. */
+/** Removes the plugin, its sign-ins and its values from the project. A plugin the project does not have is `not_found`. */
 export async function removeProjectPlugin(
   tx: Executor,
   caller: ProjectCaller,
@@ -355,6 +455,15 @@ export async function removeProjectPlugin(
   if (!existing) throw notFound();
   await tx.transaction(async (inner) => {
     await inner.delete(installationTable).where(eq(installationTable.id, existing.id));
+    // The sign-ins set up for the plugin go with it; a plugin added again starts clean.
+    await inner
+      .delete(authConfigTable)
+      .where(
+        and(
+          eq(authConfigTable.projectId, caller.projectId),
+          eq(authConfigTable.pluginId, pluginId),
+        ),
+      );
     await writeAudit(
       inner,
       installAudit(caller, 'installation.deleted', existing.id, { pluginId }),

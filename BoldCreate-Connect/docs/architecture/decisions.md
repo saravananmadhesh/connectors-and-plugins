@@ -239,3 +239,39 @@ The route registry in `packages/contracts` is the single source. `pnpm build` wr
 - **Why.** These pages took their organization from a value remembered in the browser, so an address did not say what it showed, could not be shared, and the For You / Platform buttons and the organization switcher had to guess where to land. Pages show names, not ids; the project page no longer prints its id.
 - **One-way door.** The old addresses keep working only through the redirect; links built from the new ones do not exist in older builds.
 - **Rejected.** Keeping the short addresses and adding the organization as a query parameter (the address would still be ambiguous without it), and putting a slug in the address (a rename would break every link).
+
+## A plugin is added to a project with its sign-in and values in one save
+
+- **Decision.** `PUT /v1/project/plugins/:pluginId` (and the console twin) takes optional `authConfigs` (by MCP server name, the same fields as creating an auth config) and `variables`. The plugin, its configs and its values are stored in one transaction, or none are. A config whose name the server already has is left as it is and named in `existingAuthConfigs`. A host key needs `auth-configs:write` as well as `plugins:write` when the body carries either field. The plugin detail also lists the variables the newest version asks for.
+- **UI.** The project's Auth configs and Catalog tabs are gone. Plugins is one view: add a plugin (with its sign-in and values) and set the values of installed ones. Plugin sets moved to Settings. The who-may-install mode and the allowed list have no screen; the backend stays and a new project starts with user installs `off`.
+- **Why.** Adding a plugin and then finding its configuration in two other tabs left plugins half set up, and the web client could not create an auth config at all.
+- **One-way door.** Additive fields on a public route and on the plugin detail; the removed tabs' addresses fall back to the overview.
+- **Rejected.** A new route for the combined save (two ways to add a plugin) and a separate step per server (a failure would leave a plugin without its sign-in).
+
+## A deployed environment keeps to its own folder in the bucket
+
+- **Decision.** When `DEPLOY_ENV` is `staging` or `production`, every object key starts with that name: `staging/artifacts/<sha256>` and `production/artifacts/<sha256>`. A configured `BLOB_PREFIX` goes under it (`production/<prefix>/`). Local and test keep the plain prefix.
+- **Why.** The key was `artifacts/<sha256>` in every environment, so two environments on one bucket shared keys and a clean-up in one could remove objects the other still used.
+- **One-way door.** Objects already stored in a deployed environment under the old key are not found under the new one. Copy them to the new folder before the release (`aws s3 cp --recursive s3://BUCKET/artifacts/ s3://BUCKET/<env>/artifacts/`), or republish.
+- **Rejected.** A separate bucket per environment as the only rule (still advised, but nothing stopped a shared one) and a required `BLOB_PREFIX` (easy to forget or to copy between environments).
+
+## Removing a project plugin removes its sign-ins and values
+
+- **Decision.** `DELETE` of a project plugin also deletes the auth configs of that plugin in the project, in the same transaction. Its values go with the installation. Adding it again starts clean.
+- **Why.** Leftover configs showed up in the project and were reused silently by a plugin added later.
+- **Rejected.** Keeping the configs for a re-add (hidden state the screen no longer shows).
+
+## Errors and key events are stored in our own database
+
+- **Decision.** Three platform tables, `error_group`, `error_event` and `ops_event`, hold errors (grouped by a stable fingerprint, sampled, size-capped, redacted before storage) and a short list of key events (deploys, failed jobs, startup and dependency state changes, security). Services write through a bounded in-memory queue that never delays a request. Only the admin role reads them, through a named maintenance purpose. The worker purges old rows daily with batched deletes by `occurred_at`. Admin gets an Observability area. Production console logging drops to `warn`, with a GCP exclusion for severity below WARNING. Connect stops sending to the shared Sentry once the screens exist.
+- **Why.** Errors were only in logs and shared Sentry; routine logs cost more than they help. Handled failures (KMS, seal, OAuth, job attempts, fail-open) and failures that only show in staging or production were not visible at all.
+- **One-way door.** New tables and role grants. Stored data is limited to error text, stack frames and ids; never bodies, headers, tokens or key material.
+- **Rejected.** A new observability service or vendor (cost, a new data processor), and day partitions (the migration generator cannot declare them, so retention uses indexed batched deletes).
+
+## Errors and events use a pool of their own and can move to another database
+
+- **Decision.** Every service writes errors and events through a dedicated, capped pool (`createObservabilityStore`) with its own statement, lock and connect timeouts. `OBSERVABILITY_DATABASE_URL` points it at a separate database; unset, it uses `DATABASE_URL`. A circuit breaker pauses writes after repeated failures and the store's start-up check is advisory, so a slow or missing store never fails a request or readiness. A status change in admin writes its audit row first, in the same transaction only when both use one database.
+- **Why.** Observability must not take connections, locks or time from request traffic, and moving it later must be configuration only.
+- **One-way door.** Observability tables are no longer reached through the service's own pool. A separate database receives the full migration set.
+- **Rejected.** Sharing the service pool (contention) and a separate migration set for the second database (a second migration pipeline for three tables).
+- **Read side.** The admin app reads errors and events through `ObservabilityReader` (Postgres implementation `createPostgresObservabilityReader`), so another backend replaces one module. Capture state is exposed as Prometheus metrics, and retention takes a pause between batches and a time limit.

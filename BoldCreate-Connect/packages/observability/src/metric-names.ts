@@ -24,6 +24,10 @@ export const METRIC_NAMES = {
   outboxPendingEvents: 'outbox_pending_events',
   queueDepth: 'queue_depth',
   dbPoolWaiting: 'db_pool_waiting_count',
+  errorCaptureQueued: 'error_capture_queue_depth',
+  errorCaptureWritten: 'error_capture_written_total',
+  errorCaptureDropped: 'error_capture_dropped_total',
+  errorCaptureFlushDuration: 'error_capture_flush_seconds',
 } as const;
 
 export type MetricKey = keyof typeof METRIC_NAMES;

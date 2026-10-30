@@ -57,7 +57,8 @@ function fieldPath(prefix: string, path: PropertyKey[]): string {
 function validate(route: RouteDef, request: FastifyRequest): void {
   const details: ErrorDetail[] = [];
   const parts = [
-    ['', route.body, request.body],
+    // A write that carries nothing is sent as an empty object, as the api reads it.
+    ['', route.body, request.body ?? (BODY_METHODS.has(route.method) ? {} : undefined)],
     ['query', route.query, request.query],
   ] as const;
   for (const [prefix, schema, value] of parts) {
@@ -189,7 +190,10 @@ export function registerProxy(server: HttpServer, options: ProxyOptions): void {
           signal: AbortSignal.timeout(options.timeoutMs),
         });
       } catch {
-        if (redirects) return failedSignIn(reply);
+        if (redirects) {
+          request.log.warn({ route: route.id }, 'sign-in return: the api did not answer');
+          return failedSignIn(reply);
+        }
         throw new AppError('upstream_unavailable');
       }
 
@@ -199,7 +203,15 @@ export function registerProxy(server: HttpServer, options: ProxyOptions): void {
         (COOKIE_CLEARING_ON_SUCCESS_ROUTES.has(route.id) && upstream.status < 400);
       if (clear && sessionToken) reply.clearCookie(SESSION_COOKIE, { path: '/' });
 
-      if (redirects && upstream.status >= 400) return failedSignIn(reply);
+      if (redirects && upstream.status >= 400) {
+        // The member sees one failure; the log keeps the api's classified code.
+        const failure = ApiErrorSchema.safeParse(await upstream.json().catch(() => undefined));
+        request.log.warn(
+          { route: route.id, status: upstream.status, code: failure.data?.error.code },
+          'sign-in return refused by the api',
+        );
+        return failedSignIn(reply);
+      }
 
       const text = await upstream.text();
       let json: unknown;

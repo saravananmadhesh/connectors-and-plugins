@@ -8,3 +8,8 @@ export * from './maintenance.js';
 export * from './role-grants.js';
 export * from './role-setup.js';
 export * from './idempotency-store.js';
+export * from './error-sink.js';
+export * from './error-alerts.js';
+export * from './observability-retention.js';
+export * from './observability-store.js';
+export * from './service-observability.js';

@@ -30,6 +30,16 @@ describe('blob adapter configuration', () => {
     });
   });
 
+  it.each(['staging', 'production'] as const)(
+    'keeps a deployed environment to its own folder in the bucket (%s)',
+    (DEPLOY_ENV) => {
+      expect(s3OptionsFromConfig({ ...base, DEPLOY_ENV }).prefix).toBe(`${DEPLOY_ENV}/artifacts/`);
+      expect(s3OptionsFromConfig({ ...base, DEPLOY_ENV, BLOB_PREFIX: '/x' }).prefix).toBe(
+        `${DEPLOY_ENV}/x/`,
+      );
+    },
+  );
+
   it.each(['local', 'test'] as const)('allows static credentials when %s', (DEPLOY_ENV) => {
     expect(s3OptionsFromConfig({ ...base, DEPLOY_ENV, ...withKeys }).credentials).toBeDefined();
   });

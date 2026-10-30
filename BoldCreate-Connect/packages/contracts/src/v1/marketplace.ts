@@ -56,6 +56,15 @@ export const PluginDetailResponseSchema = PluginSummaryResponseSchema.extend({
   createdAt: IsoDateTimeSchema,
   latestVersion: PluginVersionSummaryResponseSchema.nullable(),
   components: z.array(ComponentSummarySchema),
+  /** The values the newest published version asks its installer for. */
+  variables: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      required: z.boolean(),
+      secret: z.boolean(),
+    }),
+  ),
 });
 export type PluginDetailResponse = z.infer<typeof PluginDetailResponseSchema>;
 

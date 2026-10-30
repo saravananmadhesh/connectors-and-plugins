@@ -5,12 +5,11 @@ import {
   ApiError,
   mcpServers,
   type InstallationResponse,
-  type McpAuthTypeValue,
   type McpServerResponse,
   type ScopeKey,
 } from '@/lib/api';
 import {
-  AUTH_OPTIONS,
+  authChoices,
   MAX_TIMEOUT_SECONDS,
   MIN_TIMEOUT_SECONDS,
   authBody,
@@ -29,10 +28,11 @@ import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Input, Select } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { McpAuthFields } from '@/components/McpAuthFields';
 import { McpEnvironment } from '@/components/McpEnvironment';
 
 interface Props {
@@ -137,20 +137,12 @@ function Body({ orgId, scopeKey, installation, server, canUpdate, replace }: Bod
     retry: false,
   });
   const found = discovery.data?.scopes ?? [];
-  // Sign-in types the server cannot take are not offered, except the one already stored.
-  const choices = AUTH_OPTIONS.filter((entry) => {
-    if (entry.value === server.authType || entry.value === 'none' || entry.value === 'api_key') {
-      return true;
-    }
-    if (!discovery.data?.discovered) return false;
-    return entry.value === 'oauth_client' || discovery.data.dynamicRegistration;
-  });
+  const choices = authChoices(typed.authType, discovery.data, discovery.isError);
   const draft: AuthDraft =
     scopesEdited || server.oauthScopes !== null ? typed : { ...typed, scopes: found.join(' ') };
   const problems = authProblems(draft, server);
   const body = authBody(draft, server);
   const valid = Object.keys(problems).length === 0;
-  const option = AUTH_OPTIONS.find((entry) => entry.value === draft.authType);
 
   const save = useMutation({
     mutationFn: () => {
@@ -187,7 +179,20 @@ function Body({ orgId, scopeKey, installation, server, canUpdate, replace }: Bod
   });
 
   const signIn = useMutation({
-    mutationFn: () => mcpServers.oauthStart(orgId, scopeKey, installation.id, server.componentId),
+    mutationFn: async () => {
+      // What is typed but not saved yet is what the person means to sign in with.
+      if (body && canUpdate) {
+        const saved = await mcpServers.putAuth(
+          orgId,
+          scopeKey,
+          installation.id,
+          server.componentId,
+          body,
+        );
+        replace(saved);
+      }
+      return mcpServers.oauthStart(orgId, scopeKey, installation.id, server.componentId);
+    },
     onSuccess: ({ authorizeUrl }) => {
       if (!leaveTo(authorizeUrl))
         setError('The sign-in service returned an address that cannot be used.');
@@ -224,6 +229,31 @@ function Body({ orgId, scopeKey, installation, server, canUpdate, replace }: Bod
     <div className="mt-4 space-y-6">
       {error && <Alert variant="destructive">{error}</Alert>}
       {note && <Alert variant="success">{note}</Alert>}
+
+      {http && needsSignIn(server) && (
+        <section className="space-y-2" aria-label="Your sign-in">
+          <h3 className="text-sm font-medium">Your sign-in</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={server.connection === 'connected' ? 'success' : 'warning'}>
+              {connectionLabel(server.connection)}
+            </Badge>
+            {server.connection === 'connected' ? (
+              <Button variant="outline" size="sm" disabled={busy} onClick={() => signOut.mutate()}>
+                {signOut.isPending ? <Spinner /> : <LogOut />}
+                Sign out
+              </Button>
+            ) : (
+              <Button size="sm" disabled={busy || !valid} onClick={() => signIn.mutate()}>
+                {signIn.isPending ? <Spinner /> : <LogIn />}
+                {server.connection === 'needs_reauth' ? 'Sign in again' : 'Sign in'}
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Your agents act with your own sign-in; other members sign in for themselves.
+          </p>
+        </section>
+      )}
 
       <section className="space-y-2" aria-label="Status">
         <div className="flex flex-wrap items-center gap-2">
@@ -262,110 +292,27 @@ function Body({ orgId, scopeKey, installation, server, canUpdate, replace }: Bod
       {http && (
         <section className="space-y-3" aria-label="Authentication">
           <h3 className="text-sm font-medium">Authentication</h3>
-          <div className="space-y-1.5">
-            <Label htmlFor="mcp-auth-type">Type</Label>
-            <Select
-              id="mcp-auth-type"
-              value={draft.authType}
-              disabled={!canUpdate || busy}
-              onChange={(event) => set({ authType: event.target.value as McpAuthTypeValue })}
-            >
-              {choices.map((entry) => (
-                <option key={entry.value} value={entry.value}>
-                  {entry.label}
-                </option>
-              ))}
-            </Select>
-            {option && <p className="text-xs text-muted-foreground">{option.hint}</p>}
-          </div>
-
-          {draft.authType === 'api_key' && (
-            <div className="space-y-1.5">
-              <Label htmlFor="mcp-api-key">API key</Label>
-              <Input
-                id="mcp-api-key"
-                type="password"
-                autoComplete="off"
-                disabled={!canUpdate || busy}
-                placeholder={
-                  server.authType === 'api_key' && server.apiKeyLastFour
-                    ? `Stored key ending ${server.apiKeyLastFour}; leave blank to keep it`
-                    : 'Paste the key'
-                }
-                value={draft.apiKey}
-                error={problems.apiKey}
-                onChange={(event) => set({ apiKey: event.target.value })}
-              />
-            </div>
-          )}
-
-          {draft.authType === 'oauth_client' && (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="mcp-callback-url">Callback URL</Label>
-                <Input
-                  id="mcp-callback-url"
-                  readOnly
-                  value={discovery.data?.callbackUrl ?? ''}
-                  placeholder={discovery.isFetching ? 'Loading…' : ''}
-                  onFocus={(event) => event.target.select()}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Register this address as the redirect URL of your OAuth app.
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="mcp-client-id">Client ID</Label>
-                <Input
-                  id="mcp-client-id"
-                  autoComplete="off"
-                  disabled={!canUpdate || busy}
-                  value={draft.clientId}
-                  error={problems.clientId}
-                  onChange={(event) => set({ clientId: event.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="mcp-client-secret">Client secret</Label>
-                <Input
-                  id="mcp-client-secret"
-                  type="password"
-                  autoComplete="off"
-                  disabled={!canUpdate || busy}
-                  placeholder={
-                    server.oauthClientSecretSet
-                      ? 'A secret is stored; leave blank to keep it'
-                      : 'Optional for public clients'
-                  }
-                  value={draft.clientSecret}
-                  onChange={(event) => set({ clientSecret: event.target.value })}
-                />
-              </div>
-            </>
-          )}
-
-          {(draft.authType === 'oauth_client' || draft.authType === 'oauth_dcr') && (
-            <div className="space-y-1.5">
-              <Label htmlFor="mcp-scopes">Scopes</Label>
-              <Input
-                id="mcp-scopes"
-                autoComplete="off"
-                spellCheck={false}
-                disabled={!canUpdate || busy}
-                placeholder="Space-separated, for example: repo read:user"
-                value={draft.scopes}
-                onChange={(event) => set({ scopes: event.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                {discovery.isFetching
-                  ? 'Reading the sign-in details the server publishes…'
-                  : found.length > 0
-                    ? 'Filled in from the server’s published sign-in details. '
-                    : 'The server publishes no scopes. '}
-                Changing this signs members out so they connect again.
-              </p>
-            </div>
-          )}
+          <McpAuthFields
+            idPrefix="mcp"
+            draft={draft}
+            onChange={set}
+            choices={choices}
+            discovery={discovery.data}
+            fetching={discovery.isFetching}
+            disabled={!canUpdate || busy}
+            problems={problems}
+            keyPlaceholder={
+              server.authType === 'api_key' && server.apiKeyLastFour
+                ? `Stored key ending ${server.apiKeyLastFour}; leave blank to keep it`
+                : 'Paste the key'
+            }
+            secretPlaceholder={
+              server.oauthClientSecretSet
+                ? 'A secret is stored; leave blank to keep it'
+                : 'Optional for public clients'
+            }
+            scopesNote="Changing this signs members out so they connect again."
+          />
 
           <div className="space-y-1.5">
             <Label htmlFor="mcp-timeout">Call timeout (seconds)</Label>
@@ -387,31 +334,6 @@ function Body({ orgId, scopeKey, installation, server, canUpdate, replace }: Bod
               Save authentication
             </Button>
           )}
-        </section>
-      )}
-
-      {http && needsSignIn(server) && (
-        <section className="space-y-2" aria-label="Your sign-in">
-          <h3 className="text-sm font-medium">Your sign-in</h3>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={server.connection === 'connected' ? 'success' : 'warning'}>
-              {connectionLabel(server.connection)}
-            </Badge>
-            {server.connection === 'connected' ? (
-              <Button variant="outline" size="sm" disabled={busy} onClick={() => signOut.mutate()}>
-                {signOut.isPending ? <Spinner /> : <LogOut />}
-                Sign out
-              </Button>
-            ) : (
-              <Button size="sm" disabled={busy} onClick={() => signIn.mutate()}>
-                {signIn.isPending ? <Spinner /> : <LogIn />}
-                {server.connection === 'needs_reauth' ? 'Sign in again' : 'Sign in'}
-              </Button>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Your agents act with your own sign-in; other members sign in for themselves.
-          </p>
         </section>
       )}
 

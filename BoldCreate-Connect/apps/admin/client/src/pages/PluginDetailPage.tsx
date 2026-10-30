@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { RefreshButton } from '../components/RefreshButton';
 import { ArrowLeft, ChevronDown, History } from 'lucide-react';
 import { AuditList } from '../components/AuditList';
 import { ComponentCounts } from '../components/ComponentCounts';
@@ -99,13 +100,16 @@ export function PluginDetailPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <Link
-        to="/plugins"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to plugins
-      </Link>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <Link
+          to="/plugins"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back to plugins
+        </Link>
+        <RefreshButton />
+      </div>
       {plugin.isPending && (
         <div className="flex flex-col gap-3" aria-label="Loading plugin">
           <Skeleton className="h-16" />

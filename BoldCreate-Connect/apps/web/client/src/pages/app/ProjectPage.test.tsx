@@ -116,15 +116,15 @@ describe('ProjectPage', () => {
       'Users',
       'Sessions',
       'Plugins',
-      'Auth configs',
       'Connections',
-      'Catalog',
       'Logs',
       'API keys',
     ]) {
       expect(await screen.findByRole('tab', { name })).toBeInTheDocument();
     }
     expect(screen.getByRole('tab', { name: 'Settings' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Auth configs' })).toBeNull();
+    expect(screen.queryByRole('tab', { name: 'Catalog' })).toBeNull();
   });
 
   it('leaves the keys and settings tabs out for a viewer', async () => {

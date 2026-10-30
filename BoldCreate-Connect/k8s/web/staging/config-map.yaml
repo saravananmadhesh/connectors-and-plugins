@@ -9,3 +9,5 @@ data:
   PORT: '3000'
   API_BASE_URL: http://boldcreate-integrations-api-staging.boldcreate-stag.svc.cluster.local:3001
   APP_BASE_URL: https://connect-staging.boldcreate.ai
+  PUBLIC_GATEWAY_URL: https://connect-gateway-staging.boldcreate.ai
+  NODE_TLS_REJECT_UNAUTHORIZED: '0'

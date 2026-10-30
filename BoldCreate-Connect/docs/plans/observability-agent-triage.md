@@ -47,6 +47,8 @@ The endpoint returns a summary by default, then lets the agent ask for detail on
 | `get_event`                   | One selected event, including exact frame and redacted context, with a 1,500-token cap.                                                                                                                                                   |   Up to 1,500 tokens |
 | `get_request_trail`           | Key events for one request/trace across services, default 10 records and 2,000-token cap.                                                                                                                                                 |     500-2,000 tokens |
 
+The summary also carries the typed fields captured by [observability.md](observability.md) (`area`, `operation`, `step`, `provider`, `errorCode`, `attempt`) and the environment fields (`environment`, `release`, `instance_id`, `region`). For handled failures such as a KMS unwrap denied, an OAuth `redirect_uri_mismatch` or a failed startup check, these fields are the cause hint: "production only, worker service account lacks the KMS decrypt role" is something the agent can act on without reading a stack. The bundle states whether the issue was seen in staging, production or both, and whether it first appeared after a release or after a configuration change. For environment-only failures (permissions, callback URLs, missing grants, config) the skill tells the agent that the fix is usually outside the code, and that it should report the missing setting by name (never a value) instead of editing code.
+
 Tool output should use compact JSON, omit null and repeated fields, collapse library frames, and include `truncated` plus a cursor or follow-up hint whenever it hits a cap. Stack excerpts belong in full tier only. The agent can inspect source itself once it has the commit SHA and file/line. Budgets are estimates, not token counts guaranteed by character length. A2 must measure actual serialized fixtures with the selected model tokenizer, enforce limits and test the largest issue. The usual path is `list_issues` (about 600 tokens) then `get_issue` summary (about 1,500), roughly 2,100 tokens before the agent reads local code. Ask for full detail only if the summary and source are not enough. On the capture side, the reporter batches and deduplicates so normal traffic does not create event rows. If the database is unavailable, it never delays a user request: retry a bounded in-memory buffer, then emit one redacted Pino error line and increment a dropped-capture metric. Graceful shutdown flushes the batch; a hard process crash may lose only the unflushed batch, which is why platform alerts must cover process and database health.
 
 Example of the Markdown head:
@@ -65,7 +67,7 @@ frames:
 
 1. Call `get_issue CON-142`. Stop if the bundle says `status: resolved` or `ignored`.
 2. `git fetch` and create a worktree at the bundle's commit sha, then a branch `fix/con-142`.
-3. Read the failing frames. Write a failing test first (unit, or integration if a database is involved) using the input shape from the bundle.
+3. Check `environment` and `area` first. If the issue appears only in staging or production and the cause hint points at configuration, permissions, a callback URL or a missing grant, stop and report the exact missing setting by name; do not change code to hide it. Otherwise read the failing frames. Write a failing test first (unit, or integration if a database is involved) using the input shape from the bundle.
 4. Fix the cause, not the symptom. Keep the change small (repo rules apply).
 5. Run `pnpm test -- --only=format,lint,typecheck,unit`. Report exactly what passed.
 6. Commit with the trailer `Fixes CON-142` only when the user agrees, and open a pull request.
@@ -88,15 +90,15 @@ If the bundle lacks what the agent needs, the agent says what is missing instead
 
 ## Work packages
 
-| Id  | Work                                                                                                           | Effort |
-| --- | -------------------------------------------------------------------------------------------------------------- | ------ |
-| A1  | Capture adds commit sha, release, route pattern, input shape and last-10 timeline to each event                | S      |
-| A2  | Bundle builder in `packages/domain` (pure function, unit-tested with fixtures) and admin endpoint              | M      |
-| A3  | `monitoring:read` token: table, hashing, expiry, audit, admin UI to create and revoke                          | M      |
-| A4  | Local stdio MCP server in `scripts/monitor-mcp/` and `pnpm monitor <cmd>` CLI over the endpoints; not deployed | S      |
-| A5  | Skill `fix-issue`, "Copy as prompt" button on the error detail screen (copies the bundle)                      | S      |
-| A6  | Resolve-by-release from verified commit metadata and regression reopen in the worker                           | M      |
-| A7  | Tests: redaction of every bundle section, token scope and expiry, size caps, injection fixtures                | M      |
+| Id  | Work                                                                                                                                                  | Effort |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| A1  | Capture adds commit sha, release, route pattern, input shape and last-10 timeline to each event; bundle includes typed failure fields and environment | S      |
+| A2  | Bundle builder in `packages/domain` (pure function, unit-tested with fixtures) and admin endpoint                                                     | M      |
+| A3  | `monitoring:read` token: table, hashing, expiry, audit, admin UI to create and revoke                                                                 | M      |
+| A4  | Local stdio MCP server in `scripts/monitor-mcp/` and `pnpm monitor <cmd>` CLI over the endpoints; not deployed                                        | S      |
+| A5  | Skill `fix-issue`, "Copy as prompt" button on the error detail screen (copies the bundle)                                                             | S      |
+| A6  | Resolve-by-release from verified commit metadata and regression reopen in the worker                                                                  | M      |
+| A7  | Tests: redaction of every bundle section, token scope and expiry, size caps, injection fixtures                                                       | M      |
 
 Order: A1, A2, A5 first. That alone replaces copy and paste. The token and local read-only MCP follow. Resolve-by-release is a worker action based on verified commit/release metadata, not an MCP write operation.
 

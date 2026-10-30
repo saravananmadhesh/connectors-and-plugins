@@ -10,7 +10,18 @@ import type {
   AdminAuditQuery,
   AdminCategoryListResponse,
   AdminCategoryResponse,
+  AdminErrorGroupDetailResponse,
+  AdminErrorGroupsQuery,
+  AdminErrorGroupsResponse,
+  AdminErrorGroupStatusBody,
   AdminImpactResponse,
+  AdminObservabilityOverviewQuery,
+  AdminObservabilityOverviewResponse,
+  AdminObservabilityPurgeBody,
+  AdminObservabilityPurgeResponse,
+  AdminObservabilityStorageResponse,
+  AdminOpsEventsQuery,
+  AdminOpsEventsResponse,
   AdminPluginBulkPublishResponse,
   AdminPluginBulkSyncResponse,
   AdminPluginBulkUpdateBody,
@@ -39,6 +50,17 @@ import type {
   PluginSourceListResponse,
   PluginSourceResponse,
   VersionChange,
+} from '@boldcreate-integrations/contracts';
+
+export type {
+  AdminErrorGroup,
+  AdminErrorGroupDetailResponse,
+  AdminErrorGroupsQuery,
+  AdminErrorOccurrence,
+  AdminObservabilityOverviewResponse,
+  AdminObservabilityStorageResponse,
+  AdminOpsEvent,
+  AdminOpsEventsQuery,
 } from '@boldcreate-integrations/contracts';
 
 export type {
@@ -141,7 +163,36 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return (await res.json()) as T;
 }
 
+function queryText(query: object): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== '') params.set(key, String(value));
+  }
+  const text = params.toString();
+  return text ? `?${text}` : '';
+}
+
+const OBSERVABILITY = '/api/v1/admin/observability';
+
 export const adminApi = {
+  listErrors: (query: Partial<AdminErrorGroupsQuery> = {}) =>
+    request<AdminErrorGroupsResponse>('GET', `${OBSERVABILITY}/errors${queryText(query)}`),
+  getError: (id: string) =>
+    request<AdminErrorGroupDetailResponse>('GET', `${OBSERVABILITY}/errors/${id}`),
+  setErrorStatus: (id: string, body: AdminErrorGroupStatusBody) =>
+    request<AdminErrorGroupDetailResponse>('POST', `${OBSERVABILITY}/errors/${id}/status`, body),
+  deleteError: (id: string) => request<void>('DELETE', `${OBSERVABILITY}/errors/${id}`),
+  listEvents: (query: Partial<AdminOpsEventsQuery> = {}) =>
+    request<AdminOpsEventsResponse>('GET', `${OBSERVABILITY}/events${queryText(query)}`),
+  observabilityStorage: () =>
+    request<AdminObservabilityStorageResponse>('GET', `${OBSERVABILITY}/storage`),
+  observabilityOverview: (query: Partial<AdminObservabilityOverviewQuery> = {}) =>
+    request<AdminObservabilityOverviewResponse>(
+      'GET',
+      `${OBSERVABILITY}/overview${queryText(query)}`,
+    ),
+  purgeObservability: (body: AdminObservabilityPurgeBody) =>
+    request<AdminObservabilityPurgeResponse>('POST', `${OBSERVABILITY}/purge`, body),
   session: () => request<AdminSessionResponse>('GET', '/api/v1/admin/auth/session'),
   signIn: (body: { email: string; password: string }) =>
     request<AdminSessionResponse>('POST', '/api/v1/admin/auth/signin', body),

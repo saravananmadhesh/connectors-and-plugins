@@ -361,3 +361,20 @@ export function refineLocalAdapters(
   if (value.BLOB_ACCESS_KEY_ID !== undefined) refuse('BLOB_ACCESS_KEY_ID');
   if (value.BLOB_SECRET_ACCESS_KEY !== undefined) refuse('BLOB_SECRET_ACCESS_KEY');
 }
+
+/**
+ * Where errors and key events are stored and how hard that store may be used. Unset
+ * `OBSERVABILITY_DATABASE_URL` keeps them in the service's own database, on a pool of their own.
+ */
+export const observabilityDbShape = {
+  OBSERVABILITY_DATABASE_URL: secret.optional(),
+  /** Connections the store may hold per instance. */
+  OBSERVABILITY_DB_POOL_MAX: z.coerce.number().int().min(1).max(20).default(2),
+  OBSERVABILITY_DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().min(100).default(10_000),
+  OBSERVABILITY_DB_LOCK_TIMEOUT_MS: z.coerce.number().int().min(100).default(2_000),
+  OBSERVABILITY_DB_CONNECT_TIMEOUT_MS: z.coerce.number().int().min(100).default(3_000),
+  /** Consecutive failed writes that make a service stop writing for a while. */
+  OBSERVABILITY_SINK_FAILURE_THRESHOLD: z.coerce.number().int().min(1).default(3),
+  /** Seconds a service skips writes after that, before it tries once more. */
+  OBSERVABILITY_SINK_PAUSE_SECONDS: z.coerce.number().int().min(1).default(30),
+};

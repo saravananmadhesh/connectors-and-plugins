@@ -104,7 +104,10 @@ describe.each(ROLE_NAMES)('app_%s role matches its grants', (role) => {
           role,
           `SELECT ${columnList.map(quote).join(', ')} FROM ${quote(table)} LIMIT 0`,
         );
-        await expectDenied(role, statementFor('select', table, columns));
+        // A list that names every column is the same as no restriction.
+        if (columns.some((column) => !columnList.includes(column))) {
+          await expectDenied(role, statementFor('select', table, columns));
+        }
       } else if (allowed && privilege === 'update' && columnList) {
         await expectAllowed(
           role,

@@ -1,0 +1,1587 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boldcreate-migration-sql
+  namespace: boldcreate-prod
+data:
+  0000_baseline.sql: |-
+    -- 0000_baseline.sql
+    CREATE TABLE "email_token" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"purpose" text NOT NULL,
+    	"token_hash" text NOT NULL,
+    	"target_user_id" uuid,
+    	"target_email_normalized" text,
+    	"org_id" uuid,
+    	"invited_role" text,
+    	"inviter_id" uuid,
+    	"expires_at" timestamp with time zone NOT NULL,
+    	"consumed_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "email_token_hash_unique" UNIQUE("token_hash"),
+    	CONSTRAINT "email_token_purpose_check" CHECK ("email_token"."purpose" IN ('verification', 'reset', 'invite')),
+    	CONSTRAINT "email_token_invited_role_check" CHECK ("email_token"."invited_role" IS NULL OR "email_token"."invited_role" IN ('OWNER', 'ADMIN', 'MEMBER')),
+    	CONSTRAINT "email_token_verification_shape" CHECK (purpose NOT IN ('verification','reset') OR ("email_token"."target_user_id" IS NOT NULL AND "email_token"."org_id" IS NULL)),
+    	CONSTRAINT "email_token_invite_shape" CHECK (purpose != 'invite' OR ("email_token"."org_id" IS NOT NULL AND "email_token"."invited_role" IS NOT NULL AND "email_token"."target_email_normalized" IS NOT NULL))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "session" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"token_hash" text NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"idle_expires_at" timestamp with time zone NOT NULL,
+    	"absolute_expires_at" timestamp with time zone NOT NULL,
+    	"revoked_at" timestamp with time zone,
+    	"ip" text,
+    	"user_agent" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "session_token_hash_unique" UNIQUE("token_hash"),
+    	CONSTRAINT "session_user_agent_length" CHECK (user_agent IS NULL OR char_length("session"."user_agent") <= 400)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "user" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"email" text NOT NULL,
+    	"email_normalized" text NOT NULL,
+    	"password_hash" text NOT NULL,
+    	"display_name" text NOT NULL,
+    	"email_verified_at" timestamp with time zone,
+    	"starter_org_provisioned_at" timestamp with time zone,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"failed_login_count" integer DEFAULT 0 NOT NULL,
+    	"locked_until" timestamp with time zone,
+    	"last_login_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "user_email_normalized_unique" UNIQUE("email_normalized"),
+    	CONSTRAINT "user_status_check" CHECK ("user"."status" IN ('active', 'suspended')),
+    	CONSTRAINT "user_email_length" CHECK (char_length("user"."email") <= 254),
+    	CONSTRAINT "user_display_name_length" CHECK (char_length("user"."display_name") <= 80)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "organization_member" (
+    	"organization_id" uuid NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"role" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "organization_member_pk" PRIMARY KEY("organization_id","user_id"),
+    	CONSTRAINT "organization_member_role_check" CHECK ("organization_member"."role" IN ('OWNER', 'ADMIN', 'MEMBER'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "organization" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"name" text NOT NULL,
+    	"slug" text NOT NULL,
+    	"created_by" uuid NOT NULL,
+    	"deletion_requested_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "organization_slug_unique" UNIQUE("slug"),
+    	CONSTRAINT "organization_name_length" CHECK (char_length("organization"."name") >= 3 AND char_length("organization"."name") <= 60),
+    	CONSTRAINT "organization_slug_format" CHECK ("organization"."slug" ~ '^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$')
+    );
+    --> statement-breakpoint
+    CREATE TABLE "team_member" (
+    	"team_id" uuid NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"role" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "team_member_pk" PRIMARY KEY("team_id","user_id"),
+    	CONSTRAINT "team_member_role_check" CHECK ("team_member"."role" IN ('ADMIN', 'MEMBER', 'VIEWER'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "team" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"name" text NOT NULL,
+    	"slug" text NOT NULL,
+    	"description" text,
+    	"created_by" uuid NOT NULL,
+    	"deletion_requested_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "team_org_slug_unique" UNIQUE("organization_id","slug"),
+    	CONSTRAINT "team_id_organization_unique" UNIQUE("id","organization_id"),
+    	CONSTRAINT "team_name_length" CHECK (char_length("team"."name") >= 3 AND char_length("team"."name") <= 60),
+    	CONSTRAINT "team_slug_format" CHECK ("team"."slug" ~ '^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$'),
+    	CONSTRAINT "team_description_length" CHECK ("team"."description" IS NULL OR char_length("team"."description") <= 500)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "component" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"plugin_version_id" uuid NOT NULL,
+    	"kind" text DEFAULT 'mcp' NOT NULL,
+    	"name" text NOT NULL,
+    	"description" text NOT NULL,
+    	"metadata" jsonb NOT NULL,
+    	CONSTRAINT "component_version_kind_name_unique" UNIQUE("plugin_version_id","kind","name"),
+    	CONSTRAINT "component_name_length" CHECK (char_length("component"."name") >= 1 AND char_length("component"."name") <= 60),
+    	CONSTRAINT "component_kind_check" CHECK ("component"."kind" IN ('mcp', 'skill', 'rule', 'hook', 'agent'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "plugin" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"name" text NOT NULL,
+    	"display_name" text NOT NULL,
+    	"summary" text NOT NULL,
+    	"description" text NOT NULL,
+    	"keywords" text[] DEFAULT '{}'::text[] NOT NULL,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"visibility" text DEFAULT 'public' NOT NULL,
+    	"publisher_organization_id" uuid,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "plugin_name_unique" UNIQUE("name"),
+    	CONSTRAINT "plugin_name_format" CHECK ("plugin"."name" ~ '^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$'),
+    	CONSTRAINT "plugin_summary_length" CHECK (char_length("plugin"."summary") <= 200),
+    	CONSTRAINT "plugin_status_check" CHECK ("plugin"."status" IN ('active', 'deprecated', 'suspended')),
+    	CONSTRAINT "plugin_visibility_check" CHECK ("plugin"."visibility" IN ('public'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "plugin_version" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"plugin_id" uuid NOT NULL,
+    	"version" text NOT NULL,
+    	"major" integer NOT NULL,
+    	"minor" integer NOT NULL,
+    	"patch" integer NOT NULL,
+    	"manifest_schema_version" text NOT NULL,
+    	"manifest" jsonb NOT NULL,
+    	"manifest_sha256" text NOT NULL,
+    	"changelog" text,
+    	"published_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"status" text DEFAULT 'published' NOT NULL,
+    	"execution_blocked_at" timestamp with time zone,
+    	CONSTRAINT "plugin_version_plugin_version_unique" UNIQUE("plugin_id","version"),
+    	CONSTRAINT "plugin_version_semver_format" CHECK ("plugin_version"."version" ~ '^[0-9]+.[0-9]+.[0-9]+$'),
+    	CONSTRAINT "plugin_version_status_check" CHECK ("plugin_version"."status" IN ('pending', 'approved', 'published', 'rejected', 'yanked'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "installation_component" (
+    	"installation_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"component_id" uuid NOT NULL,
+    	"plugin_version_id" uuid NOT NULL,
+    	"enabled" boolean DEFAULT false NOT NULL,
+    	"alias" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "installation_component_pk" PRIMARY KEY("installation_id","component_id"),
+    	CONSTRAINT "installation_component_alias_unique" UNIQUE("installation_id","alias"),
+    	CONSTRAINT "installation_component_alias_format" CHECK ("installation_component"."alias" IS NULL OR "installation_component"."alias" ~ '^[a-z][a-z0-9_]{0,47}$')
+    );
+    --> statement-breakpoint
+    CREATE TABLE "installation" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"scope" text NOT NULL,
+    	"team_id" uuid,
+    	"user_id" uuid,
+    	"created_by" uuid NOT NULL,
+    	"plugin_id" uuid NOT NULL,
+    	"plugin_version_id" uuid NOT NULL,
+    	"connection_id" uuid,
+    	"status" text DEFAULT 'disabled' NOT NULL,
+    	"installed_by" uuid NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "installation_id_organization_unique" UNIQUE("id","organization_id"),
+    	CONSTRAINT "installation_scope_check" CHECK ("installation"."scope" IN ('org', 'team', 'user')),
+    	CONSTRAINT "installation_status_check" CHECK ("installation"."status" IN ('disabled', 'active')),
+    	CONSTRAINT "installation_user_scope_shape" CHECK ("installation"."scope" != 'user' OR ("installation"."user_id" IS NOT NULL AND "installation"."team_id" IS NULL)),
+    	CONSTRAINT "installation_team_scope_shape" CHECK ("installation"."scope" != 'team' OR ("installation"."team_id" IS NOT NULL AND "installation"."user_id" IS NULL)),
+    	CONSTRAINT "installation_org_scope_shape" CHECK ("installation"."scope" != 'org' OR ("installation"."team_id" IS NULL AND "installation"."user_id" IS NULL))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "connection_secret" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"connection_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"type" text DEFAULT 'bearer_token' NOT NULL,
+    	"credential_revision" integer NOT NULL,
+    	"ciphertext" text NOT NULL,
+    	"iv" text NOT NULL,
+    	"auth_tag" text NOT NULL,
+    	"wrapped_dek" text NOT NULL,
+    	"kms_key_version" text NOT NULL,
+    	"last_four" text NOT NULL,
+    	"superseded_at" timestamp with time zone,
+    	"created_by" uuid NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "connection_secret_revision_unique" UNIQUE("connection_id","credential_revision"),
+    	CONSTRAINT "connection_secret_type_check" CHECK ("connection_secret"."type" IN ('bearer_token'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "connection" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"scope" text NOT NULL,
+    	"team_id" uuid,
+    	"user_id" uuid,
+    	"created_by" uuid NOT NULL,
+    	"display_name" text NOT NULL,
+    	"plugin_version_id" uuid NOT NULL,
+    	"endpoint_key" text NOT NULL,
+    	"status" text DEFAULT 'pending' NOT NULL,
+    	"current_credential_revision" integer DEFAULT 1 NOT NULL,
+    	"verified_revision" integer,
+    	"verification_attempt" bigint DEFAULT 0 NOT NULL,
+    	"last_verified_at" timestamp with time zone,
+    	"last_error" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "connection_scope_check" CHECK ("connection"."scope" IN ('org', 'team', 'user')),
+    	CONSTRAINT "connection_status_check" CHECK ("connection"."status" IN ('pending', 'active', 'invalid', 'revoked')),
+    	CONSTRAINT "connection_user_scope_shape" CHECK ("connection"."scope" != 'user' OR ("connection"."user_id" IS NOT NULL AND "connection"."team_id" IS NULL)),
+    	CONSTRAINT "connection_team_scope_shape" CHECK ("connection"."scope" != 'team' OR ("connection"."team_id" IS NOT NULL AND "connection"."user_id" IS NULL)),
+    	CONSTRAINT "connection_org_scope_shape" CHECK ("connection"."scope" != 'org' OR ("connection"."team_id" IS NULL AND "connection"."user_id" IS NULL)),
+    	CONSTRAINT "connection_display_name_length" CHECK (char_length("connection"."display_name") >= 3 AND char_length("connection"."display_name") <= 60)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "api_key" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"key_id" text NOT NULL,
+    	"secret_hash" text NOT NULL,
+    	"principal_user_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"scope" text NOT NULL,
+    	"team_id" uuid,
+    	"user_id" uuid,
+    	"created_by" uuid NOT NULL,
+    	"name" text NOT NULL,
+    	"last_four" text NOT NULL,
+    	"permissions" text[] NOT NULL,
+    	"expires_at" timestamp with time zone,
+    	"revoked_at" timestamp with time zone,
+    	"last_used_at" timestamp with time zone,
+    	"last_used_ip" text,
+    	"rate_limit_per_minute" integer DEFAULT 60 NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "api_key_key_id_unique" UNIQUE("key_id"),
+    	CONSTRAINT "api_key_scope_check" CHECK ("api_key"."scope" IN ('org', 'team', 'user')),
+    	CONSTRAINT "api_key_user_scope_shape" CHECK ("api_key"."scope" != 'user' OR ("api_key"."user_id" IS NOT NULL AND "api_key"."team_id" IS NULL)),
+    	CONSTRAINT "api_key_team_scope_shape" CHECK ("api_key"."scope" != 'team' OR ("api_key"."team_id" IS NOT NULL AND "api_key"."user_id" IS NULL)),
+    	CONSTRAINT "api_key_org_scope_shape" CHECK ("api_key"."scope" != 'org' OR ("api_key"."team_id" IS NULL AND "api_key"."user_id" IS NULL)),
+    	CONSTRAINT "api_key_permissions_nonempty" CHECK (array_length("api_key"."permissions", 1) > 0),
+    	CONSTRAINT "api_key_name_length" CHECK (char_length("api_key"."name") >= 3 AND char_length("api_key"."name") <= 60)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "audit_log" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"actor_id" text NOT NULL,
+    	"actor_kind" text NOT NULL,
+    	"action" text NOT NULL,
+    	"target_kind" text,
+    	"target_id" text,
+    	"context" text,
+    	"request_id" text,
+    	"ip" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+    );
+    --> statement-breakpoint
+    CREATE TABLE "outbox" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"event_type" text NOT NULL,
+    	"payload" text,
+    	"status" text DEFAULT 'pending' NOT NULL,
+    	"attempts" integer DEFAULT 0 NOT NULL,
+    	"last_attempt_at" timestamp with time zone,
+    	"next_attempt_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"delivered_at" timestamp with time zone,
+    	"lease_owner" text,
+    	"lease_expires_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "outbox_status_check" CHECK ("outbox"."status" IN ('pending', 'delivered', 'failed')),
+    	CONSTRAINT "outbox_attempts_max" CHECK ("outbox"."attempts" <= 6)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "oidc_login_attempt" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"handle" text NOT NULL,
+    	"state_hash" text NOT NULL,
+    	"nonce" text NOT NULL,
+    	"pkce_verifier" text NOT NULL,
+    	"expected_issuer" text NOT NULL,
+    	"expected_audience" text NOT NULL,
+    	"safe_return_path" text NOT NULL,
+    	"expires_at" timestamp with time zone NOT NULL,
+    	"claimed_at" timestamp with time zone,
+    	"consumed_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "oidc_login_attempt_handle_unique" UNIQUE("handle"),
+    	CONSTRAINT "oidc_login_attempt_state_hash_unique" UNIQUE("state_hash")
+    );
+    --> statement-breakpoint
+    CREATE TABLE "platform_admin_identity" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"idp_tenant_id" text NOT NULL,
+    	"oid" text NOT NULL,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"role" text DEFAULT 'PLATFORM_ADMIN' NOT NULL,
+    	"granted_by" text NOT NULL,
+    	"granted_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"revoked_at" timestamp with time zone,
+    	"revoke_audit_ref" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "platform_admin_identity_tenant_oid_unique" UNIQUE("idp_tenant_id","oid"),
+    	CONSTRAINT "platform_admin_identity_status_check" CHECK ("platform_admin_identity"."status" IN ('active', 'revoked')),
+    	CONSTRAINT "platform_admin_identity_role_fixed" CHECK ("platform_admin_identity"."role" = 'PLATFORM_ADMIN')
+    );
+    --> statement-breakpoint
+    CREATE TABLE "platform_admin_session" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"token_hash" text NOT NULL,
+    	"admin_identity_id" uuid NOT NULL,
+    	"realm" text DEFAULT 'admin' NOT NULL,
+    	"idle_expires_at" timestamp with time zone NOT NULL,
+    	"absolute_expires_at" timestamp with time zone NOT NULL,
+    	"revoked_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "platform_admin_session_token_hash_unique" UNIQUE("token_hash"),
+    	CONSTRAINT "platform_admin_session_realm_fixed" CHECK ("platform_admin_session"."realm" = 'admin')
+    );
+    --> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_target_user_id_user_id_fk" FOREIGN KEY ("target_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_org_id_organization_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_inviter_id_user_id_fk" FOREIGN KEY ("inviter_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "organization_member" ADD CONSTRAINT "organization_member_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "organization_member" ADD CONSTRAINT "organization_member_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "organization" ADD CONSTRAINT "organization_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "team_member" ADD CONSTRAINT "team_member_team_organization_fk" FOREIGN KEY ("team_id","organization_id") REFERENCES "public"."team"("id","organization_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "team_member" ADD CONSTRAINT "team_member_organization_member_fk" FOREIGN KEY ("organization_id","user_id") REFERENCES "public"."organization_member"("organization_id","user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "team" ADD CONSTRAINT "team_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "team" ADD CONSTRAINT "team_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "component" ADD CONSTRAINT "component_plugin_version_id_plugin_version_id_fk" FOREIGN KEY ("plugin_version_id") REFERENCES "public"."plugin_version"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "plugin" ADD CONSTRAINT "plugin_publisher_organization_id_organization_id_fk" FOREIGN KEY ("publisher_organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "plugin_version" ADD CONSTRAINT "plugin_version_plugin_id_plugin_id_fk" FOREIGN KEY ("plugin_id") REFERENCES "public"."plugin"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation_component" ADD CONSTRAINT "installation_component_component_id_component_id_fk" FOREIGN KEY ("component_id") REFERENCES "public"."component"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation_component" ADD CONSTRAINT "installation_component_plugin_version_id_plugin_version_id_fk" FOREIGN KEY ("plugin_version_id") REFERENCES "public"."plugin_version"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation_component" ADD CONSTRAINT "installation_component_installation_organization_fk" FOREIGN KEY ("installation_id","organization_id") REFERENCES "public"."installation"("id","organization_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_plugin_id_plugin_id_fk" FOREIGN KEY ("plugin_id") REFERENCES "public"."plugin"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_plugin_version_id_plugin_version_id_fk" FOREIGN KEY ("plugin_version_id") REFERENCES "public"."plugin_version"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_installed_by_user_id_fk" FOREIGN KEY ("installed_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection_secret" ADD CONSTRAINT "connection_secret_connection_id_connection_id_fk" FOREIGN KEY ("connection_id") REFERENCES "public"."connection"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection_secret" ADD CONSTRAINT "connection_secret_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection_secret" ADD CONSTRAINT "connection_secret_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_plugin_version_id_plugin_version_id_fk" FOREIGN KEY ("plugin_version_id") REFERENCES "public"."plugin_version"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_principal_user_id_user_id_fk" FOREIGN KEY ("principal_user_id") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "platform_admin_session" ADD CONSTRAINT "platform_admin_session_admin_identity_id_platform_admin_identity_id_fk" FOREIGN KEY ("admin_identity_id") REFERENCES "public"."platform_admin_identity"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "email_token_purpose_target_idx" ON "email_token" USING btree ("purpose","target_user_id");--> statement-breakpoint
+    CREATE INDEX "email_token_purpose_email_idx" ON "email_token" USING btree ("purpose","target_email_normalized");--> statement-breakpoint
+    CREATE INDEX "session_user_id_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
+    CREATE INDEX "team_member_org_member_idx" ON "team_member" USING btree ("organization_id","user_id");--> statement-breakpoint
+    CREATE INDEX "plugin_version_plugin_sort_idx" ON "plugin_version" USING btree ("plugin_id","major","minor","patch");--> statement-breakpoint
+    CREATE UNIQUE INDEX "installation_org_scope_unique" ON "installation" USING btree ("organization_id","plugin_id") WHERE "installation"."scope" = 'org';--> statement-breakpoint
+    CREATE UNIQUE INDEX "installation_team_scope_unique" ON "installation" USING btree ("organization_id","plugin_id","team_id") WHERE "installation"."scope" = 'team';--> statement-breakpoint
+    CREATE UNIQUE INDEX "installation_user_scope_unique" ON "installation" USING btree ("organization_id","plugin_id","user_id") WHERE "installation"."scope" = 'user';--> statement-breakpoint
+    CREATE INDEX "installation_org_plugin_idx" ON "installation" USING btree ("organization_id","plugin_id","scope");--> statement-breakpoint
+    CREATE INDEX "installation_team_idx" ON "installation" USING btree ("team_id");--> statement-breakpoint
+    CREATE INDEX "installation_user_idx" ON "installation" USING btree ("user_id");--> statement-breakpoint
+    CREATE UNIQUE INDEX "connection_secret_active_unique" ON "connection_secret" USING btree ("connection_id") WHERE "connection_secret"."superseded_at" IS NULL;--> statement-breakpoint
+    CREATE INDEX "connection_secret_connection_idx" ON "connection_secret" USING btree ("connection_id");--> statement-breakpoint
+    CREATE INDEX "connection_org_idx" ON "connection" USING btree ("organization_id","scope");--> statement-breakpoint
+    CREATE INDEX "api_key_principal_idx" ON "api_key" USING btree ("principal_user_id","organization_id");--> statement-breakpoint
+    CREATE INDEX "audit_log_actor_idx" ON "audit_log" USING btree ("actor_id","actor_kind");--> statement-breakpoint
+    CREATE INDEX "audit_log_target_idx" ON "audit_log" USING btree ("target_kind","target_id");--> statement-breakpoint
+    CREATE INDEX "audit_log_created_at_idx" ON "audit_log" USING btree ("created_at");--> statement-breakpoint
+    CREATE INDEX "outbox_status_next_attempt_idx" ON "outbox" USING btree ("status","next_attempt_at");
+    --> statement-breakpoint
+    -- 0001_young_legion.sql
+    ALTER TABLE "outbox" ADD COLUMN "last_error" text;
+    --> statement-breakpoint
+    -- 0002_thin_quentin_quire.sql
+    ALTER TABLE "audit_log" ADD COLUMN "org_id" uuid;--> statement-breakpoint
+    ALTER TABLE "audit_log" ADD COLUMN "result" text DEFAULT 'success' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "audit_log" ADD COLUMN "event_id" uuid DEFAULT gen_random_uuid() NOT NULL;--> statement-breakpoint
+    CREATE INDEX "audit_log_org_created_idx" ON "audit_log" USING btree ("org_id","created_at");--> statement-breakpoint
+    ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_event_unique" UNIQUE("event_id","created_at");--> statement-breakpoint
+    ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_result_check" CHECK ("audit_log"."result" IN ('success', 'denied', 'failure'));
+    --> statement-breakpoint
+    -- 0003_dusty_stellaris.sql
+    CREATE TABLE "auth_identity" (
+    	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"provider" text NOT NULL,
+    	"subject" text NOT NULL,
+    	"secret_hash" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "auth_identity_provider_subject_unique" UNIQUE("provider","subject"),
+    	CONSTRAINT "auth_identity_user_provider_unique" UNIQUE("user_id","provider"),
+    	CONSTRAINT "auth_identity_provider_format" CHECK ("auth_identity"."provider" ~ '^[a-z][a-z0-9_]{1,31}$'),
+    	CONSTRAINT "auth_identity_password_secret" CHECK ("auth_identity"."provider" <> 'password' OR "auth_identity"."secret_hash" IS NOT NULL)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "email_token" DROP CONSTRAINT "email_token_purpose_check";--> statement-breakpoint
+    ALTER TABLE "auth_identity" ADD CONSTRAINT "auth_identity_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "user" DROP COLUMN "password_hash";--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_email_change_shape" CHECK (purpose != 'email_change' OR ("email_token"."target_user_id" IS NOT NULL AND "email_token"."target_email_normalized" IS NOT NULL AND "email_token"."org_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_purpose_check" CHECK ("email_token"."purpose" IN ('verification', 'reset', 'invite', 'email_change'));
+    --> statement-breakpoint
+    -- 0004_white_fallen_one.sql
+    CREATE TABLE "org_key" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"version" integer NOT NULL,
+    	"public_key" text NOT NULL,
+    	"wrapped_private_key" text NOT NULL,
+    	"kms_key_id" text NOT NULL,
+    	"kms_key_version" text NOT NULL,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"retired_at" timestamp with time zone,
+    	CONSTRAINT "org_key_org_version_unique" UNIQUE("organization_id","version"),
+    	CONSTRAINT "org_key_status_check" CHECK ("org_key"."status" IN ('active', 'retired', 'destroyed')),
+    	CONSTRAINT "org_key_version_positive" CHECK ("org_key"."version" > 0)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "organization" ADD COLUMN "key_state" text DEFAULT 'key_pending' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "connection" ADD COLUMN "credential_type" text DEFAULT 'bearer_token' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "connection" ADD COLUMN "credential_last_four" text;--> statement-breakpoint
+    ALTER TABLE "connection" ADD COLUMN "credential_revision" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
+    ALTER TABLE "connection" ADD COLUMN "sealed_credential" text;--> statement-breakpoint
+    ALTER TABLE "connection" ADD COLUMN "org_key_id" uuid;--> statement-breakpoint
+    ALTER TABLE "org_key" ADD CONSTRAINT "org_key_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    CREATE UNIQUE INDEX "org_key_one_active_per_org" ON "org_key" USING btree ("organization_id") WHERE "org_key"."status" = 'active';--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_org_key_id_org_key_id_fk" FOREIGN KEY ("org_key_id") REFERENCES "public"."org_key"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "organization" ADD CONSTRAINT "organization_key_state_check" CHECK ("organization"."key_state" IN ('key_pending', 'ready'));--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_credential_type_check" CHECK ("connection"."credential_type" IN ('bearer_token'));--> statement-breakpoint
+    ALTER TABLE "connection" ADD CONSTRAINT "connection_sealed_shape" CHECK (("connection"."sealed_credential" IS NULL) = ("connection"."org_key_id" IS NULL));
+    --> statement-breakpoint
+    -- 0005_perpetual_orphan.sql
+    DROP TABLE "connection_secret" CASCADE;--> statement-breakpoint
+    ALTER TABLE "connection" DROP COLUMN "current_credential_revision";
+    --> statement-breakpoint
+    -- 0006_abandoned_mandarin.sql
+    CREATE TABLE "idempotency_key" (
+    	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    	"principal_key" text NOT NULL,
+    	"method" text NOT NULL,
+    	"route_template" text NOT NULL,
+    	"idem_key" text NOT NULL,
+    	"request_hash" text NOT NULL,
+    	"state" text DEFAULT 'in_progress' NOT NULL,
+    	"response_status" integer,
+    	"response_body" jsonb,
+    	"response_headers" jsonb,
+    	"secret_response" boolean DEFAULT false NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"expires_at" timestamp with time zone NOT NULL,
+    	CONSTRAINT "idempotency_key_scope_unique" UNIQUE("principal_key","method","route_template","idem_key"),
+    	CONSTRAINT "idempotency_key_state_check" CHECK ("idempotency_key"."state" IN ('in_progress', 'completed')),
+    	CONSTRAINT "idempotency_key_length" CHECK (char_length("idempotency_key"."idem_key") BETWEEN 1 AND 255)
+    );
+    --> statement-breakpoint
+    CREATE INDEX "idempotency_key_expires_at_idx" ON "idempotency_key" USING btree ("expires_at");
+    --> statement-breakpoint
+    -- 0007_identity_lifecycle.sql
+    CREATE TABLE "org_policy" (
+    	"organization_id" uuid PRIMARY KEY NOT NULL,
+    	"allow_personal_installs" boolean,
+    	"allow_personal_api_keys" boolean,
+    	"max_personal_key_expiry_days" integer,
+    	"allowed_key_presets" text[],
+    	"updated_by" uuid,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "org_policy_expiry_range" CHECK ("org_policy"."max_personal_key_expiry_days" IS NULL OR "org_policy"."max_personal_key_expiry_days" BETWEEN 1 AND 90),
+    	CONSTRAINT "org_policy_presets" CHECK ("org_policy"."allowed_key_presets" IS NULL OR "org_policy"."allowed_key_presets" <@ ARRAY['agent', 'read_only'])
+    );
+    --> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT "user_status_check";--> statement-breakpoint
+    ALTER TABLE "user" ADD COLUMN "deleted_at" timestamp with time zone;--> statement-breakpoint
+    ALTER TABLE "organization_member" ADD COLUMN "status" text DEFAULT 'active' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "org_policy" ADD CONSTRAINT "org_policy_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "org_policy" ADD CONSTRAINT "org_policy_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_status_check" CHECK ("user"."status" IN ('active', 'suspended', 'deleted'));--> statement-breakpoint
+    ALTER TABLE "organization_member" ADD CONSTRAINT "organization_member_status_check" CHECK ("organization_member"."status" IN ('active', 'suspended'));
+    --> statement-breakpoint
+    -- 0008_flags_and_kill_switches.sql
+    CREATE TABLE "feature_flag" (
+    	"key" text PRIMARY KEY NOT NULL,
+    	"enabled" boolean NOT NULL,
+    	"description" text DEFAULT '' NOT NULL,
+    	"updated_by" uuid,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "feature_flag_key_format" CHECK ("feature_flag"."key" ~ '^[a-z][a-z0-9_]{1,63}$')
+    );
+    --> statement-breakpoint
+    CREATE TABLE "kill_switch" (
+    	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    	"target_kind" text NOT NULL,
+    	"target_id" uuid NOT NULL,
+    	"reason" text NOT NULL,
+    	"created_by" uuid NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"lifted_at" timestamp with time zone,
+    	"lifted_by" uuid,
+    	"lift_reason" text,
+    	CONSTRAINT "kill_switch_target_kind_check" CHECK ("kill_switch"."target_kind" IN ('plugin', 'plugin_version', 'plugin_source', 'mcp_server', 'api_key', 'org')),
+    	CONSTRAINT "kill_switch_reason_length" CHECK (char_length("kill_switch"."reason") BETWEEN 1 AND 500)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "feature_flag" ADD CONSTRAINT "feature_flag_updated_by_platform_admin_identity_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."platform_admin_identity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "kill_switch" ADD CONSTRAINT "kill_switch_created_by_platform_admin_identity_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."platform_admin_identity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "kill_switch" ADD CONSTRAINT "kill_switch_lifted_by_platform_admin_identity_id_fk" FOREIGN KEY ("lifted_by") REFERENCES "public"."platform_admin_identity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    CREATE UNIQUE INDEX "kill_switch_active_unique" ON "kill_switch" USING btree ("target_kind","target_id") WHERE "kill_switch"."lifted_at" IS NULL;
+    --> statement-breakpoint
+    -- 0009_rls_policies.sql
+    ALTER TABLE "team" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "team" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "team_member" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "team_member" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "installation" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "installation" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "installation_component" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "installation_component" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "connection" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "connection" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "api_key" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "api_key" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "org_key" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "org_key" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "org_policy" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "org_policy" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "organization" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "organization" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "organization_member" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "organization_member" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "audit_log" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "audit_log" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY organization_select_tenant ON "organization" FOR SELECT USING (id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    -- Only the api lists the organizations a user belongs to; a policy that reads organization_member
+    -- would need that privilege from every role that selects organization, so it names its role.
+    CREATE POLICY organization_select_member ON "organization" FOR SELECT TO app_api USING (EXISTS (SELECT 1 FROM "organization_member" m WHERE m.organization_id = "organization".id AND m.user_id = nullif(current_setting('app.user', true), '')::uuid));--> statement-breakpoint
+    CREATE POLICY organization_insert ON "organization" FOR INSERT WITH CHECK (created_by = nullif(current_setting('app.user', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY organization_update ON "organization" FOR UPDATE USING (id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY organization_delete ON "organization" FOR DELETE USING (id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY organization_member_tenant ON "organization_member" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid OR user_id = nullif(current_setting('app.user', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid OR user_id = nullif(current_setting('app.user', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY team_tenant ON "team" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY team_member_tenant ON "team_member" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY installation_tenant ON "installation" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY installation_component_tenant ON "installation_component" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY connection_tenant ON "connection" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY api_key_tenant ON "api_key" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY org_key_tenant ON "org_key" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY org_policy_tenant ON "org_policy" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY audit_log_select ON "audit_log" FOR SELECT USING (org_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY audit_log_insert ON "audit_log" FOR INSERT WITH CHECK (true);--> statement-breakpoint
+    CREATE POLICY maintenance_admin_read_select ON "audit_log" FOR SELECT TO app_admin USING (current_setting('app.maintenance', true) = 'admin_read');--> statement-breakpoint
+    CREATE POLICY maintenance_retention_select ON "audit_log" FOR SELECT TO app_worker USING (current_setting('app.maintenance', true) = 'retention');--> statement-breakpoint
+    CREATE POLICY maintenance_retention_delete ON "audit_log" FOR DELETE TO app_worker USING (current_setting('app.maintenance', true) = 'retention');
+    --> statement-breakpoint
+    -- 0010_faulty_fantastic_four.sql
+    CREATE TABLE "admin_setup_token" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"email" text NOT NULL,
+    	"token_hash" text NOT NULL,
+    	"expires_at" timestamp with time zone NOT NULL,
+    	"consumed_at" timestamp with time zone,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "admin_setup_token_hash_unique" UNIQUE("token_hash")
+    );
+    --> statement-breakpoint
+    ALTER TABLE "platform_admin_identity" ADD COLUMN "password_hash" text;--> statement-breakpoint
+    ALTER TABLE "platform_admin_identity" ADD COLUMN "failed_attempts" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+    ALTER TABLE "platform_admin_identity" ADD COLUMN "locked_until" timestamp with time zone;
+    --> statement-breakpoint
+    -- 0011_plugin_sources.sql
+    CREATE TABLE "plugin_ingestion" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"source_id" uuid NOT NULL,
+    	"status" text DEFAULT 'queued' NOT NULL,
+    	"commit_sha" text,
+    	"plugin_version_id" uuid,
+    	"error" text,
+    	"requested_by" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"finished_at" timestamp with time zone,
+    	CONSTRAINT "plugin_ingestion_status_check" CHECK ("plugin_ingestion"."status" IN ('queued', 'running', 'succeeded', 'failed'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "plugin_source" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"owner" text NOT NULL,
+    	"repository" text NOT NULL,
+    	"ref" text DEFAULT 'main' NOT NULL,
+    	"path" text DEFAULT '' NOT NULL,
+    	"last_commit_sha" text,
+    	"last_synced_at" timestamp with time zone,
+    	"last_status" text,
+    	"last_error" text,
+    	"created_by" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "plugin_source_location_unique" UNIQUE("owner","repository","ref","path"),
+    	CONSTRAINT "plugin_source_owner_format" CHECK ("plugin_source"."owner" ~ '^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$'),
+    	CONSTRAINT "plugin_source_repository_format" CHECK ("plugin_source"."repository" ~ '^[A-Za-z0-9._-]{1,100}$'),
+    	CONSTRAINT "plugin_source_status_check" CHECK ("plugin_source"."last_status" IS NULL OR "plugin_source"."last_status" IN ('queued', 'running', 'succeeded', 'failed'))
+    );
+    --> statement-breakpoint
+    ALTER TABLE "plugin" ADD COLUMN "source_id" uuid;--> statement-breakpoint
+    ALTER TABLE "plugin_version" ADD COLUMN "commit_sha" text;--> statement-breakpoint
+    ALTER TABLE "plugin_version" ADD COLUMN "archive_sha256" text;--> statement-breakpoint
+    ALTER TABLE "plugin_version" ADD COLUMN "archive_size_bytes" integer;--> statement-breakpoint
+    ALTER TABLE "plugin_version" ADD COLUMN "scan" jsonb;--> statement-breakpoint
+    ALTER TABLE "plugin_ingestion" ADD CONSTRAINT "plugin_ingestion_source_id_plugin_source_id_fk" FOREIGN KEY ("source_id") REFERENCES "public"."plugin_source"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "plugin" ADD CONSTRAINT "plugin_source_id_plugin_source_id_fk" FOREIGN KEY ("source_id") REFERENCES "public"."plugin_source"("id") ON DELETE set null ON UPDATE no action;
+    --> statement-breakpoint
+    -- 0012_admin_installation_read.sql
+    -- The admin app counts installations across organizations to show what a change affects. The
+    -- policy only opens when the transaction names that purpose, and only for the admin role.
+    CREATE POLICY maintenance_admin_read_select ON "installation" FOR SELECT TO app_admin USING (current_setting('app.maintenance', true) = 'admin_read');
+    --> statement-breakpoint
+    -- 0013_categories.sql
+    CREATE TABLE "category" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"slug" text NOT NULL,
+    	"name" text NOT NULL,
+    	"description" text DEFAULT '' NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "category_slug_unique" UNIQUE("slug"),
+    	CONSTRAINT "category_slug_format" CHECK ("category"."slug" ~ '^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$'),
+    	CONSTRAINT "category_name_length" CHECK (char_length("category"."name") BETWEEN 1 AND 60),
+    	CONSTRAINT "category_description_length" CHECK (char_length("category"."description") <= 200)
+    );
+    --> statement-breakpoint
+    CREATE TABLE "plugin_category" (
+    	"plugin_id" uuid NOT NULL,
+    	"category_id" uuid NOT NULL,
+    	CONSTRAINT "plugin_category_pk" PRIMARY KEY("plugin_id","category_id")
+    );
+    --> statement-breakpoint
+    ALTER TABLE "plugin_source" ADD COLUMN "last_note" text;--> statement-breakpoint
+    ALTER TABLE "plugin" ADD COLUMN "featured" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+    ALTER TABLE "plugin" ADD COLUMN "verified" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+    ALTER TABLE "plugin_category" ADD CONSTRAINT "plugin_category_plugin_id_plugin_id_fk" FOREIGN KEY ("plugin_id") REFERENCES "public"."plugin"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "plugin_category" ADD CONSTRAINT "plugin_category_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."category"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    INSERT INTO "category" ("id", "slug", "name", "description")
+    VALUES (gen_random_uuid(), 'general', 'General', 'Plugins that fit no other category.')
+    ON CONFLICT ("slug") DO NOTHING;--> statement-breakpoint
+    INSERT INTO "plugin_category" ("plugin_id", "category_id")
+    SELECT p."id", c."id" FROM "plugin" p, "category" c
+    WHERE c."slug" = 'general'
+      AND NOT EXISTS (SELECT 1 FROM "plugin_category" pc WHERE pc."plugin_id" = p."id");
+    --> statement-breakpoint
+    -- 0014_reflective_bullseye.sql
+    ALTER TABLE "plugin" ADD COLUMN "metadata_edited" boolean DEFAULT false NOT NULL;
+    --> statement-breakpoint
+    -- 0015_brainy_iron_patriot.sql
+    ALTER TABLE "plugin" DROP CONSTRAINT "plugin_visibility_check";--> statement-breakpoint
+    ALTER TABLE "plugin_source" ADD COLUMN "featured" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+    ALTER TABLE "plugin_source" ADD COLUMN "verified" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+    ALTER TABLE "plugin_source" ADD COLUMN "visibility" text DEFAULT 'public' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "plugin_source" ADD CONSTRAINT "plugin_source_visibility_check" CHECK ("plugin_source"."visibility" IN ('public', 'private'));--> statement-breakpoint
+    ALTER TABLE "plugin" ADD CONSTRAINT "plugin_visibility_check" CHECK ("plugin"."visibility" IN ('public', 'private'));
+    --> statement-breakpoint
+    -- 0016_plugin_name_one_character.sql
+    ALTER TABLE "plugin" DROP CONSTRAINT "plugin_name_format";--> statement-breakpoint
+    ALTER TABLE "plugin" ADD CONSTRAINT "plugin_name_format" CHECK ("plugin"."name" ~ '^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$');
+    --> statement-breakpoint
+    -- 0017_lean_dexter_bennett.sql
+    ALTER TABLE "installation" ADD COLUMN "update_policy" text DEFAULT 'pinned' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_update_policy_check" CHECK ("installation"."update_policy" IN ('pinned', 'follow_latest'));
+    --> statement-breakpoint
+    -- 0018_clever_lyja.sql
+    CREATE TABLE "installation_variable" (
+    	"installation_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"name" text NOT NULL,
+    	"value_sealed" text NOT NULL,
+    	"updated_by" uuid,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "installation_variable_pk" PRIMARY KEY("installation_id","name"),
+    	CONSTRAINT "installation_variable_name_format" CHECK ("installation_variable"."name" ~ '^[A-Z][A-Z0-9_]{0,63}$')
+    );
+    --> statement-breakpoint
+    ALTER TABLE "installation" ADD COLUMN "variables_revision" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+    ALTER TABLE "installation_variable" ADD CONSTRAINT "installation_variable_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation_variable" ADD CONSTRAINT "installation_variable_installation_organization_fk" FOREIGN KEY ("installation_id","organization_id") REFERENCES "public"."installation"("id","organization_id") ON DELETE cascade ON UPDATE no action;
+    --> statement-breakpoint
+    -- 0019_installation_variable_rls.sql
+    -- Variable values belong to one organization; like every tenant table they are visible only inside
+    -- a transaction that names that organization.
+    ALTER TABLE "installation_variable" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "installation_variable" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY installation_variable_tenant ON "installation_variable" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);
+    --> statement-breakpoint
+    -- 0020_reflective_jocasta.sql
+    ALTER TABLE "installation_variable" DROP CONSTRAINT "installation_variable_name_format";--> statement-breakpoint
+    ALTER TABLE "installation_variable" ADD CONSTRAINT "installation_variable_name_format" CHECK ("installation_variable"."name" ~ '^[A-Za-z0-9_-]{1,64}$');
+    --> statement-breakpoint
+    -- 0021_dusty_pyro.sql
+    CREATE TABLE "mcp_oauth_state" (
+    	"state_hash" text PRIMARY KEY NOT NULL,
+    	"installation_id" uuid NOT NULL,
+    	"component_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"code_verifier_sealed" text NOT NULL,
+    	"redirect_uri" text NOT NULL,
+    	"expires_at" timestamp with time zone NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+    );
+    --> statement-breakpoint
+    CREATE TABLE "mcp_oauth_token" (
+    	"installation_id" uuid NOT NULL,
+    	"component_id" uuid NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"access_sealed" text NOT NULL,
+    	"refresh_sealed" text,
+    	"expires_at" timestamp with time zone,
+    	"scope" text,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "mcp_oauth_token_pk" PRIMARY KEY("installation_id","component_id","user_id"),
+    	CONSTRAINT "mcp_oauth_token_status_check" CHECK ("mcp_oauth_token"."status" IN ('active', 'needs_reauth'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "mcp_server" (
+    	"installation_id" uuid NOT NULL,
+    	"component_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"auth_type" text DEFAULT 'none' NOT NULL,
+    	"api_key_sealed" text,
+    	"api_key_last_four" text,
+    	"oauth_client_id" text,
+    	"oauth_client_secret_sealed" text,
+    	"oauth_metadata" jsonb,
+    	"call_timeout_ms" integer,
+    	"health" text DEFAULT 'unknown' NOT NULL,
+    	"health_checked_at" timestamp with time zone,
+    	"last_error" text,
+    	"tools" jsonb DEFAULT '[]'::jsonb NOT NULL,
+    	"tools_hash" text,
+    	"tools_refreshed_at" timestamp with time zone,
+    	"revision" integer DEFAULT 1 NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "mcp_server_pk" PRIMARY KEY("installation_id","component_id"),
+    	CONSTRAINT "mcp_server_auth_type_check" CHECK ("mcp_server"."auth_type" IN ('none', 'api_key', 'oauth_dcr', 'oauth_client')),
+    	CONSTRAINT "mcp_server_health_check" CHECK ("mcp_server"."health" IN ('unknown', 'healthy', 'degraded', 'unreachable')),
+    	CONSTRAINT "mcp_server_call_timeout_range" CHECK ("mcp_server"."call_timeout_ms" IS NULL OR ("mcp_server"."call_timeout_ms" >= 1000 AND "mcp_server"."call_timeout_ms" <= 120000))
+    );
+    --> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_server_fk" FOREIGN KEY ("installation_id","component_id") REFERENCES "public"."mcp_server"("installation_id","component_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD CONSTRAINT "mcp_oauth_token_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD CONSTRAINT "mcp_oauth_token_server_fk" FOREIGN KEY ("installation_id","component_id") REFERENCES "public"."mcp_server"("installation_id","component_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_server" ADD CONSTRAINT "mcp_server_installation_component_fk" FOREIGN KEY ("installation_id","component_id") REFERENCES "public"."installation_component"("installation_id","component_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_server" ADD CONSTRAINT "mcp_server_installation_organization_fk" FOREIGN KEY ("installation_id","organization_id") REFERENCES "public"."installation"("id","organization_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "mcp_oauth_state_expires_idx" ON "mcp_oauth_state" USING btree ("expires_at");--> statement-breakpoint
+    CREATE INDEX "mcp_server_org_idx" ON "mcp_server" USING btree ("organization_id");
+    --> statement-breakpoint
+    -- 0022_mcp_server_rls.sql
+    -- MCP server settings, member tokens and pending authorizations belong to one organization; like
+    -- every tenant table they are visible only inside a transaction that names that organization.
+    ALTER TABLE "mcp_server" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "mcp_server" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY mcp_server_tenant ON "mcp_server" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY mcp_oauth_token_tenant ON "mcp_oauth_token" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY mcp_oauth_state_tenant ON "mcp_oauth_state" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);
+    --> statement-breakpoint
+    -- 0023_api_key_lookup_policy.sql
+    -- A request that carries an API key knows the key id before it knows the organization. The api may
+    -- read key rows for that one lookup, in a transaction that names the purpose; everything after the
+    -- lookup runs inside the key's own organization.
+    CREATE POLICY maintenance_key_lookup_select ON "api_key" FOR SELECT TO app_api USING (current_setting('app.maintenance', true) = 'key_lookup');
+    --> statement-breakpoint
+    -- 0024_conscious_quentin_quire.sql
+    DROP TABLE "connection" CASCADE;--> statement-breakpoint
+    ALTER TABLE "installation" DROP COLUMN "connection_id";
+    --> statement-breakpoint
+    -- 0025_blushing_calypso.sql
+    ALTER TABLE "installation" ADD COLUMN "required" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_required_org_only" CHECK ("installation"."required" = false OR "installation"."scope" = 'org');
+    --> statement-breakpoint
+    -- 0026_tricky_hiroim.sql
+    ALTER TABLE "mcp_server" ADD COLUMN "oauth_scopes" text;
+    --> statement-breakpoint
+    -- 0027_early_obadiah_stane.sql
+    ALTER TABLE "installation" ADD COLUMN "replaced_by_installation_id" uuid;
+    --> statement-breakpoint
+    -- 0028_mushy_yellowjacket.sql
+    CREATE TABLE "partner_app_key" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"app_id" uuid NOT NULL,
+    	"key_id" text NOT NULL,
+    	"secret_hash" text NOT NULL,
+    	"last_four" text NOT NULL,
+    	"scopes" text[] NOT NULL,
+    	"allowed_cidrs" text[],
+    	"expires_at" timestamp with time zone NOT NULL,
+    	"revoked_at" timestamp with time zone,
+    	"created_by" uuid NOT NULL,
+    	"last_used_at" timestamp with time zone,
+    	"last_used_ip" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "partner_app_key_key_id_unique" UNIQUE("key_id"),
+    	CONSTRAINT "partner_app_key_id_format" CHECK ("partner_app_key"."key_id" ~ '^bcip_[0-9a-f]{16}$'),
+    	CONSTRAINT "partner_app_key_scopes_count" CHECK (cardinality("partner_app_key"."scopes") BETWEEN 1 AND 20),
+    	CONSTRAINT "partner_app_key_cidrs_count" CHECK ("partner_app_key"."allowed_cidrs" IS NULL OR cardinality("partner_app_key"."allowed_cidrs") BETWEEN 1 AND 20),
+    	CONSTRAINT "partner_app_key_expiry_after_creation" CHECK ("partner_app_key"."expires_at" > "partner_app_key"."created_at")
+    );
+    --> statement-breakpoint
+    CREATE TABLE "partner_app_member" (
+    	"app_id" uuid NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"role" text DEFAULT 'OWNER' NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "partner_app_member_pk" PRIMARY KEY("app_id","user_id"),
+    	CONSTRAINT "partner_app_member_role_check" CHECK ("partner_app_member"."role" IN ('OWNER', 'ADMIN', 'VIEWER'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "partner_app" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"name" text NOT NULL,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"return_origins" text[] DEFAULT '{}'::text[] NOT NULL,
+    	"allow_admin_role" boolean DEFAULT false NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "partner_app_name_length" CHECK (char_length("partner_app"."name") >= 3 AND char_length("partner_app"."name") <= 60),
+    	CONSTRAINT "partner_app_status_check" CHECK ("partner_app"."status" IN ('active', 'suspended', 'revoked')),
+    	CONSTRAINT "partner_app_return_origins_count" CHECK (cardinality("partner_app"."return_origins") <= 20)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "user" ADD COLUMN "kind" text DEFAULT 'human' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "user" ADD COLUMN "partner_app_id" uuid;--> statement-breakpoint
+    ALTER TABLE "user" ADD COLUMN "external_ref" text;--> statement-breakpoint
+    ALTER TABLE "organization" ADD COLUMN "partner_app_id" uuid;--> statement-breakpoint
+    ALTER TABLE "organization" ADD COLUMN "external_ref" text;--> statement-breakpoint
+    ALTER TABLE "organization" ADD COLUMN "partner_access_enabled" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+    ALTER TABLE "team" ADD COLUMN "external_ref" text;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD COLUMN "partner_app_id" uuid;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD COLUMN "return_url" text;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD COLUMN "client_state" text;--> statement-breakpoint
+    ALTER TABLE "partner_app_key" ADD CONSTRAINT "partner_app_key_app_id_partner_app_id_fk" FOREIGN KEY ("app_id") REFERENCES "public"."partner_app"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "partner_app_key" ADD CONSTRAINT "partner_app_key_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "partner_app_member" ADD CONSTRAINT "partner_app_member_app_id_partner_app_id_fk" FOREIGN KEY ("app_id") REFERENCES "public"."partner_app"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "partner_app_member" ADD CONSTRAINT "partner_app_member_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "partner_app_key_app_idx" ON "partner_app_key" USING btree ("app_id");--> statement-breakpoint
+    CREATE INDEX "partner_app_member_user_idx" ON "partner_app_member" USING btree ("user_id");--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_partner_app_id_partner_app_id_fk" FOREIGN KEY ("partner_app_id") REFERENCES "public"."partner_app"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "organization" ADD CONSTRAINT "organization_partner_app_id_partner_app_id_fk" FOREIGN KEY ("partner_app_id") REFERENCES "public"."partner_app"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_partner_app_id_partner_app_id_fk" FOREIGN KEY ("partner_app_id") REFERENCES "public"."partner_app"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE UNIQUE INDEX "user_one_service_per_app" ON "user" USING btree ("partner_app_id") WHERE "user"."kind" = 'service';--> statement-breakpoint
+    CREATE INDEX "organization_partner_app_idx" ON "organization" USING btree ("partner_app_id");--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_partner_ref_unique" UNIQUE("partner_app_id","external_ref");--> statement-breakpoint
+    ALTER TABLE "organization" ADD CONSTRAINT "organization_partner_ref_unique" UNIQUE("partner_app_id","external_ref");--> statement-breakpoint
+    ALTER TABLE "team" ADD CONSTRAINT "team_org_external_ref_unique" UNIQUE("organization_id","external_ref");--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_kind_check" CHECK ("user"."kind" IN ('human', 'external', 'service'));--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_kind_refs_check" CHECK (("user"."kind" = 'human' AND "user"."partner_app_id" IS NULL AND "user"."external_ref" IS NULL) OR ("user"."kind" = 'external' AND "user"."partner_app_id" IS NOT NULL AND "user"."external_ref" IS NOT NULL) OR ("user"."kind" = 'service' AND "user"."partner_app_id" IS NOT NULL AND "user"."external_ref" IS NULL));--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_external_ref_length" CHECK ("user"."external_ref" IS NULL OR char_length("user"."external_ref") BETWEEN 1 AND 128);--> statement-breakpoint
+    ALTER TABLE "organization" ADD CONSTRAINT "organization_partner_refs_check" CHECK (("organization"."partner_app_id" IS NULL) = ("organization"."external_ref" IS NULL));--> statement-breakpoint
+    ALTER TABLE "organization" ADD CONSTRAINT "organization_external_ref_length" CHECK ("organization"."external_ref" IS NULL OR char_length("organization"."external_ref") BETWEEN 1 AND 128);--> statement-breakpoint
+    ALTER TABLE "team" ADD CONSTRAINT "team_external_ref_length" CHECK ("team"."external_ref" IS NULL OR char_length("team"."external_ref") BETWEEN 1 AND 128);--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_partner_fields_check" CHECK ("mcp_oauth_state"."partner_app_id" IS NOT NULL OR ("mcp_oauth_state"."return_url" IS NULL AND "mcp_oauth_state"."client_state" IS NULL));--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_client_state_length" CHECK ("mcp_oauth_state"."client_state" IS NULL OR char_length("mcp_oauth_state"."client_state") <= 128);
+    --> statement-breakpoint
+    -- 0029_partner_console_read_policy.sql
+    -- The website console of a partner app lists that app's orgs and their audit trail. The api may read
+    -- those rows in a transaction that names the purpose and the app (`app.partner_app`); a row of any
+    -- other org stays closed. The org policy reads only its own columns, and the audit policy reaches the
+    -- orgs through them, so neither policy can loop back into the other.
+    CREATE POLICY maintenance_partner_console_read_select ON "organization" FOR SELECT TO app_api USING (current_setting('app.maintenance', true) = 'partner_console_read' AND partner_app_id = nullif(current_setting('app.partner_app', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY maintenance_partner_console_read_select ON "audit_log" FOR SELECT TO app_api USING (current_setting('app.maintenance', true) = 'partner_console_read' AND org_id IN (SELECT id FROM "organization" WHERE partner_app_id = nullif(current_setting('app.partner_app', true), '')::uuid));
+    --> statement-breakpoint
+    -- 0030_invite_team_role.sql
+    ALTER TABLE "email_token" ADD COLUMN "invited_team_id" uuid;--> statement-breakpoint
+    ALTER TABLE "email_token" ADD COLUMN "invited_team_role" text;--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_invited_team_id_team_id_fk" FOREIGN KEY ("invited_team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_invited_team_check" CHECK (("email_token"."invited_team_id" IS NULL) = ("email_token"."invited_team_role" IS NULL) AND ("email_token"."invited_team_role" IS NULL OR ("email_token"."purpose" = 'invite' AND "email_token"."invited_team_role" IN ('ADMIN', 'MEMBER', 'VIEWER'))));
+    --> statement-breakpoint
+    -- 0031_project_core.sql
+    CREATE TABLE "project_key" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"project_id" uuid NOT NULL,
+    	"key_id" text NOT NULL,
+    	"secret_hash" text NOT NULL,
+    	"last_four" text NOT NULL,
+    	"scopes" text[] NOT NULL,
+    	"allowed_cidrs" text[],
+    	"expires_at" timestamp with time zone NOT NULL,
+    	"revoked_at" timestamp with time zone,
+    	"created_by" uuid NOT NULL,
+    	"last_used_at" timestamp with time zone,
+    	"last_used_ip" text,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "project_key_key_id_unique" UNIQUE("key_id"),
+    	CONSTRAINT "project_key_id_format" CHECK ("project_key"."key_id" ~ '^prk_[0-9a-f]{16}$'),
+    	CONSTRAINT "project_key_scopes_count" CHECK (cardinality("project_key"."scopes") BETWEEN 1 AND 20),
+    	CONSTRAINT "project_key_scopes_allowed" CHECK ("project_key"."scopes" <@ ARRAY['users:read', 'users:write', 'sessions:read', 'sessions:write', 'plugins:read', 'plugins:write', 'connections:read', 'connections:write', 'logs:read']::text[]),
+    	CONSTRAINT "project_key_cidrs_count" CHECK ("project_key"."allowed_cidrs" IS NULL OR cardinality("project_key"."allowed_cidrs") BETWEEN 1 AND 20),
+    	CONSTRAINT "project_key_expiry_after_creation" CHECK ("project_key"."expires_at" > "project_key"."created_at")
+    );
+    --> statement-breakpoint
+    CREATE TABLE "project" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"name" text NOT NULL,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"return_origins" text[] DEFAULT '{}'::text[] NOT NULL,
+    	"created_by" uuid NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "project_organization_name_unique" UNIQUE("organization_id","name"),
+    	CONSTRAINT "project_name_length" CHECK (char_length("project"."name") BETWEEN 1 AND 60),
+    	CONSTRAINT "project_status_check" CHECK ("project"."status" IN ('active', 'suspended', 'revoked')),
+    	CONSTRAINT "project_return_origins_count" CHECK (cardinality("project"."return_origins") <= 20)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT "user_kind_refs_check";--> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT "user_external_ref_length";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_scope_check";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_user_scope_shape";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_team_scope_shape";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_org_scope_shape";--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" DROP CONSTRAINT "mcp_oauth_state_partner_fields_check";--> statement-breakpoint
+    ALTER TABLE "user" ADD COLUMN "project_id" uuid;--> statement-breakpoint
+    ALTER TABLE "installation" ADD COLUMN "project_id" uuid;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD COLUMN "project_id" uuid;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD COLUMN "plugins" text[];--> statement-breakpoint
+    ALTER TABLE "audit_log" ADD COLUMN "project_id" uuid;--> statement-breakpoint
+    ALTER TABLE "audit_log" ADD COLUMN "subject_user_id" uuid;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD COLUMN "project_id" uuid;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD COLUMN "id" uuid DEFAULT gen_random_uuid() NOT NULL;--> statement-breakpoint
+    ALTER TABLE "project_key" ADD CONSTRAINT "project_key_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project_key" ADD CONSTRAINT "project_key_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project" ADD CONSTRAINT "project_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project" ADD CONSTRAINT "project_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "project_key_project_idx" ON "project_key" USING btree ("project_id");--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE UNIQUE INDEX "installation_project_scope_unique" ON "installation" USING btree ("organization_id","plugin_id","project_id") WHERE "installation"."scope" = 'project';--> statement-breakpoint
+    CREATE INDEX "installation_project_idx" ON "installation" USING btree ("project_id");--> statement-breakpoint
+    CREATE INDEX "audit_log_project_created_idx" ON "audit_log" USING btree ("project_id","created_at");--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_project_ref_unique" UNIQUE("project_id","external_ref");--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD CONSTRAINT "mcp_oauth_token_id_unique" UNIQUE("id");--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_kind_refs_check" CHECK (("user"."kind" = 'human' AND "user"."partner_app_id" IS NULL AND "user"."project_id" IS NULL AND "user"."external_ref" IS NULL) OR ("user"."kind" = 'external' AND "user"."external_ref" IS NOT NULL AND (("user"."partner_app_id" IS NOT NULL) <> ("user"."project_id" IS NOT NULL))) OR ("user"."kind" = 'service' AND "user"."partner_app_id" IS NOT NULL AND "user"."project_id" IS NULL AND "user"."external_ref" IS NULL));--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_external_ref_length" CHECK ("user"."external_ref" IS NULL OR char_length("user"."external_ref") BETWEEN 1 AND 255);--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_project_scope_shape" CHECK ("installation"."scope" != 'project' OR ("installation"."project_id" IS NOT NULL AND "installation"."team_id" IS NULL AND "installation"."user_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_scope_check" CHECK ("installation"."scope" IN ('org', 'team', 'user', 'project'));--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_user_scope_shape" CHECK ("installation"."scope" != 'user' OR ("installation"."user_id" IS NOT NULL AND "installation"."team_id" IS NULL AND "installation"."project_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_team_scope_shape" CHECK ("installation"."scope" != 'team' OR ("installation"."team_id" IS NOT NULL AND "installation"."user_id" IS NULL AND "installation"."project_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_org_scope_shape" CHECK ("installation"."scope" != 'org' OR ("installation"."team_id" IS NULL AND "installation"."user_id" IS NULL AND "installation"."project_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_project_scope" CHECK ("api_key"."project_id" IS NULL OR "api_key"."scope" = 'user');--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_partner_fields_check" CHECK ("mcp_oauth_state"."partner_app_id" IS NOT NULL OR "mcp_oauth_state"."project_id" IS NOT NULL OR ("mcp_oauth_state"."return_url" IS NULL AND "mcp_oauth_state"."client_state" IS NULL));
+    --> statement-breakpoint
+    -- 0032_project_policies.sql
+    ALTER TABLE "project" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_key" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_key" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY project_tenant ON "project" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY project_key_tenant ON "project_key" USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    -- A request that carries a project key knows the key id before it knows the organization. The api
+    -- may read the key row and its project for that one lookup, in a transaction that names the
+    -- purpose; everything after the lookup runs inside the project's own organization.
+    CREATE POLICY maintenance_key_lookup_select ON "project" FOR SELECT TO app_api USING (current_setting('app.maintenance', true) = 'key_lookup');--> statement-breakpoint
+    CREATE POLICY maintenance_key_lookup_select ON "project_key" FOR SELECT TO app_api USING (current_setting('app.maintenance', true) = 'key_lookup');
+    --> statement-breakpoint
+    -- 0033_key_prefixes.sql
+    ALTER TABLE "partner_app_key" DROP CONSTRAINT "partner_app_key_id_format";--> statement-breakpoint
+    ALTER TABLE "partner_app_key" ADD CONSTRAINT "partner_app_key_id_format" CHECK ("partner_app_key"."key_id" ~ '^ptk_[0-9a-f]{16}$');
+    --> statement-breakpoint
+    -- 0034_project_key_scope_areas.sql
+    ALTER TABLE "project_key" DROP CONSTRAINT "project_key_scopes_allowed";--> statement-breakpoint
+    ALTER TABLE "project_key" ADD CONSTRAINT "project_key_scopes_allowed" CHECK ("project_key"."scopes" <@ ARRAY['tools:read', 'sessions:read', 'sessions:write', 'connections:read', 'connections:write', 'auth-configs:read', 'auth-configs:write', 'plugins:read', 'plugins:write', 'observability:read']::text[]);
+    --> statement-breakpoint
+    -- 0035_project_user_installs.sql
+    CREATE TABLE "project_allowed_plugin" (
+    	"project_id" uuid NOT NULL,
+    	"plugin_id" uuid NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "project_allowed_plugin_pk" PRIMARY KEY("project_id","plugin_id")
+    );
+    --> statement-breakpoint
+    CREATE TABLE "project_plugin_set_member" (
+    	"set_id" uuid NOT NULL,
+    	"plugin_id" uuid NOT NULL,
+    	CONSTRAINT "project_plugin_set_member_pk" PRIMARY KEY("set_id","plugin_id")
+    );
+    --> statement-breakpoint
+    CREATE TABLE "project_plugin_set" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"project_id" uuid NOT NULL,
+    	"name" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "project_plugin_set_name_unique" UNIQUE("project_id","name"),
+    	CONSTRAINT "project_plugin_set_name_length" CHECK (char_length("project_plugin_set"."name") BETWEEN 1 AND 60)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_user_scope_shape";--> statement-breakpoint
+    ALTER TABLE "project" ADD COLUMN "user_install_mode" text DEFAULT 'off' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "project_allowed_plugin" ADD CONSTRAINT "project_allowed_plugin_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project_allowed_plugin" ADD CONSTRAINT "project_allowed_plugin_plugin_id_plugin_id_fk" FOREIGN KEY ("plugin_id") REFERENCES "public"."plugin"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set_member" ADD CONSTRAINT "project_plugin_set_member_set_id_project_plugin_set_id_fk" FOREIGN KEY ("set_id") REFERENCES "public"."project_plugin_set"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set_member" ADD CONSTRAINT "project_plugin_set_member_plugin_id_plugin_id_fk" FOREIGN KEY ("plugin_id") REFERENCES "public"."plugin"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set" ADD CONSTRAINT "project_plugin_set_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "project_plugin_set_project_idx" ON "project_plugin_set" USING btree ("project_id");--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_user_scope_shape" CHECK ("installation"."scope" != 'user' OR ("installation"."user_id" IS NOT NULL AND "installation"."team_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "project" ADD CONSTRAINT "project_user_install_mode_check" CHECK ("project"."user_install_mode" IN ('off', 'allowlist', 'any'));
+    --> statement-breakpoint
+    -- 0036_project_user_install_policies.sql
+    ALTER TABLE "project_allowed_plugin" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_allowed_plugin" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set_member" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_plugin_set_member" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY project_allowed_plugin_tenant ON "project_allowed_plugin" USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    CREATE POLICY project_plugin_set_tenant ON "project_plugin_set" USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    CREATE POLICY project_plugin_set_member_tenant ON "project_plugin_set_member" USING (set_id IN (SELECT s.id FROM "project_plugin_set" s JOIN "project" p ON p.id = s.project_id WHERE p.organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (set_id IN (SELECT s.id FROM "project_plugin_set" s JOIN "project" p ON p.id = s.project_id WHERE p.organization_id = nullif(current_setting('app.tenant', true), '')::uuid));
+    --> statement-breakpoint
+    -- 0037_project_sessions.sql
+    CREATE TABLE "project_idempotency" (
+    	"project_id" uuid NOT NULL,
+    	"route" text NOT NULL,
+    	"key" text NOT NULL,
+    	"request_sha256" text NOT NULL,
+    	"response_status" integer NOT NULL,
+    	"response_sealed" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"expires_at" timestamp with time zone NOT NULL,
+    	CONSTRAINT "project_idempotency_pk" PRIMARY KEY("project_id","route","key"),
+    	CONSTRAINT "project_idempotency_key_length" CHECK (char_length("project_idempotency"."key") BETWEEN 1 AND 255)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "api_key" ADD COLUMN "tool_policy" jsonb;--> statement-breakpoint
+    ALTER TABLE "project_idempotency" ADD CONSTRAINT "project_idempotency_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "project_idempotency_expires_idx" ON "project_idempotency" USING btree ("expires_at");
+    --> statement-breakpoint
+    -- 0038_project_session_policies.sql
+    ALTER TABLE "project_idempotency" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_idempotency" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY project_idempotency_tenant ON "project_idempotency" TO app_api USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    -- The worker removes expired rows across organizations, in a transaction that names the purpose.
+    CREATE POLICY maintenance_purge_select ON "project_idempotency" FOR SELECT TO app_worker USING (current_setting('app.maintenance', true) = 'purge');--> statement-breakpoint
+    CREATE POLICY maintenance_purge_delete ON "project_idempotency" FOR DELETE TO app_worker USING (current_setting('app.maintenance', true) = 'purge');
+    --> statement-breakpoint
+    -- 0039_org_roles.sql
+    ALTER TABLE "email_token" DROP CONSTRAINT "email_token_invited_role_check";--> statement-breakpoint
+    ALTER TABLE "organization_member" DROP CONSTRAINT "organization_member_role_check";--> statement-breakpoint
+    ALTER TABLE "email_token" ADD CONSTRAINT "email_token_invited_role_check" CHECK ("email_token"."invited_role" IS NULL OR "email_token"."invited_role" IN ('ADMIN', 'MEMBER', 'VIEWER'));--> statement-breakpoint
+    ALTER TABLE "organization_member" ADD CONSTRAINT "organization_member_role_check" CHECK ("organization_member"."role" IN ('ADMIN', 'MEMBER', 'VIEWER'));
+    --> statement-breakpoint
+    -- 0040_isolation_policies.sql
+    -- Narrowing policies. They are RESTRICTIVE, so they only remove rows the organization policy allows
+    -- and never add any. Each reads a setting that the caller sets for the transaction; an unset or
+    -- empty setting leaves the row visible, so callers that do not set it behave as before.
+    --   app.project : a project key or a project session; only rows of that project are visible.
+    --   app.subject : a project session; only that user's own rows are visible.
+    --   app.viewer  : '1' for an organization Viewer; the For You rows (scope other than project) are hidden.
+    -- Which project an installation belongs to. A function, so a policy on another table can read it
+    -- without the caller holding any privilege on the installation table.
+    CREATE FUNCTION installation_project(p_installation uuid) RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$ SELECT project_id FROM "installation" WHERE id = p_installation $$;--> statement-breakpoint
+    CREATE POLICY installation_isolation_project ON "installation" AS RESTRICTIVE USING (nullif(current_setting('app.project', true), '') IS NULL OR project_id = nullif(current_setting('app.project', true), '')::uuid) WITH CHECK (nullif(current_setting('app.project', true), '') IS NULL OR project_id = nullif(current_setting('app.project', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY installation_isolation_subject ON "installation" AS RESTRICTIVE USING (nullif(current_setting('app.subject', true), '') IS NULL OR scope <> 'user' OR user_id = nullif(current_setting('app.subject', true), '')::uuid) WITH CHECK (nullif(current_setting('app.subject', true), '') IS NULL OR scope <> 'user' OR user_id = nullif(current_setting('app.subject', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY installation_isolation_viewer ON "installation" AS RESTRICTIVE USING (coalesce(current_setting('app.viewer', true), '') <> '1' OR scope = 'project') WITH CHECK (coalesce(current_setting('app.viewer', true), '') <> '1' OR scope = 'project');--> statement-breakpoint
+    CREATE POLICY api_key_isolation_project ON "api_key" AS RESTRICTIVE USING (nullif(current_setting('app.project', true), '') IS NULL OR project_id = nullif(current_setting('app.project', true), '')::uuid) WITH CHECK (nullif(current_setting('app.project', true), '') IS NULL OR project_id = nullif(current_setting('app.project', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY api_key_isolation_subject ON "api_key" AS RESTRICTIVE USING (nullif(current_setting('app.subject', true), '') IS NULL OR scope <> 'user' OR user_id = nullif(current_setting('app.subject', true), '')::uuid) WITH CHECK (nullif(current_setting('app.subject', true), '') IS NULL OR scope <> 'user' OR user_id = nullif(current_setting('app.subject', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY mcp_oauth_token_isolation_project ON "mcp_oauth_token" AS RESTRICTIVE USING (nullif(current_setting('app.project', true), '') IS NULL OR installation_project(installation_id) = nullif(current_setting('app.project', true), '')::uuid) WITH CHECK (nullif(current_setting('app.project', true), '') IS NULL OR installation_project(installation_id) = nullif(current_setting('app.project', true), '')::uuid);--> statement-breakpoint
+    CREATE POLICY mcp_oauth_token_isolation_subject ON "mcp_oauth_token" AS RESTRICTIVE USING (nullif(current_setting('app.subject', true), '') IS NULL OR user_id = nullif(current_setting('app.subject', true), '')::uuid) WITH CHECK (nullif(current_setting('app.subject', true), '') IS NULL OR user_id = nullif(current_setting('app.subject', true), '')::uuid);
+    --> statement-breakpoint
+    -- 0041_project_kind.sql
+    ALTER TABLE "project" ADD COLUMN "kind" text DEFAULT 'platform' NOT NULL;--> statement-breakpoint
+    CREATE UNIQUE INDEX "project_for_you_unique" ON "project" USING btree ("organization_id") WHERE "project"."kind" = 'for_you';--> statement-breakpoint
+    ALTER TABLE "project" ADD CONSTRAINT "project_kind_check" CHECK ("project"."kind" IN ('for_you', 'platform'));--> statement-breakpoint
+    INSERT INTO "project" ("id", "organization_id", "name", "kind", "created_by")
+    SELECT gen_random_uuid(), o."id", 'For You', 'for_you', o."created_by" FROM "organization" o
+    WHERE NOT EXISTS (SELECT 1 FROM "project" p WHERE p."organization_id" = o."id" AND p."kind" = 'for_you')
+    ON CONFLICT DO NOTHING;--> statement-breakpoint
+    INSERT INTO "project" ("id", "organization_id", "name", "kind", "created_by")
+    SELECT gen_random_uuid(), o."id", 'Default', 'platform', o."created_by" FROM "organization" o
+    WHERE NOT EXISTS (SELECT 1 FROM "project" p WHERE p."organization_id" = o."id" AND p."kind" = 'platform')
+    ON CONFLICT DO NOTHING;
+    --> statement-breakpoint
+    -- 0042_api_key_kinds.sql
+    DELETE FROM "api_key" WHERE "scope" = 'team' OR ("scope" = 'user' AND "project_id" IS NULL) OR ("scope" = 'org' AND left("key_id", 4) = 'ork_');--> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT "api_key_team_scope_shape";--> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT "api_key_scope_check";--> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT "api_key_user_scope_shape";--> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT "api_key_org_scope_shape";--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_kind_check" CHECK (("api_key"."scope" = 'org' AND left("api_key"."key_id", 4) IN ('fyk_', 'plk_')) OR ("api_key"."scope" = 'user' AND left("api_key"."key_id", 4) = 'stk_'));--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_scope_check" CHECK ("api_key"."scope" IN ('org', 'user'));--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_user_scope_shape" CHECK ("api_key"."scope" != 'user' OR ("api_key"."user_id" IS NOT NULL AND "api_key"."team_id" IS NULL AND "api_key"."project_id" IS NOT NULL));--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_org_scope_shape" CHECK ("api_key"."scope" != 'org' OR ("api_key"."team_id" IS NULL AND "api_key"."user_id" IS NULL AND "api_key"."project_id" IS NULL));
+    --> statement-breakpoint
+    -- 0043_auth_config.sql
+    CREATE TABLE "auth_config" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"project_id" uuid NOT NULL,
+    	"plugin_id" uuid NOT NULL,
+    	"server_name" text NOT NULL,
+    	"name" text NOT NULL,
+    	"auth_mode" text NOT NULL,
+    	"secret_sealed" text,
+    	"secret_last_four" text,
+    	"oauth_client_id" text,
+    	"oauth_client_secret_sealed" text,
+    	"oauth_scopes" text,
+    	"oauth_metadata" jsonb,
+    	"is_default" boolean DEFAULT false NOT NULL,
+    	"status" text DEFAULT 'active' NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "auth_config_project_server_name_unique" UNIQUE("project_id","plugin_id","server_name","name"),
+    	CONSTRAINT "auth_config_mode_check" CHECK ("auth_config"."auth_mode" IN ('dcr', 'oauth_client', 'shared_secret', 'user_form')),
+    	CONSTRAINT "auth_config_status_check" CHECK ("auth_config"."status" IN ('active', 'disabled')),
+    	CONSTRAINT "auth_config_name_length" CHECK (char_length("auth_config"."name") >= 1 AND char_length("auth_config"."name") <= 60)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ALTER COLUMN "access_sealed" DROP NOT NULL;--> statement-breakpoint
+    ALTER TABLE "api_key" ADD COLUMN "auth_configs" jsonb;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD COLUMN "auth_config_id" uuid;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD COLUMN "kind" text DEFAULT 'oauth' NOT NULL;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD COLUMN "credentials_sealed" text;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD COLUMN "value_names" text[];--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD COLUMN "auth_config_id" uuid;--> statement-breakpoint
+    ALTER TABLE "auth_config" ADD CONSTRAINT "auth_config_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "auth_config" ADD CONSTRAINT "auth_config_plugin_id_plugin_id_fk" FOREIGN KEY ("plugin_id") REFERENCES "public"."plugin"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE UNIQUE INDEX "auth_config_one_default_idx" ON "auth_config" USING btree ("project_id","plugin_id","server_name") WHERE "auth_config"."is_default";--> statement-breakpoint
+    CREATE INDEX "auth_config_plugin_idx" ON "auth_config" USING btree ("plugin_id");--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_auth_config_id_auth_config_id_fk" FOREIGN KEY ("auth_config_id") REFERENCES "public"."auth_config"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD CONSTRAINT "mcp_oauth_token_auth_config_id_auth_config_id_fk" FOREIGN KEY ("auth_config_id") REFERENCES "public"."auth_config"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "mcp_oauth_token_auth_config_idx" ON "mcp_oauth_token" USING btree ("auth_config_id");--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD CONSTRAINT "mcp_oauth_token_kind_check" CHECK ("mcp_oauth_token"."kind" IN ('oauth', 'api_key', 'env'));--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_token" ADD CONSTRAINT "mcp_oauth_token_credentials_shape" CHECK (("mcp_oauth_token"."kind" = 'oauth' AND "mcp_oauth_token"."access_sealed" IS NOT NULL) OR ("mcp_oauth_token"."kind" <> 'oauth' AND "mcp_oauth_token"."credentials_sealed" IS NOT NULL));
+    --> statement-breakpoint
+    -- 0044_auth_config_policies.sql
+    ALTER TABLE "auth_config" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "auth_config" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY auth_config_tenant ON "auth_config" USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    CREATE POLICY auth_config_isolation_project ON "auth_config" AS RESTRICTIVE USING (nullif(current_setting('app.project', true), '') IS NULL OR project_id = nullif(current_setting('app.project', true), '')::uuid) WITH CHECK (nullif(current_setting('app.project', true), '') IS NULL OR project_id = nullif(current_setting('app.project', true), '')::uuid);
+    --> statement-breakpoint
+    -- 0045_component_archives.sql
+    ALTER TABLE "component" ADD COLUMN "archive_sha256" text;--> statement-breakpoint
+    ALTER TABLE "component" ADD COLUMN "archive_size_bytes" integer;--> statement-breakpoint
+    CREATE INDEX "component_archive_sha256_idx" ON "component" USING btree ("archive_sha256");
+    --> statement-breakpoint
+    -- 0046_even_flatman.sql
+    CREATE TABLE "project_webhook_delivery" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"project_id" uuid NOT NULL,
+    	"event_id" uuid NOT NULL,
+    	"event_type" text NOT NULL,
+    	"payload" text NOT NULL,
+    	"status" text DEFAULT 'pending' NOT NULL,
+    	"attempts" integer DEFAULT 0 NOT NULL,
+    	"next_attempt_at" timestamp with time zone,
+    	"last_status_code" integer,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "project_webhook_delivery_event_unique" UNIQUE("project_id","event_id"),
+    	CONSTRAINT "project_webhook_delivery_status_check" CHECK ("project_webhook_delivery"."status" IN ('pending', 'delivered', 'failed'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "project_webhook" (
+    	"project_id" uuid PRIMARY KEY NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"url" text NOT NULL,
+    	"secret_sealed" text NOT NULL,
+    	"events" text[] NOT NULL,
+    	"enabled" boolean DEFAULT true NOT NULL,
+    	"cursor_at" text NOT NULL,
+    	"cursor_id" uuid NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "project_webhook_events_count" CHECK (cardinality("project_webhook"."events") BETWEEN 1 AND 8),
+    	CONSTRAINT "project_webhook_url_length" CHECK (char_length("project_webhook"."url") BETWEEN 8 AND 2048)
+    );
+    --> statement-breakpoint
+    ALTER TABLE "project_webhook_delivery" ADD CONSTRAINT "project_webhook_delivery_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "project_webhook" ADD CONSTRAINT "project_webhook_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "project_webhook_delivery_due_idx" ON "project_webhook_delivery" USING btree ("status","next_attempt_at");--> statement-breakpoint
+    CREATE INDEX "project_webhook_delivery_project_idx" ON "project_webhook_delivery" USING btree ("project_id","created_at","id");
+    --> statement-breakpoint
+    -- 0047_project_webhook_policies.sql
+    ALTER TABLE "project_webhook" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_webhook" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY project_webhook_tenant ON "project_webhook" TO app_api USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    ALTER TABLE "project_webhook_delivery" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "project_webhook_delivery" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY project_webhook_delivery_tenant ON "project_webhook_delivery" TO app_api USING (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid)) WITH CHECK (project_id IN (SELECT id FROM "project" WHERE organization_id = nullif(current_setting('app.tenant', true), '')::uuid));--> statement-breakpoint
+    -- The worker reads and sends across organizations, in a transaction that names the purpose.
+    CREATE POLICY maintenance_webhook_select ON "project_webhook" FOR SELECT TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_update ON "project_webhook" FOR UPDATE TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_select ON "project_webhook_delivery" FOR SELECT TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_insert ON "project_webhook_delivery" FOR INSERT TO app_worker WITH CHECK (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_update ON "project_webhook_delivery" FOR UPDATE TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_delete ON "project_webhook_delivery" FOR DELETE TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_select ON "audit_log" FOR SELECT TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');--> statement-breakpoint
+    CREATE POLICY maintenance_webhook_select ON "installation" FOR SELECT TO app_worker USING (current_setting('app.maintenance', true) = 'webhook');
+  0001_remove_partner_apps.sql: |-
+    -- The partner API is gone: its apps, members and keys, the org and user columns that pointed at an
+    -- app, and the console read policies that depended on them. Rows that only a partner app could own
+    -- (its service principal and its external users) are removed first; project users stay.
+    DROP POLICY IF EXISTS maintenance_partner_console_read_select ON "organization";--> statement-breakpoint
+    DROP POLICY IF EXISTS maintenance_partner_console_read_select ON "audit_log";--> statement-breakpoint
+    DELETE FROM "user" WHERE "kind" = 'service' OR ("kind" = 'external' AND "project_id" IS NULL);--> statement-breakpoint
+    ALTER TABLE "partner_app_key" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "partner_app_member" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "partner_app" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    DROP TABLE "partner_app_key" CASCADE;--> statement-breakpoint
+    DROP TABLE "partner_app_member" CASCADE;--> statement-breakpoint
+    DROP TABLE "partner_app" CASCADE;--> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT "user_partner_ref_unique";--> statement-breakpoint
+    ALTER TABLE "organization" DROP CONSTRAINT "organization_partner_ref_unique";--> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT "user_kind_check";--> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT "user_kind_refs_check";--> statement-breakpoint
+    ALTER TABLE "organization" DROP CONSTRAINT "organization_partner_refs_check";--> statement-breakpoint
+    ALTER TABLE "organization" DROP CONSTRAINT "organization_external_ref_length";--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" DROP CONSTRAINT "mcp_oauth_state_partner_fields_check";--> statement-breakpoint
+    ALTER TABLE "user" DROP CONSTRAINT IF EXISTS "user_partner_app_id_partner_app_id_fk";
+    --> statement-breakpoint
+    ALTER TABLE "organization" DROP CONSTRAINT IF EXISTS "organization_partner_app_id_partner_app_id_fk";
+    --> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" DROP CONSTRAINT IF EXISTS "mcp_oauth_state_partner_app_id_partner_app_id_fk";
+    --> statement-breakpoint
+    DROP INDEX "user_one_service_per_app";--> statement-breakpoint
+    DROP INDEX "organization_partner_app_idx";--> statement-breakpoint
+    ALTER TABLE "user" DROP COLUMN "partner_app_id";--> statement-breakpoint
+    ALTER TABLE "organization" DROP COLUMN "partner_app_id";--> statement-breakpoint
+    ALTER TABLE "organization" DROP COLUMN "external_ref";--> statement-breakpoint
+    ALTER TABLE "organization" DROP COLUMN "partner_access_enabled";--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" DROP COLUMN "partner_app_id";--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_kind_check" CHECK ("user"."kind" IN ('human', 'external'));--> statement-breakpoint
+    ALTER TABLE "user" ADD CONSTRAINT "user_kind_refs_check" CHECK (("user"."kind" = 'human' AND "user"."project_id" IS NULL AND "user"."external_ref" IS NULL) OR ("user"."kind" = 'external' AND "user"."external_ref" IS NOT NULL AND "user"."project_id" IS NOT NULL));--> statement-breakpoint
+    ALTER TABLE "mcp_oauth_state" ADD CONSTRAINT "mcp_oauth_state_return_fields_check" CHECK ("mcp_oauth_state"."project_id" IS NOT NULL OR ("mcp_oauth_state"."return_url" IS NULL AND "mcp_oauth_state"."client_state" IS NULL));
+  0002_remove_teams.sql: |-
+    -- Teams are gone: the team tables, the team columns on installations, keys and invites, and the team
+    -- scope. Installs at team scope are removed first (their components, variables and servers follow by
+    -- cascade); an invite that named a team stays as an invite for its organization role.
+    DELETE FROM "installation" WHERE "scope" = 'team';--> statement-breakpoint
+    ALTER TABLE "team_member" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "team" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    DROP TABLE "team_member" CASCADE;--> statement-breakpoint
+    DROP TABLE "team" CASCADE;--> statement-breakpoint
+    ALTER TABLE "email_token" DROP CONSTRAINT "email_token_invited_team_check";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_team_scope_shape";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_scope_check";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_user_scope_shape";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_org_scope_shape";--> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT "installation_project_scope_shape";--> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT "api_key_user_scope_shape";--> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT "api_key_org_scope_shape";--> statement-breakpoint
+    ALTER TABLE "email_token" DROP CONSTRAINT IF EXISTS "email_token_invited_team_id_team_id_fk";
+    --> statement-breakpoint
+    ALTER TABLE "installation" DROP CONSTRAINT IF EXISTS "installation_team_id_team_id_fk";
+    --> statement-breakpoint
+    ALTER TABLE "api_key" DROP CONSTRAINT IF EXISTS "api_key_team_id_team_id_fk";
+    --> statement-breakpoint
+    DROP INDEX "installation_team_scope_unique";--> statement-breakpoint
+    DROP INDEX "installation_team_idx";--> statement-breakpoint
+    ALTER TABLE "email_token" DROP COLUMN "invited_team_id";--> statement-breakpoint
+    ALTER TABLE "email_token" DROP COLUMN "invited_team_role";--> statement-breakpoint
+    ALTER TABLE "installation" DROP COLUMN "team_id";--> statement-breakpoint
+    ALTER TABLE "api_key" DROP COLUMN "team_id";--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_scope_check" CHECK ("installation"."scope" IN ('org', 'user', 'project'));--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_user_scope_shape" CHECK ("installation"."scope" != 'user' OR "installation"."user_id" IS NOT NULL);--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_org_scope_shape" CHECK ("installation"."scope" != 'org' OR ("installation"."user_id" IS NULL AND "installation"."project_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "installation" ADD CONSTRAINT "installation_project_scope_shape" CHECK ("installation"."scope" != 'project' OR ("installation"."project_id" IS NOT NULL AND "installation"."user_id" IS NULL));--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_user_scope_shape" CHECK ("api_key"."scope" != 'user' OR ("api_key"."user_id" IS NOT NULL AND "api_key"."project_id" IS NOT NULL));--> statement-breakpoint
+    ALTER TABLE "api_key" ADD CONSTRAINT "api_key_org_scope_shape" CHECK ("api_key"."scope" != 'org' OR ("api_key"."user_id" IS NULL AND "api_key"."project_id" IS NULL));
+  0003_user_component_preference.sql: |-
+    CREATE TABLE "user_component_preference" (
+    	"installation_id" uuid NOT NULL,
+    	"organization_id" uuid NOT NULL,
+    	"component_id" uuid NOT NULL,
+    	"user_id" uuid NOT NULL,
+    	"enabled" boolean NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "user_component_preference_pk" PRIMARY KEY("installation_id","component_id","user_id")
+    );
+    --> statement-breakpoint
+    ALTER TABLE "user_component_preference" ADD CONSTRAINT "user_component_preference_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "user_component_preference" ADD CONSTRAINT "user_component_preference_component_fk" FOREIGN KEY ("installation_id","component_id") REFERENCES "public"."installation_component"("installation_id","component_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "user_component_preference" ADD CONSTRAINT "user_component_preference_installation_organization_fk" FOREIGN KEY ("installation_id","organization_id") REFERENCES "public"."installation"("id","organization_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    ALTER TABLE "user_component_preference" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+    ALTER TABLE "user_component_preference" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+    CREATE POLICY user_component_preference_tenant ON "user_component_preference" USING (organization_id = nullif(current_setting('app.tenant', true), '')::uuid) WITH CHECK (organization_id = nullif(current_setting('app.tenant', true), '')::uuid);
+  0004_admin_allowed_email.sql: |-
+    CREATE TABLE "admin_allowed_email" (
+    	"email" text PRIMARY KEY NOT NULL,
+    	"source" text DEFAULT 'added' NOT NULL,
+    	"added_by" text NOT NULL,
+    	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	CONSTRAINT "admin_allowed_email_source_check" CHECK ("admin_allowed_email"."source" IN ('config', 'added'))
+    );
+  0005_observability.sql: |-
+    CREATE TABLE "error_event" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"group_id" uuid NOT NULL,
+    	"occurred_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"environment" text NOT NULL,
+    	"app_version" text,
+    	"instance_id" text,
+    	"request_id" text,
+    	"trace_id" text,
+    	"org_id" uuid,
+    	"stack" text,
+    	"context" jsonb
+    );
+    --> statement-breakpoint
+    CREATE TABLE "error_group" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"fingerprint" text NOT NULL,
+    	"service" text NOT NULL,
+    	"area" text,
+    	"title" text NOT NULL,
+    	"status" text DEFAULT 'unresolved' NOT NULL,
+    	"count" integer DEFAULT 1 NOT NULL,
+    	"first_seen" timestamp with time zone DEFAULT now() NOT NULL,
+    	"last_seen" timestamp with time zone DEFAULT now() NOT NULL,
+    	"app_version" text,
+    	"resolved_at" timestamp with time zone,
+    	"resolved_by" text,
+    	CONSTRAINT "error_group_fingerprint_unique" UNIQUE("fingerprint"),
+    	CONSTRAINT "error_group_status_check" CHECK ("error_group"."status" IN ('unresolved', 'resolved', 'ignored'))
+    );
+    --> statement-breakpoint
+    CREATE TABLE "ops_event" (
+    	"id" uuid PRIMARY KEY NOT NULL,
+    	"occurred_at" timestamp with time zone DEFAULT now() NOT NULL,
+    	"service" text NOT NULL,
+    	"kind" text NOT NULL,
+    	"severity" text NOT NULL,
+    	"environment" text,
+    	"app_version" text,
+    	"instance_id" text,
+    	"org_id" uuid,
+    	"detail" jsonb,
+    	CONSTRAINT "ops_event_severity_check" CHECK ("ops_event"."severity" IN ('info', 'warning', 'error'))
+    );
+    --> statement-breakpoint
+    ALTER TABLE "error_event" ADD CONSTRAINT "error_event_group_id_error_group_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."error_group"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+    CREATE INDEX "error_event_occurred_at_idx" ON "error_event" USING btree ("occurred_at");--> statement-breakpoint
+    CREATE INDEX "error_event_group_occurred_at_idx" ON "error_event" USING btree ("group_id","occurred_at");--> statement-breakpoint
+    CREATE INDEX "error_group_status_last_seen_idx" ON "error_group" USING btree ("status","last_seen");--> statement-breakpoint
+    CREATE INDEX "error_group_service_last_seen_idx" ON "error_group" USING btree ("service","last_seen");--> statement-breakpoint
+    CREATE INDEX "error_group_last_seen_idx" ON "error_group" USING btree ("last_seen","id");--> statement-breakpoint
+    CREATE INDEX "ops_event_occurred_at_idx" ON "ops_event" USING btree ("occurred_at");--> statement-breakpoint
+    CREATE INDEX "ops_event_kind_occurred_at_idx" ON "ops_event" USING btree ("kind","occurred_at");--> statement-breakpoint
+    CREATE INDEX "ops_event_service_occurred_at_idx" ON "ops_event" USING btree ("service","occurred_at");--> statement-breakpoint
+    CREATE INDEX "ops_event_severity_occurred_at_idx" ON "ops_event" USING btree ("severity","occurred_at");
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: boldcreate-migration-job
+  namespace: boldcreate-prod
+  labels:
+    app.kubernetes.io/name: boldcreate-migration
+    app.kubernetes.io/part-of: boldcreate-integrations
+    app.kubernetes.io/environment: production
+spec:
+  ttlSecondsAfterFinished: 1800
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: boldcreate-migration
+        app.kubernetes.io/environment: production
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrator
+          image: us-east4-docker.pkg.dev/syncfusioncody/synccodestudio/boldcreate-production-integrations-api:#{Build.BuildId}#
+          imagePullPolicy: Always
+          env:
+            - name: NODE_TLS_REJECT_UNAUTHORIZED
+              value: '0'
+            - name: DATABASE_URL
+              value: '__MIGRATION_DATABASE_URL__'
+          volumeMounts:
+            - name: sql-files
+              mountPath: /sql
+              readOnly: true
+          command:
+            - node
+            - --input-type=module
+            - -e
+            - |
+              import fs from 'node:fs';
+              import path from 'node:path';
+              import pg from 'pg';
+
+              async function runMigrations() {
+                const dbUrl = process.env.DATABASE_URL;
+                if (!dbUrl) {
+                  throw new Error('DATABASE_URL environment variable is required');
+                }
+
+                console.log('Connecting to database...');
+                const client = new pg.Client({
+                  connectionString: dbUrl,
+                  ssl: { rejectUnauthorized: false }
+                });
+
+                await client.connect();
+                console.log('Connected successfully!');
+
+                console.log('Ensuring __applied_migrations table exists...');
+                await client.query(`
+                  CREATE TABLE IF NOT EXISTS __applied_migrations (
+                    name TEXT PRIMARY KEY,
+                    checksum TEXT NOT NULL DEFAULT 'auto',
+                    applied_at TIMESTAMPTZ DEFAULT NOW(),
+                    executed_at TIMESTAMPTZ DEFAULT NOW(),
+                    execution_time_ms INTEGER NOT NULL DEFAULT 0
+                  );
+                  ALTER TABLE __applied_migrations ADD COLUMN IF NOT EXISTS checksum TEXT NOT NULL DEFAULT 'auto';
+                  ALTER TABLE __applied_migrations ADD COLUMN IF NOT EXISTS executed_at TIMESTAMPTZ DEFAULT NOW();
+                  ALTER TABLE __applied_migrations ADD COLUMN IF NOT EXISTS execution_time_ms INTEGER NOT NULL DEFAULT 0;
+                `);
+
+                const { rows } = await client.query('SELECT name FROM __applied_migrations');
+                const applied = new Set(rows.map(r => r.name));
+
+                const { rows: tableCheck } = await client.query(`
+                  SELECT 1 FROM information_schema.tables 
+                  WHERE table_schema = 'public' AND table_name = 'user'
+                `);
+
+                if (tableCheck.length > 0 && !applied.has('0000_baseline.sql')) {
+                  console.log('[RECORD] Baseline tables already exist; recording 0000_baseline.sql as applied.');
+                  await client.query(
+                    'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    ['0000_baseline.sql', 'auto_baseline']
+                  );
+                  applied.add('0000_baseline.sql');
+                }
+
+                // Auto-record 0001_remove_partner_apps.sql if partner_app table does not exist
+                const { rows: partnerCheck } = await client.query(`
+                  SELECT 1 FROM information_schema.tables 
+                  WHERE table_schema = 'public' AND table_name = 'partner_app'
+                `);
+                if (partnerCheck.length === 0 && !applied.has('0001_remove_partner_apps.sql')) {
+                  console.log('[RECORD] partner_app table already absent; recording 0001_remove_partner_apps.sql as applied.');
+                  await client.query(
+                    'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    ['0001_remove_partner_apps.sql', 'auto_partner_app']
+                  );
+                  applied.add('0001_remove_partner_apps.sql');
+                }
+
+                // Auto-record 0002_remove_teams.sql if team table does not exist
+                const { rows: teamCheck } = await client.query(`
+                  SELECT 1 FROM information_schema.tables 
+                  WHERE table_schema = 'public' AND table_name = 'team'
+                `);
+                if (teamCheck.length === 0 && !applied.has('0002_remove_teams.sql')) {
+                  console.log('[RECORD] team table already absent; recording 0002_remove_teams.sql as applied.');
+                  await client.query(
+                    'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    ['0002_remove_teams.sql', 'auto_teams']
+                  );
+                  applied.add('0002_remove_teams.sql');
+                }
+
+                const files = fs.readdirSync('/sql')
+                  .filter(f => f.endsWith('.sql'))
+                  .sort();
+
+                console.log('Found migration files:', files);
+
+                for (const file of files) {
+                  if (applied.has(file)) {
+                    console.log(`[SKIP] Already applied: ${file}`);
+                    continue;
+                  }
+
+                  console.log(`[APPLYING] ${file}...`);
+                  const sql = fs.readFileSync(path.join('/sql', file), 'utf8');
+
+                  await client.query('BEGIN');
+                  try {
+                    await client.query(sql);
+                    await client.query(
+                      'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2)',
+                      [file, 'applied_' + Date.now()]
+                    );
+                    await client.query('COMMIT');
+                    console.log(`[SUCCESS] Applied ${file}`);
+                  } catch (err) {
+                    await client.query('ROLLBACK');
+                    console.error(`[FAIL] Error in ${file}:`, err.message);
+                    throw err;
+                  }
+                }
+
+                console.log('Ensuring database role grants...');
+                await client.query(`
+                  DO \$\$
+                  BEGIN
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_migrator') THEN
+                      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_migrator;
+                      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_migrator;
+                    END IF;
+
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_api') THEN
+                      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_api;
+                      GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_api;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_api;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_api;
+                    END IF;
+
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_gateway') THEN
+                      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_gateway;
+                      GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_gateway;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_gateway;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_gateway;
+                    END IF;
+
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_admin') THEN
+                      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_admin;
+                      GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_admin;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_admin;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_admin;
+                    END IF;
+
+                    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_worker') THEN
+                      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_worker;
+                      GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_worker;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_worker;
+                      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_worker;
+                    END IF;
+                  END
+                  \$\$;
+                `);
+
+                console.log('All migrations and permissions verified successfully!');
+                await client.end();
+              }
+
+              runMigrations().catch(err => {
+                console.error('Fatal migration failure:', err);
+                process.exit(1);
+              });
+      volumes:
+        - name: sql-files
+          configMap:
+            name: boldcreate-migration-sql

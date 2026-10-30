@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { RefreshButton } from '../components/RefreshButton';
 import { ArrowLeft } from 'lucide-react';
 import { AuditList } from '../components/AuditList';
 import { EmptyState } from '../components/EmptyState';
@@ -81,14 +82,17 @@ export function VersionPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <Link
-        to="/plugins/$pluginId"
-        params={{ pluginId }}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to {plugin.data?.displayName ?? 'the plugin'}
-      </Link>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <Link
+          to="/plugins/$pluginId"
+          params={{ pluginId }}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back to {plugin.data?.displayName ?? 'the plugin'}
+        </Link>
+        <RefreshButton />
+      </div>
       {version.isPending && (
         <div className="flex flex-col gap-3" aria-label="Loading version">
           <Skeleton className="h-16" />

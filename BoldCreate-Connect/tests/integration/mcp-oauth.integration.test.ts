@@ -302,6 +302,23 @@ describe('member sign-in', () => {
     expect(fixture.registrations).toBe(1);
   });
 
+  it('sends a configured OAuth app and its scopes to the provider, with the callback URL it shows', async () => {
+    const discovered = (await (
+      await callApi('POST', `${serverPath()}/oauth/discover`, user)
+    ).json()) as { callbackUrl: string };
+    expect(
+      (await setAuth({ authType: 'oauth_client', clientId: CLIENT_ID, scopes: 'read write' }))
+        .status,
+    ).toBe(200);
+    const { url } = await beginSignIn();
+    expect(url.origin + url.pathname).toBe(`${FIXTURE_ORIGIN}/authorize`);
+    expect(Object.fromEntries(url.searchParams)).toMatchObject({
+      client_id: CLIENT_ID,
+      redirect_uri: discovered.callbackUrl,
+      scope: 'read write',
+    });
+  });
+
   it('connects through the callback and shows the member as connected', async () => {
     await connect();
     expect(await (await callApi('GET', serverPath(), user)).json()).toMatchObject({

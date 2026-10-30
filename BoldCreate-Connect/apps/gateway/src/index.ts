@@ -9,8 +9,14 @@ import {
   createOrgKeyCache,
   createSealer,
   createUnsealer,
+  isCredentialFault,
 } from '@boldcreate-integrations/credentials';
-import { createDb } from '@boldcreate-integrations/db';
+import {
+  createDb,
+  createServiceObservability,
+  OBSERVABILITY_STORE_CHECK,
+  databaseStartupChecks,
+} from '@boldcreate-integrations/db';
 import {
   createCatalogStores,
   createOrgKeyDirectory,
@@ -21,8 +27,19 @@ import {
   createWorkloadHeaders,
   installProcessGuards,
 } from '@boldcreate-integrations/http-server';
-import { createLogger, createMetrics } from '@boldcreate-integrations/observability';
-import { createSsrfGuard, createUpstreamFetch } from '@boldcreate-integrations/security';
+import {
+  createLogger,
+  createMetrics,
+  registerCaptureMetrics,
+  createStartupChecks,
+  instrumentBoundary,
+  instrumentCall,
+} from '@boldcreate-integrations/observability';
+import {
+  createSsrfGuard,
+  createUpstreamFetch,
+  isUpstreamFault,
+} from '@boldcreate-integrations/security';
 import { buildApp } from './app.js';
 import { createGatewayRemote } from './remote.js';
 import { createApiKeyAuthenticator } from './key-auth.js';
@@ -35,6 +52,26 @@ const logger = createLogger({ service: 'gateway', level: config.LOG_LEVEL });
 installProcessGuards(logger);
 
 const { db, pool } = createDb({ connectionString: config.DATABASE_URL, max: config.DB_POOL_MAX });
+const observability = createServiceObservability({
+  service: 'gateway',
+  environment: config.DEPLOY_ENV,
+  config,
+  log: logger,
+});
+const errors = observability.errors;
+const metrics = createMetrics({ service: 'gateway' });
+registerCaptureMetrics(metrics, errors);
+const startup = createStartupChecks({
+  service: 'gateway',
+  errors,
+  checks: {
+    ...databaseStartupChecks(db, observability.store.db),
+    redis: () => (redis ? redis.cache.ping() : Promise.resolve()),
+  },
+  // A down cache degrades the service but does not make it unready.
+  advisory: [OBSERVABILITY_STORE_CHECK, 'redis'],
+  onFailure: (failure) => logger.error(failure, 'Startup check failed'),
+});
 
 const orgKeyCache = createOrgKeyCache({
   max: config.ORG_KEY_CACHE_MAX,
@@ -76,27 +113,49 @@ const server = buildApp(config, {
       }
     : {}),
   access: {
-    unsealer: createUnsealer({
-      kms: createKmsFromConfig(config),
-      orgKeyStore: createOrgKeyStore(db),
-      keyCache: orgKeyCache,
-    }),
-    sealerFor: (executor) => createSealer({ orgKeys: createOrgKeyDirectory(executor) }),
-    fetcher: createUpstreamFetch(
-      createSsrfGuard({
-        deployed: isDeployed(config.DEPLOY_ENV),
-        allowedPorts: config.UPSTREAM_ALLOWED_PORTS,
-        allowHttpHosts: config.UPSTREAM_ALLOW_HTTP_HOSTS,
+    unsealer: instrumentBoundary(
+      createUnsealer({
+        kms: instrumentBoundary(createKmsFromConfig(config), { area: 'kms', errors }),
+        orgKeyStore: createOrgKeyStore(db),
+        keyCache: orgKeyCache,
       }),
+      { area: 'credentials', errors, shouldReport: isCredentialFault },
+    ),
+    sealerFor: (executor) =>
+      instrumentBoundary(createSealer({ orgKeys: createOrgKeyDirectory(executor) }), {
+        area: 'credentials',
+        errors,
+        shouldReport: isCredentialFault,
+      }),
+    fetcher: instrumentCall(
+      createUpstreamFetch(
+        createSsrfGuard({
+          deployed: isDeployed(config.DEPLOY_ENV),
+          allowedPorts: config.UPSTREAM_ALLOWED_PORTS,
+          allowHttpHosts: config.UPSTREAM_ALLOW_HTTP_HOSTS,
+        }),
+      ),
+      'fetch',
+      { area: 'upstream', errors, shouldReport: isUpstreamFault },
     ),
   },
   logger,
-  metrics: createMetrics({ service: 'gateway' }),
+  metrics,
+  errors,
   workloadHeaders,
-  limiter: redis?.limiter,
-  pingDb: () => pool.query('SELECT 1'),
-  onShutdown: [() => stopInvalidation(), () => pool.end(), async () => redis?.close()],
+  limiter: redis ? instrumentBoundary(redis.limiter, { area: 'rate_limit', errors }) : undefined,
+  pingDb: async () => {
+    await pool.query('SELECT 1');
+    await startup.readiness();
+  },
+  onShutdown: [
+    () => stopInvalidation(),
+    () => observability.close(),
+    () => pool.end(),
+    async () => redis?.close(),
+  ],
 });
 
 await server.listen({ port: config.PORT });
+await startup.run();
 logger.info({ port: config.PORT }, 'Gateway listening');

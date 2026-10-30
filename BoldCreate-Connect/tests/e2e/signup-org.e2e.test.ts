@@ -38,7 +38,8 @@ test('sign up, verify, create an organization, sign out and sign in again', asyn
   await page.goto('/signup');
   await page.getByLabel(/full name/i).fill('E2E User');
   await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
+  await page.getByLabel('Repeat password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: /sign up/i }).click();
   await expect(page.getByText(/check your email/i)).toBeVisible();
 
@@ -57,7 +58,7 @@ test('sign up, verify, create an organization, sign out and sign in again', asyn
   await expect(page).toHaveURL(/\/signin/);
 
   await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: /^sign in$/i }).click();
   await expect(page).toHaveURL(/\/marketplace/);
 

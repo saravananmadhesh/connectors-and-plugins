@@ -51,7 +51,7 @@ import {
   listProjectUsers,
   projectUsage,
   putProjectAuthConfigVariables,
-  putProjectPlugin,
+  putProjectPluginWithConfig,
   removeProjectPlugin,
   type ProjectCaller,
 } from '@boldcreate-integrations/domain';
@@ -172,10 +172,22 @@ export async function projectSelfRoutes(
     const body = PutProjectPluginBodySchema.safeParse(req.body ?? {});
     if (!body.success) throw new AppError('validation_failed', []);
     const versionId = body.data.versionId ? parseId('pv', body.data.versionId) : undefined;
+    const carriesSetup = body.data.authConfigs !== undefined || body.data.variables !== undefined;
+    if (carriesSetup && !identity.scopes.includes('auth-configs:write')) {
+      throw new AppError('insufficient_scope');
+    }
     const { created, plugin } = await withTenant(
       db,
       { orgId: identity.organizationId, projectId: identity.projectId },
-      (tx) => putProjectPlugin(tx, callerOf(identity), pluginId, versionId),
+      (tx) =>
+        putProjectPluginWithConfig(
+          tx,
+          callerOf(identity),
+          pluginId,
+          { versionId, authConfigs: body.data.authConfigs, variables: body.data.variables },
+          sealerFor(tx),
+          { callbackUrl: redirectUri },
+        ),
     );
     return reply.status(created ? 201 : 200).send(serializeProjectPlugin(plugin));
   });

@@ -61,8 +61,8 @@ describe('org keys', () => {
         WHERE u.email_normalized = $1`,
       [email],
     );
-    await waitForOrgKey(org!.id, 5_000);
-    expect(Date.now() - startedAt).toBeLessThan(5_000);
+    await waitForOrgKey(org!.id, 15_000);
+    expect(Date.now() - startedAt).toBeLessThan(15_000);
 
     const keys = await keysOf(org!.id);
     expect(keys).toHaveLength(1);

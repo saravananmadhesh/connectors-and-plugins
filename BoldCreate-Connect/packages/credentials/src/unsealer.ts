@@ -7,7 +7,6 @@ import {
   KmsInvalidCiphertextError,
   KmsKeyDisabledError,
   KmsKeyNotFoundError,
-  KmsUnavailableError,
   type KmsPort,
 } from '@boldcreate-integrations/ports';
 import { CredentialUnavailableError } from './errors.js';
@@ -74,12 +73,9 @@ export function createUnsealer(deps: {
         error instanceof KmsInvalidCiphertextError ||
         error instanceof EnvelopeFormatError
       ) {
-        throw new CredentialUnavailableError('key_unusable');
+        throw new CredentialUnavailableError('key_unusable', error);
       }
-      if (error instanceof KmsUnavailableError) {
-        throw new CredentialUnavailableError('kms_unavailable');
-      }
-      throw new CredentialUnavailableError('kms_unavailable');
+      throw new CredentialUnavailableError('kms_unavailable', error);
     }
   }
 
@@ -105,7 +101,9 @@ export function createUnsealer(deps: {
       parsed = parseEnvelope(input.envelope);
       aad = buildSealAad(input);
     } catch (error) {
-      if (error instanceof EnvelopeFormatError) throw new CredentialUnavailableError('malformed');
+      if (error instanceof EnvelopeFormatError) {
+        throw new CredentialUnavailableError('malformed', error);
+      }
       throw error;
     }
     const key = await privateKey(parsed.orgKeyId, input.orgId);
@@ -117,8 +115,12 @@ export function createUnsealer(deps: {
         aad,
       });
       return new TextDecoder().decode(plain);
-    } catch {
-      throw new CredentialUnavailableError('open_failed');
+    } catch (error) {
+      throw new CredentialUnavailableError('open_failed', error, {
+        purpose: input.purpose,
+        subjectKind: input.subject.kind,
+        orgKeyId: parsed.orgKeyId,
+      });
     } finally {
       key.fill(0);
     }

@@ -215,6 +215,11 @@ describe('admin session and the allow-list', () => {
     const { db, pool } = createDb({ connectionString: roleConnectionString('admin'), max: 2 });
     try {
       await sql(`DELETE FROM platform_admin_identity WHERE oid = $1`, [email]);
+      await sql(
+        `INSERT INTO admin_allowed_email (email, source, added_by) VALUES ($1, $2, $2)
+         ON CONFLICT (email) DO NOTHING`,
+        [email, 'config'],
+      );
       await requestAdminSetup(db, policy, email);
       const token = await mailToken(email, SETUP_SUBJECT);
       const { sessionToken } = await completeAdminSetup(
@@ -225,10 +230,15 @@ describe('admin session and the allow-list', () => {
       );
 
       expect(await authenticateAdminSession(db, policy, sessionToken)).toMatchObject({ email });
-      expect(
-        await authenticateAdminSession(db, { ...policy, allowedEmails: [] }, sessionToken),
-      ).toBeNull();
       expect(await authenticateAdminSession(db, policy, 'unknown-session-token')).toBeNull();
+
+      // Off the list, a live session ends.
+      await sql(`DELETE FROM admin_allowed_email WHERE email = $1`, [email]);
+      expect(await authenticateAdminSession(db, policy, sessionToken)).toBeNull();
+      await sql(`INSERT INTO admin_allowed_email (email, source, added_by) VALUES ($1, $2, $2)`, [
+        email,
+        'config',
+      ]);
 
       // Past the idle limit the session is revoked for good.
       const later = new Date(Date.now() + 700_000);
@@ -246,6 +256,7 @@ describe('admin session and the allow-list', () => {
       await sql(`DELETE FROM platform_admin_session`, []);
       await sql(`DELETE FROM platform_admin_identity WHERE oid = $1`, [email]);
       await sql(`DELETE FROM admin_setup_token WHERE email = $1`, [email]);
+      await sql(`DELETE FROM admin_allowed_email WHERE email = $1`, [email]);
       await pool.end();
     }
   });

@@ -23,21 +23,21 @@ fi
 # 1. Environment & Cluster Configuration Mapping
 # ------------------------------------------------------------------------------
 if [ "$TARGET_ENV" = "production" ]; then
-  GCP_PROJECT="${GCP_PROJECT_PROD:-${GCP_PROJECT:-codestudio-prod}}"
-  GKE_CLUSTER="${GKE_CLUSTER_PROD:-${GKE_CLUSTER:-prod-cody}}"
-  GKE_LOCATION="${GKE_LOCATION_PROD:-${GKE_LOCATION:---region us-central1}}"
+  GCP_PROJECT="${GCP_PROJECT_PROD:-${GCP_PROJECT:-syncfusioncody}}"
+  GKE_CLUSTER="${GKE_CLUSTER_PROD:-${GKE_CLUSTER:-syncfusion-cody-cluster}}"
+  GKE_LOCATION="${GKE_LOCATION_PROD:-${GKE_LOCATION:---region us-east4}}"
   NAMESPACE="${NAMESPACE_PROD:-${NAMESPACE:-boldcreate-prod}}"
-  IMAGE_PROJECT="${IMAGE_PROJECT_PROD:-${IMAGE_PROJECT:-$GCP_PROJECT}}"
-  IMAGE_NAME="${IMAGE_NAME_PROD:-boldcreate-prod-integrations-api}"
+  IMAGE_REGISTRY="${IMAGE_REGISTRY_PROD:-us-east4-docker.pkg.dev/${GCP_PROJECT}/synccodestudio}"
+  IMAGE_NAME="${IMAGE_NAME_PROD:-boldcreate-production-integrations-api}"
   SA_KEY="${GCP_SA_KEY_PROD:-${GCP_SERVICE_ACCOUNT_KEY}}"
   DB_URL="${DATABASE_URL_PROD:-${DATABASE_URL}}"
 
 elif [ "$TARGET_ENV" = "preproduction" ]; then
   GCP_PROJECT="${GCP_PROJECT_PREPROD:-${GCP_PROJECT:-codestudio-dev}}"
-  GKE_CLUSTER="${GKE_CLUSTER_PREPROD:-${GKE_CLUSTER:-preprod-cody}}"
+  GKE_CLUSTER="${GKE_CLUSTER_PREPROD:-${GKE_CLUSTER:-dev-cody}}"
   GKE_LOCATION="${GKE_LOCATION_PREPROD:-${GKE_LOCATION:---zone us-central1-a}}"
   NAMESPACE="${NAMESPACE_PREPROD:-${NAMESPACE:-boldcreate-preprod}}"
-  IMAGE_PROJECT="${IMAGE_PROJECT_PREPROD:-${IMAGE_PROJECT:-codestudio-dev}}"
+  IMAGE_REGISTRY="${IMAGE_REGISTRY_PREPROD:-us-central1-docker.pkg.dev/${GCP_PROJECT}/synccodestudio}"
   IMAGE_NAME="${IMAGE_NAME_PREPROD:-boldcreate-preprod-integrations-api}"
   SA_KEY="${GCP_SA_KEY_PREPROD:-${GCP_SERVICE_ACCOUNT_KEY}}"
   DB_URL="${DATABASE_URL_PREPROD:-${DATABASE_URL}}"
@@ -48,13 +48,13 @@ else
   GKE_CLUSTER="${GKE_CLUSTER_STAGING:-${GKE_CLUSTER:-dev-cody}}"
   GKE_LOCATION="${GKE_LOCATION_STAGING:-${GKE_LOCATION:---zone us-central1-a}}"
   NAMESPACE="${NAMESPACE_STAGING:-${NAMESPACE:-boldcreate-stag}}"
-  IMAGE_PROJECT="${IMAGE_PROJECT_STAGING:-${IMAGE_PROJECT:-codestudio-dev}}"
+  IMAGE_REGISTRY="${IMAGE_REGISTRY_STAGING:-us-central1-docker.pkg.dev/${GCP_PROJECT}/synccodestudio}"
   IMAGE_NAME="${IMAGE_NAME_STAGING:-boldcreate-staging-integrations-api}"
   SA_KEY="${GCP_SA_KEY_STAGING:-${GCP_SERVICE_ACCOUNT_KEY}}"
   DB_URL="${DATABASE_URL_STAGING:-${DATABASE_URL}}"
 fi
 
-MIGRATOR_IMAGE="us-central1-docker.pkg.dev/${IMAGE_PROJECT}/synccodestudio/${IMAGE_NAME}:${BUILD_ID}"
+MIGRATOR_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:${BUILD_ID}"
 
 echo "Target GCP Project : $GCP_PROJECT"
 echo "Target GKE Cluster : $GKE_CLUSTER"

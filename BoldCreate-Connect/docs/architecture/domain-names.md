@@ -61,6 +61,32 @@ The environment suffix goes last, so every host is one flat label under `boldcre
 | `gateway.integrations.boldcreate.ai` (nested)     | Long, and needs its own wildcard certificate (`*.integrations.boldcreate.ai`) |
 | Public `api.` host                                | The API is internal; the gateway fronts it for outside callers                |
 
+## Proposal: standalone `boldconnect.ai` (not decided)
+
+Open option, not adopted. The confirmed names above stay in force until this is accepted and recorded in `decisions.md`.
+
+The `connect-` prefixes exist only because `boldcreate.ai` already hosts other apps that use `admin`, `api` and `app`. On a separate `boldconnect.ai` domain that clash disappears, so plain role names work:
+
+| App       | Staging                          | Production               |
+| --------- | -------------------------------- | ------------------------ |
+| `web`     | `app-staging.boldconnect.ai`     | `app.boldconnect.ai`     |
+| `admin`   | `admin-staging.boldconnect.ai`   | `admin.boldconnect.ai`   |
+| `gateway` | `gateway-staging.boldconnect.ai` | `gateway.boldconnect.ai` |
+
+- The apex `boldconnect.ai` stays free for a landing page or a redirect to `app.`.
+- The environment suffix still goes last, so every host is one flat label and a single `*.boldconnect.ai` wildcard certificate covers all of them.
+- Cost: register the domain, issue a new wildcard certificate, add DNS, and change gateway URLs and OAuth redirect URIs before any are given to customers.
+- Keep session cookies host-only (no `Domain=.boldconnect.ai`) so `web` and `admin` never share them.
+
+### Gateway or `api` as the public name
+
+Keep `gateway`. Do not name the public host `api`.
+
+- `apps/api` is an internal service that seals and unwraps keys, probes upstreams and runs OAuth exchange. A public host called `api` that points at `apps/gateway` invites confusion in logs and runbooks, and a mistaken DNS or ingress change could expose the privileged service.
+- The public host serves MCP, sync, plugin archives and project routes, and forwards to the internal API. The name `gateway` matches `apps/gateway` and this document.
+- An `api` alias for the gateway would give two public URLs to keep consistent in redirect URIs and cookie scopes, so it is not recommended.
+- If `api` is wanted publicly, rename the internal `api` app first (for example `core`) as its own recorded decision; do not alias it.
+
 ## Security notes
 
 - `connect-admin` is the most sensitive host: restrict it (SSO, VPN or IP allowlist) and scope its cookies to that host only.

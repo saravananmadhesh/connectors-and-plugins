@@ -7,11 +7,20 @@ import type { PostgresQueue } from '@boldcreate-integrations/adapters/postgres-q
 import { ROLE_LABELS, type EventType } from '@boldcreate-integrations/contracts';
 import type { IngestionDeps } from '@boldcreate-integrations/domain';
 import type { ClaimedJob, EmailPort } from '@boldcreate-integrations/ports';
+import type { ErrorReporter } from '@boldcreate-integrations/observability';
 import type { Logger } from 'pino';
 import {
   handleIdempotencyPurgeDue,
   type IdempotencyPurgeDeps,
 } from './handlers/idempotency-purge.js';
+import {
+  handleObservabilityAlertDue,
+  type ObservabilityAlertDeps,
+} from './handlers/observability-alert.js';
+import {
+  handleObservabilityPurgeDue,
+  type ObservabilityRetentionDeps,
+} from './handlers/observability-retention.js';
 import {
   handleProjectWebhookDispatch,
   type ProjectWebhookDeps,
@@ -37,12 +46,30 @@ type JobOptions = {
   emailAdapter: EmailPort;
   baseUrl: string;
   log: Logger;
+  errors?: ErrorReporter;
   orgKeys: OrgKeyHandlerDeps;
   idempotency: IdempotencyPurgeDeps;
+  retention: ObservabilityRetentionDeps;
+  alerts: ObservabilityAlertDeps;
   revision: RevisionHandlerDeps;
   ingestion: IngestionDeps;
   webhooks: ProjectWebhookDeps;
 };
+
+/**
+ * A copy of the failure that is safe to store: adapter and SQL errors can carry email tokens in
+ * their message, so only the class, the job type and the stack frames are kept.
+ */
+function storableFailure(err: unknown, jobType: string): Error {
+  const name = err instanceof Error ? err.name : 'NonError';
+  const safe = new Error(`${name} while handling ${jobType}`);
+  safe.name = name;
+  if (err instanceof Error && err.stack) {
+    const frames = err.stack.split('\n').filter((line) => line.trim().startsWith('at '));
+    safe.stack = [`${name}: ${safe.message}`, ...frames].join('\n');
+  }
+  return safe;
+}
 
 function asObject(payload: unknown, message: string): Record<string, unknown> {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
@@ -144,6 +171,12 @@ const handlers: Record<EventType, Handler> = {
   'idempotency_key.purge_due': async (job, options) => {
     await handleIdempotencyPurgeDue(job, options.idempotency);
   },
+  'observability.purge_due': async (job, options) => {
+    await handleObservabilityPurgeDue(job, options.retention);
+  },
+  'observability.alert_due': async (job, options) => {
+    await handleObservabilityAlertDue(job, options.alerts);
+  },
   'project_webhook.dispatch_due': (job, options) =>
     handleProjectWebhookDispatch(job, options.webhooks),
   'org_key.requested': (job, options) => handleOrgKeyRequested(job, options.orgKeys),
@@ -206,13 +239,28 @@ export async function pollJobs(queue: PostgresQueue, options: JobOptions): Promi
       if (!(await queue.renew(job.id, LEASE_MS))) continue;
       await dispatchJob(job, options);
       await queue.complete(job.id);
-      options.log.info({ id: job.id, eventType: job.type }, 'Job processed');
-    } catch {
+      options.log.debug({ id: job.id, eventType: job.type }, 'Job processed');
+    } catch (err) {
       // Do not log adapter errors or SQL parameters: they can contain email tokens.
-      options.log.warn(
-        { id: job.id, attempt: Math.min(job.attempts + 1, MAX_ATTEMPTS) },
-        'Job failed',
-      );
+      const attempt = Math.min(job.attempts + 1, MAX_ATTEMPTS);
+      options.log.warn({ id: job.id, attempt }, 'Job failed');
+      const code = (err as { code?: unknown } | null)?.code;
+      const detail = {
+        area: 'worker',
+        operation: job.type,
+        attempt,
+        ...(typeof code === 'string' ? { errorCode: code } : {}),
+        extra: { jobId: job.id, maxAttempts: MAX_ATTEMPTS },
+      };
+      // Every failed attempt is an event; only the last one opens or reopens an issue.
+      if (attempt >= MAX_ATTEMPTS) {
+        options.errors?.reportError(storableFailure(err, job.type), detail);
+      } else {
+        options.errors?.recordOpsEvent('job_attempt_failed', 'warning', {
+          ...detail,
+          errorClass: err instanceof Error ? err.name : 'NonError',
+        });
+      }
       await queue.fail(job.id, { retryAt: null, error: 'delivery failed' });
     }
   }

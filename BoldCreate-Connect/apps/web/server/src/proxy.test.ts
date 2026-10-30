@@ -159,6 +159,19 @@ describe('forwarding', () => {
     expect(call.headers['content-type']).toBe('application/json');
   });
 
+  it('accepts a write that carries no body when the route takes an empty one', async () => {
+    const w = await build();
+    const headers = await csrfHeaders(w, '__Host-sid=token-1');
+    w.reply({ status: 200, body: { authorizeUrl: 'https://idp.example.test/authorize' } });
+    const res = await w.server.app.inject({
+      method: 'POST',
+      url: `/api/v1/orgs/${ORG}/installations/${formatId('ins', '44444444-4444-4444-8444-444444444444')}/mcp-servers/${formatId('cmp', '55555555-5555-4555-8555-555555555555')}/oauth/start`,
+      headers,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(w.calls[0]?.body ?? 'null')).toEqual({});
+  });
+
   it('requires the session cookie on routes that need a session, without calling the api', async () => {
     const w = await build();
     const res = await w.server.app.inject({ method: 'GET', url: '/api/v1/auth/me' });

@@ -49,6 +49,16 @@ const open = (current: AdminVersionSummary, tab = '') =>
   renderApp(`/plugins/${PLUGIN_ID}/versions/${current.id}${tab}`);
 
 describe('version page', () => {
+  it('reads the version again when asked to refresh', async () => {
+    const calls = stubVersion(version({ id: 'v1', version: '2.0.0', status: 'pending' }));
+    await open(version({ id: 'v1' }));
+    await screen.findByRole('heading', { name: /Sample plugin/ });
+    const reads = () => calls.filter((call) => call.path.includes('/plugin-versions/v1')).length;
+    const before = reads();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh' }));
+    await waitFor(() => expect(reads()).toBeGreaterThan(before));
+  });
+
   it('shows the version, where it stands and what it contains', async () => {
     stubVersion(version({ id: 'v1', version: '2.0.0', status: 'pending', findings: 1 }));
     await open(version({ id: 'v1' }));

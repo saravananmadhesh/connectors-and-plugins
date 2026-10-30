@@ -12,7 +12,7 @@ data:
   BLOB_BUCKET: codestudio-marketplace
   BLOB_REGION: us-east-1
   NODE_TLS_REJECT_UNAUTHORIZED: '0'
-  ADMIN_ALLOWED_EMAILS: hruthikkumar.jeyakumar@syncfusion.com,saravanan.madheswaran@syncfusion.com
+  ADMIN_ALLOWED_EMAILS: hruthikkumar.jeyakumar@syncfusion.com,saravanan.madheswaran@syncfusion.com,hemanthkumar.s@syncfusion.com,suriyakumar.arumugam@syncfusion.com,praveenh@syncfusion.com
   PLUGIN_SOURCE_ALLOWED_OWNERS: 'cursor,boldcreate,syncfusion,sfcodestudio,*'
   ADMIN_ALLOWED_CIDRS: ''
   DB_POOL_MAX: '5'

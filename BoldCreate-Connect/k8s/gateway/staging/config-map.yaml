@@ -8,6 +8,8 @@ data:
   LOG_LEVEL: info
   PORT_GATEWAY: '3002'
   API_BASE_URL: http://boldcreate-integrations-api-staging.boldcreate-stag.svc.cluster.local:3001
+  APP_BASE_URL: https://connect-staging.boldcreate.ai
+  PUBLIC_GATEWAY_URL: https://connect-gateway-staging.boldcreate.ai
   KMS_ADAPTER: cloud-kms
   KMS_CLOUD_KEY_NAME: projects/codestudio-dev/locations/global/keyRings/boldcreate-connect/cryptoKeys/boldcreate-connect-kms
   NODE_TLS_REJECT_UNAUTHORIZED: '0'

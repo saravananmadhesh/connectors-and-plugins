@@ -36,6 +36,13 @@
       "when": 1793209780802,
       "tag": "0004_admin_allowed_email",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793339373247,
+      "tag": "0005_observability",
+      "breakpoints": true
     }
   ]
 }

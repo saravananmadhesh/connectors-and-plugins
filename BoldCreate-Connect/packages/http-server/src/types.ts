@@ -3,7 +3,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from 'pino';
 import type { DeployEnv } from '@boldcreate-integrations/config';
 import type { ErrorCode, RouteDef } from '@boldcreate-integrations/contracts';
-import type { Metrics, RequestContext, ServiceName } from '@boldcreate-integrations/observability';
+import type {
+  ErrorReporter,
+  Metrics,
+  RequestContext,
+  ServiceName,
+} from '@boldcreate-integrations/observability';
 import type { LimiterPort } from '@boldcreate-integrations/ports';
 import type { Stage, StageObserver } from './stages.js';
 import type { WorkloadAuthenticator } from './workload.js';
@@ -108,6 +113,8 @@ export interface CreateServerOptions {
   /** Content-Security-Policy value; `false` disables it. Default is `default-src 'none'`. */
   contentSecurityPolicy?: string | false;
   hooks?: ServerHooks;
+  /** Receives unexpected errors and server failures; absent where errors are not stored. */
+  errors?: ErrorReporter;
   /** Answers requests that match no route; the default throws `not_found`. */
   notFound?: (request: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
   /** Seconds for `Retry-After` per code when the error itself does not set it. */

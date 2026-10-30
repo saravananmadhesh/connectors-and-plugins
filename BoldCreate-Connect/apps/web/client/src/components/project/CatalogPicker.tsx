@@ -26,22 +26,18 @@ const KINDS: readonly { value: ComponentKind; label: string }[] = [
  * A dialog that lists what the project may offer, with search, kind and category filters, and
  * hands back the plugin the person chose. `taken` plugins show as already added.
  */
-export function CatalogPicker({
+export function CatalogBrowser({
   orgId,
   projectId,
-  title,
   actionLabel,
   taken,
   onPick,
-  onClose,
 }: {
   orgId: string;
   projectId: string;
-  title: string;
   actionLabel: string;
   taken: ReadonlySet<string>;
-  onPick: (pluginId: string) => Promise<unknown>;
-  onClose: () => void;
+  onPick: (pluginId: string, displayName: string) => Promise<unknown>;
 }) {
   const [typed, setTyped] = useState('');
   const [q, setQ] = useState('');
@@ -77,11 +73,11 @@ export function CatalogPicker({
     placeholderData: keepPreviousData,
   });
 
-  const choose = async (pluginId: string) => {
+  const choose = async (pluginId: string, displayName: string) => {
     setError('');
     setBusy(pluginId);
     try {
-      await onPick(pluginId);
+      await onPick(pluginId, displayName);
     } catch (err) {
       setError(messageOf(err));
     } finally {
@@ -92,91 +88,112 @@ export function CatalogPicker({
   const items = catalog.data?.items ?? [];
 
   return (
+    <div className="space-y-3">
+      {error && <Alert variant="destructive">{error}</Alert>}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Search plugins…"
+            aria-label="Search the catalog"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+          />
+        </div>
+        <Select
+          aria-label="Kind"
+          className="w-36"
+          value={kind}
+          onChange={(e) => {
+            setKind(e.target.value as ComponentKind | '');
+            setPage(1);
+          }}
+        >
+          <option value="">All kinds</option>
+          {KINDS.map((entry) => (
+            <option key={entry.value} value={entry.value}>
+              {entry.label}
+            </option>
+          ))}
+        </Select>
+        <MultiSelectMenu
+          label="Categories"
+          allLabel="All categories"
+          options={(categories.data?.items ?? []).map((item) => ({
+            value: item.slug,
+            label: item.name,
+          }))}
+          selected={picked}
+          onChange={(next) => {
+            setPicked(next);
+            setPage(1);
+          }}
+        />
+      </div>
+      <QueryFrame
+        label="the catalog"
+        isPending={catalog.isPending}
+        error={catalog.error}
+        onRetry={() => void catalog.refetch()}
+      >
+        {items.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No plugins match these filters.
+          </p>
+        ) : (
+          <ul className="divide-y rounded-md border">
+            {items.map((plugin) => (
+              <li key={plugin.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{plugin.displayName}</p>
+                  <p className="truncate text-xs text-muted-foreground">{plugin.summary}</p>
+                </div>
+                <Button
+                  className="w-20 shrink-0"
+                  size="sm"
+                  variant="outline"
+                  disabled={taken.has(plugin.id) || busy !== null}
+                  aria-label={`${actionLabel} ${plugin.displayName}`}
+                  onClick={() => void choose(plugin.id, plugin.displayName)}
+                >
+                  {taken.has(plugin.id) ? 'Added' : actionLabel}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </QueryFrame>
+      <Pagination
+        page={catalog.data?.page ?? page}
+        pageSize={PAGE_SIZE}
+        total={catalog.data?.total ?? 0}
+        onPage={setPage}
+      />
+    </div>
+  );
+}
+
+/** The catalog in a dialog, for the places that pick a plugin for something else. */
+export function CatalogPicker({
+  title,
+  onClose,
+  ...browser
+}: {
+  orgId: string;
+  projectId: string;
+  title: string;
+  actionLabel: string;
+  taken: ReadonlySet<string>;
+  onPick: (pluginId: string, displayName: string) => Promise<unknown>;
+  onClose: () => void;
+}) {
+  return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogTitle>{title}</DialogTitle>
         <div className="mt-4 space-y-3">
-          {error && <Alert variant="destructive">{error}</Alert>}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                placeholder="Search plugins…"
-                aria-label="Search the catalog"
-                value={typed}
-                onChange={(e) => setTyped(e.target.value)}
-              />
-            </div>
-            <Select
-              aria-label="Kind"
-              className="w-36"
-              value={kind}
-              onChange={(e) => {
-                setKind(e.target.value as ComponentKind | '');
-                setPage(1);
-              }}
-            >
-              <option value="">All kinds</option>
-              {KINDS.map((entry) => (
-                <option key={entry.value} value={entry.value}>
-                  {entry.label}
-                </option>
-              ))}
-            </Select>
-            <MultiSelectMenu
-              label="Categories"
-              allLabel="All categories"
-              options={(categories.data?.items ?? []).map((item) => ({
-                value: item.slug,
-                label: item.name,
-              }))}
-              selected={picked}
-              onChange={(next) => {
-                setPicked(next);
-                setPage(1);
-              }}
-            />
-          </div>
-          <QueryFrame
-            label="the catalog"
-            isPending={catalog.isPending}
-            error={catalog.error}
-            onRetry={() => void catalog.refetch()}
-          >
-            {items.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                No plugins match these filters.
-              </p>
-            ) : (
-              <ul className="divide-y rounded-md border">
-                {items.map((plugin) => (
-                  <li key={plugin.id} className="flex items-center justify-between gap-3 px-3 py-2">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{plugin.displayName}</p>
-                      <p className="truncate text-xs text-muted-foreground">{plugin.summary}</p>
-                    </div>
-                    <Button
-                      className="w-20 shrink-0"
-                      size="sm"
-                      variant="outline"
-                      disabled={taken.has(plugin.id) || busy !== null}
-                      aria-label={`${actionLabel} ${plugin.displayName}`}
-                      onClick={() => void choose(plugin.id)}
-                    >
-                      {taken.has(plugin.id) ? 'Added' : actionLabel}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </QueryFrame>
-          <Pagination
-            page={catalog.data?.page ?? page}
-            pageSize={PAGE_SIZE}
-            total={catalog.data?.total ?? 0}
-            onPage={setPage}
-          />
+          <CatalogBrowser {...browser} />
           <div className="flex justify-end">
             <Button variant="outline" onClick={onClose}>
               Close

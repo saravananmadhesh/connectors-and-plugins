@@ -88,6 +88,11 @@ import { syncPlugins } from '@syncfusion/boldcreate-connect/sync';
 const connect = new ConnectClient({ apiKey: process.env.CONNECT_PROJECT_KEY! });
 
 await connect.plugins.add('plg_…'); // once: the plugins your users get
+// A plugin with an MCP server can be set up in the same call; it is all stored or none:
+// await connect.plugins.add('plg_…', {
+//   authConfigs: { 'server-name': { name: 'Default', authMode: 'dcr' } },
+//   variables: { API_TOKEN: process.env.API_TOKEN! },
+// });
 const session = await connect.create('user-42'); // a session for one of your users
 const servers = await session.mcp(); // MCP servers; the token is in their headers
 await syncPlugins(session, { dir: '/data/agents/user-42' }); // skills, rules, agents on disk

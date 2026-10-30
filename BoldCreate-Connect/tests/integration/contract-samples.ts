@@ -171,6 +171,7 @@ export function concretePath(pathTemplate: string, known: Record<string, string>
   return pathTemplate.replace(/\{([A-Za-z]+)\}/g, (_match, name: string) => {
     const given = known[name];
     if (given) return given;
+    if (name === 'serverName') return 'sample-server';
     const prefix = PARAM_PREFIX[name];
     if (!prefix) throw new Error(`no id prefix known for path parameter "${name}"`);
     return id(prefix);

@@ -1,3 +1,4 @@
+import type { ReporterStats } from '@boldcreate-integrations/observability';
 import { request as httpRequest } from 'node:http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as z from 'zod/v4';
@@ -216,7 +217,41 @@ describe('middleware order', () => {
     expect((await post(server, { name: 'a' })).statusCode).toBe(200);
     expect(server.logs().some((line) => line['msg'] === 'audit hook failed')).toBe(true);
   });
+
+  it('reports an audit hook that throws, with the route it ran for', async () => {
+    const { reportError, errors } = recordingErrors();
+    const server = build({
+      registry: [route()],
+      errors,
+      hooks: {
+        audit: async () => {
+          throw new Error('audit store down');
+        },
+      },
+    });
+    server.register('things.create', async () => ({ ok: true }));
+    await post(server, { name: 'a' });
+    expect(reportError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'audit store down' }),
+      expect.objectContaining({ area: 'http_hook', operation: expect.stringContaining('audit ') }),
+    );
+  });
 });
+
+function recordingErrors() {
+  const reportError =
+    vi.fn<(error: unknown, context: { area: string; operation?: string }) => void>();
+  return {
+    reportError,
+    errors: {
+      reportError,
+      recordOpsEvent: vi.fn<() => void>(),
+      flush: vi.fn<() => Promise<void>>(),
+      stop: vi.fn<() => Promise<void>>(),
+      stats: vi.fn<() => ReporterStats>(),
+    },
+  };
+}
 
 describe('error hook', () => {
   it('runs before the error response is built and keeps the mapped answer', async () => {
@@ -254,6 +289,27 @@ describe('error hook', () => {
     expect(response.statusCode).toBe(503);
     expect(ApiErrorSchema.parse(response.json()).error.code).toBe('service_unavailable');
     expect(server.logs().some((line) => line['msg'] === 'error hook failed')).toBe(true);
+  });
+
+  it('reports the hook failure itself, not only the 503 it causes', async () => {
+    const { reportError, errors } = recordingErrors();
+    const server = build({
+      registry: [route()],
+      errors,
+      hooks: {
+        beforeError: async () => {
+          throw new Error('audit store down');
+        },
+      },
+    });
+    server.register('things.create', async () => {
+      throw new AppError('not_found');
+    });
+    await post(server, { name: 'a' });
+    expect(reportError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'audit store down' }),
+      expect.objectContaining({ area: 'http_hook' }),
+    );
   });
 
   it('is not called for requests that succeed', async () => {
@@ -620,6 +676,34 @@ describe('workload identity', () => {
     expect(JSON.stringify(wrong.json())).not.toContain('secret-value');
     expect((await post(server, { name: 'a' })).statusCode).toBe(401);
   });
+
+  it('records a rejected caller as an event, at most once a minute', async () => {
+    const recordOpsEvent = vi.fn<(kind: string, severity: string, detail?: object) => void>();
+    const server = build({
+      registry: [route()],
+      errors: {
+        reportError: vi.fn<() => void>(),
+        recordOpsEvent,
+        flush: vi.fn<() => Promise<void>>(),
+        stop: vi.fn<() => Promise<void>>(),
+        stats: vi.fn<() => ReporterStats>(),
+      },
+      workloadVerifier: sharedSecretWorkloadAuthenticator(
+        createSharedSecretVerifier({ secret: 'secret-value', allowedCallers: ['web'] }),
+      ),
+    });
+    server.register('things.create', async () => ({ ok: true }));
+    for (let i = 0; i < 3; i += 1) {
+      await post(server, { name: 'a' }, { 'x-caller-id': 'web', 'x-workload-secret': 'nope' });
+    }
+    expect(recordOpsEvent).toHaveBeenCalledOnce();
+    expect(recordOpsEvent).toHaveBeenCalledWith(
+      'workload_auth_failed',
+      'warning',
+      expect.objectContaining({ area: 'http' }),
+    );
+    expect(JSON.stringify(recordOpsEvent.mock.calls)).not.toContain('secret-value');
+  });
 });
 
 describe('probes', () => {
@@ -702,6 +786,34 @@ describe('error mapping', () => {
     expect(response.json().error.code).toBe('internal_error');
     expect(response.body).not.toContain('secret stack');
     expect(JSON.stringify(server.logs())).toContain('secret stack');
+  });
+
+  it('reports an unexpected error and a server failure, but not a caller error', async () => {
+    const reportError = vi.fn<(error: unknown, context?: object) => void>();
+    const errors = {
+      reportError,
+      recordOpsEvent: vi.fn<() => void>(),
+      flush: vi.fn<() => void>(),
+      stop: vi.fn<() => void>(),
+    };
+    const server = build({ registry: [route()], errors } as never);
+    server.register('things.create', async () => {
+      throw new Error('boom');
+    });
+    expect((await post(server, { name: 'a' })).statusCode).toBe(500);
+    expect(reportError).toHaveBeenCalledOnce();
+    expect(reportError.mock.calls[0]?.[1]).toMatchObject({
+      area: 'http',
+      errorCode: 'internal_error',
+    });
+
+    reportError.mockClear();
+    const caller = build({ registry: [route()], errors } as never);
+    caller.register('things.create', async () => {
+      throw new AppError('not_found');
+    });
+    expect((await post(caller, { name: 'a' })).statusCode).toBe(404);
+    expect(reportError).not.toHaveBeenCalled();
   });
 });
 

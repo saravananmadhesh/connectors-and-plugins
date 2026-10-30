@@ -30,7 +30,7 @@ const SCOPED_ROUTES = ROUTES.filter(
     !route.pathTemplate.includes('{appId}'),
 );
 
-const IDS_THAT_EXIST = new Set(['orgId', 'userId']);
+const IDS_THAT_EXIST = new Set(['orgId', 'userId', 'serverName']);
 
 const PARAM_PREFIX: Record<string, string> = {
   inviteId: ID_PREFIXES.invite,
@@ -70,6 +70,7 @@ function path(route: RouteDef): string {
   return route.pathTemplate.replace(/\{(\w+)\}/g, (_, name: string) => {
     if (name === 'orgId') return fx.orgId;
     if (name === 'userId') return ownerWireId;
+    if (name === 'serverName') return 'sample-server';
     return formatId(prefixOf(route, name), randomUUID());
   });
 }

@@ -245,11 +245,17 @@ describe('a project key adds plugins', () => {
   it('removes a plugin with its settings, and answers 404 for one the project does not have', async () => {
     const host = await createHost();
     const plugin = await seedPlugin();
-    await putPlugin(host, plugin);
+    await putPlugin(host, plugin, { authConfigs: { tool: { name: 'Default', authMode: 'dcr' } } });
     const installation = await installationOf(host, plugin);
+    expect(
+      await sql(`SELECT 1 FROM auth_config WHERE plugin_id = $1`, [plugin.rawId]),
+    ).toHaveLength(1);
 
     const removed = await viaKey(host.key, 'DELETE', `/v1/project/plugins/${plugin.pluginId}`);
     expect(removed.status).toBe(204);
+    expect(
+      await sql(`SELECT 1 FROM auth_config WHERE plugin_id = $1`, [plugin.rawId]),
+    ).toHaveLength(0);
     expect(
       await sql(`SELECT 1 FROM installation_component WHERE installation_id = $1`, [installation]),
     ).toHaveLength(0);
@@ -747,5 +753,173 @@ describe('the console', () => {
     expect(
       (await callApi('PUT', `${foreign}/plugins/${plugin.pluginId}`, owner(), {})).status,
     ).toBe(404);
+  });
+});
+
+describe('an add that carries its setup', () => {
+  const secret = 'sk-live-add-secret-1234';
+
+  it('stores the plugin, its auth config and its variables in one save, and shows no secret', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    const added = await putPlugin(host, plugin, {
+      authConfigs: { tool: { name: 'Shared', authMode: 'shared_secret', secret } },
+      variables: { API_TOKEN: 'token-value-9876' },
+    });
+    expect(added.status).toBe(201);
+    const text = await added.text();
+    expect(text).not.toContain(secret);
+    expect(text).not.toContain('token-value-9876');
+
+    const list = await viaKey(host.key, 'GET', '/v1/project/auth-configs');
+    const configs = (await list.json()) as { items: ConfigBody[] };
+    expect(configs.items).toHaveLength(1);
+    expect(configs.items[0]).toMatchObject({
+      serverName: 'tool',
+      authMode: 'shared_secret',
+      isDefault: true,
+      secretSet: true,
+    });
+    expect(JSON.stringify(configs)).not.toContain(secret);
+    expect(configs.items[0]!.variables.find((v) => v.name === 'API_TOKEN')?.isSet).toBe(true);
+  });
+
+  it('reads the sign-in details of a catalog server before it is added, with the callback URL', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    const path = `${base()}/${host.projectId}/plugins/${plugin.pluginId}/mcp-servers/tool/oauth/discover`;
+    const res = await callApi('POST', path, owner());
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      discovered: boolean;
+      scopes: string[];
+      callbackUrl: string;
+    };
+    // The fixture server publishes nothing, which is an answer and not an error.
+    expect(body.discovered).toBe(false);
+    expect(body.scopes).toEqual([]);
+    expect(body.callbackUrl).toMatch(/^https?:\/\//);
+    const unknown = await callApi('POST', path.replace('/tool/', '/nope/'), owner());
+    expect(unknown.status).toBe(404);
+  });
+
+  it('stores nothing when one part fails', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    const failed = await putPlugin(host, plugin, {
+      authConfigs: { missing: { name: 'Default', authMode: 'dcr' } },
+    });
+    expect(failed.status).toBe(400);
+    const rows = await sql(`SELECT id FROM installation WHERE project_id = $1 AND plugin_id = $2`, [
+      host.rawProjectId,
+      plugin.rawId,
+    ]);
+    expect(rows).toHaveLength(0);
+    const configs = await sql(`SELECT id FROM auth_config WHERE project_id = $1`, [
+      host.rawProjectId,
+    ]);
+    expect(configs).toHaveLength(0);
+  });
+
+  it('rolls the config back when a later part of the save fails', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    const custom = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`EXTRA_${i}`, 'x']));
+    const failed = await putPlugin(host, plugin, {
+      authConfigs: { tool: { name: 'Default', authMode: 'dcr' } },
+      variables: custom,
+    });
+    expect(failed.status).toBeGreaterThanOrEqual(400);
+    const installs = await sql(`SELECT id FROM installation WHERE project_id = $1`, [
+      host.rawProjectId,
+    ]);
+    const configs = await sql(`SELECT id FROM auth_config WHERE project_id = $1`, [
+      host.rawProjectId,
+    ]);
+    expect(installs).toHaveLength(0);
+    expect(configs).toHaveLength(0);
+  });
+
+  it('leaves an existing config of the same name as it is and says so', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    await putPlugin(host, plugin, {
+      authConfigs: { tool: { name: 'Default', authMode: 'shared_secret', secret } },
+    });
+    const again = await putPlugin(host, plugin, {
+      authConfigs: { tool: { name: 'Default', authMode: 'dcr' } },
+    });
+    expect(again.status).toBe(200);
+    expect(
+      ((await again.json()) as { existingAuthConfigs?: string[] }).existingAuthConfigs,
+    ).toEqual(['tool']);
+    const configs = await sql<{ auth_mode: string }>(
+      `SELECT auth_mode FROM auth_config WHERE project_id = $1`,
+      [host.rawProjectId],
+    );
+    expect(configs).toEqual([{ auth_mode: 'shared_secret' }]);
+  });
+
+  it('refuses a key without the auth config scope', async () => {
+    const host = await createHost(['plugins:read', 'plugins:write']);
+    const plugin = await seedPlugin();
+    const denied = await putPlugin(host, plugin, {
+      authConfigs: { tool: { name: 'Default', authMode: 'dcr' } },
+    });
+    expect(denied.status).toBe(403);
+    expect((await putPlugin(host, plugin)).status).toBe(201);
+  });
+
+  it('rejects a mode with the wrong fields', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    const bad = await putPlugin(host, plugin, {
+      authConfigs: { tool: { name: 'Default', authMode: 'shared_secret' } },
+    });
+    expect(bad.status).toBe(400);
+  });
+});
+
+describe('the setup a plugin list shows', () => {
+  interface Listed {
+    pluginId: string;
+    setup?: { status: string; missing: string[] };
+    servers?: { name: string; authMode: string | null; defaultAuthConfigId: string | null }[];
+  }
+  const listed = async (host: Host, plugin: Seeded): Promise<Listed> => {
+    const res = await viaKey(host.key, 'GET', '/v1/project/plugins');
+    const page = (await res.json()) as { items: Listed[] };
+    return page.items.find((item) => item.pluginId === plugin.pluginId)!;
+  };
+
+  it('moves from needing values to configured once a value or a sign-in is set', async () => {
+    const host = await createHost();
+    const plugin = await seedPlugin();
+    await putPlugin(host, plugin);
+    let item = await listed(host, plugin);
+    expect(item.setup).toEqual({ status: 'needs_values', missing: ['API_TOKEN'] });
+    expect(item.servers).toMatchObject([
+      { name: 'tool', authMode: null, defaultAuthConfigId: null },
+    ]);
+
+    await putPlugin(host, plugin, { variables: { API_TOKEN: 'value-1234' } });
+    item = await listed(host, plugin);
+    expect(item.setup).toEqual({ status: 'ready', missing: [] });
+    expect(item.servers?.[0]?.defaultAuthConfigId).toBeNull();
+
+    await putPlugin(host, plugin, { authConfigs: { tool: { name: 'Default', authMode: 'dcr' } } });
+    item = await listed(host, plugin);
+    expect(item.setup).toEqual({ status: 'ready', missing: [] });
+    expect(item.servers?.[0]).toMatchObject({ authMode: 'dcr' });
+    expect(item.servers?.[0]?.defaultAuthConfigId).toMatch(/^acf_/);
+  });
+
+  it('answers a page of plugins with a fixed number of setup queries', async () => {
+    const host = await createHost();
+    for (let i = 0; i < 5; i += 1) await putPlugin(host, await seedPlugin());
+    const res = await viaKey(host.key, 'GET', '/v1/project/plugins');
+    const page = (await res.json()) as { items: Listed[] };
+    expect(page.items).toHaveLength(5);
+    expect(page.items.every((item) => item.setup?.status === 'needs_values')).toBe(true);
   });
 });

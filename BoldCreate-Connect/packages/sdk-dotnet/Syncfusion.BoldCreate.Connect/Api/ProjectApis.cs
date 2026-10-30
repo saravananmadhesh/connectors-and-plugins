@@ -7,6 +7,35 @@ public sealed record InstallOptions
     public string? VersionId { get; init; }
 }
 
+/// <summary>How the users of one MCP server sign in, given when a plugin is added. The mode decides which other fields apply.</summary>
+public sealed record PluginAuthConfigInput
+{
+    public required string Name { get; init; }
+
+    /// <summary><c>dcr</c>, <c>oauth_client</c> or <c>shared_secret</c>.</summary>
+    public required string AuthMode { get; init; }
+
+    public bool? IsDefault { get; init; }
+
+    public string? ClientId { get; init; }
+
+    public string? ClientSecret { get; init; }
+
+    public string? Scopes { get; init; }
+
+    public string? Secret { get; init; }
+}
+
+/// <summary>What <c>Plugins.AddAsync</c> takes: the version, how each MCP server signs in (by server name) and variable values. All of it is stored, or none.</summary>
+public sealed record AddPluginOptions
+{
+    public string? VersionId { get; init; }
+
+    public IReadOnlyDictionary<string, PluginAuthConfigInput>? AuthConfigs { get; init; }
+
+    public IReadOnlyDictionary<string, string?>? Variables { get; init; }
+}
+
 public sealed record UserListOptions : PageOptions
 {
     public string? UserId { get; init; }
@@ -158,6 +187,11 @@ public sealed class PluginsApi
     public async Task<ProjectPlugin> AddAsync(string pluginId, InstallOptions? options = null, CancellationToken ct = default) =>
         await _http.JsonAsync<ProjectPlugin>(HttpMethod.Put, $"/v1/project/plugins/{Paths.Id(pluginId)}",
             new { versionId = options?.VersionId }, ct: ct).ConfigureAwait(false) ?? throw UsersApi.Empty();
+
+    public async Task<ProjectPlugin> AddAsync(string pluginId, AddPluginOptions options, CancellationToken ct = default) =>
+        await _http.JsonAsync<ProjectPlugin>(HttpMethod.Put, $"/v1/project/plugins/{Paths.Id(pluginId)}",
+            new { versionId = options.VersionId, authConfigs = options.AuthConfigs, variables = options.Variables }, ct: ct)
+            .ConfigureAwait(false) ?? throw UsersApi.Empty();
 
     public async Task<ProjectPlugin> UpdateAsync(string pluginId, string versionId, CancellationToken ct = default) =>
         await _http.JsonAsync<ProjectPlugin>(HttpMethod.Put, $"/v1/project/plugins/{Paths.Id(pluginId)}",

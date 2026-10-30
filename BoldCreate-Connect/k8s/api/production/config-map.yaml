@@ -5,7 +5,15 @@ metadata:
   namespace: boldcreate-prod
 data:
   NODE_ENV: production
-  LOG_LEVEL: info
+  LOG_LEVEL: warn
   PORT: '3001'
   BFF_CALLER_ALLOWLIST: web,admin,gateway
-  BLOB_BUCKET: boldcreate-artifacts-prod
+  BLOB_BUCKET: codestudio-marketplace
+  BLOB_REGION: us-east-1
+  KMS_ADAPTER: cloud-kms
+  KMS_CLOUD_KEY_NAME: projects/syncfusioncody/locations/global/keyRings/boldcreate-connect-prod/cryptoKeys/boldcreate-connect-key
+  NODE_TLS_REJECT_UNAUTHORIZED: '0'
+  # REDIS_URL (with the Redis password) is in the secret, not here
+  OPEN_SIGNUP_ENABLED: 'true'
+  APP_BASE_URL: https://connect.boldcreate.ai
+  PUBLIC_GATEWAY_URL: https://connect-gateway.boldcreate.ai

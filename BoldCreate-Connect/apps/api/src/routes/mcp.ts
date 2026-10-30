@@ -36,6 +36,7 @@ import {
 } from '@boldcreate-integrations/domain';
 import { authenticate, inTenant } from '../auth/principal.js';
 import { serializeList, serializeMcpServer } from '../serializers/serializers.js';
+import { hostOf, traceNote, traced } from './oauth-trace.js';
 import { scopeRunner } from './scoped.js';
 
 export interface McpRuntime {
@@ -120,40 +121,95 @@ function registerServerRoutes(app: FastifyInstance, runtime: McpRuntime, run: Ru
     async (req, reply) => {
       const { installationId, componentId } = req.params as Params;
       const parsed = McpOAuthStartBodySchema.safeParse(req.body ?? {});
-      const plan = await run(req, 'user-connection:authorize', (tx, principal, scope) => {
-        if (!parsed.success) {
-          throw new AppError(
-            'validation_failed',
-            parsed.error.issues.map((issue) => ({
-              field: issue.path.join('.'),
-              message: issue.message,
-            })),
-          );
-        }
-        return planOAuthStart(tx, principal, scope, installationId, componentId, deps.unsealer);
-      });
-      const prepared = await prepareOAuth(
-        deps.fetcher,
-        plan,
-        runtime.redirectUri,
-        // The provider's reason stays in the log; the member sees only the classified failure.
-        (rejection) => req.log.warn({ registration: rejection }, 'client registration refused'),
+      const ids = { installationId, componentId };
+      const plan = await traced(req, 'member', 'start.plan', ids, () =>
+        run(req, 'user-connection:authorize', (tx, principal, scope) => {
+          if (!parsed.success) {
+            throw new AppError(
+              'validation_failed',
+              parsed.error.issues.map((issue) => ({
+                field: issue.path.join('.'),
+                message: issue.message,
+              })),
+            );
+          }
+          return planOAuthStart(tx, principal, scope, installationId, componentId, deps.unsealer);
+        }),
       );
-      const result = await run(req, 'user-connection:authorize', (tx, principal, scope) =>
-        beginOAuth(
-          tx,
-          principal,
-          scope,
-          installationId,
-          componentId,
-          prepared,
+      const planned = {
+        ...ids,
+        authType: plan.authType,
+        hasStoredClient: plan.client !== null,
+        hasStoredMetadata: plan.metadata !== null,
+        usesAuthConfig: plan.authConfig !== null,
+        serverHost: hostOf(plan.url),
+      };
+      const prepared = await traced(req, 'member', 'start.prepare', planned, () =>
+        prepareOAuth(
+          deps.fetcher,
+          plan,
           runtime.redirectUri,
-          deps.sealerFor(tx),
+          // The provider's reason stays in the log; the member sees only the classified failure.
+          (rejection) => req.log.warn({ registration: rejection }, 'client registration refused'),
         ),
       );
+      const result = await traced(
+        req,
+        'member',
+        'start.begin',
+        {
+          ...ids,
+          registered: prepared.registered,
+          redirectUri: runtime.redirectUri,
+          issuer: prepared.metadata.issuer,
+          authorizeHost: hostOf(prepared.metadata.authorizationEndpoint),
+          tokenHost: hostOf(prepared.metadata.tokenEndpoint),
+        },
+        () =>
+          run(req, 'user-connection:authorize', (tx, principal, scope) =>
+            beginOAuth(
+              tx,
+              principal,
+              scope,
+              installationId,
+              componentId,
+              prepared,
+              runtime.redirectUri,
+              deps.sealerFor(tx),
+            ),
+          ),
+      );
+      await sealSelfCheck(req, ids, run);
       return reply.status(200).send(result);
     },
   );
+
+  /**
+   * Seals a throwaway value to the organization's key and opens it again, then logs the outcome.
+   * A failure here means the stored key pair is broken; a pass with a later failure at the
+   * callback means the context the value was sealed under differs. It never fails the sign-in.
+   */
+  async function sealSelfCheck(
+    req: FastifyRequest,
+    ids: { installationId: string; componentId: string },
+    runScoped: Run,
+  ): Promise<void> {
+    try {
+      await traced(req, 'member', 'start.seal-selfcheck', ids, () =>
+        runScoped(req, 'user-connection:authorize', async (tx, principal, scope) => {
+          const context = {
+            purpose: 'oauth_state_verifier' as const,
+            orgId: scope.organizationId,
+            subject: { kind: 'user_connection' as const, id: `selfcheck:${principal.userId}` },
+          };
+          const envelope = await deps.sealerFor(tx).seal({ ...context, plaintext: 'selfcheck' });
+          await deps.unsealer.unseal({ ...context, envelope });
+        }),
+      );
+    } catch {
+      // Already logged by the step.
+    }
+  }
 
   app.delete(
     '/installations/:installationId/mcp-servers/:componentId/oauth',
@@ -188,11 +244,8 @@ function registerCallback(app: FastifyInstance, db: Db, runtime: McpRuntime): vo
     query: McpOAuthCallbackQuery,
     orgId: string,
   ) {
-    const { landing, consumed } = await consumeExternalOAuthState(
-      db,
-      orgId,
-      query.state,
-      deps.unsealer,
+    const { landing, consumed } = await traced(req, 'project', 'state.consume', { orgId }, () =>
+      consumeExternalOAuthState(db, orgId, query.state, deps.unsealer),
     );
     const land = (outcome: string) => {
       const url = new URL(landing.returnUrl);
@@ -205,23 +258,50 @@ function registerCallback(app: FastifyInstance, db: Db, runtime: McpRuntime): vo
         .header('referrer-policy', 'no-referrer')
         .redirect(url.toString(), 302);
     };
-    if (!consumed) return land('oauth_state_invalid');
-    if (query.error || !query.code) return land('denied');
+    const flow = {
+      orgId,
+      projectId: landing.projectId,
+      componentId: landing.componentId,
+    };
+    if (!consumed) {
+      traceNote(req, 'project', 'state.unknown', flow);
+      return land('oauth_state_invalid');
+    }
+    if (query.error || !query.code) {
+      traceNote(req, 'project', 'denied', { ...flow, upstreamError: query.error });
+      return land('denied');
+    }
+    const code = query.code;
     try {
-      const tokens = await exchangeOAuthCode(deps.fetcher, consumed, query.code, query.iss);
+      const tokens = await traced(
+        req,
+        'project',
+        'token.exchange',
+        {
+          ...flow,
+          issuer: consumed.metadata.issuer,
+          tokenHost: hostOf(consumed.metadata.tokenEndpoint),
+          redirectUri: consumed.redirectUri,
+          hasClientSecret: consumed.client.clientSecret !== undefined,
+          issuerChecked: query.iss !== undefined,
+        },
+        () => exchangeOAuthCode(deps.fetcher, consumed, code, query.iss),
+      );
       if (landing.projectId !== null) {
         // A project user is no member of the organization; the project and the user are the subject.
         const projectId = landing.projectId;
-        await withTenant(db, { orgId, userId: landing.userId }, (tx) =>
-          storeOAuthTokens(
-            tx,
-            { userId: landing.userId },
-            orgId,
-            consumed,
-            tokens,
-            deps.sealerFor(tx),
-            new Date(),
-            { projectId },
+        await traced(req, 'project', 'token.store', flow, () =>
+          withTenant(db, { orgId, userId: landing.userId }, (tx) =>
+            storeOAuthTokens(
+              tx,
+              { userId: landing.userId },
+              orgId,
+              consumed,
+              tokens,
+              deps.sealerFor(tx),
+              new Date(),
+              { projectId },
+            ),
           ),
         );
       }
@@ -233,28 +313,97 @@ function registerCallback(app: FastifyInstance, db: Db, runtime: McpRuntime): vo
     return land('connected');
   }
 
-  app.get('/oauth/callback', async (req, reply) => {
+  /** What the callback sent back: the status and the outcome in the address; no query values beyond it. */
+  const logReturn = async (req: FastifyRequest, reply: FastifyReply, payload: unknown) => {
+    const location = reply.getHeader('location');
+    let returned: Record<string, unknown> = {};
+    if (typeof location === 'string') {
+      try {
+        const url = new URL(location, runtime.appBaseUrl);
+        returned = {
+          host: url.host,
+          path: url.pathname,
+          oauth: url.searchParams.get('oauth') ?? undefined,
+          connection: url.searchParams.get('connection') ?? undefined,
+        };
+      } catch {
+        returned = { host: 'invalid' };
+      }
+    }
+    req.log.debug(
+      { oauth: { flow: 'callback', step: 'respond', status: reply.statusCode, returned } },
+      'oauth step',
+    );
+    return payload;
+  };
+
+  app.get('/oauth/callback', { onSend: logReturn }, async (req, reply) => {
     const parsed = McpOAuthCallbackQuerySchema.safeParse(req.query);
     if (!parsed.success) throw new AppError('validation_failed', []);
     const query = parsed.data;
     const orgId = stateOrganization(query.state);
+    traceNote(req, 'callback', 'received', {
+      orgId,
+      hasCode: query.code !== undefined,
+      hasIss: query.iss !== undefined,
+      // The upstream's own error name, such as `access_denied`; it holds no secret.
+      upstreamError: query.error,
+    });
     if (!orgId) throw new AppError('oauth_state_invalid');
-    if (await isExternalState(db, orgId, query.state)) {
+    const external = await traced(req, 'callback', 'state.kind', { orgId }, () =>
+      isExternalState(db, orgId, query.state),
+    );
+    if (external) {
+      traceNote(req, 'callback', 'project-flow', { orgId });
       return finishExternalFlow(req, reply, query, orgId);
     }
-    const principal = await authenticate(db, req, orgId);
-    const consumed = await inTenant(db, principal, (tx) =>
-      consumeOAuthState(tx, principal, query.state, deps.unsealer),
+    const principal = await traced(req, 'callback', 'session', { orgId }, () =>
+      authenticate(db, req, orgId),
+    );
+    const consumed = await traced(req, 'callback', 'state.consume', { orgId }, () =>
+      inTenant(db, principal, (tx) => consumeOAuthState(tx, principal, query.state, deps.unsealer)),
     );
     const scope = consumed.scope.type === 'user' ? 'me' : 'org';
     const landing = { scope };
+    const flow = {
+      orgId,
+      installationId: consumed.installationId,
+      componentId: consumed.componentId,
+      scope,
+    };
     if (query.error || !query.code) {
+      traceNote(req, 'callback', 'denied', flow);
       return reply.redirect(back({ ...landing, oauth: 'denied' }), 302);
     }
     try {
-      const tokens = await exchangeOAuthCode(deps.fetcher, consumed, query.code, query.iss);
-      await inTenant(db, principal, (tx) =>
-        storeOAuthTokens(tx, principal, orgId, consumed, tokens, deps.sealerFor(tx)),
+      const tokens = await traced(
+        req,
+        'callback',
+        'token.exchange',
+        {
+          ...flow,
+          issuer: consumed.metadata.issuer,
+          tokenHost: hostOf(consumed.metadata.tokenEndpoint),
+          redirectUri: consumed.redirectUri,
+          hasClientSecret: consumed.client.clientSecret !== undefined,
+          issuerChecked: query.iss !== undefined,
+        },
+        () => exchangeOAuthCode(deps.fetcher, consumed, query.code as string, query.iss),
+      );
+      await traced(
+        req,
+        'callback',
+        'token.store',
+        {
+          ...flow,
+          hasRefreshToken: tokens.refreshToken !== undefined,
+          expiresIn: tokens.expiresIn,
+          scopeGranted: tokens.scope,
+        },
+        () =>
+          inTenant(db, principal, (tx) =>
+            storeOAuthTokens(tx, principal, orgId, consumed, tokens, deps.sealerFor(tx)),
+          ),
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -262,6 +411,7 @@ function registerCallback(app: FastifyInstance, db: Db, runtime: McpRuntime): vo
       }
       throw error;
     }
+    traceNote(req, 'callback', 'connected', flow);
     return reply.redirect(
       back({ ...landing, oauth: 'connected', server: formatId('cmp', consumed.componentId) }),
       302,

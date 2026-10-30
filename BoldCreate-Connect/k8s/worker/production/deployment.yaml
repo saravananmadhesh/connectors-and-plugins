@@ -20,14 +20,20 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: boldcreate-integrations-worker-production
-          image: us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/boldcreate-production-integrations-worker:#{Build.BuildId}#
+          image: us-east4-docker.pkg.dev/syncfusioncody/synccodestudio/boldcreate-production-integrations-worker:#{Build.BuildId}#
           imagePullPolicy: Always
-          command: [node]
-          args: [dist/index.js]
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/gcp/sa-key.json
+          envFrom:
+            - configMapRef:
+                name: boldcreate-integrations-worker-config-production
+            - secretRef:
+                name: boldcreate-integrations-worker-secrets-production
           ports: [{ name: health, containerPort: 3005 }]
           resources:
-            requests: { cpu: 100m, memory: 128Mi }
-            limits: { cpu: '1', memory: 512Mi }
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: '1', memory: 1024Mi }
           startupProbe:
             httpGet: { path: /healthz, port: health }
             periodSeconds: 5
@@ -38,7 +44,20 @@ spec:
           livenessProbe:
             httpGet: { path: /healthz, port: health }
             periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: gcp-sa-key
+              mountPath: /etc/gcp
+              readOnly: true
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities: { drop: [ALL] }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: gcp-sa-key
+          secret:
+            secretName: boldcreate-gcp-sa-key
+            optional: true

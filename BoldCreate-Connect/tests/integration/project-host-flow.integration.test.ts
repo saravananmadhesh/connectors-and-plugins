@@ -461,6 +461,9 @@ describe('a host and its users, from the key to the gateway', () => {
   });
 
   it("serves the session user's catalog, plugins and installs through the gateway", async () => {
+    // A session keeps the install permission it was minted with, so the project opens installs first.
+    const before = (await (await host('GET', '/user-install-mode')).json()) as { mode: string };
+    expect((await host('PUT', '/user-install-mode', { mode: 'any' })).status).toBe(200);
     const own = await mint();
     const extra = await seedPlugin(
       'flow-own',
@@ -468,8 +471,6 @@ describe('a host and its users, from the key to the gateway', () => {
       `${FIXTURE_ORIGIN}/flow-api`,
       false,
     );
-    const before = (await (await host('GET', '/user-install-mode')).json()) as { mode: string };
-    expect((await host('PUT', '/user-install-mode', { mode: 'any' })).status).toBe(200);
     try {
       const catalog = await viaGateway(own.token, 'GET', '/v1/session/catalog?limit=100');
       expect(catalog.status).toBe(200);

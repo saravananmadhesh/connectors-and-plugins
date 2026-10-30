@@ -701,6 +701,16 @@ export const projects = {
       'GET',
       `${projectBase(orgId, projectId)}/plugins${query(params)}`,
     ),
+  catalogPlugin: (orgId: string, projectId: string, pluginId: string) =>
+    request<PluginDetailResponse>('GET', `${projectBase(orgId, projectId)}/catalog/${pluginId}`),
+  /** What a plugin's server publishes about its sign-in, and the callback URL; fills in the form. */
+  oauthDiscover: (orgId: string, projectId: string, pluginId: string, serverName: string) =>
+    request<McpOAuthDiscoverResponse>(
+      'POST',
+      `${projectBase(orgId, projectId)}/plugins/${pluginId}/mcp-servers/${encodeURIComponent(serverName)}/oauth/discover`,
+      undefined,
+      true,
+    ),
   putPlugin: (
     orgId: string,
     projectId: string,
@@ -710,6 +720,19 @@ export const projects = {
     request<ProjectPluginResponse>(
       'PUT',
       `${projectBase(orgId, projectId)}/plugins/${pluginId}`,
+      body,
+      true,
+    ),
+  /** Changes the client, scopes or secret of a sign-in; a secret is sent and never read back. */
+  updateAuthConfig: (
+    orgId: string,
+    projectId: string,
+    authConfigId: string,
+    body: { clientId?: string; clientSecret?: string; scopes?: string; secret?: string },
+  ) =>
+    request<AuthConfigResponse>(
+      'PUT',
+      `${projectBase(orgId, projectId)}/auth-configs/${authConfigId}`,
       body,
       true,
     ),

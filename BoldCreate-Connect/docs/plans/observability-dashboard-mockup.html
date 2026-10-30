@@ -990,6 +990,11 @@
             <option>resolved</option>
             <option>ignored</option>
           </select>
+          <select id="fenv" aria-label="Environment">
+            <option value="">All environments</option>
+            <option>production</option>
+            <option>staging</option>
+          </select>
           <button class="btn" id="clr">Clear filters</button>
         </div>
         <div class="tw">
@@ -1076,6 +1081,7 @@
           <button role="tab" aria-selected="false" data-k="upstream">Upstream</button>
           <button role="tab" aria-selected="false" data-k="security">Security</button>
           <button role="tab" aria-selected="false" data-k="deploy">Deploys</button>
+          <button role="tab" aria-selected="false" data-k="startup">Startup</button>
         </div>
         <div class="tw">
           <table>
@@ -1477,6 +1483,103 @@
           hint: 'Seen once after the staging copy was reset. No action needed.',
         },
         {
+          id: 'CON-150',
+          t: 'KmsUnavailableError: unwrap of org key failed (PERMISSION_DENIED)',
+          svc: 'worker',
+          st: 'unresolved',
+          n: 9,
+          first: '40 min ago',
+          last: '2 min ago',
+          tr: [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3],
+          where: 'unwrapOrgKey (packages/adapters/src/kms/cloud.ts:88)',
+          route: 'job: org-key-requested',
+          kind: 'K01',
+          env: 'production',
+          area: 'kms',
+          op: 'unwrap',
+          step: 'unwrap org key (attempt 3 of 6)',
+          ectx: [
+            ['Key resource', 'projects/connect/.../orgKeyWrap'],
+            ['Error code', 'PERMISSION_DENIED'],
+            ['Retried', 'yes, backoff 30 s'],
+            ['Latency', '212 ms'],
+          ],
+          hint: 'Only production fails; staging and local work. The worker service account lacks the KMS decrypt role on the key. Grant the role and the job retries on its own.',
+        },
+        {
+          id: 'CON-151',
+          t: 'KmsInvalidCiphertextError: org key envelope failed authentication',
+          svc: 'api',
+          st: 'unresolved',
+          n: 2,
+          first: '3 hours ago',
+          last: '2 hours ago',
+          tr: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+          where: 'openEnvelope (packages/credentials/src/envelope.ts:61)',
+          route: 'POST /v1/projects/:id/connections',
+          kind: 'H01',
+          env: 'production',
+          area: 'seal',
+          op: 'unseal',
+          step: 'open envelope',
+          ectx: [
+            ['Key version', 'v4'],
+            ['Payload size', '1.2 KB'],
+            ['Stage', 'auth tag check'],
+            ['Plaintext', 'never stored'],
+          ],
+          hint: 'Key version v4 was rotated while a stale envelope was cached. Check org-key cache invalidation after rotation.',
+        },
+        {
+          id: 'CON-152',
+          t: 'OAuth redirect_uri_mismatch from provider github',
+          svc: 'api',
+          st: 'unresolved',
+          n: 31,
+          first: '1 hour ago',
+          last: '8 min ago',
+          tr: [0, 0, 0, 0, 0, 0, 2, 5, 8, 7, 5, 4],
+          where: 'exchangeCode (packages/domain/src/project/connections.ts:204)',
+          route: 'GET /v1/oauth/callback',
+          kind: 'O01',
+          env: 'staging',
+          area: 'oauth',
+          op: 'callback',
+          step: 'code exchange',
+          ectx: [
+            ['Provider', 'github'],
+            ['Provider error', 'redirect_uri_mismatch'],
+            ['HTTP status', '400'],
+            ['State', 'valid'],
+            ['Tokens and codes', 'never stored'],
+          ],
+          hint: 'Works locally and in production, fails only in staging: the staging callback URL is not registered on the provider app. Add it, no code change.',
+        },
+        {
+          id: 'CON-153',
+          t: 'Startup check failed: role grants missing for table error_event',
+          svc: 'api',
+          st: 'unresolved',
+          n: 4,
+          first: '14 min ago',
+          last: '9 min ago',
+          tr: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1],
+          where: 'runStartupChecks (packages/http-server/src/startup.ts:41)',
+          route: 'startup: api',
+          kind: 'V01',
+          env: 'production',
+          area: 'startup',
+          op: 'grants',
+          step: 'database grants',
+          ectx: [
+            ['Expected migration', '0006'],
+            ['Found migration', '0006'],
+            ['Missing grant', 'INSERT on error_event (role api_service)'],
+            ['Readiness', 'failed, rollout paused'],
+          ],
+          hint: 'The new release started but role grants were not applied. Readiness failed, so no traffic was sent to this pod. Run the migration step that applies grants.',
+        },
+        {
           id: 'CON-136',
           t: 'Webhook delivery failed: 503 from hooks.acme.example',
           svc: 'worker',
@@ -1576,6 +1679,38 @@
           'GitHub API circuit opened after 5 timeouts, recovering in 30 s',
           'req_5c3e',
         ],
+        [
+          '14:30',
+          'startup',
+          'error',
+          'api',
+          'startup_check_failed: grants missing for error_event, readiness failed, rollout paused',
+          '-',
+        ],
+        [
+          '14:12',
+          'upstream',
+          'error',
+          'worker',
+          'KMS unwrap PERMISSION_DENIED on org key, attempt 3 of 6, retrying',
+          'req_71ab',
+        ],
+        [
+          '13:20',
+          'upstream',
+          'warning',
+          'api',
+          'OAuth callback failed for github: redirect_uri_mismatch (staging)',
+          'req_b1c7',
+        ],
+        [
+          '13:05',
+          'upstream',
+          'info',
+          'worker',
+          'Dependency redis recovered after 4 min unreachable',
+          '-',
+        ],
         ['12:15', 'security', 'info', 'admin', 'Signing key rotated by user u_204', 'req_0f11'],
         [
           '11:03',
@@ -1594,6 +1729,9 @@
           'req_9be2',
         ],
       ];
+      groups.forEach((g) => {
+        g.env = g.env || 'production';
+      });
       const stack = [
         ['lib', 'TypeError: Cannot read properties of undefined (reading "scopes")'],
         ['lib', '  at Object.<anonymous> (node_modules/zod/lib/types.js:210:12)'],
@@ -1924,6 +2062,146 @@
           [],
           'Biggest log cost; keep as counters only',
           '0',
+        ),
+        C(
+          'K01',
+          'KMS wrap, unwrap or rotate failure',
+          'Handled failures',
+          'api, worker',
+          'Any KMS error, even when handled or retried',
+          'error',
+          'Capture',
+          'First 5 per group, then 1 in 100; every attempt is an event',
+          'Alert on first occurrence',
+          '14 days',
+          [
+            ...common,
+            ...[
+              'operation',
+              'key resource name',
+              'error class and code',
+              'attempt of max',
+              'latency',
+              'retried',
+            ],
+          ],
+          'Key material, plaintext',
+          '~1 KB',
+        ),
+        C(
+          'H01',
+          'Seal or unseal failure (HPKE)',
+          'Handled failures',
+          'api, gateway, worker',
+          'Envelope open or seal fails, key-version mismatch, auth tag failure',
+          'error',
+          'Capture',
+          'First 5 per group, then 1 in 100',
+          'Alert on first occurrence',
+          '14 days',
+          [...common, ...['operation', 'key version', 'stage', 'payload size']],
+          'Plaintext, ciphertext, key bytes',
+          '~1 KB',
+        ),
+        C(
+          'O01',
+          'OAuth step failure',
+          'Handled failures',
+          'api, worker',
+          'Authorize, callback, exchange, refresh or revoke fails, including handled redirects',
+          'warning',
+          'Capture',
+          'Group by provider and step',
+          'Alert on spike per provider',
+          '14 days',
+          [
+            ...common,
+            ...[
+              'provider',
+              'step',
+              'HTTP status',
+              'provider error code',
+              'state mismatch or expiry',
+              'connection id',
+            ],
+          ],
+          'Codes, tokens, secrets',
+          '~1 KB',
+        ),
+        C(
+          'J03',
+          'Job attempt failed (not final)',
+          'Handled failures',
+          'worker',
+          'Each failed attempt before the last',
+          'warning',
+          'Capture, sampled',
+          'Event only; the final failure opens the issue',
+          '-',
+          '14 days',
+          [...common, ...['job name', 'attempt of max', 'duration', 'cause chain']],
+          'Payload values',
+          '~0.6 KB',
+        ),
+        C(
+          'F01',
+          'Fail-open or swallowed error',
+          'Handled failures',
+          'all services',
+          'Throttle, cache, limiter or audit hook failed and the request continued',
+          'warning',
+          'Capture, sampled',
+          'One event per component per minute',
+          'Alert when above 5 per minute',
+          '14 days',
+          [...common, ...['component', 'reason', 'count per minute']],
+          'Request content',
+          '~0.4 KB',
+        ),
+        C(
+          'V01',
+          'Startup check failed',
+          'Environment',
+          'all services',
+          'Config, database, migration, grants, KMS round trip, Redis, object store or upstream DNS/TLS check fails at start',
+          'error',
+          'Capture',
+          'Every failure; also printed at error',
+          'Alert immediately',
+          '30 days',
+          [...common, ...['check name', 'expected vs found', 'variable names only', 'error code']],
+          'Secret and config values',
+          '~0.5 KB',
+        ),
+        C(
+          'V02',
+          'Dependency state change',
+          'Environment',
+          'worker',
+          'DB, Redis, KMS, object store or provider goes healthy to failing or back',
+          'warning',
+          'Capture',
+          'State changes only, not every probe',
+          'Alert when failing over 5 min',
+          '30 days',
+          [...common, ...['dependency', 'previous and new state', 'latency', 'error code']],
+          'Probe responses',
+          '~0.3 KB',
+        ),
+        C(
+          'V03',
+          'Environment or release drift',
+          'Environment',
+          'all services',
+          'Services on different releases or schema versions, restart loop, out-of-memory kill',
+          'warning',
+          'Capture',
+          'One per change',
+          'Alert on restart loop',
+          '30 days',
+          [...common, ...['release per service', 'schema version', 'restart count', 'exit reason']],
+          'Process memory',
+          '~0.3 KB',
         ),
       ];
       const storage = [
@@ -2346,13 +2624,15 @@
       function renderGroups() {
         const q = $('#q').value.toLowerCase(),
           s = $('#fs').value,
-          st = $('#fst').value;
+          st = $('#fst').value,
+          en = $('#fenv').value;
         const body = $('#grp');
         body.replaceChildren();
         const rows = groups.filter(
           (g) =>
             (!q || (g.t + g.id + g.fingerprint).toLowerCase().includes(q)) &&
             (!s || g.svc === s) &&
+            (!en || g.env === en) &&
             (!st || g.st === st),
         );
         rows.forEach((g) =>
@@ -2387,12 +2667,13 @@
         $('#empty').classList.toggle('hidden', rows.length > 0);
       }
       ['input', 'change'].forEach((e) =>
-        ['#q', '#fs', '#fst'].forEach((s) => $(s).addEventListener(e, renderGroups)),
+        ['#q', '#fs', '#fst', '#fenv'].forEach((s) => $(s).addEventListener(e, renderGroups)),
       );
       $('#clr').onclick = () => {
         $('#q').value = '';
         $('#fs').value = '';
         $('#fst').value = '';
+        $('#fenv').value = '';
         renderGroups();
       };
 
@@ -2447,8 +2728,12 @@
             ['Organization', 'org_ac1'],
             ['Project key', 'pk_live_3d91'],
             ['Release', '2.14.0'],
+            ['Environment', cur.env],
+            ['Area / operation', cur.area ? cur.area + ' / ' + cur.op : 'general'],
+            ['Step', cur.step || '-'],
+            ...(cur.ectx || []),
             ['Issue type', cur.kind || 'E01'],
-            ['Pod', cur.svc + '-6d9f-x2k'],
+            ['Instance', cur.svc + '-6d9f-x2k'],
             ['Node', '24 / linux'],
             ['HTTP status', cur.svc === 'worker' ? '-' : '500'],
             ['Duration', '184 ms'],

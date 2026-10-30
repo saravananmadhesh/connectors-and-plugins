@@ -16,3 +16,4 @@ data:
   # REDIS_URL (with the Redis password) is in the secret, not here
   OPEN_SIGNUP_ENABLED: 'true'
   APP_BASE_URL: https://connect-staging.boldcreate.ai
+  PUBLIC_GATEWAY_URL: https://connect-gateway-staging.boldcreate.ai

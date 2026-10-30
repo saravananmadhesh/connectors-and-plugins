@@ -477,7 +477,8 @@ describe('the catalog a session sees', () => {
       const body = (await res.json()) as { items: { id: string; installed: boolean }[] };
       return body.items;
     };
-    // A new project lets users install; turning it off empties the catalog.
+    // Users install only once the project opens it; turning it off empties the catalog.
+    expect((await host(h, 'PUT', '/user-install-mode', { mode: 'any' })).status).toBe(200);
     expect((await ids()).map((item) => item.id)).toContain(other.pluginId);
     expect((await host(h, 'PUT', '/user-install-mode', { mode: 'off' })).status).toBe(200);
     expect(await ids()).toEqual([]);
@@ -551,6 +552,7 @@ describe('the catalog a session sees', () => {
   it('shows the state of an install and lets the user change their own values and components', async () => {
     const h = await createHost();
     const plugin = await seedPlugin();
+    expect((await host(h, 'PUT', '/user-install-mode', { mode: 'any' })).status).toBe(200);
     const session = await mint(h);
     expect(
       (await bearer(session.token, 'PUT', `/v1/session/plugins/${plugin.pluginId}`, {})).status,

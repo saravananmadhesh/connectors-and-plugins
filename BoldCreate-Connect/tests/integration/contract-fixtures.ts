@@ -799,6 +799,19 @@ const FIXED: Record<string, Fixture> = {
       {},
     );
   },
+  'projectPluginsConsole.oauthDiscover': async (seed) => {
+    const delivery = await sharedDelivery(seed);
+    const plugin = await newPlugin();
+    const [component] = await sql<{ name: string }>(
+      `SELECT name FROM component WHERE plugin_version_id = $1 AND kind = 'mcp'`,
+      [parseId('pv', plugin.versionId)],
+    );
+    return callApi(
+      'POST',
+      `/v1/orgs/${seed.owner.orgId}/projects/${delivery.projectId}/plugins/${plugin.pluginId}/mcp-servers/${component!.name}/oauth/discover`,
+      seed.owner,
+    );
+  },
   'projectPluginsConsole.delete': async (seed) => {
     const delivery = await sharedDelivery(seed);
     const pluginId = await freshPlugin(delivery, true);
@@ -1335,9 +1348,14 @@ function sessionFixtures(): Record<string, Fixture> {
       });
     },
     'sessionPluginComponents.put': async (seed) => {
-      const delivery = await sharedDelivery(seed);
-      const pluginId = await freshPlugin(delivery, false);
+      await openInstall(seed);
+      const { pluginId } = await newPlugin();
       const { token } = await newSession(seed);
+      await json(
+        await asSession(token, 'PUT', `/v1/session/plugins/${pluginId}`, {}),
+        201,
+        'install for session user',
+      );
       const page = await json<{
         items: { pluginId: string; components: { componentId: string }[] }[];
       }>(await asSession(token, 'GET', '/v1/session/plugins'), 200, 'read session plugins');
@@ -1350,18 +1368,21 @@ function sessionFixtures(): Record<string, Fixture> {
       );
     },
     'sessionPluginComponents.delete': async (seed) => {
+      await openInstall(seed);
       const delivery = await sharedDelivery(seed);
-      const pluginId = await freshPlugin(delivery, false);
+      const pluginId = await freshPlugin(delivery, true);
       const { token } = await newSession(seed);
       const page = await json<{
         items: { pluginId: string; components: { componentId: string }[] }[];
       }>(await asSession(token, 'GET', '/v1/session/plugins'), 200, 'read session plugins');
       const item = page.items.find((entry) => entry.pluginId === pluginId);
-      return asSession(
-        token,
-        'DELETE',
-        `/v1/session/plugins/${pluginId}/components/${item!.components[0]!.componentId}`,
+      const componentPath = `/v1/session/plugins/${pluginId}/components/${item!.components[0]!.componentId}`;
+      await json(
+        await asSession(token, 'PUT', componentPath, { enabled: false }),
+        200,
+        'override component',
       );
+      return asSession(token, 'DELETE', componentPath);
     },
     'sessionPlugins.put': async (seed) => {
       await openInstall(seed);

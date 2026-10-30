@@ -6,10 +6,9 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: gce
     kubernetes.io/ingress.allow-http: 'false'
-    ingress.gcp.kubernetes.io/pre-shared-cert: ssl-sfcodestudio-platformapi-production
 spec:
   rules:
-    - host: app.example.com
+    - host: connect.boldcreate.ai
       http:
         paths:
           - path: /
@@ -18,3 +17,7 @@ spec:
               service:
                 name: boldcreate-integrations-web-production
                 port: { name: http }
+  tls:
+    - hosts:
+        - api.boldcreate.ai
+      secretName: ssl-boldcreate-production
