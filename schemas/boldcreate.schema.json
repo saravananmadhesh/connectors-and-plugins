@@ -25,6 +25,19 @@
     "stage": { "enum": ["ga", "preview", "beta", "early-access"], "description": "Launch stage: the vendor's stage for an MCP server, or the plugin's own stage for a first-party plugin." },
     "oauthScopes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "description": "OAuth scopes to request, for servers that need them (Google)." },
     "docs": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "commit", "license"],
+      "description": "Where a community plugin was copied from. The original LICENSE file stays in the plugin folder.",
+      "properties": {
+        "repository": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "path": { "type": "string", "description": "Plugin folder inside the source repository." },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        "author": { "type": "string", "description": "Author named in the source manifest." },
+        "license": { "type": "string" }
+      }
+    },
     "endpointCheck": {
       "type": "object",
       "additionalProperties": false,

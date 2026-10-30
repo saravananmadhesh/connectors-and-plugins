@@ -6,8 +6,8 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { listPlugins, expectedFiles, isMcpPlugin } from "./build.mjs";
-import { checkKit } from "./check-kit.mjs";
+import { listPlugins, expectedFiles, isMcpPlugin, isCommunityPlugin, CURSOR_HOOKS } from "./build.mjs";
+import { checkKit, checkCommunity } from "./check-kit.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const readJSON = (p) => JSON.parse(readFileSync(join(root, p), "utf-8"));
@@ -27,6 +27,7 @@ const fail = (msg) => {
   console.error(`ERROR: ${msg}`);
   errors++;
 };
+const warnings = [];
 
 function validate(kind, file) {
   if (!existsSync(join(root, file))) return fail(`${file} is missing`), null;
@@ -72,8 +73,31 @@ for (const { name, dir: base } of plugins) {
     fail(`${base}/CHANGELOG.md has no entry for version ${manifest.version}`);
   }
 
+  if (isCommunityPlugin(base, manifest)) {
+    // Copied from another marketplace: keep it as published, check that it loads,
+    // and record where it came from.
+    if (existsSync(join(root, base, "mcp.json"))) fail(`${base}/mcp.json exists but the manifest declares no mcpServers`);
+    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required for community plugins`);
+    for (const key of ["transport", "auth", "alternativeAuth", "oauthScopes", "wave", "hostedBy"]) {
+      if (meta && meta[key] !== undefined) fail(`${base}/boldcreate.json: ${key} applies only to MCP plugins`);
+    }
+    if (manifest.variables) fail(`${base}: variables apply only to MCP plugins`);
+    for (const [key, path] of [["skills", "./skills/"], ["agents", "./agents/"], ["rules", "./rules/"]]) {
+      const has = existsSync(join(root, base, key));
+      if (has && manifest[key] !== path) fail(`${base}: ${key} must be "${path}"`);
+      if (!has && manifest[key] !== undefined) fail(`${base}: ${key} is set but there is no ${key}/ folder`);
+    }
+    const hasHooks = existsSync(join(root, base, CURSOR_HOOKS));
+    if (hasHooks && manifest.hooks !== `./${CURSOR_HOOKS}`) fail(`${base}: hooks must be "./${CURSOR_HOOKS}"`);
+    if (!hasHooks && manifest.hooks !== undefined) fail(`${base}: hooks is set but ${CURSOR_HOOKS} is missing`);
+    const { errors: kitErrors, warnings: kitWarnings, summary } = checkCommunity(base);
+    kitErrors.forEach(fail);
+    warnings.push(...kitWarnings);
+    summaries.push(summary);
+    continue;
+  }
+
   if (!isMcpPlugin(manifest)) {
-    if (base.startsWith("third_party/")) fail(`${base}: plugins under third_party/ must declare mcpServers`);
     if (existsSync(join(root, base, "mcp.json"))) fail(`${base}/mcp.json exists but the manifest declares no mcpServers`);
     for (const key of ["transport", "auth", "alternativeAuth", "oauthScopes", "wave"]) {
       if (meta && meta[key] !== undefined) fail(`${base}/boldcreate.json: ${key} applies only to MCP plugins`);
@@ -151,5 +175,6 @@ if (errors) {
   console.error(`\n${errors} problem(s) found.`);
   process.exit(1);
 }
+warnings.forEach((w) => console.warn(`WARNING: ${w}`));
 summaries.forEach((s) => console.log(s));
 console.log(`All ${plugins.length} plugins are valid.`);
