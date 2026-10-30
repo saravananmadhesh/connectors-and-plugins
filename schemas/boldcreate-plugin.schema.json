@@ -26,6 +26,19 @@
     "hostedBy": { "enum": ["vendor", "customer", "boldcreate", "local"] },
     "stage": { "enum": ["ga", "preview", "beta", "early-access"] },
     "docs": { "type": "string", "format": "uri" },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "commit", "license"],
+      "description": "Where a community plugin was copied from. The original LICENSE file stays in the plugin folder.",
+      "properties": {
+        "repository": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "path": { "type": "string", "description": "Plugin folder inside the source repository." },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        "author": { "type": "string", "description": "Author named in the source manifest." },
+        "license": { "type": "string" }
+      }
+    },
     "rollout": {
       "type": "object",
       "additionalProperties": false,

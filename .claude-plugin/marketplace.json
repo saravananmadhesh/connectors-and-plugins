@@ -4,9 +4,19 @@
     "name": "Syncfusion"
   },
   "metadata": {
-    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a toolkit for the whole software delivery lifecycle."
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, and community skill and agent packs."
   },
   "plugins": [
+    {
+      "name": "advisor",
+      "source": "./third_party/advisor",
+      "description": "Consult a stronger model at key checkpoints: before major decisions, when stuck on an error, and before declaring a task done. The advisor gets a full briefing plus the conversation transcript, returns guidance, and the main model keeps doing the work."
+    },
+    {
+      "name": "agent-compatibility",
+      "source": "./third_party/agent-compatibility",
+      "description": "CLI-backed repo compatibility scans plus agents that audit startup, validation, and docs against reality."
+    },
     {
       "name": "android-management",
       "source": "./third_party/android-management",
@@ -28,14 +38,34 @@
       "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests."
     },
     {
+      "name": "cli-for-agent",
+      "source": "./third_party/cli-for-agent",
+      "description": "Patterns for designing CLIs that coding agents can run reliably: non-interactive flags, layered help with examples, pipelines, actionable errors, idempotency, and dry-run."
+    },
+    {
       "name": "context7",
       "source": "./third_party/context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt."
     },
     {
+      "name": "continual-learning",
+      "source": "./third_party/continual-learning",
+      "description": "Incrementally learns durable user preferences and workspace facts from transcript changes and keeps AGENTS.md up to date with plain bullet points."
+    },
+    {
+      "name": "create-plugin",
+      "source": "./third_party/create-plugin",
+      "description": "Scaffold and validate new agent plugins. Handles directory setup, manifest generation, and pre-submission quality checks for the marketplace."
+    },
+    {
       "name": "deepwiki",
       "source": "./third_party/deepwiki",
       "description": "Ask questions about any public GitHub repository and read its generated wiki."
+    },
+    {
+      "name": "dyl-stack",
+      "source": "./third_party/dyl-stack",
+      "description": "Dylan's agent style on top of pstack: root causes over symptom patches, The Algorithm before design, terse verified delivery, a PR review that fits in a paste, and Figma-to-UI with a visual judge."
     },
     {
       "name": "figma",
@@ -188,6 +218,11 @@
       "description": "Search across Gmail, Drive, Calendar, and other Google Workspace content in one place."
     },
     {
+      "name": "grok-voice",
+      "source": "./third_party/grok-voice",
+      "description": "Add Grok voice to an app: realtime speech-to-speech, speech-to-text dictation, text-to-speech read-aloud, and a log-driven fix loop for voice sessions."
+    },
+    {
       "name": "linear",
       "source": "./third_party/linear",
       "description": "Find, create, and update Linear issues, projects, and cycles."
@@ -213,6 +248,16 @@
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog."
     },
     {
+      "name": "pstack",
+      "source": "./third_party/pstack",
+      "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence."
+    },
+    {
+      "name": "ralph-loop",
+      "source": "./third_party/ralph-loop",
+      "description": "Continuous self-referential AI loops for iterative development, implementing the Ralph Wiggum technique. Run the agent in a while-true loop with the same prompt until task completion."
+    },
+    {
       "name": "sentry",
       "source": "./third_party/sentry",
       "description": "Investigate Sentry errors, stack traces, and issues for a project."
@@ -226,6 +271,16 @@
       "name": "supabase",
       "source": "./third_party/supabase",
       "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project."
+    },
+    {
+      "name": "teaching",
+      "source": "./third_party/teaching",
+      "description": "Skill mapping, practice plans, and learning retrospectives. Builds personalized roadmaps with milestones and practice checkpoints, and runs periodic reviews to adjust based on progress."
+    },
+    {
+      "name": "thermos",
+      "source": "./third_party/thermos",
+      "description": "Thermo-nuclear branch review: deep correctness and security audits plus harsh code-quality rubrics, parallel subagents, thermos orchestration, and optional take-the-wheel and FSD merge-ready flows."
     },
     {
       "name": "vercel",

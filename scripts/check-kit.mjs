@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Checks the skills, agents, rules and hooks of first-party plugins, and the
+// Checks the skills, agents, rules and hooks of Syncfusion (first-party) plugins, and the
 // context budgets they must stay within:
 //   TB-1  auto-skill descriptions, agent descriptions and always-on rules <= 600 tokens
 //         (characters / 4), each auto-skill description <= 40 words. Claude Code counts
@@ -9,13 +9,15 @@
 //   AC-8  every skill has tests/scenarios/<skill>.md
 //   Self-contained components: BoldCreate Connect syncs each skill folder, agent, rule and
 //   hook file on its own, so nothing may rely on files elsewhere in the plugin folder.
+// Community plugins under third_party/ are kept as published, so checkCommunity only checks
+// that their components load and warns about files BoldCreate Connect cannot deliver yet.
 // Usage: node scripts/check-kit.mjs   (also run by npm run validate)
 
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
-import { listPlugins, isMcpPlugin, kitComponents, CLAUDE_HOOKS } from "./build.mjs";
+import { listPlugins, isMcpPlugin, kitComponents, CLAUDE_HOOKS, CURSOR_HOOKS, PLUGINS_DIR } from "./build.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -182,8 +184,80 @@ export function checkKit(dir) {
   return { errors, summary };
 }
 
+export function checkCommunity(dir) {
+  const errors = [];
+  const warnings = [];
+  const base = join(root, dir);
+  const { skills, agents, rules, hooks } = kitComponents(dir);
+
+  const frontmatterOf = (rel) => {
+    const doc = readDoc(join(base, rel));
+    if (!doc.frontmatter) errors.push(`${dir}/${rel}: frontmatter is missing`);
+    else if (doc.frontmatter.__error) errors.push(`${dir}/${rel}: frontmatter is not valid YAML: ${doc.frontmatter.__error}`);
+    return doc.frontmatter && !doc.frontmatter.__error ? doc.frontmatter : {};
+  };
+  const needs = (rel, fm, keys) => {
+    for (const key of keys) {
+      if (typeof fm[key] !== "string" || !fm[key].trim()) errors.push(`${dir}/${rel}: ${key} is missing`);
+    }
+  };
+
+  for (const name of skills) {
+    const rel = `skills/${name}/SKILL.md`;
+    const fm = frontmatterOf(rel);
+    needs(rel, fm, ["name", "description"]);
+    if (fm.name && fm.name !== name) errors.push(`${dir}/${rel}: name "${fm.name}" must match the folder name`);
+  }
+  for (const name of agents) {
+    const rel = `agents/${name}.md`;
+    const fm = frontmatterOf(rel);
+    needs(rel, fm, ["name", "description"]);
+  }
+  for (const name of rules) {
+    const rel = `rules/${name}.mdc`;
+    const fm = frontmatterOf(rel);
+    needs(rel, fm, ["description"]);
+  }
+  const hooksFile = join(base, CURSOR_HOOKS);
+  if (existsSync(hooksFile)) {
+    try {
+      const parsed = JSON.parse(readFileSync(hooksFile, "utf-8")).hooks;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) errors.push(`${dir}/${CURSOR_HOOKS}: needs a top-level "hooks" object`);
+    } catch (e) {
+      errors.push(`${dir}/${CURSOR_HOOKS} is not valid JSON: ${e.message}`);
+    }
+    const scripts = readdirSync(join(base, "hooks")).filter((f) => `hooks/${f}` !== CURSOR_HOOKS);
+    if (scripts.length) {
+      warnings.push(`${dir}/hooks: BoldCreate Connect delivers only the hooks file today, not ${scripts.join(", ")}; the hooks work from Cursor's marketplace install`);
+    }
+  }
+
+  const known = new Set([
+    ".boldcreate-plugin", ".claude-plugin", ".cursor-plugin", "boldcreate.json",
+    "skills", "agents", "rules", "hooks", "assets", "README.md", "CHANGELOG.md", "LICENSE",
+  ]);
+  const extra = readdirSync(base).filter((e) => !known.has(e));
+  if (extra.length) warnings.push(`${dir}: BoldCreate Connect does not deliver plugin-level files (${extra.join(", ")})`);
+
+  // A skill may link to a sibling skill, but not to plugin-level files that never reach the user.
+  const skillsDir = join(base, "skills");
+  const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(d, e.name)) : [join(d, e.name)]));
+  for (const file of skills.flatMap((s) => walk(join(skillsDir, s))).filter((f) => f.endsWith(".md"))) {
+    for (const [, link] of readFileSync(file, "utf-8").matchAll(/\]\((\.\.\/[^)\s#]*)/g)) {
+      if (!resolve(dirname(file), link).startsWith(skillsDir + "/")) {
+        warnings.push(`${dir}/${file.slice(base.length + 1)}: links to ${link}, outside the skills folder`);
+      }
+    }
+  }
+
+  const summary = `${dir}: community plugin, ${skills.length} skills, ${agents.length} agents, ${rules.length} rules, ${hooks.length} hook events`;
+  return { errors, warnings, summary };
+}
+
+// Syncfusion plugins at the repository root.
 export function firstPartyPlugins() {
   return listPlugins().filter((p) => {
+    if (p.dir.startsWith(`${PLUGINS_DIR}/`)) return false;
     const cursor = JSON.parse(readFileSync(join(root, p.dir, ".cursor-plugin/plugin.json"), "utf-8"));
     return !isMcpPlugin(cursor);
   });
