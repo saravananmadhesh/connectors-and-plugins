@@ -5,10 +5,51 @@
     "name": "Syncfusion"
   },
   "metadata": {
-    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a toolkit for the whole software delivery lifecycle.",
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, and community skill and agent packs.",
     "formatVersion": 1
   },
   "plugins": [
+    {
+      "name": "advisor",
+      "displayName": "Advisor",
+      "version": "1.0.0",
+      "description": "Consult a stronger model at key checkpoints: before major decisions, when stuck on an error, and before declaring a task done. The advisor gets a full briefing plus the conversation transcript, returns guidance, and the main model keeps doing the work.",
+      "source": "third_party/advisor",
+      "logo": "third_party/advisor/assets/avatar.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "hooks",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
+      "name": "agent-compatibility",
+      "displayName": "Agent Compatibility",
+      "version": "1.0.0",
+      "description": "CLI-backed repo compatibility scans plus agents that audit startup, validation, and docs against reality.",
+      "source": "third_party/agent-compatibility",
+      "logo": "third_party/agent-compatibility/assets/avatar.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
     {
       "name": "android-management",
       "displayName": "Android Management",
@@ -104,6 +145,25 @@
       "supportedByGateway": false
     },
     {
+      "name": "cli-for-agent",
+      "displayName": "CLI for Agents",
+      "version": "1.0.0",
+      "description": "Patterns for designing CLIs that coding agents can run reliably: non-interactive flags, layered help with examples, pipelines, actionable errors, idempotency, and dry-run.",
+      "source": "third_party/cli-for-agent",
+      "logo": "third_party/cli-for-agent/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "skills"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
       "name": "context7",
       "displayName": "Context7",
       "version": "0.7.0",
@@ -128,6 +188,48 @@
       "supportedByGateway": true
     },
     {
+      "name": "continual-learning",
+      "displayName": "Continual Learning",
+      "version": "1.0.0",
+      "description": "Incrementally learns durable user preferences and workspace facts from transcript changes and keeps AGENTS.md up to date with plain bullet points.",
+      "source": "third_party/continual-learning",
+      "logo": "third_party/continual-learning/assets/avatar.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "hooks",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
+      "name": "create-plugin",
+      "displayName": "Create Plugin",
+      "version": "1.0.0",
+      "description": "Scaffold and validate new agent plugins. Handles directory setup, manifest generation, and pre-submission quality checks for the marketplace.",
+      "source": "third_party/create-plugin",
+      "logo": "third_party/create-plugin/assets/avatar.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "rules",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
       "name": "deepwiki",
       "displayName": "DeepWiki",
       "version": "0.7.0",
@@ -150,6 +252,26 @@
         "wave": "A"
       },
       "supportedByGateway": true
+    },
+    {
+      "name": "dyl-stack",
+      "displayName": "dyl-stack",
+      "version": "0.1.0",
+      "description": "Dylan's agent style on top of pstack: root causes over symptom patches, The Algorithm before design, terse verified delivery, a PR review that fits in a paste, and Figma-to-UI with a visual judge.",
+      "source": "third_party/dyl-stack",
+      "logo": "third_party/dyl-stack/assets/logo.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
     },
     {
       "name": "figma",
@@ -250,7 +372,7 @@
     {
       "name": "gmail",
       "displayName": "Gmail",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Search, read, and draft Gmail messages and threads.",
       "source": "third_party/gmail",
       "logo": "third_party/gmail/assets/logo.svg",
@@ -264,7 +386,7 @@
       "auth": [
         "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 2,
         "wave": "B"
@@ -872,6 +994,25 @@
       "supportedByGateway": true
     },
     {
+      "name": "grok-voice",
+      "displayName": "Grok Voice",
+      "version": "0.1.0",
+      "description": "Add Grok voice to an app: realtime speech-to-speech, speech-to-text dictation, text-to-speech read-aloud, and a log-driven fix loop for voice sessions.",
+      "source": "third_party/grok-voice",
+      "logo": "third_party/grok-voice/assets/logo.png",
+      "category": "developer-tools",
+      "components": [
+        "skills"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
       "name": "linear",
       "displayName": "Linear",
       "version": "0.7.0",
@@ -992,6 +1133,46 @@
       "supportedByGateway": true
     },
     {
+      "name": "pstack",
+      "displayName": "pstack",
+      "version": "0.15.36",
+      "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.",
+      "source": "third_party/pstack",
+      "logo": "third_party/pstack/assets/logo.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
+      "name": "ralph-loop",
+      "displayName": "Ralph Loop",
+      "version": "1.0.0",
+      "description": "Continuous self-referential AI loops for iterative development, implementing the Ralph Wiggum technique. Run the agent in a while-true loop with the same prompt until task completion.",
+      "source": "third_party/ralph-loop",
+      "logo": "third_party/ralph-loop/assets/avatar.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "hooks"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
       "name": "sentry",
       "displayName": "Sentry",
       "version": "0.7.0",
@@ -1062,6 +1243,45 @@
         "wave": "A"
       },
       "supportedByGateway": true
+    },
+    {
+      "name": "teaching",
+      "displayName": "Teaching",
+      "version": "1.0.0",
+      "description": "Skill mapping, practice plans, and learning retrospectives. Builds personalized roadmaps with milestones and practice checkpoints, and runs periodic reviews to adjust based on progress.",
+      "source": "third_party/teaching",
+      "logo": "third_party/teaching/assets/avatar.png",
+      "category": "utilities",
+      "components": [
+        "skills"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
+      "name": "thermos",
+      "displayName": "Thermos",
+      "version": "1.0.0",
+      "description": "Thermo-nuclear branch review: deep correctness and security audits plus harsh code-quality rubrics, parallel subagents, thermos orchestration, and optional take-the-wheel and FSD merge-ready flows.",
+      "source": "third_party/thermos",
+      "logo": "third_party/thermos/assets/logo.png",
+      "category": "developer-tools",
+      "components": [
+        "skills",
+        "agents"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
     },
     {
       "name": "vercel",

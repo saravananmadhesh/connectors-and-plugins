@@ -6,8 +6,9 @@
 //   .claude-plugin/marketplace.json          (Claude Code marketplace index)
 //   .boldcreate-plugin/marketplace.json      (BoldCreate Connect marketplace index)
 //
-// <plugin> is third_party/<name> for MCP plugins and <name> at the repo root for
-// first-party plugins. Sources per plugin: .cursor-plugin/plugin.json, boldcreate.json,
+// <plugin> is <name> at the repo root for Syncfusion plugins and third_party/<name> for
+// vendor MCP plugins and community plugins (skills, agents, rules and hooks copied from
+// another marketplace). Sources per plugin: .cursor-plugin/plugin.json, boldcreate.json,
 // and either mcp.json or the skills/, agents/, rules/ and hooks/ folders.
 // Usage: node scripts/build.mjs          write the files
 //        node scripts/build.mjs --check  fail if any file is out of date
@@ -26,7 +27,7 @@ const MARKETPLACE = {
   name: "boldcreate-plugins",
   owner: { name: "Syncfusion" },
   description:
-    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, and a toolkit for the whole software delivery lifecycle.",
+    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, and community skill and agent packs.",
 };
 
 const readJSON = (p) => JSON.parse(readFileSync(p, "utf-8"));
@@ -53,16 +54,23 @@ export function listPlugins() {
 // Cursor auto-loads hooks/hooks.json in its own format, so Claude Code hooks live in a separate file.
 export const CLAUDE_HOOKS = "hooks/claude-hooks.json";
 
+// Cursor's own hooks file. Community plugins keep it as published.
+export const CURSOR_HOOKS = "hooks/hooks.json";
+
 export const isMcpPlugin = (cursor) => cursor.mcpServers !== undefined;
 
-// Skill, agent, rule and hook names found in a first-party plugin.
+// A community plugin is a non-MCP plugin under third_party/, copied from another marketplace.
+export const isCommunityPlugin = (dir, cursor) => dir.startsWith(`${PLUGINS_DIR}/`) && !isMcpPlugin(cursor);
+
+// Skill, agent, rule and hook names found in a non-MCP plugin. Hook names are the
+// events in the Claude Code hooks file, or in Cursor's hooks file when there is none.
 export function kitComponents(dir) {
   const base = join(root, dir);
   const skills = subdirs(join(base, "skills")).filter((n) => existsSync(join(base, "skills", n, "SKILL.md")));
   const agents = filesWith(join(base, "agents"), ".md").map((f) => f.slice(0, -3));
   const rules = filesWith(join(base, "rules"), ".mdc").map((f) => f.slice(0, -4));
-  const hooksFile = join(base, CLAUDE_HOOKS);
-  const hooks = existsSync(hooksFile) ? Object.keys(readJSON(hooksFile).hooks ?? {}).sort() : [];
+  const hooksFile = [CLAUDE_HOOKS, CURSOR_HOOKS].map((f) => join(base, f)).find((f) => existsSync(f));
+  const hooks = hooksFile ? Object.keys(readJSON(hooksFile).hooks ?? {}).sort() : [];
   return { skills, agents, rules, hooks };
 }
 
@@ -187,6 +195,7 @@ export function boldcreateManifest({ dir }) {
     ...(meta.hostedBy ? { hostedBy: meta.hostedBy } : {}),
     ...(meta.stage ? { stage: meta.stage } : {}),
     docs: meta.docs,
+    ...(meta.upstream ? { upstream: meta.upstream } : {}),
     rollout: { phase: meta.phase, ...(meta.wave ? { wave: meta.wave } : {}) },
     supportedByGateway: mcpPlugin && meta.transport === "streamable-http",
     variables,

@@ -1,9 +1,10 @@
 # Syncfusion BoldCreate Plugins
 
-Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds two kinds of plugin, each in its own directory with its own manifests:
+Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds three kinds of plugin, each in its own directory with its own manifests:
 
 - **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-toolkit/` gives agents one software delivery lifecycle on any stack.
 - **MCP plugins** under `third_party/`. Each connects agents to a vendor's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+- **Community plugins** under `third_party/`, made of skills, agents, rules and hooks. Each is copied from [cursor/plugins](https://github.com/cursor/plugins) under its MIT license and keeps its original author and LICENSE file.
 
 ## Install
 
@@ -68,6 +69,26 @@ Secrets such as API keys are never stored in this repository. Each MCP plugin de
 | `supabase` | [Supabase](third_party/supabase/) | Database | Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project. |
 | `vercel` | [Vercel](third_party/vercel/) | Hosting | Inspect Vercel projects, deployments, and build logs, and search Vercel docs. |
 
+## Community plugins
+
+Copied from [cursor/plugins](https://github.com/cursor/plugins) at commit `4dd1d05`. The skills, agents, rules and hooks are kept as their authors published them.
+
+| `name` | Plugin | Author | Category | `description` (from marketplace) |
+|:-------|:-------|:-------|:---------|:-------------------------------------|
+| `advisor` | [Advisor](third_party/advisor/) | Cursor | Developer Tools | Consult a stronger model at key checkpoints: before major decisions, when stuck on an error, and before declaring a task done. The advisor gets a full briefing plus the conversation transcript, returns guidance, and the main model keeps doing the work. |
+| `agent-compatibility` | [Agent Compatibility](third_party/agent-compatibility/) | Cursor | Developer Tools | CLI-backed repo compatibility scans plus agents that audit startup, validation, and docs against reality. |
+| `cli-for-agent` | [CLI for Agents](third_party/cli-for-agent/) | Eric Zakariasson | Developer Tools | Patterns for designing CLIs that coding agents can run reliably: non-interactive flags, layered help with examples, pipelines, actionable errors, idempotency, and dry-run. |
+| `continual-learning` | [Continual Learning](third_party/continual-learning/) | Eric Zakariasson | Developer Tools | Incrementally learns durable user preferences and workspace facts from transcript changes and keeps AGENTS.md up to date with plain bullet points. |
+| `create-plugin` | [Create Plugin](third_party/create-plugin/) | Cursor | Developer Tools | Scaffold and validate new agent plugins. Handles directory setup, manifest generation, and pre-submission quality checks for the marketplace. |
+| `dyl-stack` | [dyl-stack](third_party/dyl-stack/) | Dylan Gattey | Developer Tools | Dylan's agent style on top of pstack: root causes over symptom patches, The Algorithm before design, terse verified delivery, a PR review that fits in a paste, and Figma-to-UI with a visual judge. |
+| `grok-voice` | [Grok Voice](third_party/grok-voice/) | Eric Zakariasson | Developer Tools | Add Grok voice to an app: realtime speech-to-speech, speech-to-text dictation, text-to-speech read-aloud, and a log-driven fix loop for voice sessions. |
+| `pstack` | [pstack](third_party/pstack/) | Lauren Tan | Developer Tools | if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence. |
+| `ralph-loop` | [Ralph Loop](third_party/ralph-loop/) | Cursor | Developer Tools | Continuous self-referential AI loops for iterative development, implementing the Ralph Wiggum technique. Run the agent in a while-true loop with the same prompt until task completion. |
+| `teaching` | [Teaching](third_party/teaching/) | Cursor | Utilities | Skill mapping, practice plans, and learning retrospectives. Builds personalized roadmaps with milestones and practice checkpoints, and runs periodic reviews to adjust based on progress. |
+| `thermos` | [Thermos](third_party/thermos/) | Cursor | Developer Tools | Thermo-nuclear branch review: deep correctness and security audits plus harsh code-quality rubrics, parallel subagents, thermos orchestration, and optional take-the-wheel and FSD merge-ready flows. |
+
+`advisor`, `continual-learning` and `ralph-loop` use Cursor hooks, which run in Cursor only. BoldCreate Connect does not deliver hook scripts yet, so from Connect these three install their skills and agents only.
+
 ## Repository structure
 
 This is a multi-plugin marketplace repository. The root marketplace files list every plugin, and each plugin has a manifest per client:
@@ -95,8 +116,8 @@ third_party/
     ├── .cursor-plugin/plugin.json      # Per-plugin manifest and install-time variables
     ├── .claude-plugin/plugin.json      # Claude Code manifest (generated)
     ├── .boldcreate-plugin/plugin.json  # BoldCreate Connect manifest (generated)
-    ├── boldcreate.json                 # Transport, auth and docs metadata
-    ├── mcp.json                        # MCP server definitions
+    ├── boldcreate.json                 # Transport, auth and docs metadata, or the upstream source of a community plugin
+    ├── mcp.json                        # MCP server definitions (community plugins have skills/, agents/, rules/ and hooks/ instead)
     ├── assets/logo.svg                 # Logo
     ├── README.md
     ├── CHANGELOG.md
@@ -108,9 +129,9 @@ scripts/                              # build.mjs, validate.mjs and check-kit.mj
 ## Contributing
 
 1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a Syncfusion plugin. Don't edit generated files by hand.
-2. Run `npm ci`, then `npm run build` and `npm run validate`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
+2. Run `npm ci`, then `npm run build` and `npm run validate`. Community plugins are checked only for loadable components and an `upstream` entry in `boldcreate.json`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
 3. Open a pull request. CI runs the same checks and the Claude Code plugin validator.
 
 ## License
 
-MIT. Logos are trademarks of their owners.
+MIT. Each community plugin keeps its own MIT LICENSE file and copyright holder. Logos are trademarks of their owners.

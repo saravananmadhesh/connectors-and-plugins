@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "gmail": {
-	  "type": "http",
+      "type": "http",
       "url": "https://gmailmcp.googleapis.com/mcp/v1"
     }
   }
