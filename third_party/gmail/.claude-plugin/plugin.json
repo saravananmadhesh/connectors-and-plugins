@@ -1,7 +1,7 @@
 {
   "name": "gmail",
   "displayName": "Gmail",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Search, read, and draft Gmail messages and threads.",
   "author": {
     "name": "Syncfusion"

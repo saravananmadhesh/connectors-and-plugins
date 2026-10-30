@@ -372,7 +372,7 @@
     {
       "name": "gmail",
       "displayName": "Gmail",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Search, read, and draft Gmail messages and threads.",
       "source": "third_party/gmail",
       "logo": "third_party/gmail/assets/logo.svg",
@@ -386,7 +386,7 @@
       "auth": [
         "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 2,
         "wave": "B"
