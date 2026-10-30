@@ -28,17 +28,5 @@
     "mcp",
     "http"
   ],
-  "variables": {
-    "type": "object",
-    "properties": {
-      "GITLAB_HOST": {
-        "type": "string",
-        "title": "GitLab host",
-        "description": "Host name of your GitLab instance. Keep gitlab.com for GitLab.com, or enter your self-managed host, such as gitlab.example.com.",
-        "x-sensitive": false,
-        "default": "gitlab.com"
-      }
-    }
-  },
   "mcpServers": "./mcp.json"
 }

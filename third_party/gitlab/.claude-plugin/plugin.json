@@ -18,19 +18,10 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
-  "userConfig": {
-    "GITLAB_HOST": {
-      "type": "string",
-      "title": "GitLab host",
-      "description": "Host name of your GitLab instance. Keep gitlab.com for GitLab.com, or enter your self-managed host, such as gitlab.example.com.",
-      "default": "gitlab.com",
-      "sensitive": false
-    }
-  },
   "mcpServers": {
     "gitlab": {
       "type": "http",
-      "url": "https://${user_config.GITLAB_HOST}/api/v4/mcp"
+      "url": "https://gitlab.com/api/v4/mcp"
     }
   }
 }

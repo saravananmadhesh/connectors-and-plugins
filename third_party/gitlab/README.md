@@ -17,7 +17,7 @@ Work with GitLab projects, issues, merge requests, pipelines, and code search.
   "mcpServers": {
     "gitlab": {
       "type": "http",
-      "url": "https://${GITLAB_HOST}/api/v4/mcp"
+      "url": "https://gitlab.com/api/v4/mcp"
     }
   }
 }
@@ -25,11 +25,7 @@ Work with GitLab projects, issues, merge requests, pipelines, and code search.
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
-
-| Setting | Required | Secret | What to enter |
-| --- | --- | --- | --- |
-| **GitLab host** (`GITLAB_HOST`) | No (default `gitlab.com`) | No | Host name of your GitLab instance. Keep gitlab.com for GitLab.com, or enter your self-managed host, such as gitlab.example.com. |
+There is nothing to set when you install the plugin. It connects to GitLab.com.
 
 Auth is OAuth. The first time the agent calls a tool, each member signs in to their own account in the browser. Tool calls run with that member's permissions.
 
@@ -37,7 +33,7 @@ GitLab registers the OAuth client itself (dynamic client registration), so there
 
 ## Before you connect
 
-The GitLab MCP server is generally available from GitLab 19.5 (Free tier from 19.2). An administrator or group owner must allow MCP access before members can connect. For self-managed GitLab, set **GitLab host** to your instance.
+The GitLab MCP server is generally available from GitLab 19.5 (Free tier from 19.2). An administrator or group owner must allow MCP access before members can connect.
 
 ## Docs
 
