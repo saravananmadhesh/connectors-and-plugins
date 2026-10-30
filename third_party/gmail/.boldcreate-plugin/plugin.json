@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "gmail",
   "displayName": "Gmail",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Search, read, and draft Gmail messages and threads.",
   "author": {
     "name": "Syncfusion"
@@ -26,20 +26,7 @@
     "wave": "B"
   },
   "supportedByGateway": true,
-  "variables": {
-    "CLIENT_ID": {
-      "title": "Client ID",
-      "description": "A Google OAuth client your team created. Every team member signs in under it.",
-      "required": true,
-      "secret": false
-    },
-    "CLIENT_SECRET": {
-      "title": "Client secret",
-      "description": "The secret for that OAuth client. Stored encrypted.",
-      "required": true,
-      "secret": true
-    }
-  },
+  "variables": {},
   "components": {
     "mcp": [
       {
@@ -49,10 +36,6 @@
         "auth": {
           "type": "oauth",
           "alternatives": [],
-          "oauthClient": {
-            "clientId": "${CLIENT_ID}",
-            "clientSecret": "${CLIENT_SECRET}"
-          },
           "scopes": [
             "https://www.googleapis.com/auth/gmail.readonly",
             "https://www.googleapis.com/auth/gmail.compose"
