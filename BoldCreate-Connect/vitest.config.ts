@@ -138,7 +138,10 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: ['tests/integration/**/*.test.ts', '**/*.integration.test.ts'],
-          testTimeout: 30_000,
+          // The files share one database and five services; more workers than this only make
+          // each test wait longer, which shows up as timeouts. Raise it on a larger machine.
+          maxWorkers: Number(process.env['TEST_INTEGRATION_WORKERS'] ?? 4),
+          testTimeout: 60_000,
         },
       },
       {

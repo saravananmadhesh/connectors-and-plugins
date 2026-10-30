@@ -191,9 +191,9 @@ describe('the catalog', () => {
 });
 
 describe('the install mode and the allowed list', () => {
-  it('defaults to any, changes, and refuses an unknown mode', async () => {
+  it('defaults to off, changes, and refuses an unknown mode', async () => {
     const h = await createHost();
-    expect(await (await host(h, 'GET', '/user-install-mode')).json()).toEqual({ mode: 'any' });
+    expect(await (await host(h, 'GET', '/user-install-mode')).json()).toEqual({ mode: 'off' });
     const put = await host(h, 'PUT', '/user-install-mode', { mode: 'allowlist' });
     expect(put.status).toBe(200);
     expect(await put.json()).toEqual({ mode: 'allowlist' });
@@ -503,6 +503,7 @@ describe('the install rule for users', () => {
         canUserInstall(tx, scope, pluginRaw),
       );
 
+    await host(h, 'PUT', '/user-install-mode', { mode: 'any' });
     expect(await check(neither.rawId)).toBe(true);
     await host(h, 'PUT', '/user-install-mode', { mode: 'off' });
     expect(await check(direct.rawId)).toBe(false);

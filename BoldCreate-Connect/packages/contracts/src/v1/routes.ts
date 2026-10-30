@@ -23,6 +23,20 @@ import {
 } from './categories.js';
 import { AdminAuditListResponseSchema, AdminAuditQuerySchema } from './admin-audit.js';
 import {
+  AdminErrorGroupDetailResponseSchema,
+  AdminErrorGroupParamsSchema,
+  AdminErrorGroupStatusBodySchema,
+  AdminErrorGroupsQuerySchema,
+  AdminErrorGroupsResponseSchema,
+  AdminObservabilityOverviewQuerySchema,
+  AdminObservabilityOverviewResponseSchema,
+  AdminObservabilityPurgeBodySchema,
+  AdminObservabilityPurgeResponseSchema,
+  AdminObservabilityStorageResponseSchema,
+  AdminOpsEventsQuerySchema,
+  AdminOpsEventsResponseSchema,
+} from './admin-observability.js';
+import {
   AdminActionBodySchema,
   AdminImpactResponseSchema,
   AdminPluginDetailResponseSchema,
@@ -120,6 +134,7 @@ import {
   CreateAuthConfigBodySchema,
   UpdateAuthConfigBodySchema,
   ConsoleProjectPluginParamsSchema,
+  ConsoleProjectPluginServerParamsSchema,
   ProjectAuthConfigParamsSchema,
   ProjectAuthConfigVariablesParamsSchema,
   ProjectPluginPageSchema,
@@ -984,6 +999,16 @@ const projects: RouteDef[] = [
       body: PutProjectPluginBodySchema,
       responses: { 200: ProjectPluginResponseSchema, 201: ProjectPluginResponseSchema },
       idempotency: 'optional',
+    },
+  ),
+  route(
+    'projectPluginsConsole.oauthDiscover',
+    'POST',
+    '/v1/orgs/{orgId}/projects/{projectId}/plugins/{pluginId}/mcp-servers/{serverName}/oauth/discover',
+    {
+      action: 'project-plugin:write',
+      params: ConsoleProjectPluginServerParamsSchema,
+      responses: { 200: McpOAuthDiscoverResponseSchema },
     },
   ),
   route(
@@ -1883,6 +1908,48 @@ const adminPlugins: RouteDef[] = [
   adminRoute('adminAudit.list', 'GET', '/api/v1/admin/audit', {
     query: AdminAuditQuerySchema,
     responses: { 200: AdminAuditListResponseSchema },
+  }),
+  adminRoute('adminObservability.listErrors', 'GET', '/api/v1/admin/observability/errors', {
+    query: AdminErrorGroupsQuerySchema,
+    responses: { 200: AdminErrorGroupsResponseSchema },
+  }),
+  adminRoute('adminObservability.getError', 'GET', '/api/v1/admin/observability/errors/{groupId}', {
+    params: AdminErrorGroupParamsSchema,
+    responses: { 200: AdminErrorGroupDetailResponseSchema },
+  }),
+  adminRoute(
+    'adminObservability.setErrorStatus',
+    'POST',
+    '/api/v1/admin/observability/errors/{groupId}/status',
+    {
+      params: AdminErrorGroupParamsSchema,
+      body: AdminErrorGroupStatusBodySchema,
+      responses: { 200: AdminErrorGroupDetailResponseSchema },
+    },
+  ),
+  adminRoute(
+    'adminObservability.deleteError',
+    'DELETE',
+    '/api/v1/admin/observability/errors/{groupId}',
+    {
+      params: AdminErrorGroupParamsSchema,
+      responses: { 204: NoContent },
+    },
+  ),
+  adminRoute('adminObservability.listEvents', 'GET', '/api/v1/admin/observability/events', {
+    query: AdminOpsEventsQuerySchema,
+    responses: { 200: AdminOpsEventsResponseSchema },
+  }),
+  adminRoute('adminObservability.storage', 'GET', '/api/v1/admin/observability/storage', {
+    responses: { 200: AdminObservabilityStorageResponseSchema },
+  }),
+  adminRoute('adminObservability.overview', 'GET', '/api/v1/admin/observability/overview', {
+    query: AdminObservabilityOverviewQuerySchema,
+    responses: { 200: AdminObservabilityOverviewResponseSchema },
+  }),
+  adminRoute('adminObservability.purge', 'POST', '/api/v1/admin/observability/purge', {
+    body: AdminObservabilityPurgeBodySchema,
+    responses: { 200: AdminObservabilityPurgeResponseSchema },
   }),
   adminRoute('adminPlugins.bulkDelete', 'POST', '/api/v1/admin/plugins/bulk-delete', {
     body: BulkIdsBodySchema,

@@ -37,6 +37,7 @@ const DETAIL: apiModule.PluginDetailResponse = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   latestVersion: VERSION,
+  variables: [],
   components: [
     {
       id: 'cmp_1' as Id<'cmp'>,

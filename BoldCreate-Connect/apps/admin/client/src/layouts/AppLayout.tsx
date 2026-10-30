@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import {
+  Activity,
   Compass,
   LayoutDashboard,
   Menu,
@@ -30,7 +31,14 @@ import { useSession } from '../lib/session';
 import { useSourceSyncWatcher } from '../lib/source-sync';
 
 interface Section {
-  to: '/' | '/plugins' | '/discover' | '/categories' | '/allowed-users' | '/audit';
+  to:
+    | '/'
+    | '/plugins'
+    | '/discover'
+    | '/categories'
+    | '/allowed-users'
+    | '/observability'
+    | '/audit';
   label: string;
   icon: LucideIcon;
   exact?: boolean;
@@ -51,6 +59,7 @@ const GROUPS: { label?: string; sections: Section[] }[] = [
     label: 'System',
     sections: [
       { to: '/allowed-users', label: 'Allowed users', icon: UserCheck },
+      { to: '/observability', label: 'Observability', icon: Activity },
       { to: '/audit', label: 'Audit', icon: ScrollText },
     ],
   },

@@ -19,6 +19,32 @@ export const AUTH_OPTIONS: readonly { value: McpAuthTypeValue; label: string; hi
   },
 ];
 
+/** What the server publishes about its sign-in, as the discovery call returns it. */
+export interface Discovery {
+  discovered: boolean;
+  dynamicRegistration: boolean;
+  scopes: string[];
+  callbackUrl: string;
+}
+
+/**
+ * The sign-in types a server can take: the one already chosen, none and an API key always, and
+ * the OAuth types only when the server publishes sign-in details (automatic registration only
+ * when it lets a client register itself). While the details are still being read, all are shown.
+ */
+export function authChoices(
+  current: McpAuthTypeValue,
+  discovery: Discovery | undefined,
+  failed: boolean,
+) {
+  return AUTH_OPTIONS.filter((entry) => {
+    if (entry.value === current || entry.value === 'none' || entry.value === 'api_key') return true;
+    if (!discovery) return !failed;
+    if (!discovery.discovered) return false;
+    return entry.value === 'oauth_client' || discovery.dynamicRegistration;
+  });
+}
+
 export const MIN_TIMEOUT_SECONDS = 1;
 export const MAX_TIMEOUT_SECONDS = 120;
 

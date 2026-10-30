@@ -256,6 +256,20 @@ describe('ConnectClient', () => {
       expect(calls[2]?.body).toEqual({ versionId: 'pv_2' });
     });
 
+    it('adds a plugin with its auth configs and variables in the body, never in the URL', async () => {
+      const { connect: client, calls } = connect({ 'PUT /v1/project/plugins/plg_1': json(PLUGIN) });
+      const options = {
+        authConfigs: {
+          tool: { name: 'Shared', authMode: 'shared_secret' as const, secret: 's3cret-value' },
+        },
+        variables: { API_TOKEN: 'abc' },
+      };
+      await client.plugins.add('plg_1', options);
+      expect(calls[0]?.body).toEqual(options);
+      expect(calls[0]?.url.search).toBe('');
+      expect(calls[0]?.url.href).not.toContain('s3cret-value');
+    });
+
     it('searches the catalog with flags as text', async () => {
       const { connect: client, calls } = connect({
         'GET /v1/project/catalog': json({ items: [], total: 0, page: 1, pageSize: 25 }),

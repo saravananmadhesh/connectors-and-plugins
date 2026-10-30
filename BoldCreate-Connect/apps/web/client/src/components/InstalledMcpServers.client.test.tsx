@@ -325,10 +325,10 @@ describe('InstalledMcpServers', () => {
     expect(screen.queryByText('Variables for review-tools')).not.toBeInTheDocument();
   });
 
-  it('puts the environment variables first, then authentication, sign-in and tools', async () => {
+  it('puts the sign-in first, then status, environment variables, authentication and tools', async () => {
     show(server({ authType: 'oauth_dcr', connection: 'not_connected' }));
     const { dialog } = await openDetails();
-    const order = ['Status', 'Environment', 'Authentication', 'Your sign-in', 'Tools'].map((name) =>
+    const order = ['Your sign-in', 'Status', 'Environment', 'Authentication', 'Tools'].map((name) =>
       within(dialog).getByRole('region', { name }),
     );
     for (let i = 1; i < order.length; i += 1) {
@@ -350,6 +350,36 @@ describe('InstalledMcpServers', () => {
       expect(leave).toHaveBeenCalledWith('https://idp.example.test/authorize?state=s'),
     );
     expect(start).toHaveBeenCalledWith('org_1', 'org', 'ins_1', 'cmp_1');
+  });
+
+  it('saves a client ID that was typed but not saved before it signs in', async () => {
+    show(server({ authType: 'oauth_dcr', connection: 'not_connected' }), true, {
+      ...NO_OAUTH,
+      discovered: true,
+      dynamicRegistration: true,
+    });
+    const put = vi
+      .spyOn(apiModule.mcpServers, 'putAuth')
+      .mockResolvedValue(
+        server({ authType: 'oauth_client', oauthClientId: 'app-1', connection: 'not_connected' }),
+      );
+    const start = vi
+      .spyOn(apiModule.mcpServers, 'oauthStart')
+      .mockResolvedValue({ authorizeUrl: 'https://idp.example.test/authorize?state=s' });
+    const leave = vi.spyOn(navigate, 'leaveTo').mockReturnValue(true);
+    const { user, dialog } = await openDetails();
+    await user.selectOptions(within(dialog).getByLabelText('Type'), 'oauth_client');
+    await user.type(within(dialog).getByLabelText('Client ID'), 'app-1');
+    await user.click(within(dialog).getByRole('button', { name: 'Sign in' }));
+    await waitFor(() => expect(leave).toHaveBeenCalled());
+    expect(put).toHaveBeenCalledWith(
+      'org_1',
+      'org',
+      'ins_1',
+      'cmp_1',
+      expect.objectContaining({ authType: 'oauth_client', clientId: 'app-1' }),
+    );
+    expect(start).toHaveBeenCalledTimes(1);
   });
 
   it('refuses to follow an address that is not a web address', async () => {

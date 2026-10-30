@@ -203,6 +203,7 @@ export function serializePluginDetail(plugin: Plain<PluginDetailResponse>): Plug
     createdAt: plugin.createdAt,
     latestVersion: plugin.latestVersion ? serializePluginVersion(plugin.latestVersion) : null,
     components: plugin.components.map(serializeComponentSummary),
+    variables: plugin.variables,
   };
 }
 
@@ -376,10 +377,22 @@ export function serializeProjectUsage(usage: Plain<ProjectUsageResponse>): Proje
 export function serializeProjectPlugin(
   plugin: Plain<ProjectPluginResponse>,
 ): ProjectPluginResponse {
+  const { servers, ...rest } = plugin;
   return {
-    ...plugin,
+    ...rest,
     pluginId: formatId('plg', plugin.pluginId),
     versionId: formatId('pv', plugin.versionId),
+    ...(servers
+      ? {
+          servers: servers.map((server) => ({
+            ...server,
+            componentId: formatId('cmp', server.componentId),
+            defaultAuthConfigId: server.defaultAuthConfigId
+              ? formatId('acf', server.defaultAuthConfigId)
+              : null,
+          })),
+        }
+      : {}),
   };
 }
 

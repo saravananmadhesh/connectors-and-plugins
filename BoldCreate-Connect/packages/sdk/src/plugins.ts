@@ -1,5 +1,6 @@
 import { allPages, type Http } from './http.js';
 import type {
+  AddPluginOptions,
   AllowedPlugin,
   CatalogPage,
   CatalogQuery,
@@ -21,7 +22,7 @@ export function pluginsApi(http: Http) {
   return {
     list: () => allPages<ProjectPlugin>(http, '/v1/project/plugins'),
 
-    add: (pluginId: string, options: { versionId?: string } = {}) =>
+    add: (pluginId: string, options: AddPluginOptions = {}) =>
       http.json<ProjectPlugin>('PUT', `/v1/project/plugins/${id(pluginId)}`, { body: options }),
 
     update: (pluginId: string, options: { versionId: string }) =>

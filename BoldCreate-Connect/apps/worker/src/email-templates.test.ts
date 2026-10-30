@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   adminSetupEmail,
   deletionEmail,
+  errorAlertEmail,
   emailChangeEmail,
   escapeHtml,
   inviteEmail,
@@ -116,5 +117,40 @@ describe('escapeHtml', () => {
     expect(escapeHtml(`<a href="x">'&'</a>`)).toBe(
       '&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;',
     );
+  });
+});
+
+describe('error alert mail', () => {
+  const group = {
+    groupId: '00000000-0000-4000-8000-0000000000a1',
+    title: 'KMS unwrap failed <script>alert(1)</script>',
+    service: 'api',
+    area: 'kms',
+    count: 1234,
+    reason: 'new' as const,
+  };
+
+  it('names the error, where it happens and links to it in the admin app', () => {
+    const mail = errorAlertEmail([group], BASE, 'https://admin.example.test');
+    expect(mail.subject).toContain('Error needs attention in api');
+    expect(mail.text).toContain('(api · kms)');
+    expect(mail.text).toContain('1,234 in total');
+    expect(mail.text).toContain(
+      'https://admin.example.test/observability/errors/00000000-0000-4000-8000-0000000000a1',
+    );
+    expect(mail.html).toContain('Open errors');
+    expect(mail.html).not.toContain('<script>alert(1)</script>');
+    expect(mail.html).toContain('&lt;script&gt;');
+  });
+
+  it('summarises several errors in one subject and links nowhere without an admin address', () => {
+    const mail = errorAlertEmail(
+      [group, { ...group, groupId: 'b', service: 'worker', area: null, reason: 'spike' }],
+      BASE,
+    );
+    expect(mail.subject).toBe('2 errors need attention in api, worker');
+    expect(mail.text).toContain('Happening much more often');
+    expect(mail.html).not.toContain('Open errors');
+    expect(mail.text).not.toContain('/observability');
   });
 });

@@ -6,6 +6,7 @@ import {
   csv,
   csvList,
   httpServerShape,
+  observabilityDbShape,
   kmsShape,
   redisAuthShape,
   refineAdapterKeys,
@@ -39,6 +40,7 @@ const ApiEnvSchema = BaseSchema.extend({
   DB_POOL_MAX: positive(10),
   ...workloadShape,
   ...httpServerShape,
+  ...observabilityDbShape,
   /** Caller ids (web, admin, gateway) that may use the api; any other verified caller is refused. */
   BFF_CALLER_ALLOWLIST: csv('web,admin,gateway'),
   ...kmsShape,

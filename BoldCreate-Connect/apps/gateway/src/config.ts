@@ -4,6 +4,7 @@ import {
   DeployEnvSchema,
   csvList,
   httpServerShape,
+  observabilityDbShape,
   kmsShape,
   redisAuthShape,
   refineAdapterKeys,
@@ -56,6 +57,7 @@ const GatewayEnvSchema = BaseSchema.extend({
   API_BASE_URL: nonEmpty.default('http://localhost:3001'),
   ...workloadShape,
   ...httpServerShape,
+  ...observabilityDbShape,
   /** Agents may send up to 1 MB to the data plane. */
   BODY_LIMIT_BYTES: z.coerce.number().int().min(1024).default(1_048_576),
   /** A tool call may run up to the longest per-server timeout, so the request may as well. */

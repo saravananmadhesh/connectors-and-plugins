@@ -31,7 +31,20 @@ public sealed record ProjectPlugin(
     string VersionId,
     string Version,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    IReadOnlyList<string>? ExistingAuthConfigs = null,
+    ProjectPluginSetup? Setup = null,
+    IReadOnlyList<ProjectPluginServer>? Servers = null);
+
+/// <summary>Where a project plugin stands: <c>ready</c>, <c>needs_values</c>, <c>no_sign_in</c> or <c>no_auth</c>, and the values still missing.</summary>
+public sealed record ProjectPluginSetup(string Status, IReadOnlyList<string> Missing);
+
+/// <summary>One MCP server of a project plugin and how its users sign in.</summary>
+public sealed record ProjectPluginServer(
+    string Name,
+    string ComponentId,
+    string? AuthMode,
+    string? DefaultAuthConfigId);
 
 /// <summary>What a user still has to do before one server of a plugin can be used.</summary>
 public sealed record ConnectSetup(SetupKind Kind, IReadOnlyList<string>? Names = null);

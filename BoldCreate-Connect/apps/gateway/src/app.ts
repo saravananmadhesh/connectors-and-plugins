@@ -25,7 +25,7 @@ import {
   type HttpServer,
   type WorkloadHeaders,
 } from '@boldcreate-integrations/http-server';
-import type { Metrics } from '@boldcreate-integrations/observability';
+import type { ErrorReporter, Metrics } from '@boldcreate-integrations/observability';
 import { KEY_PREFIX } from '@boldcreate-integrations/security';
 import { createArtifactProxy } from './artifacts.js';
 import type { GatewayConfig } from './config.js';
@@ -39,6 +39,7 @@ export interface GatewayDeps {
   access: AccessDeps;
   logger: Logger;
   metrics: Metrics;
+  errors?: ErrorReporter;
   workloadHeaders: WorkloadHeaders;
   /** Counts requests per key; absent means no per-key limit. */
   limiter?: LimiterPort | undefined;
@@ -116,6 +117,7 @@ export function buildApp(config: GatewayConfig, deps: GatewayDeps): HttpServer {
     config,
     logger: deps.logger,
     metrics: deps.metrics,
+    ...(deps.errors ? { errors: deps.errors } : {}),
     readinessChecks: { db: deps.pingDb },
     ...(deps.onShutdown ? { onShutdown: deps.onShutdown } : {}),
   });

@@ -8,6 +8,7 @@ import {
   DEFAULT_SOURCE_OWNERS,
   DeployEnvSchema,
   httpServerShape,
+  observabilityDbShape,
   emailShape,
   kmsShape,
   redisAuthShape,
@@ -47,6 +48,41 @@ const WorkerEnvSchema = BaseSchema.extend({
   FLAG_CACHE_TTL_SECONDS: z.coerce.number().int().min(1).default(5),
   IDEMPOTENCY_PURGE_INTERVAL_SECONDS: z.coerce.number().int().min(1).default(900),
   IDEMPOTENCY_PURGE_BATCH_SIZE: z.coerce.number().int().min(1).default(1000),
+  /** Seconds between runs of the job that removes expired errors and events. */
+  OBSERVABILITY_RETENTION_INTERVAL_SECONDS: z.coerce.number().int().min(60).default(86_400),
+  OBSERVABILITY_RETENTION_BATCH_SIZE: z.coerce.number().int().min(1).default(1000),
+  /** Milliseconds to wait between delete batches, so retention leaves room for request traffic. */
+  OBSERVABILITY_RETENTION_BATCH_PAUSE_MS: z.coerce.number().int().min(0).default(50),
+  /** Longest a run may last; the next run continues. 0 means no limit. */
+  OBSERVABILITY_RETENTION_MAX_RUN_SECONDS: z.coerce.number().int().min(0).default(300),
+  /** Seconds before the next run when a run stopped at its limit with rows left. */
+  OBSERVABILITY_RETENTION_CATCH_UP_SECONDS: z.coerce.number().int().min(60).default(300),
+  /** Days an occurrence of an error is kept. */
+  OBSERVABILITY_ERROR_EVENT_DAYS: z.coerce.number().int().min(1).default(14),
+  /** Days after its last occurrence that an error group and its occurrences are removed. */
+  OBSERVABILITY_ERROR_GROUP_DAYS: z.coerce.number().int().min(1).default(30),
+  OBSERVABILITY_OPS_EVENT_DAYS: z.coerce.number().int().min(1).default(30),
+  /** Event kinds kept for `OBSERVABILITY_LONG_LIVED_EVENT_DAYS`, such as key and auth events. */
+  OBSERVABILITY_LONG_LIVED_EVENT_KINDS: csv(
+    'key_created,key_revoked,auth_failures_repeated,rate_limit_blocked,ssrf_blocked',
+  ),
+  OBSERVABILITY_LONG_LIVED_EVENT_DAYS: z.coerce.number().int().min(1).default(90),
+  /** Combined size of the three tables above which the oldest occurrences go early; 0 disables. */
+  OBSERVABILITY_MAX_TOTAL_BYTES: z.coerce.number().int().min(0).default(2_147_483_648),
+  /** Who is mailed when an error is new or spiking. Empty switches the alert off. */
+  OBSERVABILITY_ALERT_EMAILS: csv(),
+  /** Seconds between checks for errors that need an alert. */
+  OBSERVABILITY_ALERT_INTERVAL_SECONDS: z.coerce.number().int().min(60).default(300),
+  /** Seconds over which stored occurrences are counted for the spike rule. */
+  OBSERVABILITY_ALERT_SPIKE_WINDOW_SECONDS: z.coerce.number().int().min(60).default(600),
+  /** Stored occurrences in that window that make an error a spike; occurrences are sampled. */
+  OBSERVABILITY_ALERT_SPIKE_OCCURRENCES: z.coerce.number().int().min(1).default(20),
+  /** Seconds an error already alerted about stays quiet. */
+  OBSERVABILITY_ALERT_COOLDOWN_SECONDS: z.coerce.number().int().min(60).default(21_600),
+  /** The most errors one alert mail lists. */
+  OBSERVABILITY_ALERT_MAX_GROUPS: z.coerce.number().int().min(1).max(50).default(10),
+  /** Address of the admin app, so alert mails can link to the error pages. */
+  OBSERVABILITY_ADMIN_URL: z.url().optional(),
   /** Seconds between runs of the job that sends project webhooks. */
   WEBHOOK_DISPATCH_INTERVAL_SECONDS: z.coerce.number().int().min(1).default(5),
   /** Seconds an audit event waits before a webhook picks it up. */
@@ -58,6 +94,7 @@ const WorkerEnvSchema = BaseSchema.extend({
   /** Non-default ports a webhook may use. */
   WEBHOOK_ALLOWED_PORTS: portList,
   ...httpServerShape,
+  ...observabilityDbShape,
   ...originShape(...ORIGIN_KEYS),
 })
   .superRefine((value, ctx) => {

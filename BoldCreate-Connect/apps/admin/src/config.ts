@@ -7,6 +7,7 @@ import {
   csvList,
   DEFAULT_SOURCE_OWNERS,
   httpServerShape,
+  observabilityDbShape,
   isDeployed,
   loadEnv,
   nonEmpty,
@@ -28,6 +29,7 @@ const AdminEnvSchema = BaseSchema.extend({
   CSRF_SECRET: secret,
   ...workloadShape,
   ...httpServerShape,
+  ...observabilityDbShape,
   API_BASE_URL: nonEmpty.default('http://localhost:3001'),
   /** Origin the admin app is served from; links in setup mail point here. */
   APP_BASE_URL: z.string().optional(),
@@ -35,6 +37,8 @@ const AdminEnvSchema = BaseSchema.extend({
   CLIENT_DIST_DIR: nonEmpty.default(path.resolve(import.meta.dirname, '../client/dist')),
   /** Emails that may be admins. Empty means nobody can sign in. */
   ADMIN_ALLOWED_EMAILS: csvList,
+  /** The size limit the worker enforces on errors and events; shown on the storage panel. */
+  OBSERVABILITY_MAX_TOTAL_BYTES: z.coerce.number().int().min(0).default(2_147_483_648),
   /** GitHub owners whose repositories may be added as plugin sources. Empty allows none. */
   PLUGIN_SOURCE_ALLOWED_OWNERS: csv(DEFAULT_SOURCE_OWNERS),
   /** Optional token for inspecting private source repositories; sent to the GitHub API only. */

@@ -5,10 +5,16 @@ metadata:
   namespace: boldcreate-prod
 data:
   NODE_ENV: production
-  LOG_LEVEL: info
-  EMAIL_PROVIDER: resend
-  EMAIL_FROM: noreply@example.com
+  LOG_LEVEL: warn
+  EMAIL_ADAPTER: smtp
+  EMAIL_FROM: noreply@boldcreate.ai
+  SMTP_HOST: email-smtp.us-east-1.amazonaws.com
+  SMTP_PORT: '587'
   OUTBOX_POLL_INTERVAL_MS: '5000'
-  APP_BASE_URL: https://app.example.com
-  BLOB_BUCKET: boldcreate-artifacts-prod
-  KMS_LOCAL_KEYRING_PATH: /tmp/keyring.json
+  APP_BASE_URL: https://connect.boldcreate.ai
+  BLOB_BUCKET: codestudio-marketplace
+  BLOB_REGION: us-east-1
+  KMS_ADAPTER: cloud-kms
+  KMS_CLOUD_KEY_NAME: projects/syncfusioncody/locations/global/keyRings/boldcreate-connect-prod/cryptoKeys/boldcreate-connect-key
+  NODE_TLS_REJECT_UNAUTHORIZED: '0'
+  # REDIS_URL (with the Redis password) is in the secret, not here

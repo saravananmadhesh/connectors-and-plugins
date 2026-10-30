@@ -8,13 +8,12 @@ import { qk } from '@/lib/query-keys';
 import { Tabs } from '@/components/ui/tabs';
 import { Page } from '@/components/Page';
 import { PageHeader } from '@/components/PageHeader';
-import { AuthConfigsTab } from '@/components/project/AuthConfigsTab';
-import { CatalogTab } from '@/components/project/CatalogTab';
 import { ConnectionsTab } from '@/components/project/ConnectionsTab';
 import { KeysTab } from '@/components/project/KeysTab';
 import { LogsTab } from '@/components/project/LogsTab';
 import { OverviewTab } from '@/components/project/OverviewTab';
-import { PluginsTab } from '@/components/project/PluginsTab';
+import { PluginSetsPanel } from '@/components/project/PluginSetsSection';
+import { PluginsView } from '@/components/project/plugins/PluginsView';
 import { SessionsTab } from '@/components/project/SessionsTab';
 import { SettingsTab } from '@/components/project/SettingsTab';
 import { QueryFrame, type TabProps } from '@/components/project/shared';
@@ -25,13 +24,16 @@ const PANELS: Record<ProjectTab, (props: TabProps, activeKeyCount: number) => Re
   overview: (props, activeKeyCount) => <OverviewTab {...props} activeKeyCount={activeKeyCount} />,
   users: (props) => <UsersTab {...props} />,
   sessions: (props) => <SessionsTab {...props} />,
-  plugins: (props) => <PluginsTab {...props} />,
-  'auth-configs': (props) => <AuthConfigsTab {...props} />,
+  plugins: (props) => <PluginsView {...props} />,
   connections: (props) => <ConnectionsTab {...props} />,
-  catalog: (props) => <CatalogTab {...props} />,
   logs: (props) => <LogsTab {...props} />,
   keys: (props) => <KeysTab {...props} />,
-  settings: (props) => <SettingsTab {...props} />,
+  settings: (props) => (
+    <div className="space-y-8">
+      <SettingsTab {...props} />
+      <PluginSetsPanel orgId={props.orgId} projectId={props.projectId} />
+    </div>
+  ),
 };
 
 export function ProjectPage() {
@@ -59,9 +61,7 @@ export function ProjectPage() {
     users: 'project-user:delete',
     sessions: 'project-session:write',
     plugins: 'project-plugin:write',
-    'auth-configs': 'project-plugin:write',
     connections: 'project-connection:write',
-    catalog: 'project-plugin:write',
     logs: 'project:read',
     keys: 'project-key:create',
     settings: 'project-webhook:write',

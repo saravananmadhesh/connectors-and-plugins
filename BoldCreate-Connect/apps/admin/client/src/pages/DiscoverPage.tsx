@@ -517,6 +517,7 @@ export function DiscoverPage() {
   return (
     <div className="mx-auto max-w-7xl p-6">
       <PageHeader
+        refresh={false}
         title="Discover plugins"
         description="Paste a GitHub link, inspect it, then install only the plugins you need. Nothing is added until you install."
       />

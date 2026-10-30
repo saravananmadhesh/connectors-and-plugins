@@ -298,13 +298,13 @@ describe('signing up from an invite', () => {
     await results(await invite({ emails: [sentTo], role: 'VIEWER' }));
     const token = await mailToken(sentTo, 'invited');
     expect((await signup(email, { inviteToken: token })).status).toBe(201);
-    expect((await signin(email)).status).toBe(401);
+    expect((await signin(email)).status).toBe(403);
   });
 
   it('takes over an address someone registered without verifying', async () => {
     const email = `pre-registered-${Date.now()}@example.com`;
     expect((await signup(email)).status).toBe(201);
-    expect((await signin(email)).status).toBe(401);
+    expect((await signin(email)).status).toBe(403);
     await results(await invite({ emails: [email], role: 'VIEWER' }));
     const token = await mailToken(email, 'invited');
 

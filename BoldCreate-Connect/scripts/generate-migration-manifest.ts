@@ -30,7 +30,7 @@ const DEFAULT_IMAGES: Record<string, string> = {
   preproduction:
     'us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/boldcreate-preprod-integrations-api:latest',
   production:
-    'us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/boldcreate-prod-integrations-api:latest',
+    'us-east4-docker.pkg.dev/syncfusioncody/synccodestudio/boldcreate-production-integrations-api:latest',
 };
 
 export function getMigrationFiles(): Array<{ filename: string; content: string }> {
@@ -57,15 +57,8 @@ export function generateMigrationManifest(options: MigrationManifestOptions = {}
   const namespace = options.namespace ?? DEFAULT_NAMESPACES[env] ?? `boldcreate-${env}`;
   const image = options.image ?? DEFAULT_IMAGES[env] ?? DEFAULT_IMAGES.staging;
   const jobName = options.jobName ?? 'boldcreate-migration-job';
-  let databaseUrl =
+  const databaseUrl =
     options.databaseUrl ?? (options.databaseUrlSecretName ? undefined : process.env.DATABASE_URL);
-
-  // If no database URL or secretKeyRef is configured, default to the staging app_migrator URL
-  if (!databaseUrl && !options.databaseUrlSecretName) {
-    databaseUrl =
-      process.env.STAGING_MIGRATOR_DATABASE_URL ??
-      'postgresql://app_migrator:BoldCreateMigrator_8d2a6c4f1e7b@10.210.160.14:5432/postgres?sslmode=no-verify';
-  }
 
   const migrationFiles = getMigrationFiles();
 
@@ -157,10 +150,15 @@ ${envSection}
                 console.log('Ensuring __applied_migrations table exists...');
                 await client.query(\`
                   CREATE TABLE IF NOT EXISTS __applied_migrations (
-                    id SERIAL PRIMARY KEY,
-                    name TEXT UNIQUE NOT NULL,
-                    applied_at TIMESTAMPTZ DEFAULT NOW()
+                    name TEXT PRIMARY KEY,
+                    checksum TEXT NOT NULL DEFAULT 'auto',
+                    applied_at TIMESTAMPTZ DEFAULT NOW(),
+                    executed_at TIMESTAMPTZ DEFAULT NOW(),
+                    execution_time_ms INTEGER NOT NULL DEFAULT 0
                   );
+                  ALTER TABLE __applied_migrations ADD COLUMN IF NOT EXISTS checksum TEXT NOT NULL DEFAULT 'auto';
+                  ALTER TABLE __applied_migrations ADD COLUMN IF NOT EXISTS executed_at TIMESTAMPTZ DEFAULT NOW();
+                  ALTER TABLE __applied_migrations ADD COLUMN IF NOT EXISTS execution_time_ms INTEGER NOT NULL DEFAULT 0;
                 \`);
 
                 const { rows } = await client.query('SELECT name FROM __applied_migrations');
@@ -174,8 +172,8 @@ ${envSection}
                 if (tableCheck.length > 0 && !applied.has('0000_baseline.sql')) {
                   console.log('[RECORD] Baseline tables already exist; recording 0000_baseline.sql as applied.');
                   await client.query(
-                    'INSERT INTO __applied_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING',
-                    ['0000_baseline.sql']
+                    'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    ['0000_baseline.sql', 'auto_baseline']
                   );
                   applied.add('0000_baseline.sql');
                 }
@@ -188,8 +186,8 @@ ${envSection}
                 if (partnerCheck.length === 0 && !applied.has('0001_remove_partner_apps.sql')) {
                   console.log('[RECORD] partner_app table already absent; recording 0001_remove_partner_apps.sql as applied.');
                   await client.query(
-                    'INSERT INTO __applied_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING',
-                    ['0001_remove_partner_apps.sql']
+                    'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    ['0001_remove_partner_apps.sql', 'auto_partner_app']
                   );
                   applied.add('0001_remove_partner_apps.sql');
                 }
@@ -202,8 +200,8 @@ ${envSection}
                 if (teamCheck.length === 0 && !applied.has('0002_remove_teams.sql')) {
                   console.log('[RECORD] team table already absent; recording 0002_remove_teams.sql as applied.');
                   await client.query(
-                    'INSERT INTO __applied_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING',
-                    ['0002_remove_teams.sql']
+                    'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                    ['0002_remove_teams.sql', 'auto_teams']
                   );
                   applied.add('0002_remove_teams.sql');
                 }
@@ -227,8 +225,8 @@ ${envSection}
                   try {
                     await client.query(sql);
                     await client.query(
-                      'INSERT INTO __applied_migrations (name) VALUES ($1)',
-                      [file]
+                      'INSERT INTO __applied_migrations (name, checksum) VALUES ($1, $2)',
+                      [file, 'applied_' + Date.now()]
                     );
                     await client.query('COMMIT');
                     console.log(\`[SUCCESS] Applied \${file}\`);

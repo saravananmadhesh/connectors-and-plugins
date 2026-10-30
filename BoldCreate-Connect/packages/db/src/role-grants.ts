@@ -54,7 +54,10 @@ export type TableName =
   | 'project_plugin_set_member'
   | 'project_idempotency'
   | 'project_webhook'
-  | 'project_webhook_delivery';
+  | 'project_webhook_delivery'
+  | 'error_group'
+  | 'error_event'
+  | 'ops_event';
 
 export type Privilege = 'select' | 'insert' | 'update' | 'delete';
 
@@ -147,6 +150,26 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     project_idempotency: FULL,
     project_webhook: FULL,
     project_webhook_delivery: FULL,
+    // Services record errors and key events; they read back only what an upsert needs, which
+    // includes the columns its CASE expressions keep when a group is not resolved.
+    error_group: {
+      privileges: ['select', 'insert', 'update'],
+      columns: {
+        select: [
+          'id',
+          'fingerprint',
+          'status',
+          'count',
+          'last_seen',
+          'app_version',
+          'resolved_at',
+          'resolved_by',
+        ],
+        update: ['count', 'last_seen', 'app_version', 'status', 'resolved_at', 'resolved_by'],
+      },
+    },
+    error_event: { privileges: ['insert'] },
+    ops_event: { privileges: ['insert'] },
   },
   worker: {
     user: {
@@ -223,6 +246,36 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
       privileges: ['select', 'insert', 'update', 'delete'],
       columns: { update: ['status', 'attempts', 'next_attempt_at', 'last_status_code'] },
     },
+    // The retention job deletes expired rows by age and kind, and the alert job reads recent
+    // errors and the alerts already sent; a delete needs read access to the columns it filters on.
+    error_group: {
+      privileges: ['select', 'insert', 'update', 'delete'],
+      columns: {
+        select: [
+          'id',
+          'fingerprint',
+          'service',
+          'area',
+          'title',
+          'status',
+          'count',
+          'first_seen',
+          'last_seen',
+          'app_version',
+          'resolved_at',
+          'resolved_by',
+        ],
+        update: ['count', 'last_seen', 'app_version', 'status', 'resolved_at', 'resolved_by'],
+      },
+    },
+    error_event: {
+      privileges: ['select', 'insert', 'delete'],
+      columns: { select: ['id', 'group_id', 'occurred_at'] },
+    },
+    ops_event: {
+      privileges: ['select', 'insert', 'delete'],
+      columns: { select: ['id', 'kind', 'occurred_at', 'detail'] },
+    },
   },
   admin: {
     user: NONE,
@@ -267,6 +320,10 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     project_idempotency: NONE,
     project_webhook: NONE,
     project_webhook_delivery: NONE,
+    // Admins read everything, change a group's status and remove rows from the storage screen.
+    error_group: FULL,
+    error_event: { privileges: ['select', 'delete'] },
+    ops_event: { privileges: ['select', 'insert', 'delete'] },
   },
   gateway: {
     // The key check of a session reads whether its project user is active and notes the sign-in.
@@ -328,10 +385,30 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     project_idempotency: NONE,
     project_webhook: NONE,
     project_webhook_delivery: NONE,
+    // Services record errors and key events; they read back only what an upsert needs.
+    error_group: {
+      privileges: ['select', 'insert', 'update'],
+      columns: {
+        select: [
+          'id',
+          'fingerprint',
+          'status',
+          'count',
+          'last_seen',
+          'app_version',
+          'resolved_at',
+          'resolved_by',
+        ],
+        update: ['count', 'last_seen', 'app_version', 'status', 'resolved_at', 'resolved_by'],
+      },
+    },
+    error_event: { privileges: ['insert'] },
+    ops_event: { privileges: ['insert'] },
   },
 };
 
 const GLOBAL = 'Not owned by a tenant';
+const PLATFORM = 'Platform data; grants limit reads to the admin role';
 
 export const RLS_TABLES: Record<TableName, RlsEntry> = {
   user: { rls: 'none', reason: 'Accessed before a tenant is known (sign-in, sign-up)' },
@@ -406,6 +483,9 @@ export const RLS_TABLES: Record<TableName, RlsEntry> = {
     rls: 'tenant',
     maintenance: { webhook: { roles: ['worker'], commands: ['select', 'update'] } },
   },
+  error_group: { rls: 'none', reason: PLATFORM },
+  error_event: { rls: 'none', reason: PLATFORM },
+  ops_event: { rls: 'none', reason: PLATFORM },
   project_webhook_delivery: {
     rls: 'tenant',
     maintenance: {

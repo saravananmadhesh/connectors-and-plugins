@@ -70,3 +70,61 @@ export const parsePluginsSearch = (search: Record<string, unknown>): { stage?: P
   const stage = oneOf(PLUGIN_STAGES, search['stage']);
   return stage ? { stage } : {};
 };
+
+// ─── Observability
+export const OBSERVABILITY_TABS = ['overview', 'errors', 'events', 'storage'] as const;
+export type ObservabilityTab = (typeof OBSERVABILITY_TABS)[number];
+export const OVERVIEW_WINDOWS = ['1h', '24h', '7d'] as const;
+export type OverviewWindow = (typeof OVERVIEW_WINDOWS)[number];
+export const ERROR_STATUSES = ['unresolved', 'resolved', 'ignored'] as const;
+export const EVENT_SEVERITIES = ['info', 'warning', 'error'] as const;
+export const OBSERVABILITY_RANGES = {
+  '1h': 3_600_000,
+  '24h': 86_400_000,
+  '7d': 604_800_000,
+  '30d': 2_592_000_000,
+} as const;
+
+export interface ObservabilitySearch {
+  tab?: ObservabilityTab;
+  /** Errors: the group's state. */
+  status?: (typeof ERROR_STATUSES)[number];
+  service?: string;
+  /** Errors: the part of the service that failed. */
+  area?: string;
+  /** Events: how serious. */
+  severity?: (typeof EVENT_SEVERITIES)[number];
+  /** Events: a kind, or a prefix ending in a dot. */
+  kind?: string;
+  /** Errors: words to find in the title. */
+  q?: string;
+  /** Overview: how far back to look. */
+  period?: OverviewWindow;
+  range?: keyof typeof OBSERVABILITY_RANGES;
+}
+
+export function parseObservabilitySearch(search: Record<string, unknown>): ObservabilitySearch {
+  const tab = oneOf(OBSERVABILITY_TABS, search['tab']);
+  const status = oneOf(ERROR_STATUSES, search['status']);
+  const severity = oneOf(EVENT_SEVERITIES, search['severity']);
+  const range = oneOf(
+    Object.keys(OBSERVABILITY_RANGES) as (keyof typeof OBSERVABILITY_RANGES)[],
+    search['range'],
+  );
+  const service = text(search['service']);
+  const area = text(search['area']);
+  const kind = text(search['kind']);
+  const q = text(search['q']);
+  const period = oneOf(OVERVIEW_WINDOWS, search['period']);
+  return {
+    ...(tab ? { tab } : {}),
+    ...(status ? { status } : {}),
+    ...(service ? { service } : {}),
+    ...(area ? { area } : {}),
+    ...(severity ? { severity } : {}),
+    ...(kind ? { kind } : {}),
+    ...(q ? { q } : {}),
+    ...(period ? { period } : {}),
+    ...(range ? { range } : {}),
+  };
+}

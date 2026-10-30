@@ -499,6 +499,12 @@ async function pluginDetail(
     createdAt: plugin.createdAt.toISOString(),
     latestVersion: latestVersion ? toVersionSummary(latestVersion) : null,
     components: latestVersion ? await listComponents(db, latestVersion.id, link) : [],
+    variables: (latestVersion ? (scanOf(latestVersion)?.variables ?? []) : []).map((variable) => ({
+      name: variable.name,
+      description: variable.description,
+      required: variable.required,
+      secret: variable.secret,
+    })),
   };
 }
 

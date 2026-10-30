@@ -31,3 +31,8 @@ export class SsrfError extends Error {
     this.reason = reason;
   }
 }
+
+/** Whether a failed outbound call is a fault, not a refusal by the rules that guard it. */
+export function isUpstreamFault(error: unknown): boolean {
+  return !(error instanceof SsrfError);
+}

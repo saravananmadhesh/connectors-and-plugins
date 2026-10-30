@@ -35,6 +35,37 @@ export interface ProjectPlugin {
   version: string;
   createdAt: string;
   updatedAt: string;
+  /** Servers whose config of the requested name already existed and was left as it was. */
+  existingAuthConfigs?: string[] | undefined;
+  /** On the project's plugin list: where the plugin stands and how each MCP server signs in. */
+  setup?:
+    | { status: 'ready' | 'needs_values' | 'no_sign_in' | 'no_auth'; missing: string[] }
+    | undefined;
+  servers?:
+    | {
+        name: string;
+        componentId: string;
+        authMode: 'dcr' | 'oauth_client' | 'shared_secret' | 'user_form' | null;
+        defaultAuthConfigId: string | null;
+      }[]
+    | undefined;
+}
+
+/** How the users of a project sign in to one MCP server, given when a plugin is added. */
+export type PluginAuthConfigInput = {
+  name: string;
+  isDefault?: boolean;
+} & (
+  | { authMode: 'dcr'; scopes?: string }
+  | { authMode: 'oauth_client'; clientId: string; clientSecret?: string; scopes?: string }
+  | { authMode: 'shared_secret'; secret: string }
+);
+
+/** What `plugins.add` takes: the version, how each MCP server signs in (by server name) and variable values. */
+export interface AddPluginOptions {
+  versionId?: string;
+  authConfigs?: Record<string, PluginAuthConfigInput>;
+  variables?: Record<string, string | null>;
 }
 
 /** What a user still has to do before one server of a plugin can be used. */

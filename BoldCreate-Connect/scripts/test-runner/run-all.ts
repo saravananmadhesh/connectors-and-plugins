@@ -40,6 +40,7 @@ import {
   type StepResult,
 } from './report.js';
 import { acquireLock, releaseLock } from './run-lock.js';
+import { devStackNote } from './dev-stack.js';
 import { startStack, type RunningStack } from './stack.js';
 import { lockPath, stopLeftovers } from './stack-control.js';
 import { checkArguments, jsonOut, steps, type StepDefinition } from './steps.js';
@@ -92,6 +93,11 @@ if (!lock.acquired) {
   process.exit(2);
 }
 process.on('exit', () => releaseLock(lockPath));
+
+if (selected.some((step) => step.needsStack)) {
+  const note = await devStackNote();
+  if (note) console.log(`[test-runner] note: ${note}`);
+}
 
 if (lock.replacedStale && selected.some((step) => step.needsStack)) {
   const { stopped, foreign } = stopLeftovers();

@@ -5,6 +5,6 @@ import type { UserInstallMode } from '@boldcreate-integrations/contracts';
  * the code sets these values when it creates the project, and the host can change them later.
  */
 export const DEFAULT_PROJECT_SETTINGS: { userInstallMode: UserInstallMode } = {
-  /** `any`: a project user may install any plugin the project can offer. `allowlist` and `off` narrow it. */
-  userInstallMode: 'any',
+  /** `off`: users receive what the project delivers and install nothing. `allowlist` and `any` open it up. */
+  userInstallMode: 'off',
 };

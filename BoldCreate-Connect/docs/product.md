@@ -10,7 +10,7 @@ Install a curated plugin once and every teammate and agent gets the same MCP too
 - Per-member OAuth for any MCP server; MCP servers with API key or no auth.
 - API keys created in the website only; sync and brokered archive download.
 - MCP gateway (`/mcp`, `/{server}/mcp`) with per-key limits, breaker, timeouts, audit.
-- Projects: an organization has projects; a project has keys, users, sessions, plugins, auth configs, connections, logs, usage and one signed webhook. The host's server uses the client package `@syncfusion/boldcreate-connect` with a project key.
+- Projects: an organization has projects; a project has keys, users, sessions, plugins (each MCP server of a plugin with its auth config, and the values the plugin needs), connections, logs, usage and one signed webhook. The host's server uses the client package `@syncfusion/boldcreate-connect` with a project key.
 - Admin app: plugin sources, discover, queued ingestion, review, approve, publish, yank, deprecate, suspend, delete with impact view, categories, audit viewer.
 
 Not in scope: device-code login, SSO/SCIM/MFA, delegated identity, billing, private publishing, stdio servers, MCP resources/prompts, multi-region, analytics dashboards.

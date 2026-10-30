@@ -397,6 +397,12 @@ describe('the For You key and the maker’s own installs', () => {
        VALUES ($1, $2, '1.0.0', 1, 0, 0, '1', '{}', $3, 'published', $4, $5)`,
       [versionId, pluginId, `sha256-forme-${versionId}`, ARCHIVE_SHA, ARCHIVE.byteLength],
     );
+    await sql(
+      `INSERT INTO component (id, plugin_version_id, kind, name, description, metadata,
+         archive_sha256, archive_size_bytes)
+       VALUES ($1, $2, 'skill', 'for-me-skill', 'a skill', '{}', $3, $4)`,
+      [randomUUID(), versionId, SKILL_SHA, SKILL_ARCHIVE.byteLength],
+    );
     const installed = await callApi('POST', `/v1/orgs/${user.orgId}/me/installations`, user, {
       pluginVersionId: `pv_${versionId.replaceAll('-', '')}`,
     });

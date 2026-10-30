@@ -17,6 +17,24 @@ export interface BlobConfig {
 }
 
 /**
+ * Where objects go in the bucket. A deployed environment always keeps to its own folder, so
+ * staging and production can share a bucket without sharing a key: `staging/artifacts/` and
+ * `production/artifacts/`. A configured prefix goes under that folder. Local and test keep the
+ * plain prefix.
+ */
+export function blobPrefix(
+  config: Pick<BlobConfig, 'DEPLOY_ENV' | 'BLOB_PREFIX'>,
+): string | undefined {
+  const own = config.BLOB_PREFIX
+    ? config.BLOB_PREFIX.replace(/^\/+/, '').replace(/\/*$/, '/')
+    : undefined;
+  if (config.DEPLOY_ENV === 'staging' || config.DEPLOY_ENV === 'production') {
+    return `${config.DEPLOY_ENV}/${own ?? 'artifacts/'}`;
+  }
+  return own;
+}
+
+/**
  * Static credentials are for local object stores only and are refused when deployed. Without
  * them the SDK default chain decides, which includes web identity federation when
  * `AWS_WEB_IDENTITY_TOKEN_FILE` and `AWS_ROLE_ARN` are set.
@@ -39,7 +57,7 @@ export function s3OptionsFromConfig(config: BlobConfig): S3BlobOptions {
     ...(config.BLOB_FORCE_PATH_STYLE === undefined
       ? {}
       : { forcePathStyle: config.BLOB_FORCE_PATH_STYLE }),
-    ...(config.BLOB_PREFIX ? { prefix: config.BLOB_PREFIX } : {}),
+    ...(blobPrefix(config) ? { prefix: blobPrefix(config)! } : {}),
     ...(hasStatic
       ? {
           credentials: {

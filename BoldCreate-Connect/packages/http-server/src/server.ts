@@ -10,6 +10,7 @@ import { isDeployed } from '@boldcreate-integrations/config';
 import { AppError, type ErrorDetail, type RouteDef } from '@boldcreate-integrations/contracts';
 import { runWithContext } from '@boldcreate-integrations/observability';
 import { globalKey } from '@boldcreate-integrations/ports';
+import { ABORTED_STATUS, accessLogLevel } from './access-log.js';
 import { createTrustedProxyMatcher, resolveClientIp } from './client-ip.js';
 import { isParseError, mapError } from './errors.js';
 import { registerRoute, type RouteHandler } from './routes.js';
@@ -121,6 +122,9 @@ export function createServer(options: CreateServerOptions): HttpServer {
   app.decorateRequest('principal', null);
   app.decorateRequest('requestContext', null as never);
 
+  const WORKLOAD_AUTH_EVENT_INTERVAL_MS = 60_000;
+  let lastWorkloadAuthEvent = 0;
+
   const inContext = <T>(request: FastifyRequest, fn: () => T): T =>
     runWithContext(request.requestContext, fn);
   const routeOf = (request: FastifyRequest): RouteDef | undefined =>
@@ -143,10 +147,10 @@ export function createServer(options: CreateServerOptions): HttpServer {
     reply.raw.once('close', () => {
       metrics.requestFinished();
       const seconds = Number(process.hrtime.bigint() - startedAt) / 1e9;
-      const status = reply.raw.writableFinished ? reply.statusCode : 499;
+      const status = reply.raw.writableFinished ? reply.statusCode : ABORTED_STATUS;
       const route = request.routeOptions.url ?? 'unmatched';
       metrics.recordRequest({ method: request.method, route, status, seconds });
-      const level = request.routeOptions.config.edgeExempt ? 'debug' : 'info';
+      const level = accessLogLevel(status, request.routeOptions.config.edgeExempt === true);
       inContext(request, () =>
         logger[level](
           { method: request.method, route, status, durationMs: seconds * 1000 },
@@ -258,7 +262,17 @@ export function createServer(options: CreateServerOptions): HttpServer {
           request.callerId = (
             await options.workloadVerifier.authenticate(request.headers)
           ).callerId;
-        } catch {
+        } catch (error) {
+          // A rejected caller is also what a wrong shared secret looks like after a deploy.
+          const now = Date.now();
+          if (now - lastWorkloadAuthEvent >= WORKLOAD_AUTH_EVENT_INTERVAL_MS) {
+            lastWorkloadAuthEvent = now;
+            options.errors?.recordOpsEvent('workload_auth_failed', 'warning', {
+              area: 'http',
+              operation: `${request.method} ${request.routeOptions.url ?? 'unmatched'}`,
+              errorClass: error instanceof Error ? error.name : 'NonError',
+            });
+          }
           throw new AppError('unauthenticated');
         }
       }
@@ -304,6 +318,16 @@ export function createServer(options: CreateServerOptions): HttpServer {
     });
   }
 
+  /** A hook that fails is otherwise only a log line; record it with the route it ran for. */
+  const reportHookFailure = (request: FastifyRequest, error: unknown, hook: string): void => {
+    inContext(request, () =>
+      options.errors?.reportError(error, {
+        area: 'http_hook',
+        operation: `${hook} ${request.method} ${request.routeOptions.url ?? 'unmatched'}`,
+      }),
+    );
+  };
+
   const runAudit = async (
     request: FastifyRequest,
     status: number,
@@ -324,6 +348,7 @@ export function createServer(options: CreateServerOptions): HttpServer {
       );
     } catch (err) {
       logger.error({ err }, 'audit hook failed');
+      reportHookFailure(request, err, 'audit');
     }
   };
 
@@ -349,6 +374,7 @@ export function createServer(options: CreateServerOptions): HttpServer {
         await inContext(request, () => hooks.beforeError?.(request, thrown));
       } catch (hookError) {
         inContext(request, () => logger.error({ err: hookError }, 'error hook failed'));
+        reportHookFailure(request, hookError, 'error_hook');
         err = new AppError('service_unavailable');
       }
     }
@@ -356,8 +382,40 @@ export function createServer(options: CreateServerOptions): HttpServer {
     if (isParseError(err)) mark(request, 'parse');
     await runAudit(request, mapped.status, err);
     mark(request, 'errorMapper');
+    if (mapped.unexpected || mapped.status >= 500) {
+      inContext(request, () =>
+        options.errors?.reportError(err, {
+          area: 'http',
+          operation: `${request.method} ${request.routeOptions.url ?? 'unmatched'}`,
+          errorCode: mapped.body.error.code,
+          durationMs: Date.now() - stateOf(request).startedAt,
+          extra: { status: mapped.status },
+        }),
+      );
+    }
     if (mapped.unexpected) {
       inContext(request, () => logger.error({ err }, 'unhandled error'));
+    } else if (mapped.status >= 500) {
+      // A classified failure the member only sees as a code; the log keeps its internal reason.
+      const { reason, cause, detail } = err as {
+        reason?: unknown;
+        cause?: unknown;
+        detail?: unknown;
+      };
+      inContext(request, () =>
+        logger.warn(
+          {
+            status: mapped.status,
+            code: mapped.body.error.code,
+            ...(typeof reason === 'string' ? { reason } : {}),
+            ...(typeof detail === 'object' && detail !== null ? { detail } : {}),
+            ...(cause instanceof Error
+              ? { cause: { name: cause.name, message: cause.message.slice(0, 300) } }
+              : {}),
+          },
+          'request failed with a classified server error',
+        ),
+      );
     }
     if (mapped.retryAfterSeconds !== undefined && !reply.hasHeader('retry-after')) {
       void reply.header('retry-after', String(mapped.retryAfterSeconds));

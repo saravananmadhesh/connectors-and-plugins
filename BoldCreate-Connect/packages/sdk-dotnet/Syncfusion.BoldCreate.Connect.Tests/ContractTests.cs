@@ -90,6 +90,37 @@ public class ContractTests
     }
 
     [Fact]
+    public async Task Adding_a_plugin_carries_its_sign_in_and_values_and_reads_its_setup()
+    {
+        var (client, handler) = Make();
+        handler.Enqueue(
+            HttpStatusCode.Created,
+            "{\"pluginId\":\"plg_1\",\"name\":\"n\",\"displayName\":\"N\",\"versionId\":\"ver_1\",\"version\":\"1.0.0\",\"createdAt\":\"" + T + "\",\"updatedAt\":\"" + T + "\","
+            + "\"existingAuthConfigs\":[\"srv\"],\"setup\":{\"status\":\"needs_values\",\"missing\":[\"API_TOKEN\"]},"
+            + "\"servers\":[{\"name\":\"srv\",\"componentId\":\"cmp_1\",\"authMode\":null,\"defaultAuthConfigId\":null}]}");
+
+        var added = await client.Plugins.AddAsync("plg_1", new AddPluginOptions
+        {
+            AuthConfigs = new Dictionary<string, PluginAuthConfigInput>
+            {
+                ["srv"] = new() { Name = "Default", AuthMode = "shared_secret", Secret = "s3cret" },
+            },
+            Variables = new Dictionary<string, string?> { ["API_TOKEN"] = "abc" },
+        });
+
+        Assert.Equal("needs_values", added.Setup?.Status);
+        Assert.Equal("API_TOKEN", Assert.Single(added.Setup!.Missing));
+        Assert.Equal("srv", Assert.Single(added.Servers!).Name);
+        Assert.Equal("srv", Assert.Single(added.ExistingAuthConfigs!));
+        Expect(
+            handler,
+            0,
+            HttpMethod.Put,
+            "/v1/project/plugins/plg_1",
+            "{\"authConfigs\":{\"srv\":{\"name\":\"Default\",\"authMode\":\"shared_secret\",\"secret\":\"s3cret\"}},\"variables\":{\"API_TOKEN\":\"abc\"}}");
+    }
+
+    [Fact]
     public async Task Project_plugins_and_users()
     {
         var (client, handler) = Make();

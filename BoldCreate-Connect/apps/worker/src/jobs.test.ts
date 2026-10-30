@@ -24,13 +24,44 @@ function createMock(jobs: ClaimedJob[] = [job]) {
   const options = {
     emailAdapter: { send: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) },
     baseUrl: 'https://app.example.test',
-    log: { info: vi.fn<() => void>(), warn: vi.fn<() => void>() } as unknown as Logger,
+    log: {
+      debug: vi.fn<() => void>(),
+      info: vi.fn<() => void>(),
+      warn: vi.fn<() => void>(),
+    } as unknown as Logger,
     orgKeys: { db: {} as Db, kms: { wrapKey: vi.fn<KmsPort['wrapKey']>() } },
     idempotency: {
       db: {} as Db,
       store: { purgeExpired: vi.fn<IdempotencyStore['purgeExpired']>().mockResolvedValue(0) },
       intervalSeconds: 900,
       batchSize: 1000,
+    },
+    retention: {
+      db: {} as Db,
+      intervalSeconds: 86_400,
+      policy: {
+        errorEventDays: 14,
+        errorGroupDays: 30,
+        opsEventDays: 30,
+        longLivedOpsKinds: [],
+        longLivedOpsEventDays: 90,
+        batchSize: 1000,
+        maxTotalBytes: 0,
+      },
+    },
+    alerts: {
+      db: {} as Db,
+      email: { send: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) },
+      recipients: [],
+      intervalSeconds: 300,
+      baseUrl: 'https://app.example.test',
+      policy: {
+        newGroupWindowSeconds: 600,
+        spikeWindowSeconds: 600,
+        spikeOccurrences: 20,
+        cooldownSeconds: 21_600,
+        maxGroups: 10,
+      },
     },
     revision: {
       cache: {
@@ -252,6 +283,41 @@ describe('poll', () => {
     expect(queue.fail).toHaveBeenCalledWith('job-1', { retryAt: null, error: 'delivery failed' });
     expect(queue.complete).not.toHaveBeenCalled();
     expect(JSON.stringify(vi.mocked(options.log.warn).mock.calls)).not.toContain('tok');
+  });
+
+  it('records a failed attempt as an event and opens an issue only on the last one', async () => {
+    const reportError = vi.fn<(error: unknown, context?: object) => void>();
+    const recordOpsEvent = vi.fn<(kind: string, severity: string, detail?: object) => void>();
+    const errors = {
+      reportError,
+      recordOpsEvent,
+      flush: vi.fn<() => void>(),
+      stop: vi.fn<() => void>(),
+    };
+
+    const first = createMock();
+    first.options.emailAdapter.send.mockRejectedValue(new Error('smtp error tok'));
+    await pollJobs(first.queue, { ...first.options, errors } as never);
+    expect(reportError).not.toHaveBeenCalled();
+    expect(recordOpsEvent).toHaveBeenCalledWith(
+      'job_attempt_failed',
+      'warning',
+      expect.objectContaining({ area: 'worker', attempt: 1 }),
+    );
+
+    const lastJob: ClaimedJob = {
+      id: 'job-9',
+      type: 'revision.bumped',
+      payload: { type: 'catalog' },
+      attempts: 5,
+    };
+    const last = createMock([lastJob]);
+    vi.mocked(last.options.revision.cache!.publish).mockRejectedValue(new Error('redis tok'));
+    await pollJobs(last.queue, { ...last.options, errors } as never);
+    expect(reportError).toHaveBeenCalledOnce();
+    const [reported, context] = reportError.mock.calls[0] ?? [];
+    expect(context).toMatchObject({ area: 'worker', operation: 'revision.bumped', attempt: 6 });
+    expect(String((reported as Error).message)).not.toContain('tok');
   });
 
   it('does not dispatch when the lease was lost', async () => {

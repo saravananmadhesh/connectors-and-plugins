@@ -11,3 +11,4 @@ export * from './idempotency.js';
 export * from './flags.js';
 export * from './mcp.js';
 export * from './project.js';
+export * from './observability.js';

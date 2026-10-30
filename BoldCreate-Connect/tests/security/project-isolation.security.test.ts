@@ -174,11 +174,11 @@ async function makeTenant(label: string): Promise<Tenant> {
   const authConfigId = ((await config.json()) as { id: string }).id;
 
   const user = `shared-user-id`;
-  const session = await bearer(key, 'POST', '/v1/project/sessions', { userId: user });
-  expect(session.status).toBe(201);
   expect((await bearer(key, 'PUT', '/v1/project/user-install-mode', { mode: 'any' })).status).toBe(
     200,
   );
+  const session = await bearer(key, 'POST', '/v1/project/sessions', { userId: user });
+  expect(session.status).toBe(201);
   return {
     fx,
     projectId,

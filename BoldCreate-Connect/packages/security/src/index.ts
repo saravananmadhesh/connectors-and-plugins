@@ -4,7 +4,7 @@ export * from './workload-identity.js';
 export { isBlockedAddress, parseAddress } from './ssrf/addresses.js';
 export { createPinnedDispatcher } from './ssrf/dispatcher.js';
 export type { PinnedDispatcher, PinnedDispatcherOptions } from './ssrf/dispatcher.js';
-export { SsrfError } from './ssrf/errors.js';
+export { SsrfError, isUpstreamFault } from './ssrf/errors.js';
 export type { SsrfErrorCode, SsrfReason } from './ssrf/errors.js';
 export { guardedFetch } from './ssrf/fetch.js';
 export type { GuardedFetchOptions, GuardedResponse } from './ssrf/fetch.js';

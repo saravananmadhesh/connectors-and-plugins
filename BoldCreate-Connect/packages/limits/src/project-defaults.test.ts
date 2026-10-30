@@ -4,8 +4,8 @@ import { PROJECT_LIMITS } from './numbers.js';
 import { DEFAULT_PROJECT_SETTINGS } from './project-defaults.js';
 
 describe('DEFAULT_PROJECT_SETTINGS', () => {
-  it('lets a project user install by default, with a mode the contract accepts', () => {
-    expect(DEFAULT_PROJECT_SETTINGS.userInstallMode).toBe('any');
+  it('keeps user installs off by default, with a mode the contract accepts', () => {
+    expect(DEFAULT_PROJECT_SETTINGS.userInstallMode).toBe('off');
     expect(UserInstallModeSchema.safeParse(DEFAULT_PROJECT_SETTINGS.userInstallMode).success).toBe(
       true,
     );

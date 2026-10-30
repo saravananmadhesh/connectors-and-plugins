@@ -13,7 +13,7 @@ import {
 import { isDeployed } from '@boldcreate-integrations/config';
 import { type FlagStore } from '@boldcreate-integrations/domain';
 import { API_KEY_LIMITS } from '@boldcreate-integrations/limits';
-import type { Metrics } from '@boldcreate-integrations/observability';
+import type { ErrorReporter, Metrics } from '@boldcreate-integrations/observability';
 import type { BlobPort, LimiterPort } from '@boldcreate-integrations/ports';
 import type { ApiConfig } from './config.js';
 import { createDenialAudit } from './denial-audit.js';
@@ -55,6 +55,7 @@ export interface ApiDeps {
   webhookGuard?: SsrfGuard;
   logger: Logger;
   metrics: Metrics;
+  errors?: ErrorReporter;
   workload: WorkloadAuthenticator;
   /** Readiness probe of the database; `SELECT 1` in the real wiring. */
   pingDb: () => Promise<unknown>;
@@ -73,6 +74,7 @@ export async function buildApp(config: ApiConfig, deps: ApiDeps): Promise<HttpSe
     config,
     logger: deps.logger,
     metrics: deps.metrics,
+    ...(deps.errors ? { errors: deps.errors } : {}),
     workloadVerifier: deps.workload,
     readinessChecks: { db: deps.pingDb },
     hooks: { beforeError: createDenialAudit(deps.db) },
@@ -164,6 +166,7 @@ export async function buildApp(config: ApiConfig, deps: ApiDeps): Promise<HttpSe
     allowLocalOrigins: !isDeployed(config.DEPLOY_ENV),
     sealerFor: deps.sealerFor,
     redirectUri: deps.mcp.redirectUri,
+    fetcher: deps.mcp.deps.fetcher,
     webhookGuard: deps.webhookGuard ?? createSsrfGuard({ deployed: true }),
   });
   await app.register(projectSelfRoutes, {
