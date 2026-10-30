@@ -276,16 +276,16 @@ async function tokenRequest(
     throw new OAuthError('oauth_token_failed', 'unreachable');
   }
   const body = json(response);
-  const providerError = oauthErrorDetail(body?.['error']);
+  const refusal = oauthErrorDetail(body?.['error']);
   if (response.status < 200 || response.status >= 300) {
     throw new OAuthError(
       body?.['error'] === 'invalid_grant' ? 'oauth_invalid_grant' : 'oauth_token_failed',
-      providerError ?? `http_${response.status}`,
+      refusal ?? `http_${response.status}`,
     );
   }
   const accessToken = text(body?.['access_token']);
   // Some servers (GitHub) answer a refusal with 200 and an `error` field.
-  if (!accessToken) throw new OAuthError('oauth_token_failed', providerError ?? 'no_access_token');
+  if (!accessToken) throw new OAuthError('oauth_token_failed', refusal ?? 'no_access_token');
   const refreshToken = text(body?.['refresh_token']);
   const scope = text(body?.['scope']);
   const expiresIn = typeof body?.['expires_in'] === 'number' ? body['expires_in'] : undefined;
