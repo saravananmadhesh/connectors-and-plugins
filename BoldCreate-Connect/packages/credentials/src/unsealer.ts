@@ -44,6 +44,16 @@ export interface Unsealer {
   unsealFields<T extends object>(value: T, paths: readonly string[], ctx: SealContext): Promise<T>;
 }
 
+/**
+ * A copy that shares no memory with `bytes`. `Buffer#slice` returns a view, so zeroing a
+ * "copy" made with it would zero the cached key too.
+ */
+function copyBytes(bytes: Uint8Array): Uint8Array {
+  const copy = new Uint8Array(bytes.length);
+  copy.set(bytes);
+  return copy;
+}
+
 export function createUnsealer(deps: {
   kms: Pick<KmsPort, 'unwrapKey'>;
   orgKeyStore: OrgKeyStore;
@@ -65,7 +75,10 @@ export function createUnsealer(deps: {
         wrapped: fromBase64Url(record.wrappedPrivateKey),
         aad: buildOrgKeyAad(orgId, orgKeyId),
       });
-      deps.keyCache.set(orgKeyId, orgId, key);
+      // An owned copy: a Node Buffer (the Cloud KMS SDK returns one) may be a view into a shared
+      // pool, and its `slice()` would not copy.
+      deps.keyCache.set(orgKeyId, orgId, copyBytes(key));
+      key.fill(0);
     } catch (error) {
       if (
         error instanceof KmsKeyDisabledError ||
@@ -82,7 +95,7 @@ export function createUnsealer(deps: {
   /** A private copy of the key; the caller zeroes it after use. */
   async function privateKey(orgKeyId: string, orgId: string): Promise<Uint8Array> {
     const cached = deps.keyCache.get(orgKeyId, orgId);
-    if (cached) return cached.slice();
+    if (cached) return copyBytes(cached);
     let pending = loading.get(orgKeyId);
     if (!pending) {
       pending = load(orgKeyId, orgId).finally(() => loading.delete(orgKeyId));
@@ -91,7 +104,7 @@ export function createUnsealer(deps: {
     await pending;
     const loaded = deps.keyCache.get(orgKeyId, orgId);
     if (!loaded) throw new CredentialUnavailableError('kms_unavailable');
-    return loaded.slice();
+    return copyBytes(loaded);
   }
 
   async function unseal(input: SealContext & { envelope: string }): Promise<string> {
