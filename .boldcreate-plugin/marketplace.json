@@ -226,7 +226,7 @@
     {
       "name": "gitlab",
       "displayName": "GitLab",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search.",
       "source": "third_party/gitlab",
       "logo": "third_party/gitlab/assets/logo.svg",

@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "gitlab",
   "displayName": "GitLab",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search.",
   "author": {
     "name": "Syncfusion"
