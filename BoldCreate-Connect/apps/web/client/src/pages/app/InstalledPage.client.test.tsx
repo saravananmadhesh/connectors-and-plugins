@@ -134,6 +134,13 @@ describe('InstalledPage', () => {
     );
   });
 
+  it('names the reason a sign-in did not complete', async () => {
+    mockApi(false);
+    vi.spyOn(apiModule.mcpServers, 'list').mockResolvedValue({ items: [], nextCursor: null });
+    await render(`/orgs/${ORG_ID}/installed?tab=mcp&oauth=failed&reason=oauth_state_invalid`);
+    expect(await screen.findByText(/did not complete \(oauth_state_invalid\)/)).toBeInTheDocument();
+  });
+
   describe('setup state of a row', () => {
     const variable = (over: Partial<apiModule.VariableStatus>): apiModule.VariableStatus => ({
       name: 'REGION',

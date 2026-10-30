@@ -20,6 +20,7 @@ import {
   disconnectMcpServer,
   discoverOAuthScopes,
   exchangeOAuthCode,
+  OAuthExchangeError,
   getMcpServer,
   isExternalState,
   listMcpServers,
@@ -407,7 +408,13 @@ function registerCallback(app: FastifyInstance, db: Db, runtime: McpRuntime): vo
       );
     } catch (error) {
       if (error instanceof AppError) {
-        return reply.redirect(back({ ...landing, oauth: error.code }), 302);
+        // What the authorization server said, so the member (and support) can see why.
+        const detail = error instanceof OAuthExchangeError ? error.detail : undefined;
+        req.log.warn({ code: error.code, detail }, 'mcp sign-in did not complete');
+        return reply.redirect(
+          back({ ...landing, oauth: error.code, ...(detail ? { detail } : {}) }),
+          302,
+        );
       }
       throw error;
     }

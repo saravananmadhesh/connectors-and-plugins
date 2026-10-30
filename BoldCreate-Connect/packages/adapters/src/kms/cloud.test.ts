@@ -28,6 +28,15 @@ describe('cloud kms request shapes', () => {
     expect(wrapped).toMatchObject({ keyId: KEY, keyVersion: '1' });
   });
 
+  it('returns plain bytes the caller owns, never the SDK buffer', async () => {
+    const { kms } = setup();
+    const wrapped = await kms.wrapKey({ plaintext, aad: bytes('ctx') });
+    const key = await kms.unwrapKey({ ...wrapped, aad: bytes('ctx') });
+    expect(Buffer.isBuffer(key)).toBe(false);
+    expect(key.byteOffset).toBe(0);
+    expect(key.buffer.byteLength).toBe(key.length);
+  });
+
   it('checks the recorded version, then decrypts on the key with the AAD', async () => {
     const { fake, kms } = setup();
     const wrapped = await kms.wrapKey({ plaintext, aad: bytes('ctx') });

@@ -109,9 +109,25 @@ function bouncePage(request: FastifyRequest): string {
   return `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${escapeHtml(target)}"><title>Continuing</title>`;
 }
 
-/** Where a member lands when the sign-in to a server did not complete. */
-function failedSignIn(reply: FastifyReply): FastifyReply {
-  return reply.header('cache-control', 'no-store').redirect('/installed?tab=mcp&oauth=failed', 302);
+/**
+ * Where a member lands when the sign-in to a server did not complete. The reason is an error code
+ * (never a message), so the page can say what went wrong and support can find it in the logs.
+ */
+function failedSignIn(request: FastifyRequest, reply: FastifyReply, reason: string): FastifyReply {
+  request.log.warn({ route: 'mcpServers.oauthCallback', reason }, 'sign-in return failed');
+  const query = new URLSearchParams({ tab: 'mcp', oauth: 'failed', reason });
+  return reply.header('cache-control', 'no-store').redirect(`/installed?${query.toString()}`, 302);
+}
+
+/** The error code of a failed api answer, or a stand-in naming the status when it has none. */
+function failureReason(status: number, text: string): string {
+  try {
+    const error = ApiErrorSchema.safeParse(JSON.parse(text));
+    if (error.success) return error.data.error.code;
+  } catch {
+    // Not JSON: fall through to the status.
+  }
+  return `http_${status}`;
 }
 
 /** The in-app address a redirect from the api points to; anything else is dropped. */
@@ -190,10 +206,7 @@ export function registerProxy(server: HttpServer, options: ProxyOptions): void {
           signal: AbortSignal.timeout(options.timeoutMs),
         });
       } catch {
-        if (redirects) {
-          request.log.warn({ route: route.id }, 'sign-in return: the api did not answer');
-          return failedSignIn(reply);
-        }
+        if (redirects) return failedSignIn(request, reply, 'upstream_unavailable');
         throw new AppError('upstream_unavailable');
       }
 
@@ -204,13 +217,7 @@ export function registerProxy(server: HttpServer, options: ProxyOptions): void {
       if (clear && sessionToken) reply.clearCookie(SESSION_COOKIE, { path: '/' });
 
       if (redirects && upstream.status >= 400) {
-        // The member sees one failure; the log keeps the api's classified code.
-        const failure = ApiErrorSchema.safeParse(await upstream.json().catch(() => undefined));
-        request.log.warn(
-          { route: route.id, status: upstream.status, code: failure.data?.error.code },
-          'sign-in return refused by the api',
-        );
-        return failedSignIn(reply);
+        return failedSignIn(request, reply, failureReason(upstream.status, await upstream.text()));
       }
 
       const text = await upstream.text();

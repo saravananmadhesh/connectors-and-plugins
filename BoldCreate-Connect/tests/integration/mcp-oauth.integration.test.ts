@@ -370,6 +370,8 @@ describe('member sign-in', () => {
     const rejected = await beginSignIn();
     const bad = await callback({ code: 'unknown-code', state: rejected.state });
     expect(landing(bad).searchParams.get('oauth')).toBe('oauth_exchange_failed');
+    // What the authorization server said rides along, so the member can see why.
+    expect(landing(bad).searchParams.get('detail')).toBe('invalid_grant');
 
     const wrongIssuer = await beginSignIn();
     const mismatch = await callback({
