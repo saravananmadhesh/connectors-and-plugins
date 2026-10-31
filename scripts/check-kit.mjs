@@ -208,6 +208,11 @@ export function checkCommunity(dir) {
     const fm = frontmatterOf(rel);
     needs(rel, fm, ["name", "description"]);
     if (fm.name && fm.name !== name) errors.push(`${dir}/${rel}: name "${fm.name}" must match the folder name`);
+    // Agents skip a skill whose name or description is over the Agent Skills limits.
+    if (typeof fm.name === "string" && fm.name.length > 64) errors.push(`${dir}/${rel}: name is over 64 characters`);
+    if (typeof fm.description === "string" && fm.description.trim().length > 1024) {
+      errors.push(`${dir}/${rel}: description is ${fm.description.trim().length} characters (limit 1024)`);
+    }
   }
   for (const name of agents) {
     const rel = `agents/${name}.md`;
