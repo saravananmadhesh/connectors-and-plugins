@@ -463,10 +463,6 @@ Compare multiple datasets side-by-side with grouped or stacked columns.
 
 8. **Add Context with Annotations:** Use annotations and striplines to highlight important values, thresholds, or regions.
 
-## Related Components
-
-- **Range Selector:** [../implementing-range-selectors/](../implementing-range-selectors/) - Select date/value ranges for chart data filtering
-
 ## Troubleshooting
 
 **Chart not displaying:**

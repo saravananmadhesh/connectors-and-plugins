@@ -301,14 +301,6 @@ digitalGauge.CharacterType = CharacterType.SegmentFourteen;
 
 ---
 
-## Related Skills
-
-- [Implementing Radial Gauges](../implementing-radial-gauges/) - For circular gauge displays
-- [Implementing Range Selectors](../implementing-range-selectors/) - For range-based data visualization
-- [WPF Theming](../../../../theming/) - For applying consistent themes
-
----
-
 ## Additional Resources
 
 - [Syncfusion Digital Gauge Documentation](https://help.syncfusion.com/wpf/digital-gauge/overview)

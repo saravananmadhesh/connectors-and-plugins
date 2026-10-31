@@ -308,18 +308,6 @@ Apply theme and enable interactive tooltips:
 | `SeriesAxis` | Series axis dimensions |
 | `SlicerAxis` | Slicer axis dimensions |
 
-## Related Components
-
-### Within Data Visualization Category
-
-- **[Circular Gauges](../implementing-circular-gauges/)** - For non-OLAP radial gauge visualizations with pointers and ranges
-- **[Charts](../implementing-charts/)** - For detailed OLAP data visualization with multiple chart types
-
-### Other Syncfusion WPF Components
-
-For other WPF components, refer to the main library:
-- **[Main WPF Library](../../../)** - Complete Syncfusion WPF component documentation
-
 ## Assembly References
 
 Required assemblies for OLAP Gauge:

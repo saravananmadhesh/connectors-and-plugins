@@ -313,11 +313,6 @@ For optimal performance with large datasets:
 - Consider data virtualization for extremely large datasets
 - Set appropriate **DeferredUpdateDelay** based on data size
 
-## Related Skills
-
-- **[Implementing Charts](../implementing-charts/)** - For detailed chart implementation
-- **Parent Library:** [Implementing Syncfusion WPF Components](../../)
-
 ---
 
 **Next Steps:** Navigate to the appropriate reference file above based on your current implementation needs.

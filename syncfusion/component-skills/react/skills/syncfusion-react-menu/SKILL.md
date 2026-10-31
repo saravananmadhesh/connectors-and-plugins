@@ -365,11 +365,3 @@ const handleBeforeOpen = (args) => {
 
 ### Real-World Implementation
 - [use-case-scenarios.md](references/use-case-scenarios.md) - 8 complete patterns: file menus, toolbars, sidebars, dashboards, mobile apps, etc.
-
-## Related Skills
-
-- [Implementing Sidebar](../implementing-sidebar/) - Side navigation panels
-- [Implementing AppBar](../implementing-appbar/) - Top navigation/application bars
-- [Implementing Tabs](../implementing-tabs/) - Tab-based content switching
-- [Implementing Accordion](../implementing-accordion/) - Expandable content sections
-- [Implementing ListView](../implementing-listview/) - List-based navigation

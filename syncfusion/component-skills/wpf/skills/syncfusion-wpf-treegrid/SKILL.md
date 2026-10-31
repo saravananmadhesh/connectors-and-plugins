@@ -499,12 +499,6 @@ Display countries, states, cities in hierarchical format with data visualization
 - **Disable live updates** (LiveNodeUpdateMode) when not needed
 - **Optimize FilterLevel** choice based on data structure
 
-## Related Skills
-
-- **[Implementing Syncfusion WPF Components](../../../)** - Parent library skill
-- **Implementing Data Grids** (Future) - For flat grid data display
-- **Implementing Charts** - Already available at [../../data-visualization/implementing-charts/](../../data-visualization/implementing-charts/)
-
 ## Support Resources
 
 - **Official Documentation:** https://help.syncfusion.com/wpf/treegrid/overview
