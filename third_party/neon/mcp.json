@@ -2,10 +2,7 @@
   "mcpServers": {
     "neon": {
       "type": "http",
-      "url": "https://mcp.neon.tech/mcp?readonly=${NEON_READ_ONLY}",
-      "headers": {
-        "Authorization": "Bearer ${NEON_API_KEY}"
-      }
+      "url": "https://mcp.neon.tech/mcp?readonly=${NEON_READ_ONLY}"
     }
   }
 }

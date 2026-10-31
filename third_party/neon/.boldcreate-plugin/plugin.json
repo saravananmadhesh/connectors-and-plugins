@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "neon",
   "displayName": "Neon",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
   "author": {
     "name": "Syncfusion"
@@ -27,12 +27,6 @@
   },
   "supportedByGateway": true,
   "variables": {
-    "NEON_API_KEY": {
-      "title": "Neon API key",
-      "description": "Create one in the Neon Console. Use an organization key to limit access to that organization.",
-      "required": true,
-      "secret": true
-    },
     "NEON_READ_ONLY": {
       "title": "Read-only mode",
       "description": "\"true\" disables write tools. Set \"false\" to allow writes.",
@@ -47,13 +41,10 @@
         "name": "neon",
         "transport": "streamable-http",
         "url": "https://mcp.neon.tech/mcp?readonly=${NEON_READ_ONLY}",
-        "headers": {
-          "Authorization": "Bearer ${NEON_API_KEY}"
-        },
         "auth": {
-          "type": "bearer",
+          "type": "oauth",
           "alternatives": [
-            "oauth"
+            "bearer"
           ]
         }
       }

@@ -17,10 +17,7 @@ Work with Stripe customers, payments, subscriptions, and search Stripe docs.
   "mcpServers": {
     "stripe": {
       "type": "http",
-      "url": "https://mcp.stripe.com",
-      "headers": {
-        "Authorization": "Bearer ${STRIPE_AGENT_KEY}"
-      }
+      "url": "https://mcp.stripe.com"
     }
   }
 }
@@ -28,13 +25,9 @@ Work with Stripe customers, payments, subscriptions, and search Stripe docs.
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
+No settings.
 
-| Setting | Required | Secret | What to enter |
-| --- | --- | --- | --- |
-| **Stripe agent API key** (`STRIPE_AGENT_KEY`) | Yes | Yes | An API key with the Agent badge from the Stripe Dashboard. From December 2026 the server rejects other secret and restricted keys. |
-
-Tool calls run with the permissions of the key or token you provide. Rotate or revoke it at the vendor if it is ever exposed.
+The first time the agent calls a tool, each member signs in to their own account in the browser (OAuth). Tool calls run with that member's permissions.
 
 ## Docs
 

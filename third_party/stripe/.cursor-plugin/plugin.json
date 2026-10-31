@@ -1,7 +1,7 @@
 {
   "name": "stripe",
   "displayName": "Stripe",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
@@ -26,19 +26,5 @@
     "mcp",
     "http"
   ],
-  "variables": {
-    "type": "object",
-    "properties": {
-      "STRIPE_AGENT_KEY": {
-        "type": "string",
-        "title": "Stripe agent API key",
-        "description": "An API key with the Agent badge from the Stripe Dashboard. From December 2026 the server rejects other secret and restricted keys.",
-        "x-sensitive": true
-      }
-    },
-    "required": [
-      "STRIPE_AGENT_KEY"
-    ]
-  },
   "mcpServers": "./mcp.json"
 }

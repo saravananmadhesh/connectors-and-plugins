@@ -17,10 +17,7 @@ Query product analytics, manage feature flags, and investigate errors in PostHog
   "mcpServers": {
     "posthog": {
       "type": "http",
-      "url": "https://mcp.posthog.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${POSTHOG_API_KEY}"
-      }
+      "url": "https://mcp.posthog.com/mcp"
     }
   }
 }
@@ -28,13 +25,9 @@ Query product analytics, manage feature flags, and investigate errors in PostHog
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
+No settings.
 
-| Setting | Required | Secret | What to enter |
-| --- | --- | --- | --- |
-| **PostHog personal API key** (`POSTHOG_API_KEY`) | Yes | Yes | Create one in PostHog under Settings > Personal API keys, using the MCP Server preset. |
-
-Tool calls run with the permissions of the key or token you provide. Rotate or revoke it at the vendor if it is ever exposed.
+The first time the agent calls a tool, each member signs in to their own account in the browser (OAuth). Tool calls run with that member's permissions.
 
 ## Docs
 

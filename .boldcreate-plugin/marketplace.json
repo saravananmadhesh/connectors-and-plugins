@@ -166,7 +166,7 @@
     {
       "name": "context7",
       "displayName": "Context7",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
       "source": "third_party/context7",
       "logo": "third_party/context7/assets/logo.svg",
@@ -178,9 +178,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
@@ -1063,7 +1063,7 @@
     {
       "name": "neon",
       "displayName": "Neon",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
       "source": "third_party/neon",
       "logo": "third_party/neon/assets/logo.svg",
@@ -1075,9 +1075,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
@@ -1111,7 +1111,7 @@
     {
       "name": "posthog",
       "displayName": "PostHog",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
       "source": "third_party/posthog",
       "logo": "third_party/posthog/assets/logo.png",
@@ -1123,9 +1123,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
@@ -1199,7 +1199,7 @@
     {
       "name": "stripe",
       "displayName": "Stripe",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
       "source": "third_party/stripe",
       "logo": "third_party/stripe/assets/logo.svg",
@@ -1211,9 +1211,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"

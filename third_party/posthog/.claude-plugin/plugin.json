@@ -1,7 +1,7 @@
 {
   "name": "posthog",
   "displayName": "PostHog",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
   "author": {
     "name": "Syncfusion"
@@ -17,22 +17,10 @@
     "mcp"
   ],
   "icon": "./assets/logo.png",
-  "userConfig": {
-    "POSTHOG_API_KEY": {
-      "type": "string",
-      "title": "PostHog personal API key",
-      "description": "Create one in PostHog under Settings > Personal API keys, using the MCP Server preset.",
-      "required": true,
-      "sensitive": true
-    }
-  },
   "mcpServers": {
     "posthog": {
       "type": "http",
-      "url": "https://mcp.posthog.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${user_config.POSTHOG_API_KEY}"
-      }
+      "url": "https://mcp.posthog.com/mcp"
     }
   }
 }

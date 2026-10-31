@@ -3,8 +3,10 @@
   "phase": 1,
   "wave": "A",
   "transport": "streamable-http",
-  "auth": "bearer",
-  "alternativeAuth": [],
+  "auth": "oauth",
+  "alternativeAuth": [
+    "bearer"
+  ],
   "hostedBy": "vendor",
   "docs": "https://posthog.com/docs/model-context-protocol",
   "endpointCheck": {
