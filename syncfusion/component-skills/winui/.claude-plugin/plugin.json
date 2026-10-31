@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-winui",
   "displayName": "Syncfusion WinUI Controls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for building WinUI 3 desktop apps with Syncfusion WinUI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"
@@ -14,5 +14,5 @@
     "winui",
     "desktop"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

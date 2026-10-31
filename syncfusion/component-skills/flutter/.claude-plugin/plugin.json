@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-flutter",
   "displayName": "Syncfusion Flutter Widgets",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for building Flutter apps with Syncfusion Flutter widgets: charts, data grid, calendar, gauges, maps and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"
@@ -14,5 +14,5 @@
     "flutter",
     "dart"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

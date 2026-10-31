@@ -144,7 +144,7 @@ syncfusion/
     ├── .boldcreate-plugin/plugin.json  # (generated)
     ├── boldcreate.json                 # upstream source repository and commit
     ├── skills/<name>/                  # SKILL.md plus references/
-    ├── assets/logo.svg
+    ├── assets/logo.png
     ├── README.md
     ├── CHANGELOG.md
     └── LICENSE
