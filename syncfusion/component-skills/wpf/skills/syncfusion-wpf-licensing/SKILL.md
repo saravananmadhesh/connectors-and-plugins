@@ -295,9 +295,3 @@ Before deploying your application:
 - [ ] License key matches the version of Syncfusion packages in use
 - [ ] For CI/CD: License validation configured in build pipeline
 - [ ] License key stored securely (not hardcoded in public repos)
-
-## Related Skills
-
-- [Implementing Syncfusion WPF Components](../implementing-syncfusion-wpf-components/) - WPF-specific component implementation
-- [Implementing Syncfusion Blazor Components](../implementing-syncfusion-blazor-components/) - Blazor components
-- [Implementing Syncfusion React Components](../implementing-syncfusion-react-components/) - React components

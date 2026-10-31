@@ -84,7 +84,7 @@ The skills need no license key to install. Building an app with Syncfusion packa
 
 ## Source
 
-Copied unchanged from [syncfusion/react-ui-components-skills](https://github.com/syncfusion/react-ui-components-skills) at commit `4baa652`. Platform index: <https://ai.syncfusion.com/react/llms.txt>.
+Copied from [syncfusion/react-ui-components-skills](https://github.com/syncfusion/react-ui-components-skills) at commit `4baa652`. One change: in 3 skills, the "Related Skills" or "Related Components" section was removed because its links pointed to skill folders that don't exist. Platform index: <https://ai.syncfusion.com/react/llms.txt>.
 
 ## License
 

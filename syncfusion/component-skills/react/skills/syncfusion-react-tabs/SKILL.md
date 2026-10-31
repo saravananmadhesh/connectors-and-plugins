@@ -1593,10 +1593,3 @@ export default function AdvancedSettingsExample() {
   );
 }
 ```
-
-## Related Skills
-
-- [Implementing Accordion](../implementing-accordion/) - Similar navigation component for collapsible content
-- [Implementing Sidebars](../implementing-sidebars/) - Complementary navigation pattern
-- [Implementing Breadcrumbs](../implementing-breadcrumbs/) - Navigation context alongside tabs
-```

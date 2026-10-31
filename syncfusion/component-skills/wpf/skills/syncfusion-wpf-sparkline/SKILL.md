@@ -302,12 +302,6 @@ Allow users to hover over sparklines to inspect exact data values without clutte
 
 **Recommended:** Any sparkline type with track ball enabled and custom labels.
 
-## Related Components
-
-For more comprehensive data visualization needs:
-- **[Charts](../implementing-charts/)** - Full-featured charting with axes, legends, and multiple series
-- Other data visualization components (coming soon)
-
 ## Troubleshooting
 
 **Common issues:**

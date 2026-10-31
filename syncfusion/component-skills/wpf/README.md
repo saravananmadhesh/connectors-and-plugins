@@ -115,7 +115,7 @@ The skills need no license key to install. Building an app with Syncfusion packa
 
 ## Source
 
-Copied unchanged from [syncfusion/wpf-ui-components-skills](https://github.com/syncfusion/wpf-ui-components-skills) at commit `3dbf20e`. Platform index: <https://ai.syncfusion.com/wpf/llms.txt>.
+Copied from [syncfusion/wpf-ui-components-skills](https://github.com/syncfusion/wpf-ui-components-skills) at commit `3dbf20e`. One change: in 8 skills, the "Related Skills" or "Related Components" section was removed because its links pointed to skill folders that don't exist. Platform index: <https://ai.syncfusion.com/wpf/llms.txt>.
 
 ## License
 

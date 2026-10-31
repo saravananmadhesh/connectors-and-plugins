@@ -567,9 +567,3 @@ Inject only the modules your diagram uses: `<Inject services={[HierarchicalTree,
 | `constraints` | `DiagramConstraints` | Enable/disable diagram-level interactions |
 | `width` | `string` | Diagram canvas width (e.g., `'100%'`) |
 | `height` | `string` | Diagram canvas height (e.g., `'600px'`) |
-
-## Related Components
-
-- [Chart](../implementing-charts/) - Data-driven charts and graphs
-- [Kanban](../implementing-kanban/) - Kanban board visualization
-- [Data Grid](../../grids/implementing-data-grids/) - Tabular data display

@@ -401,12 +401,6 @@ Searchable employee list with columns for name, department, email, and phone num
 ### 6. **Report Parameter Selection**
 Display available reports with name, category, and description columns, allow filtering and selection for report generation.
 
-## Related Skills
-
-- [Implementing WPF Data Grids](../../grids/implementing-data-grids/) - For advanced SfDataGrid features used in dropdown
-- [WPF Data Binding](../../../getting-started/) - General WPF data binding patterns
-- [WPF Theming](../../../common/theming.md) - Applying themes to components
-
 ## Best Practices
 
 1. **Use ValueMember appropriately**: Set ValueMember to a unique identifier property for reliable selection tracking
