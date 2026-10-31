@@ -9,7 +9,8 @@
 //   AC-8  every skill has tests/scenarios/<skill>.md
 //   Self-contained components: BoldCreate Connect syncs each skill folder, agent, rule and
 //   hook file on its own, so nothing may rely on files elsewhere in the plugin folder.
-// Community plugins under third_party/ are kept as published, so checkCommunity only checks
+// Community plugins under third_party/ and skill packs under syncfusion/ are kept as published,
+// so checkCommunity only checks
 // that their components load and warns about files BoldCreate Connect cannot deliver yet.
 // Usage: node scripts/check-kit.mjs   (also run by npm run validate)
 
@@ -17,7 +18,7 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
-import { listPlugins, isMcpPlugin, kitComponents, CLAUDE_HOOKS, CURSOR_HOOKS, PLUGINS_DIR } from "./build.mjs";
+import { listPlugins, isMcpPlugin, kitComponents, CLAUDE_HOOKS, CURSOR_HOOKS, PLUGINS_DIR, isSkillPack } from "./build.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -250,14 +251,15 @@ export function checkCommunity(dir) {
     }
   }
 
-  const summary = `${dir}: community plugin, ${skills.length} skills, ${agents.length} agents, ${rules.length} rules, ${hooks.length} hook events`;
+  const kind = isSkillPack(dir) ? "skill pack" : "community plugin";
+  const summary = `${dir}: ${kind}, ${skills.length} skills, ${agents.length} agents, ${rules.length} rules, ${hooks.length} hook events`;
   return { errors, warnings, summary };
 }
 
 // Syncfusion plugins at the repository root.
 export function firstPartyPlugins() {
   return listPlugins().filter((p) => {
-    if (p.dir.startsWith(`${PLUGINS_DIR}/`)) return false;
+    if (p.dir.startsWith(`${PLUGINS_DIR}/`) || isSkillPack(p.dir)) return false;
     const cursor = JSON.parse(readFileSync(join(root, p.dir, ".cursor-plugin/plugin.json"), "utf-8"));
     return !isMcpPlugin(cursor);
   });
