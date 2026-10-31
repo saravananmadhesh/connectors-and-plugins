@@ -17,10 +17,7 @@ Find, create, and update Linear issues, projects, and cycles.
   "mcpServers": {
     "linear": {
       "type": "http",
-      "url": "https://mcp.linear.app/mcp",
-      "headers": {
-        "Authorization": "Bearer ${LINEAR_API_KEY}"
-      }
+      "url": "https://mcp.linear.app/mcp"
     }
   }
 }
@@ -28,13 +25,9 @@ Find, create, and update Linear issues, projects, and cycles.
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
+No settings.
 
-| Setting | Required | Secret | What to enter |
-| --- | --- | --- | --- |
-| **Linear API key** (`LINEAR_API_KEY`) | Yes | Yes | Personal API key from Linear Settings > Security & access. Tool calls run as the key's owner. |
-
-Tool calls run with the permissions of the key or token you provide. Rotate or revoke it at the vendor if it is ever exposed.
+The first time the agent calls a tool, each member signs in to their own account in the browser (OAuth). Tool calls run with that member's permissions.
 
 ## Notes
 

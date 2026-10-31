@@ -1015,7 +1015,7 @@
     {
       "name": "linear",
       "displayName": "Linear",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Find, create, and update Linear issues, projects, and cycles.",
       "source": "third_party/linear",
       "logo": "third_party/linear/assets/logo.svg",
@@ -1027,9 +1027,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
