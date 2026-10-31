@@ -1111,7 +1111,7 @@
     {
       "name": "posthog",
       "displayName": "PostHog",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
       "source": "third_party/posthog",
       "logo": "third_party/posthog/assets/logo.png",
@@ -1123,9 +1123,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
