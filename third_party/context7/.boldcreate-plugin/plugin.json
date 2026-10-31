@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "context7",
   "displayName": "Context7",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
   "author": {
     "name": "Syncfusion"
@@ -26,27 +26,17 @@
     "wave": "A"
   },
   "supportedByGateway": true,
-  "variables": {
-    "CONTEXT7_API_KEY": {
-      "title": "Context7 API key",
-      "description": "API key from https://context7.com/dashboard.",
-      "required": true,
-      "secret": true
-    }
-  },
+  "variables": {},
   "components": {
     "mcp": [
       {
         "name": "context7",
         "transport": "streamable-http",
         "url": "https://mcp.context7.com/mcp",
-        "headers": {
-          "Authorization": "Bearer ${CONTEXT7_API_KEY}"
-        },
         "auth": {
-          "type": "bearer",
+          "type": "oauth",
           "alternatives": [
-            "oauth"
+            "bearer"
           ]
         }
       }

@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "posthog",
   "displayName": "PostHog",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
   "author": {
     "name": "Syncfusion"
@@ -26,26 +26,18 @@
     "wave": "A"
   },
   "supportedByGateway": true,
-  "variables": {
-    "POSTHOG_API_KEY": {
-      "title": "PostHog personal API key",
-      "description": "Create one in PostHog under Settings > Personal API keys, using the MCP Server preset.",
-      "required": true,
-      "secret": true
-    }
-  },
+  "variables": {},
   "components": {
     "mcp": [
       {
         "name": "posthog",
         "transport": "streamable-http",
         "url": "https://mcp.posthog.com/mcp",
-        "headers": {
-          "Authorization": "Bearer ${POSTHOG_API_KEY}"
-        },
         "auth": {
-          "type": "bearer",
-          "alternatives": []
+          "type": "oauth",
+          "alternatives": [
+            "bearer"
+          ]
         }
       }
     ],

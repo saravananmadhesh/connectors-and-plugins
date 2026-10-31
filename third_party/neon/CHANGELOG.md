@@ -2,6 +2,10 @@
 
 All notable changes to this plugin will be documented here.
 
+## 0.7.1 - 2026-10-31
+
+- Sign-in is now OAuth: each member signs in to their own account. The `NEON_API_KEY` setting is removed.
+
 ## 0.7.0 - 2026-10-29
 
 - Updated plugin version for marketplace release.
