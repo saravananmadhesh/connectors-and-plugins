@@ -133,7 +133,7 @@ boldcreate-toolkit/                   # Syncfusion plugin
 ├── rules/                            # Cursor rules
 ├── hooks/claude-hooks.json           # Claude Code hooks
 ├── tests/scenarios/<skill>.md        # One scenario per skill
-├── assets/logo.svg
+├── assets/logo.png
 ├── README.md
 ├── CHANGELOG.md
 └── LICENSE
