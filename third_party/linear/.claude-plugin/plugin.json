@@ -1,7 +1,7 @@
 {
   "name": "linear",
   "displayName": "Linear",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Find, create, and update Linear issues, projects, and cycles.",
   "author": {
     "name": "Syncfusion"
@@ -16,22 +16,10 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
-  "userConfig": {
-    "LINEAR_API_KEY": {
-      "type": "string",
-      "title": "Linear API key",
-      "description": "Personal API key from Linear Settings > Security & access. Tool calls run as the key's owner.",
-      "required": true,
-      "sensitive": true
-    }
-  },
   "mcpServers": {
     "linear": {
       "type": "http",
-      "url": "https://mcp.linear.app/mcp",
-      "headers": {
-        "Authorization": "Bearer ${user_config.LINEAR_API_KEY}"
-      }
+      "url": "https://mcp.linear.app/mcp"
     }
   }
 }

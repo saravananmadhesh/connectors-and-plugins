@@ -1,7 +1,7 @@
 {
   "name": "linear",
   "displayName": "Linear",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
@@ -25,19 +25,5 @@
     "mcp",
     "http"
   ],
-  "variables": {
-    "type": "object",
-    "properties": {
-      "LINEAR_API_KEY": {
-        "type": "string",
-        "title": "Linear API key",
-        "description": "Personal API key from Linear Settings > Security & access. Tool calls run as the key's owner.",
-        "x-sensitive": true
-      }
-    },
-    "required": [
-      "LINEAR_API_KEY"
-    ]
-  },
   "mcpServers": "./mcp.json"
 }
