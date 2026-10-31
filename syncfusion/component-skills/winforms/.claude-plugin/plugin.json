@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-winforms",
   "displayName": "Syncfusion WinForms Controls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for building Windows Forms desktop apps with Syncfusion WinForms controls: data grid, charts, ribbon, docking, editors and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"
@@ -14,5 +14,5 @@
     "winforms",
     "desktop"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

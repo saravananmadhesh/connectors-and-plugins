@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.0
 
 - First release: 39 skills copied from [syncfusion/winui-ui-components-skills](https://github.com/syncfusion/winui-ui-components-skills) at commit `190414e`.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.0
 
 - First release: 65 skills copied from [syncfusion/angular-ui-components-skills](https://github.com/syncfusion/angular-ui-components-skills) at commit `044e47c`.
