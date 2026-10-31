@@ -1,0 +1,19 @@
+{
+  "name": "syncfusion-javascript",
+  "displayName": "Syncfusion JavaScript UI Controls",
+  "version": "1.0.0",
+  "description": "Skills for building JavaScript and TypeScript apps with Syncfusion Essential JS 2 controls: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/javascript",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "javascript",
+    "typescript",
+    "ej2"
+  ],
+  "icon": "./assets/logo.svg"
+}
