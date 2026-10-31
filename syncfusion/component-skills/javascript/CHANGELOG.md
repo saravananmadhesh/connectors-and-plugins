@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- `syncfusion-javascript-ai-assistview`: shortened the description to under 1,024 characters, the limit agents accept for a skill description.
+
 ## 1.0.1
 
 - Uses the official Syncfusion logo.
