@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
   "name": "syncfusion-maui",
   "displayName": "Syncfusion .NET MAUI Controls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for building .NET MAUI apps with Syncfusion .NET MAUI controls: data grid, charts, scheduler, inputs, navigation and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"

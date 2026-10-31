@@ -19,7 +19,6 @@ The easiest way to add ColorPicker to your application:
 4. Drag and drop it onto your designer view
 5. The required assembly (Syncfusion.Shared.WPF) will be added automatically
 
-![WPF Color Picker Drag and dropped from ToolBox](../../../../../../../docs/Getting-Started.md)
 
 ## Adding ColorPicker via XAML
 

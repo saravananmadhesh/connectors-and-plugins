@@ -100,7 +100,7 @@ The skills need no license key to install. Building an app with Syncfusion packa
 
 ## Source
 
-Copied from [syncfusion/maui-ui-components-skills](https://github.com/syncfusion/maui-ui-components-skills) at commit `7a36770`. One fix: the `syncfusion-maui-interactive-viewer` skill was named `implementing-interactive-viewer`, which did not match its folder, so it now uses the folder name. Platform index: <https://ai.syncfusion.com/maui/llms.txt>.
+Copied from [syncfusion/maui-ui-components-skills](https://github.com/syncfusion/maui-ui-components-skills) at commit `7a36770`. One fix: the `syncfusion-maui-interactive-viewer` skill was named `implementing-interactive-viewer`, which did not match its folder, so it now uses the folder name. Links that pointed outside their own skill folder were removed. Platform index: <https://ai.syncfusion.com/maui/llms.txt>.
 
 ## License
 

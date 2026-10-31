@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "docs": "https://ai.syncfusion.com/pdf-viewer-sdk/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/pdf-viewer-sdk-skills",
+    "path": "skills",
+    "commit": "99fa2b43419904bfe0c6c9d31acb23e30fe8be19",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "docs": "https://ai.syncfusion.com/docx-editor-sdk/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/docx-editor-sdk-skills",
+    "path": "skills",
+    "commit": "4e5b0bc79a29ed89f92ce59eafac33e5fea22416",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  }
+}
