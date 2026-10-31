@@ -17,10 +17,7 @@ Manage Neon serverless Postgres projects, branches, queries, and migrations.
   "mcpServers": {
     "neon": {
       "type": "http",
-      "url": "https://mcp.neon.tech/mcp?readonly=${NEON_READ_ONLY}",
-      "headers": {
-        "Authorization": "Bearer ${NEON_API_KEY}"
-      }
+      "url": "https://mcp.neon.tech/mcp?readonly=${NEON_READ_ONLY}"
     }
   }
 }
@@ -28,14 +25,11 @@ Manage Neon serverless Postgres projects, branches, queries, and migrations.
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
-
 | Setting | Required | Secret | What to enter |
 | --- | --- | --- | --- |
-| **Neon API key** (`NEON_API_KEY`) | Yes | Yes | Create one in the Neon Console. Use an organization key to limit access to that organization. |
 | **Read-only mode** (`NEON_READ_ONLY`) | No (default `true`) | No | "true" disables write tools. Set "false" to allow writes. |
 
-Tool calls run with the permissions of the key or token you provide. Rotate or revoke it at the vendor if it is ever exposed.
+The first time the agent calls a tool, each member signs in to their own account in the browser (OAuth). Tool calls run with that member's permissions.
 
 ## Docs
 

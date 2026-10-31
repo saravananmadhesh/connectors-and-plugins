@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "stripe",
   "displayName": "Stripe",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
   "author": {
     "name": "Syncfusion"
@@ -26,27 +26,17 @@
     "wave": "A"
   },
   "supportedByGateway": true,
-  "variables": {
-    "STRIPE_AGENT_KEY": {
-      "title": "Stripe agent API key",
-      "description": "An API key with the Agent badge from the Stripe Dashboard. From December 2026 the server rejects other secret and restricted keys.",
-      "required": true,
-      "secret": true
-    }
-  },
+  "variables": {},
   "components": {
     "mcp": [
       {
         "name": "stripe",
         "transport": "streamable-http",
         "url": "https://mcp.stripe.com",
-        "headers": {
-          "Authorization": "Bearer ${STRIPE_AGENT_KEY}"
-        },
         "auth": {
-          "type": "bearer",
+          "type": "oauth",
           "alternatives": [
-            "oauth"
+            "bearer"
           ]
         }
       }

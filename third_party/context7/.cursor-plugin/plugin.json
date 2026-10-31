@@ -1,7 +1,7 @@
 {
   "name": "context7",
   "displayName": "Context7",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
@@ -26,19 +26,5 @@
     "mcp",
     "http"
   ],
-  "variables": {
-    "type": "object",
-    "properties": {
-      "CONTEXT7_API_KEY": {
-        "type": "string",
-        "title": "Context7 API key",
-        "description": "API key from https://context7.com/dashboard.",
-        "x-sensitive": true
-      }
-    },
-    "required": [
-      "CONTEXT7_API_KEY"
-    ]
-  },
   "mcpServers": "./mcp.json"
 }

@@ -1,7 +1,7 @@
 {
   "name": "neon",
   "displayName": "Neon",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
@@ -29,12 +29,6 @@
   "variables": {
     "type": "object",
     "properties": {
-      "NEON_API_KEY": {
-        "type": "string",
-        "title": "Neon API key",
-        "description": "Create one in the Neon Console. Use an organization key to limit access to that organization.",
-        "x-sensitive": true
-      },
       "NEON_READ_ONLY": {
         "type": "string",
         "title": "Read-only mode",
@@ -42,10 +36,7 @@
         "default": "true",
         "x-sensitive": false
       }
-    },
-    "required": [
-      "NEON_API_KEY"
-    ]
+    }
   },
   "mcpServers": "./mcp.json"
 }

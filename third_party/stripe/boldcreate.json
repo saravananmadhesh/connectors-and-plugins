@@ -3,9 +3,9 @@
   "phase": 1,
   "wave": "A",
   "transport": "streamable-http",
-  "auth": "bearer",
+  "auth": "oauth",
   "alternativeAuth": [
-    "oauth"
+    "bearer"
   ],
   "hostedBy": "vendor",
   "docs": "https://docs.stripe.com/mcp",
