@@ -252,7 +252,7 @@ SmartGrid.AssistViewRequest += (sender, e) =>
 | `CurrentUser` | Author | Identifies user for AssistView message alignment (required) |
 | `Suggestions` | ObservableCollection\<string\> | Predefined prompts shown in AssistView |
 | `Prompt` | string | Initial prompt auto-executed on AssistView open |
-| `EnableSmartActions` | bool | Enable/disable AI-powered actions (default: false). Required for Smart/AI capabilities including natural language sorting, filtering, grouping, and highlighting. Part of Syncfusion.SfSmartComponents.WPF assembly features (see [docs/getting-started.md](../../docs/getting-started.md#assembly-deployment) for assembly details). |
+| `EnableSmartActions` | bool | Enable/disable AI-powered actions (default: false). Required for Smart/AI capabilities including natural language sorting, filtering, grouping, and highlighting. Part of Syncfusion.SfSmartComponents.WPF assembly features (see docs/getting-started.md for assembly details). |
 | `HighlightBrush` | SolidColorBrush | Default brush for highlighting without color specified |
 | `AutoGenerateColumns` | bool | Auto-generate columns from data model properties |
 | `ColumnSizer` | GridLengthUnitType | Column sizing mode (Star, Auto, None) |

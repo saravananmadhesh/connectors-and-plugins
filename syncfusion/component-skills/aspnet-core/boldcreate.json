@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "docs": "https://ai.syncfusion.com/aspnet-core/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/aspnetcore-ui-components-skills",
+    "path": "skills",
+    "commit": "65f8a0ece0321dcf9817aeed8b10bb114e72c615",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "docs": "https://ai.syncfusion.com/maui-toolkit/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/maui-toolkit-ui-components-skills",
+    "path": "skills",
+    "commit": "15ff533f0cea13fa68970a681114d370672d0d92",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  }
+}

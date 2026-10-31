@@ -55,7 +55,6 @@ The easiest way to add SfTextBoxExt is through the Visual Studio designer:
 3. Drag **SfTextBoxExt** from the toolbox onto your window
 4. Required assembly references will be added automatically
 
-![Designer View](../../../assets/autocomplete-designer.png)
 
 ### Step 3: Add Control Manually in XAML
 

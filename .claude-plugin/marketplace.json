@@ -273,9 +273,59 @@
       "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project."
     },
     {
+      "name": "syncfusion-angular",
+      "source": "./syncfusion/component-skills/angular",
+      "description": "Skills for building Angular apps with Syncfusion Angular UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-aspnet-core",
+      "source": "./syncfusion/component-skills/aspnet-core",
+      "description": "Skills for building ASP.NET Core apps with Syncfusion ASP.NET Core UI controls and Tag Helpers: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-aspnet-mvc",
+      "source": "./syncfusion/component-skills/aspnet-mvc",
+      "description": "Skills for building ASP.NET MVC apps with Syncfusion ASP.NET MVC UI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-blazor",
+      "source": "./syncfusion/component-skills/blazor",
+      "description": "Skills for building Blazor apps with Syncfusion Blazor components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-document-sdk",
+      "source": "./syncfusion/sdk-skills/document-sdk",
+      "description": "Skills for creating, editing and converting PDF, Word, Excel and PowerPoint files with the Syncfusion Document SDK in .NET, JavaScript, Flutter and Java."
+    },
+    {
+      "name": "syncfusion-docx-editor-sdk",
+      "source": "./syncfusion/sdk-skills/docx-editor-sdk",
+      "description": "Skills for adding the Syncfusion DOCX Editor (Word processor) to web and desktop apps: opening, editing, formatting and saving Word documents on each supported platform."
+    },
+    {
+      "name": "syncfusion-flutter",
+      "source": "./syncfusion/component-skills/flutter",
+      "description": "Skills for building Flutter apps with Syncfusion Flutter widgets: charts, data grid, calendar, gauges, maps and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-javascript",
+      "source": "./syncfusion/component-skills/javascript",
+      "description": "Skills for building JavaScript and TypeScript apps with Syncfusion Essential JS 2 controls: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
       "name": "syncfusion-maui",
       "source": "./syncfusion/component-skills/maui",
       "description": "Skills for building .NET MAUI apps with Syncfusion .NET MAUI controls: data grid, charts, scheduler, inputs, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-maui-toolkit",
+      "source": "./syncfusion/component-skills/maui-toolkit",
+      "description": "Skills for building .NET MAUI apps with the free, open-source Syncfusion Toolkit for .NET MAUI: charts, buttons, cards, calendar, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-pdf-viewer-sdk",
+      "source": "./syncfusion/sdk-skills/pdf-viewer-sdk",
+      "description": "Skills for adding the Syncfusion PDF Viewer to web, mobile and desktop apps: viewing, annotating, searching, form filling and more, on each supported platform."
     },
     {
       "name": "syncfusion-react",
@@ -283,9 +333,34 @@
       "description": "Skills for building React apps with Syncfusion React UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
     },
     {
+      "name": "syncfusion-spreadsheet-editor-sdk",
+      "source": "./syncfusion/sdk-skills/spreadsheet-editor-sdk",
+      "description": "Skills for adding the Syncfusion Spreadsheet Editor to web and desktop apps: opening, editing, formulas, formatting and saving Excel files on each supported platform."
+    },
+    {
+      "name": "syncfusion-vue",
+      "source": "./syncfusion/component-skills/vue",
+      "description": "Skills for building Vue apps with Syncfusion Vue UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-winforms",
+      "source": "./syncfusion/component-skills/winforms",
+      "description": "Skills for building Windows Forms desktop apps with Syncfusion WinForms controls: data grid, charts, ribbon, docking, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-winui",
+      "source": "./syncfusion/component-skills/winui",
+      "description": "Skills for building WinUI 3 desktop apps with Syncfusion WinUI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples."
+    },
+    {
       "name": "syncfusion-wpf",
       "source": "./syncfusion/component-skills/wpf",
       "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-xamarin-to-maui",
+      "source": "./syncfusion/migration-skills/xamarin-to-maui",
+      "description": "Skills for moving Xamarin.Forms apps to .NET MAUI: project and framework changes, platform-specific code, renderers to handlers, and Syncfusion Xamarin controls to their .NET MAUI equivalents."
     },
     {
       "name": "teaching",
