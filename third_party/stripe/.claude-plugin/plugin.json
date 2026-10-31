@@ -1,7 +1,7 @@
 {
   "name": "stripe",
   "displayName": "Stripe",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
   "author": {
     "name": "Syncfusion"
@@ -17,22 +17,10 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
-  "userConfig": {
-    "STRIPE_AGENT_KEY": {
-      "type": "string",
-      "title": "Stripe agent API key",
-      "description": "An API key with the Agent badge from the Stripe Dashboard. From December 2026 the server rejects other secret and restricted keys.",
-      "required": true,
-      "sensitive": true
-    }
-  },
   "mcpServers": {
     "stripe": {
       "type": "http",
-      "url": "https://mcp.stripe.com",
-      "headers": {
-        "Authorization": "Bearer ${user_config.STRIPE_AGENT_KEY}"
-      }
+      "url": "https://mcp.stripe.com"
     }
   }
 }

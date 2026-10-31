@@ -1,7 +1,7 @@
 {
   "name": "context7",
   "displayName": "Context7",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
   "author": {
     "name": "Syncfusion"
@@ -17,22 +17,10 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
-  "userConfig": {
-    "CONTEXT7_API_KEY": {
-      "type": "string",
-      "title": "Context7 API key",
-      "description": "API key from https://context7.com/dashboard.",
-      "required": true,
-      "sensitive": true
-    }
-  },
   "mcpServers": {
     "context7": {
       "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${user_config.CONTEXT7_API_KEY}"
-      }
+      "url": "https://mcp.context7.com/mcp"
     }
   }
 }

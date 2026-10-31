@@ -17,10 +17,7 @@ Pull up-to-date, version-specific library docs and code examples into the prompt
   "mcpServers": {
     "context7": {
       "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${CONTEXT7_API_KEY}"
-      }
+      "url": "https://mcp.context7.com/mcp"
     }
   }
 }
@@ -28,13 +25,9 @@ Pull up-to-date, version-specific library docs and code examples into the prompt
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
+No settings.
 
-| Setting | Required | Secret | What to enter |
-| --- | --- | --- | --- |
-| **Context7 API key** (`CONTEXT7_API_KEY`) | Yes | Yes | API key from https://context7.com/dashboard. |
-
-Tool calls run with the permissions of the key or token you provide. Rotate or revoke it at the vendor if it is ever exposed.
+The first time the agent calls a tool, each member signs in to their own account in the browser (OAuth). Tool calls run with that member's permissions.
 
 ## Docs
 
