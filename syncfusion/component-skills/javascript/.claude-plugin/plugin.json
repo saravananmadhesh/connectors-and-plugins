@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-javascript",
   "displayName": "Syncfusion JavaScript UI Controls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for building JavaScript and TypeScript apps with Syncfusion Essential JS 2 controls: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"
@@ -15,5 +15,5 @@
     "typescript",
     "ej2"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

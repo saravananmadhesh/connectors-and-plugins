@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-spreadsheet-editor-sdk",
   "displayName": "Syncfusion Spreadsheet Editor SDK",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for adding the Syncfusion Spreadsheet Editor to web and desktop apps: opening, editing, formulas, formatting and saving Excel files on each supported platform.",
   "author": {
     "name": "Syncfusion"
@@ -16,5 +16,5 @@
     "editor",
     "documents"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

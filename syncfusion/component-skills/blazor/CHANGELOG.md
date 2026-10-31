@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.0
 
 - First release: 69 skills copied from [syncfusion/blazor-ui-components-skills](https://github.com/syncfusion/blazor-ui-components-skills) at commit `55c2e20`.

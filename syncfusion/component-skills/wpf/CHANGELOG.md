@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.1
 
 - Removed 4 links that pointed outside their skill folder: 2 missing images (autocomplete, color picker) and 2 links in `syncfusion-wpf-smart-datagrid`, whose text is kept.

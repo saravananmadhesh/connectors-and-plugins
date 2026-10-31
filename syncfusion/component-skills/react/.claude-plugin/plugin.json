@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-react",
   "displayName": "Syncfusion React UI Components",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for building React apps with Syncfusion React UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"
@@ -17,5 +17,5 @@
     "charts",
     "scheduler"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

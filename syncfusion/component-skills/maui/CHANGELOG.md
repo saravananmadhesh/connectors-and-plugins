@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.1
 
 - Removed a link in `syncfusion-maui-funnel-charts` that pointed outside its skill folder; the link text is kept.
