@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-pdf-viewer-sdk",
   "displayName": "Syncfusion PDF Viewer SDK",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for adding the Syncfusion PDF Viewer to web, mobile and desktop apps: viewing, annotating, searching, form filling and more, on each supported platform.",
   "author": {
     "name": "Syncfusion"
@@ -15,5 +15,5 @@
     "pdf-viewer",
     "documents"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

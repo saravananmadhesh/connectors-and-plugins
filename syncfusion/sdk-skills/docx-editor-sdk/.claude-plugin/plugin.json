@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-docx-editor-sdk",
   "displayName": "Syncfusion DOCX Editor SDK",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for adding the Syncfusion DOCX Editor (Word processor) to web and desktop apps: opening, editing, formatting and saving Word documents on each supported platform.",
   "author": {
     "name": "Syncfusion"
@@ -16,5 +16,5 @@
     "editor",
     "documents"
   ],
-  "icon": "./assets/logo.svg"
+  "icon": "./assets/logo.png"
 }

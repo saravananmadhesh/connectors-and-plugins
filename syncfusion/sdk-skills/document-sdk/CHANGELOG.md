@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.0
 
 - First release: 16 skills copied from [syncfusion/document-sdk-skills](https://github.com/syncfusion/document-sdk-skills) at commit `c46c067`.

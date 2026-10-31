@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.0
 
 - First release: 49 skills copied from [syncfusion/vue-ui-components-skills](https://github.com/syncfusion/vue-ui-components-skills) at commit `7ec2505`.

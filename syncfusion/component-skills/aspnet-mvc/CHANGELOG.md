@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Uses the official Syncfusion logo.
+
 ## 1.0.0
 
 - First release: 38 skills copied from [syncfusion/aspnetmvc-ui-components-skills](https://github.com/syncfusion/aspnetmvc-ui-components-skills) at commit `aae7045`.

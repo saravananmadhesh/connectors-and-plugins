@@ -1,7 +1,7 @@
 {
   "name": "syncfusion-document-sdk",
   "displayName": "Syncfusion Document SDK",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skills for creating, editing and converting PDF, Word, Excel and PowerPoint files with the Syncfusion Document SDK in .NET, JavaScript, Flutter and Java.",
   "author": {
     "name": "Syncfusion"
@@ -9,7 +9,7 @@
   "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/sdk-skills/document-sdk",
   "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
   "license": "MIT",
-  "logo": "assets/logo.svg",
+  "logo": "assets/logo.png",
   "keywords": [
     "syncfusion",
     "pdf",
