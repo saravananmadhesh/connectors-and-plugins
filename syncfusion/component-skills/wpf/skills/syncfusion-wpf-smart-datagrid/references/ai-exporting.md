@@ -23,7 +23,7 @@
 </syncfusion:SfSmartDataGrid>
 ```
 
-**Required Assembly:** Ensure `Syncfusion.SfSmartComponents.WPF` is installed and referenced. See [docs/getting-started.md - Assembly Deployment](../../docs/getting-started.md#assembly-deployment) for complete assembly setup instructions.
+**Required Assembly:** Ensure `Syncfusion.SfSmartComponents.WPF` is installed and referenced. See docs/getting-started.md - Assembly Deployment for complete assembly setup instructions.
 
 ## Overview
 

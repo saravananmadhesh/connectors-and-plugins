@@ -1,0 +1,123 @@
+# Data Binding
+
+Bind local or remote data to the Spreadsheet Editor — load data into sheets/ranges after initialization.
+
+## Minimal Code
+
+```jsx
+import * as React from 'react';
+import { SheetsDirective, SheetDirective, RangesDirective, RangeDirective } from '@syncfusion/ej2-react-spreadsheet';
+import { SpreadsheetComponent } from '@syncfusion/ej2-react-spreadsheet';
+import { DataManager, Query } from '@syncfusion/ej2-data';
+
+
+function Default() {
+    const spreadsheetRef = React.useRef(null);
+    //Bind the data directly in the RangeDirectve's datasource (use this by default);
+    const customerData = [
+        { 'Customer Name': 'Romona Heaslip', 'Model': 'Taurus', 'Color': 'Aquamarine', 'Payment Mode': 'Debit Card', 'Delivery Date': '7/11/2015', 'Amount': '$8,529.22' },
+        { 'Customer Name': 'Clare Batterton', 'Model': 'Sparrow', 'Color': 'Pink', 'Payment Mode': 'Cash On Delivery', 'Delivery Date': '7/13/2016', 'Amount': '$17,866.19' },
+        { 'Customer Name': 'Eamon Traise', 'Model': 'Grand Cherokee', 'Color': 'Blue', 'Payment Mode': 'Net Banking', 'Delivery Date': '9/4/2015', 'Amount': '$13,853.09' },
+    ];
+    const onCreated = () => {
+      let spreadsheet = spreadsheetRef.current;
+      // === Option 1: Local data (array of objects — most common) ===
+      const localData = [
+        { Product: 'Laptop', Category: 'Electronics', Price: 1200, Quantity: 5, Total: '=C2*D2' },
+        { Product: 'Mouse', Category: 'Accessories', Price: 25, Quantity: 20, Total: '=C3*D3' },
+        { Product: 'Keyboard', Category: 'Accessories', Price: 80, Quantity: 10, Total: '=C4*D4' },
+        { Product: 'Monitor', Category: 'Electronics', Price: 350, Quantity: 3, Total: '=C5*D5' }
+      ];
+
+      spreadsheet.sheets[0].ranges = [{
+        dataSource: localData,
+        startCell: 'A1',          // Where to start placing data (default A1)
+        showFieldAsHeader: true   // Automatically add header row from object keys
+      }];
+
+      // === Option 2: Remote data via DataManager (REST/OData/JSON) ===
+      const dataManager = new DataManager({
+        // SECURITY: Validate URL against allowlist of trusted domains before use
+        url: 'url',  // You can utilize your own API endpoint
+        adaptor: 'WebApiAdaptor'                      // or 'ODataV4Adaptor', 'JsonAdaptor', etc.
+      });
+
+      const query = new Query()
+        .take(50)               // Optional: limit rows
+        .select(['Product', 'Category', 'Price', 'Quantity']);  // Optional: select fields
+
+      spreadsheet.sheets[0].ranges = [{
+        dataSource: dataManager,
+        query: query,
+        startCell: 'A1',
+        showFieldAsHeader: true
+      }];
+
+      // === Option 3: 2D array (raw grid style, no headers) ===
+      const gridData = [
+        ['Product', 'Price', 'Quantity', 'Total'],
+        ['Laptop', 1200, 5, '=B2*C2'],
+        ['Mouse', 25, 20, '=B3*C3']
+      ];
+
+      spreadsheet.sheets[0].ranges = [{
+        dataSource: gridData,
+        startCell: 'A1',
+        showFieldAsHeader: false
+      }];
+
+      //While updating the sheet ranges, we need to invoke the dataBind method and refresh method to refresh the UI with the updated dataSource.
+      spreadsheet.dataBind();
+      spreadsheet.refresh();
+    };
+    return (<div className='control-pane'>
+            <div className='control-section spreadsheet-control'>
+                <SpreadsheetComponent ref={spreadsheetRef} created={onCreated}>
+                    <SheetsDirective>
+                        <SheetDirective name="Sheet1">
+                            <RangesDirective>
+                                <RangeDirective dataSource={customerData}></RangeDirective>
+                            </RangesDirective>
+                        </SheetDirective>
+                    </SheetsDirective>
+                </SpreadsheetComponent>
+            </div>
+        </div>);
+}
+export default Default;
+
+// Render into DOM
+const root = createRoot(document.getElementById('sample')); // div element with id "sample" must exists in HTML
+root.render(<Default />);
+```
+## Placeholders
+
+| Placeholder | Description | Example |
+|---|---|---|
+| `[DATA_SOURCE]` | Array of objects or DataManager instance | `[{Name: 'John', Age: 30}]` |
+| `[RANGE]` | Cell range where data binds | `'A1:D100'` |
+| `[KEY_FIELD]` | Primary key field name | `'id'`, `'productId'` |
+| `[FIELDS]` | Column mappings | `{name: 'A', age: 'B', salary: 'C'}` |
+| `[START_CELL]` | Starting cell for data | `'A1'`, `'A2'` |
+
+## Notes
+
+- **Best Practice**: Include headers in first row before binding data
+- **Best Practice**: Use key field to track records for updates
+- **Data Format**: Arrays of objects preferred (column names from object keys)
+- **Performance**: Large datasets (100k+ rows) should use virtual scrolling
+- **Updates**: Changes in bound data auto-sync to spreadsheet UI
+- **Gotcha**: Column names in data must match field mappings exactly
+- **Gotcha**: Null/undefined values display as empty cells (OK)
+
+## Placeholders
+| Placeholder | Description | Example |
+|---|---|---|
+| [DATA_SOURCE] | Array of objects | [{ Name: 'John'}] |
+| [RANGE] | Cell range | 'A1:D100' |
+| [KEY_FIELD] | Primary key | 'id' |
+
+## Notes
+- Best Practice: Include headers
+- Data Format: Arrays of objects
+- Gotcha: Columns must match field mappings

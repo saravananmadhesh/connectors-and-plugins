@@ -22,7 +22,7 @@ dotnet add package Syncfusion.Maui.Charts
 Install-Package Syncfusion.Maui.Charts
 ```
 
-> **Note:** `Syncfusion.Maui.Core` is automatically installed as a required dependency. Ensure handler registration is configured in `MauiProgram.cs` (see parent library's [getting-started](../../getting-started/) guide).
+> **Note:** `Syncfusion.Maui.Core` is automatically installed as a required dependency. Ensure handler registration is configured in `MauiProgram.cs` (see parent library's getting-started guide).
 
 ### Step 2: Register the Syncfusion Handler
 
