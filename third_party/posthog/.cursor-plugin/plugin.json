@@ -1,7 +1,7 @@
 {
   "name": "posthog",
   "displayName": "PostHog",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
@@ -26,19 +26,5 @@
     "mcp",
     "http"
   ],
-  "variables": {
-    "type": "object",
-    "properties": {
-      "POSTHOG_API_KEY": {
-        "type": "string",
-        "title": "PostHog personal API key",
-        "description": "Create one in PostHog under Settings > Personal API keys, using the MCP Server preset.",
-        "x-sensitive": true
-      }
-    },
-    "required": [
-      "POSTHOG_API_KEY"
-    ]
-  },
   "mcpServers": "./mcp.json"
 }
