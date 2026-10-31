@@ -125,10 +125,10 @@
     {
       "name": "boldcreate-toolkit",
       "displayName": "BoldCreate Toolkit",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
       "source": "boldcreate-toolkit",
-      "logo": "boldcreate-toolkit/assets/logo.svg",
+      "logo": "boldcreate-toolkit/assets/logo.png",
       "category": "developer-tools",
       "components": [
         "skills",

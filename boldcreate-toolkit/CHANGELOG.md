@@ -2,6 +2,10 @@
 
 All notable changes to this plugin will be documented here.
 
+## 0.7.1 - 2026-10-31
+
+- New BoldCreate Toolkit logo (`assets/logo.png`).
+
 ## 0.7.0 - 2026-10-29
 
 - Updated plugin version for marketplace release.

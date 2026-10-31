@@ -1,7 +1,7 @@
 {
   "name": "boldcreate-toolkit",
   "displayName": "BoldCreate Toolkit",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests.",
   "author": {
     "name": "Syncfusion"
@@ -19,7 +19,7 @@
     "skills",
     "agents"
   ],
-  "icon": "./assets/logo.svg",
+  "icon": "./assets/logo.png",
   "agents": [
     "./agents/doc-reviewer.md",
     "./agents/implementer.md",
