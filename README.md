@@ -3,6 +3,7 @@
 Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. The repository holds three kinds of plugin, each in its own directory with its own manifests:
 
 - **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-toolkit/` gives agents one software delivery lifecycle on any stack.
+- **Syncfusion skill packs** under `syncfusion/`, one plugin per platform. Each is copied from Syncfusion's skill repository for that platform and teaches agents to build with Syncfusion components.
 - **MCP plugins** under `third_party/`. Each connects agents to a vendor's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 - **Community plugins** under `third_party/`, made of skills, agents, rules and hooks. Each is copied from [cursor/plugins](https://github.com/cursor/plugins) under its MIT license and keeps its original author and LICENSE file.
 
@@ -19,6 +20,16 @@ Secrets such as API keys are never stored in this repository. Each MCP plugin de
 | `name` | Plugin | Category | `description` (from marketplace) |
 |:-------|:-------|:---------|:-------------------------------------|
 | `boldcreate-toolkit` | [BoldCreate Toolkit](boldcreate-toolkit/) | Developer Tools | Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests. |
+
+## Syncfusion skill packs
+
+Component skills listed on [ai.syncfusion.com](https://ai.syncfusion.com/). Each pack keeps its skills as published in its source repository; the `upstream` entry in `boldcreate.json` records the commit.
+
+| `name` | Plugin | Skills | Source |
+|:-------|:-------|-------:|:-------|
+| `syncfusion-maui` | [Syncfusion .NET MAUI Controls](syncfusion/component-skills/maui/) | 81 | [syncfusion/maui-ui-components-skills](https://github.com/syncfusion/maui-ui-components-skills) |
+| `syncfusion-react` | [Syncfusion React UI Components](syncfusion/component-skills/react/) | 65 | [syncfusion/react-ui-components-skills](https://github.com/syncfusion/react-ui-components-skills) |
+| `syncfusion-wpf` | [Syncfusion WPF Controls](syncfusion/component-skills/wpf/) | 96 | [syncfusion/wpf-ui-components-skills](https://github.com/syncfusion/wpf-ui-components-skills) |
 
 ## MCP plugins
 
@@ -111,6 +122,17 @@ boldcreate-toolkit/                   # Syncfusion plugin
 ├── README.md
 ├── CHANGELOG.md
 └── LICENSE
+syncfusion/
+└── component-skills/<platform>/      # Syncfusion skill pack, named syncfusion-<platform>
+    ├── .cursor-plugin/plugin.json
+    ├── .claude-plugin/plugin.json      # (generated)
+    ├── .boldcreate-plugin/plugin.json  # (generated)
+    ├── boldcreate.json                 # upstream source repository and commit
+    ├── skills/<name>/                  # SKILL.md plus references/
+    ├── assets/logo.svg
+    ├── README.md
+    ├── CHANGELOG.md
+    └── LICENSE
 third_party/
 └── plugin-name/
     ├── .cursor-plugin/plugin.json      # Per-plugin manifest and install-time variables
@@ -129,7 +151,7 @@ scripts/                              # build.mjs, validate.mjs and check-kit.mj
 ## Contributing
 
 1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a Syncfusion plugin. Don't edit generated files by hand.
-2. Run `npm ci`, then `npm run build` and `npm run validate`. Community plugins are checked only for loadable components and an `upstream` entry in `boldcreate.json`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
+2. Run `npm ci`, then `npm run build` and `npm run validate`. Community plugins and Syncfusion skill packs are checked only for loadable components and an `upstream` entry in `boldcreate.json`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
 3. Open a pull request. CI runs the same checks and the Claude Code plugin validator.
 
 ## License

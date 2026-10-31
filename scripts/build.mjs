@@ -6,8 +6,9 @@
 //   .claude-plugin/marketplace.json          (Claude Code marketplace index)
 //   .boldcreate-plugin/marketplace.json      (BoldCreate Connect marketplace index)
 //
-// <plugin> is <name> at the repo root for Syncfusion plugins and third_party/<name> for
-// vendor MCP plugins and community plugins (skills, agents, rules and hooks copied from
+// <plugin> is <name> at the repo root for Syncfusion plugins, syncfusion/<group>/<name> for
+// Syncfusion skill packs (copied from Syncfusion's skill repositories), and third_party/<name>
+// for vendor MCP plugins and community plugins (skills, agents, rules and hooks copied from
 // another marketplace). Sources per plugin: .cursor-plugin/plugin.json, boldcreate.json,
 // and either mcp.json or the skills/, agents/, rules/ and hooks/ folders.
 // Usage: node scripts/build.mjs          write the files
@@ -21,13 +22,14 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
 
 export const PLUGINS_DIR = "third_party";
-const NOT_PLUGINS = new Set([PLUGINS_DIR, "node_modules", "schemas", "scripts"]);
+export const SKILL_PACKS_DIR = "syncfusion";
+const NOT_PLUGINS = new Set([PLUGINS_DIR, SKILL_PACKS_DIR, "node_modules", "schemas", "scripts"]);
 
 const MARKETPLACE = {
   name: "boldcreate-plugins",
   owner: { name: "Syncfusion" },
   description:
-    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, and community skill and agent packs.",
+    "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, Syncfusion component skills, and community skill and agent packs.",
 };
 
 const readJSON = (p) => JSON.parse(readFileSync(p, "utf-8"));
@@ -41,14 +43,20 @@ const filesWith = (dir, ext) =>
     ? readdirSync(dir, { withFileTypes: true }).filter((d) => d.isFile() && d.name.endsWith(ext)).map((d) => d.name).sort()
     : [];
 
-// Each plugin is { name, dir } with dir relative to the repo root.
+// Each plugin is { name, dir } with dir relative to the repo root. A skill pack in
+// syncfusion/<group>/<folder> is named syncfusion-<folder>.
 export function listPlugins() {
   const firstParty = subdirs(root)
     .filter((n) => !n.startsWith(".") && !NOT_PLUGINS.has(n))
     .filter((n) => existsSync(join(root, n, ".cursor-plugin/plugin.json")))
     .map((name) => ({ name, dir: name }));
+  const packs = subdirs(join(root, SKILL_PACKS_DIR)).flatMap((group) =>
+    subdirs(join(root, SKILL_PACKS_DIR, group))
+      .filter((n) => existsSync(join(root, SKILL_PACKS_DIR, group, n, ".cursor-plugin/plugin.json")))
+      .map((n) => ({ name: `syncfusion-${n}`, dir: `${SKILL_PACKS_DIR}/${group}/${n}` }))
+  );
   const vendor = subdirs(join(root, PLUGINS_DIR)).map((name) => ({ name, dir: `${PLUGINS_DIR}/${name}` }));
-  return [...firstParty, ...vendor].sort((a, b) => a.name.localeCompare(b.name));
+  return [...firstParty, ...packs, ...vendor].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // Cursor auto-loads hooks/hooks.json in its own format, so Claude Code hooks live in a separate file.
@@ -61,6 +69,9 @@ export const isMcpPlugin = (cursor) => cursor.mcpServers !== undefined;
 
 // A community plugin is a non-MCP plugin under third_party/, copied from another marketplace.
 export const isCommunityPlugin = (dir, cursor) => dir.startsWith(`${PLUGINS_DIR}/`) && !isMcpPlugin(cursor);
+
+// A skill pack under syncfusion/ is copied from one of Syncfusion's skill repositories.
+export const isSkillPack = (dir) => dir.startsWith(`${SKILL_PACKS_DIR}/`);
 
 // Skill, agent, rule and hook names found in a non-MCP plugin. Hook names are the
 // events in the Claude Code hooks file, or in Cursor's hooks file when there is none.

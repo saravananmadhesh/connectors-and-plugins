@@ -4,7 +4,7 @@
     "name": "Syncfusion"
   },
   "metadata": {
-    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, and community skill and agent packs."
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, Syncfusion component skills, and community skill and agent packs."
   },
   "plugins": [
     {
@@ -271,6 +271,21 @@
       "name": "supabase",
       "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
       "source": "third_party/supabase"
+    },
+    {
+      "name": "syncfusion-maui",
+      "description": "Skills for building .NET MAUI apps with Syncfusion .NET MAUI controls: data grid, charts, scheduler, inputs, navigation and more, with setup, APIs, theming and examples.",
+      "source": "syncfusion/component-skills/maui"
+    },
+    {
+      "name": "syncfusion-react",
+      "description": "Skills for building React apps with Syncfusion React UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+      "source": "syncfusion/component-skills/react"
+    },
+    {
+      "name": "syncfusion-wpf",
+      "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples.",
+      "source": "syncfusion/component-skills/wpf"
     },
     {
       "name": "teaching",

@@ -5,7 +5,7 @@
     "name": "Syncfusion"
   },
   "metadata": {
-    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, and community skill and agent packs.",
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, Syncfusion component skills, and community skill and agent packs.",
     "formatVersion": 1
   },
   "plugins": [
@@ -1243,6 +1243,63 @@
         "wave": "A"
       },
       "supportedByGateway": true
+    },
+    {
+      "name": "syncfusion-maui",
+      "displayName": "Syncfusion .NET MAUI Controls",
+      "version": "1.0.0",
+      "description": "Skills for building .NET MAUI apps with Syncfusion .NET MAUI controls: data grid, charts, scheduler, inputs, navigation and more, with setup, APIs, theming and examples.",
+      "source": "syncfusion/component-skills/maui",
+      "logo": "syncfusion/component-skills/maui/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "skills"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
+      "name": "syncfusion-react",
+      "displayName": "Syncfusion React UI Components",
+      "version": "1.0.0",
+      "description": "Skills for building React apps with Syncfusion React UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+      "source": "syncfusion/component-skills/react",
+      "logo": "syncfusion/component-skills/react/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "skills"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
+    },
+    {
+      "name": "syncfusion-wpf",
+      "displayName": "Syncfusion WPF Controls",
+      "version": "1.0.0",
+      "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples.",
+      "source": "syncfusion/component-skills/wpf",
+      "logo": "syncfusion/component-skills/wpf/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "skills"
+      ],
+      "transports": [],
+      "auth": [],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1
+      },
+      "supportedByGateway": false
     },
     {
       "name": "teaching",
