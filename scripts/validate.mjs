@@ -6,7 +6,7 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { listPlugins, expectedFiles, isMcpPlugin, isCommunityPlugin, CURSOR_HOOKS } from "./build.mjs";
+import { listPlugins, expectedFiles, isMcpPlugin, isCommunityPlugin, isSkillPack, CURSOR_HOOKS } from "./build.mjs";
 import { checkKit, checkCommunity } from "./check-kit.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,7 +55,7 @@ for (const { name, dir: base } of plugins) {
   const meta = validate("boldcreate", `${base}/boldcreate.json`);
   if (!manifest) continue;
 
-  if (manifest.name !== name) fail(`${base}: manifest name "${manifest.name}" must match folder name`);
+  if (manifest.name !== name) fail(`${base}: manifest name "${manifest.name}" must be "${name}"`);
   if (!SEMVER.test(manifest.version ?? "")) fail(`${base}: version "${manifest.version}" is not semver`);
 
   if (manifest.license !== "MIT") fail(`${base}: license must be set (MIT, like cursor/plugins)`);
@@ -73,11 +73,11 @@ for (const { name, dir: base } of plugins) {
     fail(`${base}/CHANGELOG.md has no entry for version ${manifest.version}`);
   }
 
-  if (isCommunityPlugin(base, manifest)) {
-    // Copied from another marketplace: keep it as published, check that it loads,
-    // and record where it came from.
+  if (isCommunityPlugin(base, manifest) || (isSkillPack(base) && !isMcpPlugin(manifest))) {
+    // Copied from another marketplace or a Syncfusion skill repository: keep it as
+    // published, check that it loads, and record where it came from.
     if (existsSync(join(root, base, "mcp.json"))) fail(`${base}/mcp.json exists but the manifest declares no mcpServers`);
-    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required for community plugins`);
+    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required for community plugins and skill packs`);
     for (const key of ["transport", "auth", "alternativeAuth", "oauthScopes", "wave", "hostedBy"]) {
       if (meta && meta[key] !== undefined) fail(`${base}/boldcreate.json: ${key} applies only to MCP plugins`);
     }

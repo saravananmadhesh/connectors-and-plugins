@@ -26,7 +26,7 @@ jobs:
         run: |
           npm install --global @anthropic-ai/claude-code@2.1.310
           claude plugin validate --strict .
-          for dir in */.claude-plugin third_party/*/.claude-plugin; do
+          for dir in */.claude-plugin syncfusion/*/*/.claude-plugin third_party/*/.claude-plugin; do
             plugin="$(dirname "$dir")"
             # Community plugins keep Cursor's hooks/hooks.json, whose events Claude Code
             # ignores with a warning, so those are checked without --strict.
