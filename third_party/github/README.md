@@ -17,10 +17,7 @@ Manage repos, issues, pull requests, and Actions.
   "mcpServers": {
     "github": {
       "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
+      "url": "https://api.githubcopilot.com/mcp/"
     }
   }
 }
@@ -28,13 +25,9 @@ Manage repos, issues, pull requests, and Actions.
 
 ## Setup
 
-Set these when you install the plugin. Secrets are stored encrypted and sent only to the MCP server.
+No settings.
 
-| Setting | Required | Secret | What to enter |
-| --- | --- | --- | --- |
-| **GitHub personal access token** (`GITHUB_PERSONAL_ACCESS_TOKEN`) | Yes | Yes | Fine-grained or classic PAT from https://github.com/settings/tokens with the repo scopes you want the agent to use. |
-
-Tool calls run with the permissions of the key or token you provide. Rotate or revoke it at the vendor if it is ever exposed.
+The first time the agent calls a tool, each member signs in to their own GitHub account in the browser (OAuth). Tool calls run with that member's permissions. GitHub does not support automatic OAuth registration, so a project admin first adds the client ID and secret of a GitHub OAuth app in BoldCreate Connect.
 
 ## Docs
 
