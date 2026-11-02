@@ -7,6 +7,7 @@ data:
   NODE_ENV: production
   LOG_LEVEL: info
   PORT_GATEWAY: '3002'
+  DATA_SOURCE: api
   API_BASE_URL: http://boldcreate-integrations-api-staging.boldcreate-stag.svc.cluster.local:3001
   APP_BASE_URL: https://connect-staging.boldcreate.ai
   PUBLIC_GATEWAY_URL: https://connect-gateway-staging.boldcreate.ai

@@ -86,10 +86,9 @@ export function serviceCatalog(): ServiceEndpoint[] {
       id: 'redis',
       name: 'Redis',
       category: 'Infrastructure',
-      description: `Browser (read-only); redis://localhost:${ports.redis}; cache, flags, login throttle`,
+      description: `redis://localhost:${ports.redis}; cache, flags, login throttle`,
       host: 'localhost',
       port: ports.redis,
-      url: http(ports.redisUi),
     },
     {
       id: 'mailpit',

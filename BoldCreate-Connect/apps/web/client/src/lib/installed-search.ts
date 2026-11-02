@@ -25,6 +25,32 @@ export interface InstalledSearch {
   q?: string | undefined;
   /** How a sign-in to an MCP server ended; set when the provider sends the member back. */
   oauth?: OAuthResult | undefined;
+  /** The error code of a sign-in that did not complete, when the server named one. */
+  reason?: string | undefined;
+  /** What the sign-in service said when it refused, such as `invalid_grant`. */
+  detail?: string | undefined;
+}
+
+const REASON = /^[a-z0-9_]{1,64}$/;
+const DETAIL = /^[A-Za-z0-9_.-]{1,64}$/;
+
+/**
+ * Reads how a sign-in ended. The web server answers `failed` with a `reason`; the api names its
+ * error code (or `denied`) as the outcome itself. Anything but `connected` is a failure.
+ */
+function signInOutcome(
+  search: Record<string, unknown>,
+): Pick<InstalledSearch, 'oauth' | 'reason' | 'detail'> {
+  const { oauth, reason, detail } = search;
+  const none = { reason: undefined, detail: undefined };
+  if (oauth === 'connected') return { oauth: 'connected', ...none };
+  if (typeof oauth !== 'string' || oauth === '') return { oauth: undefined, ...none };
+  const named = oauth === 'failed' ? reason : oauth;
+  return {
+    oauth: 'failed',
+    reason: typeof named === 'string' && REASON.test(named) ? named : undefined,
+    detail: typeof detail === 'string' && DETAIL.test(detail) ? detail : undefined,
+  };
 }
 
 export function validateInstalledSearch(search: Record<string, unknown>): InstalledSearch {
@@ -33,7 +59,31 @@ export function validateInstalledSearch(search: Record<string, unknown>): Instal
   return {
     tab: tab === 'plugins' ? undefined : tab,
     scope,
-    oauth: search.oauth === 'connected' || search.oauth === 'failed' ? search.oauth : undefined,
+    ...signInOutcome(search),
     q: typeof search.q === 'string' && search.q ? search.q : undefined,
   };
+}
+
+const SIGN_IN_SCOPE_KEY = 'boldcreate.signInScope';
+
+/**
+ * Remembers which list a sign-in started from, so a failed return lands there again: only a
+ * successful return says the scope in the address.
+ */
+export function rememberSignInScope(scope: InstalledScope): void {
+  try {
+    sessionStorage.setItem(SIGN_IN_SCOPE_KEY, scope);
+  } catch {
+    // Storage blocked: the page falls back to its default list.
+  }
+}
+
+/** The list the last sign-in started from, when it is known. */
+export function recalledSignInScope(): InstalledScope | undefined {
+  try {
+    const value = sessionStorage.getItem(SIGN_IN_SCOPE_KEY);
+    return INSTALLED_SCOPES.find((item) => item === value);
+  } catch {
+    return undefined;
+  }
 }

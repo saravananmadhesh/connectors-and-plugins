@@ -48,7 +48,7 @@ The route registry in `packages/contracts` is the single source. `pnpm build` wr
 
 ## Local data browsers
 
-`pnpm dev` also starts pgweb (pinned release, sha256 checked, `PORT_POSTGRES_UI`, default 8081) for Postgres and Redis Commander (`redis-commander` dev dependency, `PORT_REDIS_UI`, default 8082) for Redis. Both are read-only, loopback only, started only by the dev launcher and linked from the dev dashboard; they never run in tests or deployments. Rejected: a hand-written viewer page in the dashboard (more code to own); RedisInsight and pgAdmin (heavy desktop or container installs).
+`pnpm dev` starts pgweb (pinned release, sha256 checked, `PORT_POSTGRES_UI`, default 8081) for Postgres. It is read-only, loopback only, started only by the dev launcher and linked from the dev dashboard; it never runs in tests or deployments. Redis browsing was removed because the available Redis Commander release pulled vulnerable dependencies; connect with a local Redis client when inspection is needed. Rejected: a hand-written viewer page in the dashboard (more code to own); RedisInsight and pgAdmin (heavy desktop or container installs).
 
 ## Temporary `env-key` key wrapping removed
 

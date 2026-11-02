@@ -22,6 +22,7 @@ import {
   needsSignIn,
   type AuthDraft,
 } from '@/lib/mcp-auth';
+import { rememberSignInScope } from '@/lib/installed-search';
 import { leaveTo } from '@/lib/navigate';
 import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
@@ -194,6 +195,7 @@ function Body({ orgId, scopeKey, installation, server, canUpdate, replace }: Bod
       return mcpServers.oauthStart(orgId, scopeKey, installation.id, server.componentId);
     },
     onSuccess: ({ authorizeUrl }) => {
+      rememberSignInScope(scopeKey);
       if (!leaveTo(authorizeUrl))
         setError('The sign-in service returned an address that cannot be used.');
     },

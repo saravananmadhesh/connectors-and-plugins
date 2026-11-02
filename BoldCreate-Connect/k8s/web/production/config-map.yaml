@@ -11,3 +11,4 @@ data:
   APP_BASE_URL: https://connect.boldcreate.ai
   PUBLIC_GATEWAY_URL: https://connect-gateway.boldcreate.ai
   NODE_TLS_REJECT_UNAUTHORIZED: '0'
+  OAUTH_REDIRECT_URI: https://connect.boldcreate.ai/api/v1/oauth/callback

@@ -12,6 +12,8 @@ spec:
   template:
     metadata:
       labels: { app.kubernetes.io/name: boldcreate-integrations-gateway-staging }
+      annotations:
+        boldcreate.ai/config-revision: api-data-source
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 30

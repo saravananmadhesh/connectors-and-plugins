@@ -337,6 +337,24 @@ describe('token requests', () => {
     expect(failure).toBeInstanceOf(OAuthError);
     expect((failure as OAuthError).code).toBe(code);
   });
+
+  it.each([
+    ['a refusal with an error code', ok({ error: 'invalid_client' }, 401), 'invalid_client'],
+    [
+      'a refusal sent with 200',
+      ok({ error: 'incorrect_client_credentials' }),
+      'incorrect_client_credentials',
+    ],
+    ['a refusal with no code', ok('nope', 400), 'http_400'],
+    ['a reply without an access token', ok({}), 'no_access_token'],
+    ['a transport error', new Error('x'), 'unreachable'],
+    ['an error code that is not plain', ok({ error: 'bad <b>' }, 400), 'http_400'],
+  ])('names %s', async (_name, answer, detail) => {
+    const failure = await refreshToken(routes({ [tokenUrl]: answer }), metadata, client, 'r').catch(
+      (caught: unknown) => caught,
+    );
+    expect((failure as OAuthError).detail).toBe(detail);
+  });
 });
 
 describe('checkIssuer', () => {
