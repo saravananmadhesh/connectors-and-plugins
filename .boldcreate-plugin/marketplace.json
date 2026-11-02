@@ -1266,7 +1266,7 @@
     {
       "name": "syncfusion-aspnet-core",
       "displayName": "Syncfusion ASP.NET Core UI Controls",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Skills for building ASP.NET Core apps with Syncfusion ASP.NET Core UI controls and Tag Helpers: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples.",
       "source": "syncfusion/component-skills/aspnet-core",
       "logo": "syncfusion/component-skills/aspnet-core/assets/logo.png",
@@ -1285,7 +1285,7 @@
     {
       "name": "syncfusion-aspnet-mvc",
       "displayName": "Syncfusion ASP.NET MVC UI Controls",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Skills for building ASP.NET MVC apps with Syncfusion ASP.NET MVC UI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples.",
       "source": "syncfusion/component-skills/aspnet-mvc",
       "logo": "syncfusion/component-skills/aspnet-mvc/assets/logo.png",
@@ -1304,7 +1304,7 @@
     {
       "name": "syncfusion-blazor",
       "displayName": "Syncfusion Blazor Components",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Skills for building Blazor apps with Syncfusion Blazor components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
       "source": "syncfusion/component-skills/blazor",
       "logo": "syncfusion/component-skills/blazor/assets/logo.png",
@@ -1380,7 +1380,7 @@
     {
       "name": "syncfusion-javascript",
       "displayName": "Syncfusion JavaScript UI Controls",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Skills for building JavaScript and TypeScript apps with Syncfusion Essential JS 2 controls: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
       "source": "syncfusion/component-skills/javascript",
       "logo": "syncfusion/component-skills/javascript/assets/logo.png",
@@ -1551,7 +1551,7 @@
     {
       "name": "syncfusion-wpf",
       "displayName": "Syncfusion WPF Controls",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples.",
       "source": "syncfusion/component-skills/wpf",
       "logo": "syncfusion/component-skills/wpf/assets/logo.png",

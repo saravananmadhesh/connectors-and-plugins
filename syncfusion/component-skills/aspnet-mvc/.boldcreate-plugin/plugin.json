@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
   "name": "syncfusion-aspnet-mvc",
   "displayName": "Syncfusion ASP.NET MVC UI Controls",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Skills for building ASP.NET MVC apps with Syncfusion ASP.NET MVC UI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"

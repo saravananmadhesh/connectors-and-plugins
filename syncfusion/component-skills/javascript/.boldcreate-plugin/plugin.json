@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
   "name": "syncfusion-javascript",
   "displayName": "Syncfusion JavaScript UI Controls",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Skills for building JavaScript and TypeScript apps with Syncfusion Essential JS 2 controls: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"

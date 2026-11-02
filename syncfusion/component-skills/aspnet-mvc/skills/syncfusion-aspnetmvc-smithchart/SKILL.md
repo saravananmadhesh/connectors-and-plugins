@@ -2,9 +2,9 @@
 name: syncfusion-aspnetmvc-smithchart
 description: Implement Syncfusion Smith Chart component for ASP.NET MVC applications. ALWAYS use this skill when users need to visualize transmission line parameters, impedance/admittance data, RF circuit analysis, or high-frequency circuit applications. Trigger immediately for Smith Charts, smith chart visualization, transmission line data, impedance matching, RF visualization, antenna impedance, circuit parameter plots, or any mention of resistance-reactance plotting. Use when building data visualization for electrical engineering, RF design, or telecommunications applications.
 metadata:
+  version: "34.1.29"
   author: "Syncfusion"
   category: "Data Visualization"
-version: "34.1.29"
 ---
 
 # Implementing Syncfusion Smith Chart for ASP.NET MVC

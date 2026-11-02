@@ -2,9 +2,9 @@
 name: syncfusion-aspnetmvc-bullet-chart
 description: Implement Syncfusion ASP.NET MVC Bullet Charts for data visualization. Always use when user needs bullet charts, performance indicators, KPI dashboards, target vs actual comparisons, quality range visualizations, progress metrics, or data with comparative targets. Covers installation, data binding, ranges, value bars, comparative bars, axis customization, labels, tooltips, titles, dimensions, theming, accessibility, and RTL support for ASP.NET MVC applications.
 metadata:
+  version: "34.1.29"
   author: "Syncfusion"
   category: "Data Visualization"
-version: "34.1.29"
 ---
 
 # Implementing Bullet Charts

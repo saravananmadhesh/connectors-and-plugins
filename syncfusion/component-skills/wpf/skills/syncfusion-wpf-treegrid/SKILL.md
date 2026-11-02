@@ -3,8 +3,7 @@ name: syncfusion-wpf-treegrid
 description: Comprehensive guide for implementing Syncfusion WPF TreeGrid (SfTreeGrid) control in Windows Presentation Foundation applications. Use this when displaying hierarchical or self-relational data in a grid format with expandable tree structure. Supports column configuration, sorting and filtering hierarchical data, editing tree nodes, cell merging, exporting, and conditional styling.
 metadata:
   author: "Syncfusion Inc"
-  version : "1.0.0"
-version: "34.1.29"
+  version: "34.1.29"
 ---
 
 # Implementing WPF TreeGrid (SfTreeGrid)
