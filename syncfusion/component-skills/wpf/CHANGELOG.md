@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- `syncfusion-wpf-treegrid`: moved the top-level `version` key under `metadata`.
+
 ## 1.0.2
 
 - Uses the official Syncfusion logo.
