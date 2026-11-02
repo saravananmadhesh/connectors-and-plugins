@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "github",
   "displayName": "GitHub",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Manage repos, issues, pull requests, and Actions.",
   "author": {
     "name": "Syncfusion"
@@ -27,27 +27,17 @@
     "wave": "A"
   },
   "supportedByGateway": true,
-  "variables": {
-    "GITHUB_PERSONAL_ACCESS_TOKEN": {
-      "title": "GitHub personal access token",
-      "description": "Fine-grained or classic PAT from https://github.com/settings/tokens with the repo scopes you want the agent to use.",
-      "required": true,
-      "secret": true
-    }
-  },
+  "variables": {},
   "components": {
     "mcp": [
       {
         "name": "github",
         "transport": "streamable-http",
         "url": "https://api.githubcopilot.com/mcp/",
-        "headers": {
-          "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-        },
         "auth": {
-          "type": "bearer",
+          "type": "oauth",
           "alternatives": [
-            "oauth"
+            "bearer"
           ]
         }
       }
