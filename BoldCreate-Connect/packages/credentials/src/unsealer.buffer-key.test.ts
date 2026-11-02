@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { FakeClock } from '@boldcreate-integrations/adapters/system';
 import { createOrgKeyCache } from './org-key-cache.js';
 import { generateOrgKeyPair } from './org-key-pair.js';
 import { createSealer } from './sealer.js';
@@ -38,7 +37,7 @@ describe('unsealer with a key management service that returns a Buffer', () => {
           status: 'active',
         }),
       },
-      keyCache: createOrgKeyCache({ max: 10, ttlSeconds: 300, clock: new FakeClock() }),
+      keyCache: createOrgKeyCache({ max: 10, ttlSeconds: 300, clock: { nowMs: () => 0 } }),
     });
     const context = {
       purpose: 'connection_secret' as const,
