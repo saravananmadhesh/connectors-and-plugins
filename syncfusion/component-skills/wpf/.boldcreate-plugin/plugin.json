@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
   "name": "syncfusion-wpf",
   "displayName": "Syncfusion WPF Controls",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"

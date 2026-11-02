@@ -210,6 +210,12 @@ export function checkCommunity(dir) {
     if (fm.name && fm.name !== name) errors.push(`${dir}/${rel}: name "${fm.name}" must match the folder name`);
     // Agents skip a skill whose name or description is over the Agent Skills limits.
     if (typeof fm.name === "string" && fm.name.length > 64) errors.push(`${dir}/${rel}: name is over 64 characters`);
+    if (typeof fm.name === "string" && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(fm.name)) {
+      errors.push(`${dir}/${rel}: name may use only lowercase letters, digits and single hyphens`);
+    }
+    if (typeof fm.description === "string" && /[<>]/.test(fm.description)) {
+      errors.push(`${dir}/${rel}: description must not contain < or >`);
+    }
     if (typeof fm.description === "string" && fm.description.trim().length > 1024) {
       errors.push(`${dir}/${rel}: description is ${fm.description.trim().length} characters (limit 1024)`);
     }

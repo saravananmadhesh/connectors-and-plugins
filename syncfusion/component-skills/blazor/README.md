@@ -16,7 +16,7 @@ The skills need no license key to install. Building an app with Syncfusion packa
 
 | Skill |
 |:------|
-| `syncfusion-blazor-3D-charts` |
+| `syncfusion-blazor-3d-charts` |
 | `syncfusion-blazor-accordion` |
 | `syncfusion-blazor-accumulation-chart` |
 | `syncfusion-blazor-ai-assistview` |

@@ -1,6 +1,6 @@
 ---
 name: syncfusion-aspnetcore-ribbon
-description: Implement the Syncfusion ASP.NET Core Ribbon control using Razor Tag Helpers. Use this skill when the user mentions Syncfusion ASP.NET Core Ribbon, `<ejs-ribbon>`, `<e-ribbon-tab>`, `<e-ribbon-group>`, Razor Tag Helpers, ribbon implementation, tabs, groups, items, file menu, backstage, layouts, events, or ASP.NET Core ribbon setup. Covers installation, tag helper registration, component structure, items, events, theming, accessibility, and advanced patterns.
+description: Implement the Syncfusion ASP.NET Core Ribbon control using Razor Tag Helpers. Use this skill when the user mentions Syncfusion ASP.NET Core Ribbon, the ejs-ribbon, e-ribbon-tab and e-ribbon-group tag helpers, Razor Tag Helpers, ribbon implementation, tabs, groups, items, file menu, backstage, layouts, events, or ASP.NET Core ribbon setup. Covers installation, tag helper registration, component structure, items, events, theming, accessibility, and advanced patterns.
 metadata:
   author: "Syncfusion Inc"
   version: "34.1.29"

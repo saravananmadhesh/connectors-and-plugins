@@ -1,13 +1,12 @@
 ---
 name: syncfusion-aspnetmvc-speech-to-text
 description: Implement Syncfusion Speech To Text control in ASP.NET MVC applications using HTML Helpers. ALWAYS use this skill when the user needs ASP.NET MVC speech recognition, voice input, Web Speech API integration, speech-to-text transcription, or help with the Speech To Text control (@Html.EJS().SpeechToText()). Covers installation, HTML helper setup, speech recognition, customization, events, error handling, and accessibility patterns specific to ASP.NET MVC.
-license: "SEE LICENSE IN license"
 metadata:
+  version: "34.1.29"
   author: "Syncfusion"
   category: "Inputs"
   platform: "ASP.NET MVC"
   component: "SpeechToText"
-version: "34.1.29"
 ---
 
 # Speech To Text Control - ASP.NET MVC
