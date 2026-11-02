@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- `syncfusion-blazor-3d-charts`: the skill was named `syncfusion-blazor-3D-charts`; agents accept only lowercase skill names, so the folder and name are now lowercase.
+
 ## 1.0.1
 
 - Uses the official Syncfusion logo.

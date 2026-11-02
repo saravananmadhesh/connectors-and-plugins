@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- `syncfusion-aspnetmvc-bullet-chart`, `-smithchart` and `-speech-to-text`: moved the top-level `version` key under `metadata`, and removed a `license` line that pointed to a file that does not exist.
+
 ## 1.0.1
 
 - Uses the official Syncfusion logo.

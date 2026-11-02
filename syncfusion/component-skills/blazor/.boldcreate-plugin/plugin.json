@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
   "name": "syncfusion-blazor",
   "displayName": "Syncfusion Blazor Components",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Skills for building Blazor apps with Syncfusion Blazor components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
   "author": {
     "name": "Syncfusion"
@@ -33,7 +33,7 @@
   "components": {
     "mcp": [],
     "skills": [
-      "syncfusion-blazor-3D-charts",
+      "syncfusion-blazor-3d-charts",
       "syncfusion-blazor-accordion",
       "syncfusion-blazor-accumulation-chart",
       "syncfusion-blazor-ai-assistview",

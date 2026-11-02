@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- `syncfusion-aspnetcore-blockeditor` and `syncfusion-aspnetcore-ribbon`: removed `<` and `>` from the descriptions (tag names are now written without brackets), because agents reject angle brackets in a skill description.
+
 ## 1.0.1
 
 - Uses the official Syncfusion logo.
