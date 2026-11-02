@@ -17,3 +17,4 @@ data:
   OPEN_SIGNUP_ENABLED: 'true'
   APP_BASE_URL: https://connect-staging.boldcreate.ai
   PUBLIC_GATEWAY_URL: https://connect-gateway-staging.boldcreate.ai
+  OAUTH_REDIRECT_URI: https://connect-staging.boldcreate.ai/api/v1/oauth/callback

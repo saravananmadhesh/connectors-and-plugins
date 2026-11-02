@@ -17,10 +17,27 @@ export type OAuthFailureCode =
   | 'oauth_issuer_mismatch';
 
 export class OAuthError extends Error {
-  constructor(readonly code: OAuthFailureCode) {
+  /**
+   * What the other side said, when it said something: its OAuth `error` code, or `http_<status>`,
+   * `unreachable` or `no_access_token`. Never a description or token text.
+   */
+  readonly detail: string | undefined;
+
+  constructor(
+    readonly code: OAuthFailureCode,
+    detail?: string,
+  ) {
     super(code);
     this.name = 'OAuthError';
+    this.detail = detail;
   }
+}
+
+const DETAIL = /^[A-Za-z0-9_.-]{1,64}$/;
+
+/** A provider's error code, when it is short and plain enough to repeat. */
+export function oauthErrorDetail(value: unknown): string | undefined {
+  return typeof value === 'string' && DETAIL.test(value) ? value : undefined;
 }
 
 const TIMEOUT_MS = 10_000;
@@ -256,16 +273,19 @@ async function tokenRequest(
       { timeoutMs: TIMEOUT_MS },
     );
   } catch {
-    throw new OAuthError('oauth_token_failed');
+    throw new OAuthError('oauth_token_failed', 'unreachable');
   }
   const body = json(response);
+  const providerError = oauthErrorDetail(body?.['error']);
   if (response.status < 200 || response.status >= 300) {
     throw new OAuthError(
       body?.['error'] === 'invalid_grant' ? 'oauth_invalid_grant' : 'oauth_token_failed',
+      providerError ?? `http_${response.status}`,
     );
   }
   const accessToken = text(body?.['access_token']);
-  if (!accessToken) throw new OAuthError('oauth_token_failed');
+  // Some servers (GitHub) answer a refusal with 200 and an `error` field.
+  if (!accessToken) throw new OAuthError('oauth_token_failed', providerError ?? 'no_access_token');
   const refreshToken = text(body?.['refresh_token']);
   const scope = text(body?.['scope']);
   const expiresIn = typeof body?.['expires_in'] === 'number' ? body['expires_in'] : undefined;

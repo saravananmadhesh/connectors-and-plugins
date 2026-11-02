@@ -39,7 +39,6 @@
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
     "oxlint": "catalog:",
-    "shadcn": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"

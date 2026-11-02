@@ -1,21 +1,18 @@
 /**
- * Local data browsers started by `pnpm dev`: pgweb for Postgres and Redis Commander for Redis.
+ * Local data browser started by `pnpm dev`: pgweb for Postgres.
  *
- * Both are read-only, listen on loopback only and are optional: if one cannot start, the
+ * It is read-only, listens on loopback only and is optional: if it cannot start, the
  * rest of the stack keeps running and the problem is printed.
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, createWriteStream, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureArchivedTool, PGWEB_VERSION, pgwebAssets } from './infra-tools.js';
-import { repoRoot, toolsCache } from './local-infra.js';
+import { toolsCache } from './local-infra.js';
 
 export interface DataViewerOptions {
   databaseUrl: string;
   postgresUiPort: number;
-  redisPort: number;
-  redisPassword: string;
-  redisUiPort: number;
   logDir: string;
 }
 
@@ -64,24 +61,6 @@ export async function startDataViewers(options: DataViewerOptions): Promise<() =
     ]);
   } catch (error) {
     console.warn(`[dev] pgweb unavailable: ${error instanceof Error ? error.message : error}`);
-  }
-
-  const commander = join(repoRoot, 'node_modules', 'redis-commander', 'bin', 'redis-commander.js');
-  if (existsSync(commander)) {
-    launch('redis-commander', process.execPath, [
-      commander,
-      '--address=127.0.0.1',
-      `--port=${options.redisUiPort}`,
-      '--redis-host=127.0.0.1',
-      `--redis-port=${options.redisPort}`,
-      `--redis-password=${options.redisPassword}`,
-      '--read-only',
-      '--noload',
-      '--nosave',
-      '--no-log-data',
-    ]);
-  } else {
-    console.warn('[dev] redis-commander is not installed; run pnpm install');
   }
 
   return () => {

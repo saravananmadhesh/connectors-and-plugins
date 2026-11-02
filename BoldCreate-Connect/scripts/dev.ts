@@ -92,9 +92,6 @@ console.log(
 const stopDataViewers = await startDataViewers({
   databaseUrl: process.env['DATABASE_URL']!,
   postgresUiPort: ports.postgresUi,
-  redisPort: ports.redis,
-  redisPassword: devSecrets['REDIS_PASSWORD']!,
-  redisUiPort: ports.redisUi,
   logDir: join(dataDir, 'logs'),
 });
 

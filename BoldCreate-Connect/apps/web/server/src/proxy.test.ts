@@ -415,10 +415,17 @@ describe('oauth callback', () => {
   });
 
   it.each([
-    ['an api error', { status: 400, body: { error: { code: 'validation_failed', message: 'x' } } }],
-    ['a page that is not json', { status: 502, raw: '<html>bad gateway</html>' }],
-    ['an unreachable api', 'throw' as const],
-  ])('sends the member to the failed sign-in page on %s', async (_name, answer) => {
+    [
+      'an api error',
+      {
+        status: 400,
+        body: { error: { code: 'oauth_state_invalid', message: 'x', requestId: 'r1' } },
+      },
+      'oauth_state_invalid',
+    ],
+    ['a page that is not json', { status: 502, raw: '<html>bad gateway</html>' }, 'http_502'],
+    ['an unreachable api', 'throw' as const, 'upstream_unavailable'],
+  ])('sends the member to the failed sign-in page on %s', async (_name, answer, reason) => {
     const w = await build();
     w.reply(answer);
     const res = await w.server.app.inject({
@@ -426,7 +433,7 @@ describe('oauth callback', () => {
       url: `/api/v1/oauth/callback?${query}&_r=1`,
     });
     expect(res.statusCode).toBe(302);
-    expect(res.headers['location']).toBe('/installed?tab=mcp&oauth=failed');
+    expect(res.headers['location']).toBe(`/installed?tab=mcp&oauth=failed&reason=${reason}`);
     expect(res.headers['cache-control']).toBe('no-store');
   });
 
