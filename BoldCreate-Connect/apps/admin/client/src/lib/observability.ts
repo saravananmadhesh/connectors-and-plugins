@@ -1,5 +1,5 @@
 /** Wording, colours and arithmetic for the errors, events and storage screens. */
-import type { AdminErrorGroup, AdminOpsEvent } from './api';
+import type { AdminErrorGroup, AdminErrorOccurrence, AdminOpsEvent } from './api';
 import { OBSERVABILITY_RANGES, type ObservabilitySearch, type OverviewWindow } from './search';
 
 type Tone = 'success' | 'warning' | 'info' | 'destructive' | 'secondary';
@@ -89,6 +89,38 @@ export function recordRows(record: Record<string, unknown> | null): [string, str
     key,
     typeof value === 'string' ? value : JSON.stringify(value),
   ]);
+}
+
+/** One occurrence as plain text, ready to paste into a ticket or a chat. */
+export function occurrenceText(
+  group: Pick<AdminErrorGroup, 'title' | 'service' | 'area'>,
+  item: AdminErrorOccurrence,
+): string {
+  const facts: [string, string | null][] = [
+    ['Error', group.title],
+    ['Service', group.area ? `${group.service} · ${group.area}` : group.service],
+    ['Time', item.occurredAt],
+    ['Environment', item.environment],
+    ['Release', item.appVersion],
+    ['Instance', item.instanceId],
+    ['Request', item.requestId],
+    ['Trace', item.traceId],
+    ['Organization', item.orgId],
+  ];
+  const lines = facts.flatMap(([term, value]) => (value ? [`${term}: ${value}`] : []));
+  for (const [key, value] of recordRows(item.context)) lines.push(`${key}: ${value}`);
+  if (item.stack) lines.push('', 'Stack:', item.stack);
+  return lines.join('\n');
+}
+
+/** An error group with its occurrences, or the group alone, as formatted JSON for a ticket or a chat. */
+export function errorJson(group: AdminErrorGroup, occurrences?: AdminErrorOccurrence[]): string {
+  return JSON.stringify(occurrences ? { ...group, occurrences } : group, null, 2);
+}
+
+/** One key event as formatted JSON. */
+export function eventJson(event: AdminOpsEvent): string {
+  return JSON.stringify(event, null, 2);
 }
 
 /** Table names are stored as `error_event`; people read "Error event". */

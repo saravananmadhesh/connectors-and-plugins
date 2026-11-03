@@ -81,7 +81,7 @@ export const projectKeyTable = pgTable(
     scopes: text('scopes').array().notNull(),
     /** Null means any address. */
     allowedCidrs: text('allowed_cidrs').array(),
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
     createdBy: uuid('created_by')
       .notNull()

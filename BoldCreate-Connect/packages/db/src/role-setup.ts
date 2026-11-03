@@ -32,10 +32,36 @@ export interface SqlClient {
   query(text: string): Promise<unknown>;
 }
 
+/** Session settings a role starts with; a client may still set its own when it connects. */
+export interface RoleSessionDefaults {
+  /** Milliseconds before a running statement is cancelled. */
+  statementTimeoutMs?: number;
+  /** Milliseconds a transaction may sit idle before its connection is closed. */
+  idleInTransactionTimeoutMs?: number;
+}
+
 export interface RoleSetupOptions {
   passwords: Record<LoginRole, string>;
   connectionLimits?: Partial<Record<LoginRole, number>>;
+  /**
+   * Settings stored on the role. A transaction pooler drops the startup parameters a service
+   * sends (`statement_timeout`), so these are what keep a runaway statement or a stuck
+   * transaction from holding a shared connection.
+   */
+  sessionDefaults?: Partial<Record<LoginRole, RoleSessionDefaults>>;
 }
+
+/**
+ * Session defaults for roles that connect through a transaction pooler. Only the api had a
+ * statement timeout before pooling (15 s), so only the api gets one; every serving role gets the
+ * idle-in-transaction limit, which a pooler needs so a stuck client cannot hold a connection.
+ */
+export const POOLED_SESSION_DEFAULTS: Partial<Record<LoginRole, RoleSessionDefaults>> = {
+  api: { statementTimeoutMs: 15_000, idleInTransactionTimeoutMs: 15_000 },
+  gateway: { idleInTransactionTimeoutMs: 15_000 },
+  worker: { idleInTransactionTimeoutMs: 15_000 },
+  admin: { idleInTransactionTimeoutMs: 15_000 },
+};
 
 const quoteIdent = (name: string) => `"${name.replaceAll('"', '""')}"`;
 const quoteLiteral = (value: string) => `'${value.replaceAll("'", "''")}'`;
@@ -53,6 +79,17 @@ function createRoleStatements(options: RoleSetupOptions): string[] {
         `${BYPASS_RLS.has(role) ? 'BYPASSRLS' : 'NOBYPASSRLS'} CONNECTION LIMIT ${limit} ` +
         `PASSWORD ${quoteLiteral(options.passwords[role])}`,
     );
+    const defaults = options.sessionDefaults?.[role];
+    for (const [setting, value] of [
+      ['statement_timeout', defaults?.statementTimeoutMs],
+      ['idle_in_transaction_session_timeout', defaults?.idleInTransactionTimeoutMs],
+    ] as const) {
+      if (value === undefined) continue;
+      if (!Number.isInteger(value) || value < 0) {
+        throw new Error(`${setting} for ${name} must be a whole number of milliseconds, 0 or more`);
+      }
+      statements.push(`ALTER ROLE ${quoteIdent(name)} SET ${setting} = ${value}`);
+    }
   }
   return statements;
 }

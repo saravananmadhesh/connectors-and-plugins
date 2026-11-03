@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Limits UI mockup</title>
+    <style>
+      :root {
+        --bg: #fff;
+        --fg: #111;
+        --muted: #6b6b6b;
+        --line: #e4e4e4;
+        --card: #fafafa;
+        --accent: #111;
+        --accent-fg: #fff;
+        --danger: #b3261e;
+        --warn: #8a5a00;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #0d0d0d;
+          --fg: #ededed;
+          --muted: #9a9a9a;
+          --line: #2a2a2a;
+          --card: #151515;
+          --accent: #ededed;
+          --accent-fg: #0d0d0d;
+          --danger: #f2877f;
+          --warn: #e0b45a;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #0d0d0d;
+        --fg: #ededed;
+        --muted: #9a9a9a;
+        --line: #2a2a2a;
+        --card: #151515;
+        --accent: #ededed;
+        --accent-fg: #0d0d0d;
+        --danger: #f2877f;
+        --warn: #e0b45a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0;
+      }
+      h2 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 24px 0 8px;
+      }
+      p.lead {
+        color: var(--muted);
+        margin: 4px 0 16px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      button,
+      select,
+      input {
+        font: inherit;
+        color: inherit;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 6px 12px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--accent);
+        color: var(--accent-fg);
+        border-color: var(--accent);
+      }
+      button.danger {
+        color: var(--danger);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      input[type='checkbox'] {
+        padding: 0;
+        width: 16px;
+        height: 16px;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 16px;
+      }
+      .tabs button {
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        background: transparent;
+        color: var(--muted);
+      }
+      .tabs button[aria-selected='true'] {
+        color: var(--fg);
+        border-bottom-color: var(--accent);
+      }
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .filters input[type='search'] {
+        min-width: 220px;
+        flex: 1;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .bulk {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        background: var(--card);
+      }
+      .wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+      }
+      th {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+        background: var(--card);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td.num {
+        font-variant-numeric: tabular-nums;
+      }
+      td.actions {
+        text-align: right;
+      }
+      .tag {
+        font-size: 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 1px 8px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 12px;
+      }
+      .meter {
+        display: inline-block;
+        width: 64px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--line);
+        vertical-align: middle;
+        margin-left: 6px;
+        overflow: hidden;
+      }
+      .meter i {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+      }
+      .meter.hot i {
+        background: var(--warn);
+      }
+      .pager {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+      dialog {
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 20px;
+        width: min(460px, calc(100vw - 32px));
+      }
+      dialog::backdrop {
+        background: rgb(0 0 0 / 0.5);
+      }
+      label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 500;
+      }
+      label input,
+      label select {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        font-weight: 400;
+      }
+      .err {
+        font-size: 12px;
+        margin: 6px 0 0;
+        min-height: 18px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .results {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-top: 4px;
+        max-height: 190px;
+        overflow-y: auto;
+      }
+      .results button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        border-radius: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .results button:last-child {
+        border-bottom: 0;
+      }
+      .picked {
+        margin-top: 4px;
+        padding: 6px 10px;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+      }
+      .note {
+        margin-top: 28px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .empty {
+        padding: 32px;
+        text-align: center;
+        color: var(--muted);
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="top">
+        <div>
+          <h1>Limits</h1>
+          <p class="lead">
+            Request and capacity limits. Every change is recorded in the audit log.
+          </p>
+        </div>
+        <div class="filters" style="margin: 0">
+          <label style="margin: 0; font-weight: 400">
+            View as
+            <select id="role" style="display: inline-block; width: auto; margin: 0">
+              <option value="write">Admin (write)</option>
+              <option value="view">Admin (view only)</option>
+            </select>
+          </label>
+          <button id="theme" type="button">Theme</button>
+        </div>
+      </div>
+
+      <p
+        class="muted small"
+        id="status"
+        role="status"
+        style="min-height: 18px; margin: 0 0 8px"
+      ></p>
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="defaults" aria-selected="true">Defaults</button>
+        <button role="tab" data-tab="overrides" aria-selected="false">
+          Overrides <span class="tag" id="count"></span>
+        </button>
+        <span class="spacer"></span>
+        <a href="#audit" class="muted small" style="align-self: center"
+          >Limit changes in the audit log</a
+        >
+      </div>
+
+      <!-- Defaults: global values only, one row per limit. -->
+      <section id="tab-defaults">
+        <p class="muted">
+          Defaults apply to every organization and project without its own override. A change
+          reaches all api instances within about 30 seconds.
+        </p>
+        <div id="defaults"></div>
+      </section>
+
+      <!-- Overrides: only the values that were set, searchable and paged. -->
+      <section id="tab-overrides" hidden>
+        <div class="filters">
+          <input
+            id="q"
+            type="search"
+            placeholder="Search organization or project"
+            aria-label="Search"
+          />
+          <select id="f-limit" aria-label="Limit">
+            <option value="">All limits</option>
+          </select>
+          <select id="f-scope" aria-label="Scope">
+            <option value="">All scopes</option>
+            <option>Organization</option>
+            <option>Project</option>
+          </select>
+          <select id="f-sort" aria-label="Sort">
+            <option value="recent">Most recent</option>
+            <option value="usage">Closest to limit</option>
+            <option value="name">Name</option>
+          </select>
+          <span class="spacer"></span>
+          <button id="export" type="button">Export CSV</button>
+          <button id="add" type="button" class="primary">Add override</button>
+        </div>
+        <div class="bulk" id="bulk" hidden>
+          <strong id="bulk-n"></strong>
+          <button id="bulk-set" type="button">Set value</button>
+          <button id="bulk-remove" type="button" class="danger">Remove overrides</button>
+          <button id="bulk-clear" type="button">Clear selection</button>
+        </div>
+        <div class="wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 32px">
+                  <input id="all" type="checkbox" aria-label="Select page" />
+                </th>
+                <th>Scope</th>
+                <th>Name</th>
+                <th>Limit</th>
+                <th>Value</th>
+                <th>Default</th>
+                <th>Usage</th>
+                <th>Set by</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty" id="none" hidden>No overrides match these filters.</div>
+        </div>
+        <div class="pager">
+          <span class="muted small" id="range"></span>
+          <button id="prev" type="button">Previous</button>
+          <button id="next" type="button">Next</button>
+        </div>
+      </section>
+
+      <p class="note">
+        Delivered so far: the Defaults tab for Project requests / minute (global only). The rest is
+        planned in project-rate-limits.md. Changes are recorded in the existing audit log; this page
+        has no history of its own. Static mockup with generated sample data (200 organizations,
+        1,000 projects, 300+ overrides). Changes live only in this page. Resolution order: project,
+        organization, global, built-in. The picker, filters and paging stand in for server-side
+        queries.
+      </p>
+    </main>
+
+    <!-- Edit, add or defaults edit. -->
+    <dialog id="dlg">
+      <form id="form" method="dialog">
+        <strong id="dlg-title"></strong>
+        <div id="pick-block">
+          <label for="pick">Organization or project</label>
+          <input id="pick" type="search" placeholder="Type to search" autocomplete="off" />
+          <div class="results" id="results" hidden></div>
+          <div class="picked" id="picked" hidden></div>
+          <label>
+            Limit
+            <select id="dlg-limit"></select>
+          </label>
+        </div>
+        <p class="hint small muted" id="dlg-scope"></p>
+        <label>
+          Value
+          <input id="dlg-value" inputmode="numeric" autocomplete="off" />
+        </label>
+        <p class="err" id="dlg-err"></p>
+        <label>
+          Reason
+          <input id="dlg-reason" maxlength="500" autocomplete="off" />
+        </label>
+        <p class="small muted">
+          The reason is kept in the audit log. A change takes effect within about 30 seconds.
+        </p>
+        <div class="row">
+          <button type="button" id="dlg-remove" class="danger">Remove override</button>
+          <button type="button" id="dlg-cancel">Cancel</button>
+          <button type="submit" class="primary" id="dlg-save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Bulk change with a preview. -->
+    <dialog id="bdlg">
+      <form id="bform" method="dialog">
+        <strong id="bdlg-title"></strong>
+        <p id="bdlg-preview" class="muted"></p>
+        <label id="bdlg-value-wrap">
+          New value
+          <input id="bdlg-value" inputmode="numeric" autocomplete="off" />
+        </label>
+        <p class="err" id="bdlg-err"></p>
+        <label>
+          Reason
+          <input id="bdlg-reason" maxlength="500" autocomplete="off" />
+        </label>
+        <label id="bdlg-type-wrap">
+          Type CHANGE to confirm
+          <input id="bdlg-type" autocomplete="off" />
+        </label>
+        <div class="row">
+          <button type="button" id="bdlg-cancel">Cancel</button>
+          <button type="submit" class="primary" id="bdlg-save">Apply</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      const LIMITS = [
+        {
+          k: 'project_requests_per_minute',
+          n: 'Project requests / minute',
+          g: 'Requests',
+          d: 5000,
+          min: 60,
+          max: 100000,
+          u: 'per 60 s',
+        },
+        {
+          k: 'key_requests_per_minute',
+          n: 'Key requests / minute',
+          g: 'Requests',
+          d: 5000,
+          min: 60,
+          max: 100000,
+          u: 'per 60 s',
+        },
+        {
+          k: 'org_key_requests_per_minute',
+          n: 'Org key requests / minute',
+          g: 'Requests',
+          d: 3000,
+          min: 60,
+          max: 100000,
+          u: 'per 60 s',
+        },
+        {
+          k: 'projects_per_organization',
+          n: 'Projects per organization',
+          g: 'Capacity',
+          d: 25,
+          min: 1,
+          max: 1000,
+          u: 'count',
+          orgOnly: true,
+        },
+        {
+          k: 'keys_per_project',
+          n: 'Keys per project',
+          g: 'Capacity',
+          d: 10,
+          min: 1,
+          max: 100,
+          u: 'count',
+        },
+        {
+          k: 'users_per_project',
+          n: 'Users per project',
+          g: 'Capacity',
+          d: 50000,
+          min: 100,
+          max: 1000000,
+          u: 'count',
+        },
+        {
+          k: 'sessions_per_user',
+          n: 'Sessions per user',
+          g: 'Capacity',
+          d: 20,
+          min: 1,
+          max: 200,
+          u: 'count',
+        },
+        {
+          k: 'plugins_per_project',
+          n: 'Plugins per project',
+          g: 'Plugins',
+          d: 100,
+          min: 1,
+          max: 1000,
+          u: 'count',
+        },
+        {
+          k: 'webhook_max_attempts',
+          n: 'Webhook attempts',
+          g: 'Webhooks',
+          d: 8,
+          min: 1,
+          max: 20,
+          u: 'attempts',
+          globalOnly: true,
+        },
+        {
+          k: 'webhook_timeout_seconds',
+          n: 'Webhook timeout',
+          g: 'Webhooks',
+          d: 5,
+          min: 1,
+          max: 30,
+          u: 'seconds',
+          globalOnly: true,
+        },
+        {
+          k: 'key_lifetime_days_default',
+          n: 'Key lifetime (default)',
+          g: 'Lifetimes',
+          d: 90,
+          min: 1,
+          max: 365,
+          u: 'days',
+          globalOnly: true,
+        },
+        {
+          k: 'key_lifetime_days_max',
+          n: 'Key lifetime (ceiling)',
+          g: 'Lifetimes',
+          d: 365,
+          fixed: true,
+          u: 'days',
+        },
+      ];
+      const byKey = Object.fromEntries(LIMITS.map((l) => [l.k, l]));
+      const overridable = LIMITS.filter((l) => !l.fixed && !l.globalOnly);
+      const PEOPLE = ['amy', 'raj', 'li', 'sam'];
+
+      // Seeded sample data so the page looks the same on every load.
+      let seed = 7;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const pad = (n, w) => String(n).padStart(w, '0');
+      const SCOPES = [];
+      for (let o = 1; o <= 200; o++) {
+        SCOPES.push({ type: 'Organization', name: 'Org ' + pad(o, 3), org: 'Org ' + pad(o, 3) });
+        for (let p = 1; p <= 5; p++)
+          SCOPES.push({ type: 'Project', name: 'Shop ' + p, org: 'Org ' + pad(o, 3) });
+      }
+      let nextId = 1;
+      const overrides = [];
+      for (let i = 0; i < 312; i++) {
+        const s = SCOPES[Math.floor(rnd() * SCOPES.length)];
+        const l = overridable[Math.floor(rnd() * overridable.length)];
+        if (l.orgOnly && s.type !== 'Organization') continue;
+        if (
+          overrides.some(
+            (o) =>
+              o.scope.org === s.org &&
+              o.scope.name === s.name &&
+              o.scope.type === s.type &&
+              o.k === l.k,
+          )
+        )
+          continue;
+        overrides.push({
+          id: nextId++,
+          scope: s,
+          k: l.k,
+          value: Math.max(l.min, Math.min(l.max, Math.round(l.d * (1.2 + rnd() * 3)))),
+          by: PEOPLE[Math.floor(rnd() * PEOPLE.length)],
+          daysAgo: Math.floor(rnd() * 60),
+          used: rnd(),
+        });
+      }
+      const globals = { users_per_project: 80000 };
+      const logChange = (scopeText, k) => {
+        $('status').textContent =
+          `Saved. ${byKey[k].n} for ${scopeText} is recorded in the audit log.`;
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const fmt = (n) => n.toLocaleString('en-US');
+      const canWrite = () => $('role').value === 'write';
+      function label(s) {
+        return s.type === 'Project' ? s.org + ' / ' + s.name : s.name;
+      }
+      const effectiveGlobal = (k) => globals[k] ?? byKey[k].d;
+
+      /* ---------- tabs ---------- */
+      function showTab(name) {
+        document
+          .querySelectorAll('[data-tab]')
+          .forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+        ['defaults', 'overrides'].forEach((t) => ($('tab-' + t).hidden = t !== name));
+      }
+
+      /* ---------- defaults ---------- */
+      function renderDefaults() {
+        const groups = [...new Set(LIMITS.map((l) => l.g))];
+        $('defaults').innerHTML = groups
+          .map((g) => {
+            const rows = LIMITS.filter((l) => l.g === g)
+              .map((l) => {
+                const own = globals[l.k];
+                const action = l.fixed
+                  ? '<span class="muted">Fixed</span>'
+                  : canWrite()
+                    ? `<button data-edit-global="${l.k}">Edit</button>`
+                    : '';
+                return `<tr>
+                  <td>${l.n}<div class="muted small">${l.k}</div></td>
+                  <td class="num"><strong>${fmt(own ?? l.d)}</strong> <span class="muted">${l.u}</span></td>
+                  <td class="num muted">${fmt(l.d)}</td>
+                  <td>${l.fixed ? '<span class="tag">Fixed</span>' : own === undefined ? '<span class="tag">Built-in</span>' : '<span class="tag">Global</span>'}</td>
+                  <td class="muted small">${l.fixed ? 'Security ceiling. Changing it needs a deploy.' : l.globalOnly ? 'Global only' : 'Can be overridden per organization or project'}</td>
+                  <td class="actions">${action}</td>
+                </tr>`;
+              })
+              .join('');
+            return `<h2>${g}</h2><div class="wrap"><table>
+              <thead><tr><th>Limit</th><th>In force</th><th>Built-in</th><th>Source</th><th>Scope</th><th></th></tr></thead>
+              <tbody>${rows}</tbody></table></div>`;
+          })
+          .join('');
+      }
+
+      /* ---------- overrides ---------- */
+      const PAGE = 10;
+      let page = 0;
+      const selected = new Set();
+
+      function filtered() {
+        const q = $('q').value.trim().toLowerCase();
+        const lim = $('f-limit').value;
+        const sc = $('f-scope').value;
+        let list = overrides.filter(
+          (o) =>
+            (!q || label(o.scope).toLowerCase().includes(q)) &&
+            (!lim || o.k === lim) &&
+            (!sc || o.scope.type === sc),
+        );
+        const sort = $('f-sort').value;
+        list = [...list].sort((a, b) =>
+          sort === 'usage'
+            ? b.used - a.used
+            : sort === 'name'
+              ? label(a.scope).localeCompare(label(b.scope))
+              : a.daysAgo - b.daysAgo,
+        );
+        return list;
+      }
+
+      function renderOverrides() {
+        $('count').textContent = overrides.length;
+        const list = filtered();
+        const pages = Math.max(1, Math.ceil(list.length / PAGE));
+        page = Math.min(page, pages - 1);
+        const slice = list.slice(page * PAGE, page * PAGE + PAGE);
+        $('none').hidden = list.length > 0;
+        $('rows').innerHTML = slice
+          .map((o) => {
+            const l = byKey[o.k];
+            const pct = Math.round(o.used * 100);
+            return `<tr>
+              <td><input type="checkbox" data-sel="${o.id}" ${selected.has(o.id) ? 'checked' : ''} ${canWrite() ? '' : 'disabled'} aria-label="Select" /></td>
+              <td><span class="tag">${o.scope.type}</span></td>
+              <td>${label(o.scope)}</td>
+              <td>${l.n}</td>
+              <td class="num"><strong>${fmt(o.value)}</strong></td>
+              <td class="num muted">${fmt(effectiveGlobal(o.k))}</td>
+              <td class="num">${pct}%<span class="meter ${pct >= 80 ? 'hot' : ''}"><i style="width:${pct}%"></i></span></td>
+              <td class="muted small">${o.by}, ${o.daysAgo} d ago</td>
+              <td class="actions">${canWrite() ? `<button data-edit="${o.id}">Edit</button>` : ''}</td>
+            </tr>`;
+          })
+          .join('');
+        const from = list.length === 0 ? 0 : page * PAGE + 1;
+        $('range').textContent =
+          `${from}–${Math.min(list.length, page * PAGE + PAGE)} of ${fmt(list.length)}`;
+        $('prev').disabled = page === 0;
+        $('next').disabled = page >= pages - 1;
+        $('add').hidden = !canWrite();
+        $('bulk').hidden = selected.size === 0 || !canWrite();
+        $('bulk-n').textContent = selected.size + ' selected';
+        $('all').checked = slice.length > 0 && slice.every((o) => selected.has(o.id));
+        $('all').disabled = !canWrite();
+      }
+
+      /* ---------- edit / add dialog ---------- */
+      let mode = null; // { kind: 'global' | 'edit' | 'add', limit, override }
+      let picked = null;
+
+      function range(l) {
+        return l.min == null ? '' : `Allowed: ${fmt(l.min)} to ${fmt(l.max)}.`;
+      }
+
+      function checkDialog() {
+        const l = mode.kind === 'add' ? byKey[$('dlg-limit').value] : mode.limit;
+        const raw = $('dlg-value').value.trim();
+        const v = Number(raw);
+        let msg = '';
+        if (mode.kind === 'add' && !picked) msg = 'Choose an organization or project.';
+        else if (raw === '' || !Number.isInteger(v)) msg = 'Enter a whole number.';
+        else if (v < l.min || v > l.max) msg = `Use a value from ${fmt(l.min)} to ${fmt(l.max)}.`;
+        $('dlg-err').textContent = msg || range(l);
+        $('dlg-err').style.color = msg ? 'var(--danger)' : 'var(--muted)';
+        const reason = $('dlg-reason').value.trim() !== '';
+        $('dlg-save').disabled = msg !== '' || !reason;
+        $('dlg-remove').disabled = !reason;
+      }
+
+      function openDialog(next) {
+        mode = next;
+        picked = null;
+        $('pick').value = '';
+        $('results').hidden = true;
+        $('picked').hidden = true;
+        $('pick-block').hidden = mode.kind !== 'add';
+        $('dlg-reason').value = '';
+        if (mode.kind === 'add') {
+          $('dlg-limit').innerHTML = overridable
+            .map((l) => `<option value="${l.k}">${l.n}</option>`)
+            .join('');
+          $('dlg-title').textContent = 'Add override';
+          $('dlg-scope').textContent = 'The value applies only to the chosen scope and below it.';
+          $('dlg-value').value = '';
+          $('dlg-remove').hidden = true;
+        } else if (mode.kind === 'edit') {
+          const o = mode.override;
+          $('dlg-title').textContent = byKey[o.k].n;
+          $('dlg-scope').textContent = `${o.scope.type}: ${label(o.scope)}`;
+          $('dlg-value').value = o.value;
+          $('dlg-remove').hidden = false;
+        } else {
+          $('dlg-title').textContent = mode.limit.n;
+          $('dlg-scope').textContent = 'Global: the default for every organization and project.';
+          $('dlg-value').value = effectiveGlobal(mode.limit.k);
+          $('dlg-remove').hidden = globals[mode.limit.k] === undefined;
+        }
+        checkDialog();
+        $('dlg').showModal();
+      }
+
+      function searchScopes() {
+        const q = $('pick').value.trim().toLowerCase();
+        if (q.length < 2) {
+          $('results').hidden = true;
+          return;
+        }
+        const hits = SCOPES.filter((s) => label(s).toLowerCase().includes(q)).slice(0, 8);
+        $('results').hidden = false;
+        $('results').innerHTML = hits.length
+          ? hits
+              .map(
+                (s, i) =>
+                  `<button type="button" data-pick="${SCOPES.indexOf(s)}">${s.type === 'Project' ? 'Project' : 'Organization'} · ${label(s)}</button>`,
+              )
+              .join('')
+          : '<div class="empty small">No matches.</div>';
+      }
+
+      /* ---------- bulk ---------- */
+      let bulk = null;
+      function checkBulk() {
+        const n = selected.size;
+        const reason = $('bdlg-reason').value.trim() !== '';
+        let ok = reason;
+        let msg = '';
+        if (bulk === 'set') {
+          const chosen = overrides.filter((o) => selected.has(o.id));
+          const v = Number($('bdlg-value').value.trim());
+          const bad = chosen.find((o) => v < byKey[o.k].min || v > byKey[o.k].max);
+          if ($('bdlg-value').value.trim() === '' || !Number.isInteger(v))
+            ((msg = 'Enter a whole number.'), (ok = false));
+          else if (bad)
+            ((msg = `${byKey[bad.k].n} allows ${fmt(byKey[bad.k].min)} to ${fmt(byKey[bad.k].max)}. Nothing is applied unless every row is valid.`),
+              (ok = false));
+        }
+        if (n > 10 && $('bdlg-type').value !== 'CHANGE') ok = false;
+        $('bdlg-err').textContent = msg;
+        $('bdlg-err').style.color = 'var(--danger)';
+        $('bdlg-save').disabled = !ok;
+      }
+      function openBulk(kind) {
+        bulk = kind;
+        const n = selected.size;
+        $('bdlg-title').textContent = kind === 'set' ? 'Set value' : 'Remove overrides';
+        $('bdlg-preview').textContent =
+          kind === 'set'
+            ? `This changes ${n} override${n === 1 ? '' : 's'}.`
+            : `This removes ${n} override${n === 1 ? '' : 's'}. Each falls back to the next level up.`;
+        $('bdlg-value-wrap').hidden = kind !== 'set';
+        $('bdlg-value').value = '';
+        $('bdlg-reason').value = '';
+        $('bdlg-type').value = '';
+        $('bdlg-type-wrap').hidden = n <= 10;
+        checkBulk();
+        $('bdlg').showModal();
+      }
+
+      /* ---------- wiring ---------- */
+      document.addEventListener('click', (e) => {
+        const t = e.target;
+        const d = t.dataset || {};
+        if (d.tab) showTab(d.tab);
+        if (d.editGlobal) openDialog({ kind: 'global', limit: byKey[d.editGlobal] });
+        if (d.edit)
+          openDialog({ kind: 'edit', override: overrides.find((o) => o.id === Number(d.edit)) });
+        if (d.pick !== undefined) {
+          picked = SCOPES[Number(d.pick)];
+          $('picked').hidden = false;
+          $('picked').textContent = `${picked.type} · ${label(picked)}`;
+          $('results').hidden = true;
+          $('pick').value = '';
+          checkDialog();
+        }
+        if (d.sel) {
+          const id = Number(d.sel);
+          t.checked ? selected.add(id) : selected.delete(id);
+          renderOverrides();
+        }
+      });
+      $('all').addEventListener('change', (e) => {
+        const list = filtered().slice(page * PAGE, page * PAGE + PAGE);
+        list.forEach((o) => (e.target.checked ? selected.add(o.id) : selected.delete(o.id)));
+        renderOverrides();
+      });
+      ['q', 'f-limit', 'f-scope', 'f-sort'].forEach((id) =>
+        $(id).addEventListener('input', () => {
+          page = 0;
+          renderOverrides();
+        }),
+      );
+      $('prev').addEventListener('click', () => (page--, renderOverrides()));
+      $('next').addEventListener('click', () => (page++, renderOverrides()));
+      $('add').addEventListener('click', () => openDialog({ kind: 'add' }));
+      $('export').addEventListener('click', () => {
+        const rows = filtered().map((o) => [o.scope.type, label(o.scope), o.k, o.value].join(','));
+        const blob = new Blob([['scope,name,limit,value', ...rows].join('\n')], {
+          type: 'text/csv',
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'limit-overrides.csv';
+        a.click();
+      });
+      $('bulk-clear').addEventListener('click', () => (selected.clear(), renderOverrides()));
+      $('bulk-set').addEventListener('click', () => openBulk('set'));
+      $('bulk-remove').addEventListener('click', () => openBulk('remove'));
+      $('role').addEventListener('change', () => {
+        if (!canWrite()) selected.clear();
+        renderDefaults();
+        renderOverrides();
+      });
+
+      $('pick').addEventListener('input', searchScopes);
+      $('dlg-limit').addEventListener('change', checkDialog);
+      $('dlg-value').addEventListener('input', checkDialog);
+      $('dlg-reason').addEventListener('input', checkDialog);
+      $('dlg-cancel').addEventListener('click', () => $('dlg').close());
+      $('dlg-remove').addEventListener('click', () => {
+        const reason = $('dlg-reason').value.trim();
+        if (mode.kind === 'edit') {
+          const o = mode.override;
+          overrides.splice(overrides.indexOf(o), 1);
+          selected.delete(o.id);
+          logChange(label(o.scope), o.k, o.value, null, reason);
+        } else {
+          logChange('Global', mode.limit.k, globals[mode.limit.k], null, reason);
+          delete globals[mode.limit.k];
+        }
+        $('dlg').close();
+        renderAll();
+      });
+      $('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if ($('dlg-save').disabled) return;
+        const v = Number($('dlg-value').value);
+        const reason = $('dlg-reason').value.trim();
+        if (mode.kind === 'global') {
+          logChange('Global', mode.limit.k, globals[mode.limit.k], v, reason);
+          globals[mode.limit.k] = v;
+        } else if (mode.kind === 'edit') {
+          logChange(label(mode.override.scope), mode.override.k, mode.override.value, v, reason);
+          mode.override.value = v;
+          mode.override.by = 'you';
+          mode.override.daysAgo = 0;
+        } else {
+          const k = $('dlg-limit').value;
+          const l = byKey[k];
+          if (l.orgOnly && picked.type !== 'Organization') {
+            $('dlg-err').textContent = l.n + ' applies to organizations only.';
+            $('dlg-err').style.color = 'var(--danger)';
+            return;
+          }
+          const same = overrides.find((o) => o.scope === picked && o.k === k);
+          if (same) {
+            logChange(label(picked), k, same.value, v, reason);
+            same.value = v;
+          } else {
+            overrides.unshift({
+              id: nextId++,
+              scope: picked,
+              k,
+              value: v,
+              by: 'you',
+              daysAgo: 0,
+              used: 0.1,
+            });
+            logChange(label(picked), k, null, v, reason);
+          }
+        }
+        $('dlg').close();
+        renderAll();
+      });
+
+      $('bdlg-value').addEventListener('input', checkBulk);
+      $('bdlg-reason').addEventListener('input', checkBulk);
+      $('bdlg-type').addEventListener('input', checkBulk);
+      $('bdlg-cancel').addEventListener('click', () => $('bdlg').close());
+      $('bform').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if ($('bdlg-save').disabled) return;
+        const reason = $('bdlg-reason').value.trim() + ` (batch of ${selected.size})`;
+        const v = Number($('bdlg-value').value);
+        for (const o of [...overrides]) {
+          if (!selected.has(o.id)) continue;
+          if (bulk === 'set') {
+            logChange(label(o.scope), o.k, o.value, v, reason);
+            o.value = v;
+            o.by = 'you';
+            o.daysAgo = 0;
+          } else {
+            logChange(label(o.scope), o.k, o.value, null, reason);
+            overrides.splice(overrides.indexOf(o), 1);
+          }
+        }
+        selected.clear();
+        $('bdlg').close();
+        renderAll();
+      });
+
+      $('theme').addEventListener('click', () => {
+        const root = document.documentElement;
+        const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+        const now = root.dataset.theme || (dark ? 'dark' : 'light');
+        root.dataset.theme = now === 'dark' ? 'light' : 'dark';
+      });
+
+      $('f-limit').innerHTML += overridable
+        .map((l) => `<option value="${l.k}">${l.n}</option>`)
+        .join('');
+      function renderAll() {
+        renderDefaults();
+        renderOverrides();
+      }
+      renderAll();
+    </script>
+  </body>
+</html>

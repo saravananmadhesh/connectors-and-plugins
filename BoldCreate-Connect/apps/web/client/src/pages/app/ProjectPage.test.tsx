@@ -56,20 +56,22 @@ describe('ProjectPage', () => {
   it('shows the name, the status and the overview first', async () => {
     await render();
     expect(await screen.findByRole('heading', { name: 'Storefront' })).toBeInTheDocument();
-    expect(screen.getAllByText('active').length).toBeGreaterThan(0);
+    // One title and one description for the page, not a second pair from a shared header.
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    // An active project says nothing; only a different status gets a badge.
+    expect(screen.queryByText('active')).toBeNull();
     expect(await screen.findByText(DAY)).toBeInTheDocument();
     expect(screen.getAllByText('12', { selector: 'td' }).length).toBe(2);
   });
 
-  it('lays the overview out as details, activity totals, days and top users', async () => {
+  it('lays the overview out as totals, then top users beside the days', async () => {
     await render();
-    const details = await section('Details');
-    expect(details.getByText('https://shop.example.com')).toBeInTheDocument();
-    expect(details.getByText('Active keys')).toBeInTheDocument();
-    expect(details.getByText('Return addresses')).toBeInTheDocument();
-    const activity = await section('Activity');
-    expect(activity.getByText('16.7% of calls')).toBeInTheDocument();
-    expect(activity.getByText('The last 1 day.')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Storefront' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Details' })).toBeNull();
+    expect(screen.queryByText(/^Created /)).toBeNull();
+    const totals = within(await screen.findByRole('region', { name: 'Totals' }));
+    expect(totals.getByText('16.7% of calls')).toBeInTheDocument();
+    expect(totals.getByText('Last 1 day')).toBeInTheDocument();
     const top = await section('Top users');
     expect(top.getByText('host-user-1')).toBeInTheDocument();
     expect(top.getByText('100%')).toBeInTheDocument();
@@ -205,6 +207,20 @@ describe('ProjectPage', () => {
       expect(create.mock.calls[0]![2].scopes.length).toBeGreaterThan(0);
       await userEvent.click(screen.getByRole('button', { name: 'Done' }));
       await waitFor(() => expect(screen.queryByText(RAW_KEY)).toBeNull());
+    });
+
+    it('defaults to 90 days and can create a key that never expires', async () => {
+      const create = vi.spyOn(projects, 'createKey').mockResolvedValue(withRaw());
+      await render('keys');
+      await userEvent.click(await screen.findByRole('button', { name: 'Create key' }));
+      expect(await screen.findByRole('button', { name: '90 days' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'No expiry' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+      await screen.findByText(RAW_KEY);
+      expect(create.mock.calls[0]![2].expiresAt).toBeNull();
     });
 
     it('does not offer to create without a scope', async () => {

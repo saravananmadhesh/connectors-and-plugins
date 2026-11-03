@@ -69,13 +69,13 @@ export const PROJECT_KEY_SCOPE_INFO: Readonly<
     preset: true,
   },
   'auth-configs:read': {
-    label: 'Read auth configs',
+    label: 'Read plugin settings',
     description: 'See which variables a plugin needs and whether they are set',
     destructive: false,
     preset: false,
   },
   'auth-configs:write': {
-    label: 'Manage auth configs',
+    label: 'Manage plugin settings',
     description: 'Set the variables a plugin needs',
     destructive: false,
     preset: false,
@@ -137,7 +137,8 @@ export const CreateProjectKeyBodySchema = z.strictObject({
     .refine((scopes) => new Set(scopes).size === scopes.length, { message: 'duplicate scopes' }),
   /** Addresses the key may be used from, as CIDR blocks. Absent means any address. */
   allowedCidrs: z.array(z.string().trim().min(1).max(64)).min(1).max(20).optional(),
-  expiresAt: IsoDateTimeSchema,
+  /** Absent means the default lifetime (90 days); `null` means the key never expires. */
+  expiresAt: IsoDateTimeSchema.nullable().optional(),
 });
 export type CreateProjectKeyBody = z.infer<typeof CreateProjectKeyBodySchema>;
 
@@ -169,7 +170,8 @@ export const ProjectKeyResponseSchema = z.object({
   lastFour: z.string(),
   scopes: z.array(ProjectKeyScopeSchema),
   allowedCidrs: z.array(z.string()).nullable(),
-  expiresAt: IsoDateTimeSchema,
+  /** Null for a key that never expires. */
+  expiresAt: IsoDateTimeSchema.nullable(),
   revokedAt: IsoDateTimeSchema.nullable(),
   lastUsedAt: IsoDateTimeSchema.nullable(),
   lastUsedIp: z.string().nullable(),

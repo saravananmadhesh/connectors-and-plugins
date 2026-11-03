@@ -151,6 +151,12 @@ export type {
 };
 export type DeletionPendingResponse = DeletionAccepted;
 
+/** A page of a plugin's versions. */
+export interface PluginVersionListResponse {
+  items: PluginVersionSummaryResponse[];
+  nextCursor: string | null;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -336,10 +342,7 @@ export const marketplace = {
   getPlugin: (pluginId: string) =>
     request<PluginDetailResponse>('GET', `/api/v1/plugins/${pluginId}`),
   listVersions: (pluginId: string) =>
-    request<{
-      items: PluginVersionSummaryResponse[];
-      nextCursor: string | null;
-    }>('GET', `/api/v1/plugins/${pluginId}/versions`),
+    request<PluginVersionListResponse>('GET', `/api/v1/plugins/${pluginId}/versions`),
   getVersion: (versionId: string) =>
     request<PluginVersionDetailResponse>('GET', `/api/v1/plugin-versions/${versionId}`),
   getVersionReview: (versionId: string) =>

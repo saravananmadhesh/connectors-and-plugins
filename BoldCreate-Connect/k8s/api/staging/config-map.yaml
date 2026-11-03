@@ -8,6 +8,8 @@ data:
   LOG_LEVEL: info
   PORT: '3001'
   BFF_CALLER_ALLOWLIST: web,admin,gateway
+  DB_POOL_MAX: '8'
+  DB_POOL_IDLE_SECONDS: '30'
   BLOB_BUCKET: codestudio-marketplace
   BLOB_REGION: us-east-1
   KMS_ADAPTER: cloud-kms

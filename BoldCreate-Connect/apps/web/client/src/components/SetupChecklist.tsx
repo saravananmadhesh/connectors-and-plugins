@@ -98,7 +98,7 @@ export function SetupChecklist({ orgId }: { orgId: string }) {
     {
       id: 'connect',
       title: 'Connect your agent',
-      hint: 'Copy a setup snippet and call the gateway.',
+      hint: 'Copy a setup snippet into your agent so it can use your plugins.',
       to: `/orgs/${orgId}/api-keys`,
       done: connected,
       confirm: {

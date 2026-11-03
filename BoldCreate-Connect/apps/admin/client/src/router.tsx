@@ -24,6 +24,7 @@ import { CategoriesPage } from './pages/CategoriesPage';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { ErrorDetailPage } from './pages/ErrorDetailPage';
 import { HomePage } from './pages/HomePage';
+import { LimitsPage } from './pages/LimitsPage';
 import { ObservabilityPage } from './pages/ObservabilityPage';
 import { PluginDetailPage } from './pages/PluginDetailPage';
 import { PluginsPage } from './pages/PluginsPage';
@@ -102,6 +103,11 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
     path: '/allowed-users',
     component: AllowedEmailsPage,
   });
+  const limits = createRoute({
+    getParentRoute: () => app,
+    path: '/limits',
+    component: LimitsPage,
+  });
   const audit = createRoute({
     getParentRoute: () => app,
     path: '/audit',
@@ -144,6 +150,7 @@ export function createAdminRouter(queryClient: QueryClient, history?: RouterHist
         versionDetail,
         categories,
         allowedEmails,
+        limits,
         observability,
         errorDetail,
         audit,

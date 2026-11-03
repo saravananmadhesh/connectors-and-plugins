@@ -12,6 +12,8 @@ export type {
 } from './idempotency.js';
 export { createMemoryIdempotencyStore } from './memory-idempotency-store.js';
 export type { MemoryIdempotencyStore } from './memory-idempotency-store.js';
+export { createLoadShed } from './load-shed.js';
+export type { LoadShed, LoadShedOptions, ShedReason } from './load-shed.js';
 export { installProcessGuards } from './process-guards.js';
 export type { ProcessGuardOptions } from './process-guards.js';
 export { registerRoute, toFastifyPath } from './routes.js';

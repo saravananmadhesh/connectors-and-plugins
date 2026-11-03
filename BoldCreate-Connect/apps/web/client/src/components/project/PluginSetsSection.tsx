@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Layers, Plus } from 'lucide-react';
 import { projects } from '@/lib/api';
 import { useAbilities } from '@/lib/abilities';
 import type { PluginSetResponse } from '@/lib/api';
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { EmptyState } from '@/components/EmptyState';
 import { Section } from '@/components/Page';
 import { CatalogPicker } from './CatalogPicker';
 import { CursorPager, QueryFrame, type TabProps } from './shared';
@@ -113,7 +114,7 @@ export function PluginSets({ orgId, projectId, canWrite }: TabProps) {
   return (
     <Section
       title="Plugin sets"
-      description="Named groups of plugins your server can hand to a session."
+      description="Named groups of plugins. When your server opens a session it can name a set to give that user only those plugins."
       action={
         canWrite ? (
           <Button size="sm" onClick={() => setNaming('new')}>
@@ -131,7 +132,11 @@ export function PluginSets({ orgId, projectId, canWrite }: TabProps) {
         onRetry={() => void sets.refetch()}
       >
         {items.length === 0 && !paging.hasPrevious ? (
-          <p className="text-sm text-muted-foreground">No sets yet.</p>
+          <EmptyState
+            icon={Layers}
+            title="No plugin sets yet"
+            description="A set is a named group of plugins. Create one to give some users only those plugins."
+          />
         ) : (
           <div className="space-y-3">
             {items.map((set) => (

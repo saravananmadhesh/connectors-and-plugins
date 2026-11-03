@@ -40,6 +40,47 @@ function failure(env: Record<string, string | undefined>): string {
 }
 
 describe('loadApiConfig', () => {
+  it('has safe defaults for the load limits', () => {
+    const config = loadApiConfig(valid);
+    expect(config).toMatchObject({
+      HTTP_MAX_INFLIGHT: 200,
+      EVENT_LOOP_LAG_SHED_MS: 250,
+      HEAP_SHED_PERCENT: 85,
+      DB_MAX_CONCURRENCY: 0,
+      DB_QUEUE_MAX_DEPTH: 100,
+      DB_QUEUE_MAX_WAIT_SECONDS: 5,
+      DB_QUEUE_PROJECT_SHARE_PCT: 25,
+    });
+  });
+
+  it('reads the load limits from the environment and keeps 0 for "off"', () => {
+    const config = loadApiConfig({
+      ...valid,
+      HTTP_MAX_INFLIGHT: '0',
+      DB_MAX_CONCURRENCY: '12',
+      DB_QUEUE_MAX_DEPTH: '40',
+      DB_QUEUE_PROJECT_SHARE_PCT: '0',
+    });
+    expect(config).toMatchObject({
+      HTTP_MAX_INFLIGHT: 0,
+      DB_MAX_CONCURRENCY: 12,
+      DB_QUEUE_MAX_DEPTH: 40,
+      DB_QUEUE_PROJECT_SHARE_PCT: 0,
+    });
+  });
+
+  it.each([
+    ['DB_QUEUE_MAX_DEPTH', '0'],
+    ['DB_QUEUE_MAX_WAIT_SECONDS', '0'],
+    ['DB_QUEUE_PROJECT_SHARE_PCT', '101'],
+    ['DB_QUEUE_PROJECT_SHARE_PCT', '-1'],
+    ['DB_MAX_CONCURRENCY', '-1'],
+    ['DB_MAX_CONCURRENCY', 'many'],
+    ['HEAP_SHED_PERCENT', '100'],
+  ])('rejects %s=%s', (name, value) => {
+    expect(failure({ ...valid, [name]: value })).toContain(name);
+  });
+
   it('accepts a minimal local environment and applies defaults', () => {
     const config = loadApiConfig(valid);
     expect(config).toMatchObject({

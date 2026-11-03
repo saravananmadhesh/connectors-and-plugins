@@ -3,11 +3,13 @@
  * It uses the same helpers as the integration tests, so it only works against the isolated stack
  * the test runner starts (it needs that stack's database and workload secret).
  */
-import { apiGet, apiPost, createSignedInUser } from '../integration/signed-in-user.js';
+import { apiGet, apiPost, createSignedInUser, sql } from '../integration/signed-in-user.js';
 
 export interface LoadProject {
   /** The project key (`prk_`) a host's server calls with. */
   projectKey: string;
+  /** The project's id as the database stores it. */
+  rawProjectId: string;
 }
 
 const SCOPES = ['sessions:read', 'sessions:write'];
@@ -29,5 +31,19 @@ export async function bootstrapLoadProject(): Promise<LoadProject> {
   const projectKey = ((await key.json()) as { rawKey: string }).rawKey;
   const check = await apiGet(`${base}/${projectId}`, admin.sessionToken);
   if (check.status !== 200) throw new Error(`reading the project answered ${check.status}`);
-  return { projectKey };
+  const rawProjectId = projectId
+    .replace(/^[a-z]+_/, '')
+    .replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
+  return { projectKey, rawProjectId };
+}
+
+/**
+ * Lets this project call as often as the platform allows, so a run measures the services and not the
+ * per-project request budget (5,000 a minute by default), which a real host raises the same way.
+ */
+export async function liftRequestBudget(rawProjectId: string): Promise<void> {
+  await sql(
+    `INSERT INTO limit_setting (key, scope, scope_id, value, reason) VALUES ('project_requests_per_minute', 'project', $1, 100000, 'load run')`,
+    [rawProjectId],
+  );
 }

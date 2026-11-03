@@ -4,10 +4,16 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { adminApi, type AdminErrorGroup, type AdminErrorGroupsQuery } from '../../lib/api';
 import { formatDateTime, relativeTime } from '../../lib/format';
 import { errorMessage } from '../../lib/messages';
-import { ERROR_STATUS_TEXT, ERROR_STATUS_TONE, formatCount } from '../../lib/observability';
+import {
+  ERROR_STATUS_TEXT,
+  ERROR_STATUS_TONE,
+  errorJson,
+  formatCount,
+} from '../../lib/observability';
 import { Alert } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { CopyJsonButton } from './CopyJsonButton';
 import { ListSkeleton, LoadMore } from './LoadMore';
 
 const PAGE = 25;
@@ -43,6 +49,9 @@ function Row({ group }: { group: AdminErrorGroup }) {
       </TableCell>
       <TableCell className="max-w-40 truncate font-mono text-xs text-muted-foreground">
         {group.appVersion ?? '—'}
+      </TableCell>
+      <TableCell className="w-10 pr-2">
+        <CopyJsonButton json={() => errorJson(group)} label={`error ${group.title}`} />
       </TableCell>
     </TableRow>
   );
@@ -85,6 +94,9 @@ export function ErrorList({ filters = {}, empty }: Props) {
               <TableHead className="text-right">Times</TableHead>
               <TableHead>Last seen</TableHead>
               <TableHead>Release</TableHead>
+              <TableHead className="w-10">
+                <span className="sr-only">Copy</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -89,3 +89,12 @@ export const GatewayUsageBodySchema = z.object({
 export type GatewayUsageBody = z.infer<typeof GatewayUsageBodySchema>;
 
 export const GatewayUsageResponseSchema = z.object({ recorded: z.literal(true) });
+
+/**
+ * The limits an administrator has set, by key. A key with no stored value is absent, so the
+ * gateway keeps its own configuration for it. Numbers only; nothing else is exposed.
+ */
+export const GatewayLimitsResponseSchema = z.object({
+  values: z.record(z.string(), z.number().int()),
+});
+export type GatewayLimitsResponse = z.infer<typeof GatewayLimitsResponseSchema>;

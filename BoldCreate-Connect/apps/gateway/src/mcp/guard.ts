@@ -5,6 +5,8 @@
  */
 export interface GuardOptions {
   maxConcurrency: number;
+  /** Calls in flight across all servers on this pod; 0 or unset is no limit. */
+  maxTotalConcurrency?: number | (() => number);
   failuresToOpen: number;
   openMs: number;
   now?: () => number;
@@ -26,19 +28,29 @@ interface State {
 export function createServerGuard(options: GuardOptions): ServerGuard {
   const now = options.now ?? Date.now;
   const states = new Map<string, State>();
+  const totalLimit = (): number =>
+    typeof options.maxTotalConcurrency === 'function'
+      ? options.maxTotalConcurrency()
+      : (options.maxTotalConcurrency ?? 0);
+  let total = 0;
   return {
     acquire(key) {
+      // Long tool calls must not use up the whole pod, so one cap covers every server together.
+      const maxTotal = totalLimit();
+      if (maxTotal > 0 && total >= maxTotal) return 'busy';
       const state = states.get(key) ?? { inFlight: 0, failures: 0, openUntil: 0 };
       states.set(key, state);
       if (state.openUntil > now()) return 'open';
       if (state.inFlight >= options.maxConcurrency) return 'busy';
       state.inFlight += 1;
+      total += 1;
       let released = false;
       return {
         release(outcome) {
           if (released) return;
           released = true;
           state.inFlight -= 1;
+          total -= 1;
           if (outcome === 'ok') {
             state.failures = 0;
           } else if (outcome === 'failure') {

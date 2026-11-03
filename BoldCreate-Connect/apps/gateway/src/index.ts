@@ -12,12 +12,15 @@ import {
   isCredentialFault,
 } from '@boldcreate-integrations/credentials';
 import {
+  createAdmissionGate,
   createDb,
   createServiceObservability,
   OBSERVABILITY_STORE_CHECK,
   databaseStartupChecks,
 } from '@boldcreate-integrations/db';
 import {
+  startLiveLimits,
+  createRemoteLimitStore,
   createCatalogStores,
   createOrgKeyDirectory,
   createOrgKeyStore,
@@ -29,6 +32,7 @@ import {
 } from '@boldcreate-integrations/http-server';
 import {
   createLogger,
+  getContext,
   createMetrics,
   registerCaptureMetrics,
   createStartupChecks,
@@ -40,10 +44,12 @@ import {
   createUpstreamFetch,
   isUpstreamFault,
 } from '@boldcreate-integrations/security';
-import { buildApp } from './app.js';
+import { buildApp, type GatewayRuntime } from './app.js';
+
 import { createGatewayRemote } from './remote.js';
 import { createApiKeyAuthenticator } from './key-auth.js';
 import { loadGatewayConfig } from './config.js';
+import { createApiPing, createReadiness } from './readiness.js';
 
 assertDeployEnvSet();
 const config = loadGatewayConfig();
@@ -51,7 +57,21 @@ applyRuntimeEnv(config);
 const logger = createLogger({ service: 'gateway', level: config.LOG_LEVEL });
 installProcessGuards(logger);
 
-const { db, pool } = createDb({ connectionString: config.DATABASE_URL, max: config.DB_POOL_MAX });
+const admission = createAdmissionGate({
+  maxConcurrency: config.DB_MAX_CONCURRENCY || config.DB_POOL_MAX,
+  maxDepth: config.DB_QUEUE_MAX_DEPTH,
+  maxWaitMs: config.DB_QUEUE_MAX_WAIT_SECONDS * 1000,
+  ownerSharePct: config.DB_QUEUE_PROJECT_SHARE_PCT,
+  onReject: (reason) => metrics.recordShed(`db_queue_${reason}`),
+});
+const { db, pool } = createDb({
+  admission,
+  admissionOwner: () => getContext()?.tenantId,
+  onPoolError: (error) => logger.error({ err: error }, 'Database connection error'),
+  connectionString: config.DATABASE_URL,
+  max: config.DB_POOL_MAX,
+  connectionTimeoutMs: config.DB_POOL_WAIT_SECONDS * 1000,
+});
 const observability = createServiceObservability({
   service: 'gateway',
   environment: config.DEPLOY_ENV,
@@ -60,6 +80,7 @@ const observability = createServiceObservability({
 });
 const errors = observability.errors;
 const metrics = createMetrics({ service: 'gateway' });
+metrics.observeAdmission(() => admission.stats());
 registerCaptureMetrics(metrics, errors);
 const startup = createStartupChecks({
   service: 'gateway',
@@ -101,8 +122,14 @@ const workloadHeaders = createWorkloadHeaders({
   signingKey: config.WORKLOAD_SIGNING_KEY,
 });
 
+const runtime: GatewayRuntime = {
+  keyRatePerMinute: config.KEY_RATE_LIMIT_PER_MINUTE,
+  mcpMaxCalls: config.MCP_MAX_INFLIGHT_CALLS,
+};
+
 const server = buildApp(config, {
   db,
+  runtime,
   ...(config.DATA_SOURCE === 'api'
     ? {
         authenticate: createApiKeyAuthenticator({
@@ -144,10 +171,14 @@ const server = buildApp(config, {
   errors,
   workloadHeaders,
   limiter: redis ? instrumentBoundary(redis.limiter, { area: 'rate_limit', errors }) : undefined,
-  pingDb: async () => {
-    await pool.query('SELECT 1');
-    await startup.readiness();
-  },
+  pingDb: createReadiness({
+    dataSource: config.DATA_SOURCE,
+    pingApi: createApiPing(config.API_BASE_URL),
+    pingDatabase: async () => {
+      await pool.query('SELECT 1');
+      await startup.readiness();
+    },
+  }),
   onShutdown: [
     () => stopInvalidation(),
     () => observability.close(),
@@ -156,6 +187,83 @@ const server = buildApp(config, {
   ],
 });
 
+// Hooks cannot be added once the server listens, so the stop is registered first.
+let stopLiveLimits = (): void => undefined;
+server.app.addHook('onClose', async () => stopLiveLimits());
 await server.listen({ port: config.PORT });
+// Values an administrator sets in the admin app, always read from the api: the gateway's database
+// role has no access to the limit table (limits are reachable through the admin app and the api
+// only), so reading it directly would be refused in every mode. A value nobody set leaves the
+// configuration alone; 0 (off) stays off.
+const limitStore = createRemoteLimitStore({ apiBaseUrl: config.API_BASE_URL, workloadHeaders });
+stopLiveLimits = startLiveLimits({
+  limits: limitStore,
+  targets: [
+    ...(config.HTTP_MAX_INFLIGHT > 0
+      ? [
+          {
+            key: 'pod_max_inflight' as const,
+            configured: config.HTTP_MAX_INFLIGHT,
+            apply: (value: number) => server.setMaxInflight(value),
+          },
+        ]
+      : []),
+    ...(config.EVENT_LOOP_LAG_SHED_MS > 0
+      ? [
+          {
+            key: 'event_loop_lag_shed_ms' as const,
+            configured: config.EVENT_LOOP_LAG_SHED_MS,
+            apply: (value: number) => server.setEventLoopLagMs(value),
+          },
+        ]
+      : []),
+    ...(config.HEAP_SHED_PERCENT > 0
+      ? [
+          {
+            key: 'heap_shed_percent' as const,
+            configured: config.HEAP_SHED_PERCENT,
+            apply: (value: number) => server.setHeapPercent(value),
+          },
+        ]
+      : []),
+    ...(config.MCP_MAX_INFLIGHT_CALLS > 0
+      ? [
+          {
+            key: 'mcp_max_inflight_calls' as const,
+            configured: config.MCP_MAX_INFLIGHT_CALLS,
+            apply: (value: number) => {
+              runtime.mcpMaxCalls = value;
+            },
+          },
+        ]
+      : []),
+    ...(config.KEY_RATE_LIMIT_PER_MINUTE > 0
+      ? [
+          {
+            key: 'key_requests_per_minute' as const,
+            configured: config.KEY_RATE_LIMIT_PER_MINUTE,
+            apply: (value: number) => {
+              runtime.keyRatePerMinute = value;
+            },
+          },
+        ]
+      : []),
+    {
+      key: 'db_queue_max_depth',
+      configured: config.DB_QUEUE_MAX_DEPTH,
+      apply: (value) => admission.update({ maxDepth: value }),
+    },
+    {
+      key: 'db_queue_max_wait_seconds',
+      configured: config.DB_QUEUE_MAX_WAIT_SECONDS,
+      apply: (value) => admission.update({ maxWaitMs: value * 1000 }),
+    },
+    {
+      key: 'db_queue_project_share_pct',
+      configured: config.DB_QUEUE_PROJECT_SHARE_PCT,
+      apply: (value) => admission.update({ ownerSharePct: value }),
+    },
+  ],
+});
 await startup.run();
 logger.info({ port: config.PORT }, 'Gateway listening');

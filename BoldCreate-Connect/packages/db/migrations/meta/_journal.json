@@ -43,6 +43,13 @@
       "when": 1793339373247,
       "tag": "0005_observability",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793360327943,
+      "tag": "0006_limits_and_optional_key_expiry",
+      "breakpoints": true
     }
   ]
 }

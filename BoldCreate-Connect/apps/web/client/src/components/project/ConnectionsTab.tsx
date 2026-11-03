@@ -19,7 +19,9 @@ import {
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
-import { CursorPager, QueryFrame, type TabProps } from './shared';
+import { PageHeader } from '@/components/PageHeader';
+import { InfoHint } from '@/components/InfoHint';
+import { CursorPager, QueryFrame, RefreshButton, type TabProps } from './shared';
 import { messageOf, useCursorPaging } from './paging';
 
 /** Every sign-in the users of the project made, grouped by user. No token is ever shown. */
@@ -51,6 +53,12 @@ export function ConnectionsTab({ orgId, projectId, canWrite }: TabProps) {
 
   return (
     <div className="space-y-3">
+      <PageHeader
+        title="Connections"
+        description="A user’s sign-in to a plugin’s server, or the values they set for it. Tokens are never shown."
+      >
+        <RefreshButton orgId={orgId} projectId={projectId} />
+      </PageHeader>
       {error && <Alert variant="destructive">{error}</Alert>}
       <QueryFrame
         label="connections"
@@ -62,7 +70,7 @@ export function ConnectionsTab({ orgId, projectId, canWrite }: TabProps) {
           <EmptyState
             icon={Plug}
             title="No connections yet"
-            description="A connection appears when a user signs in to an MCP server or sets their own values."
+            description="A connection appears when a user signs in to a plugin’s server or sets their own values."
           />
         ) : (
           <>
@@ -72,7 +80,15 @@ export function ConnectionsTab({ orgId, projectId, canWrite }: TabProps) {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Server</TableHead>
-                    <TableHead>Kind</TableHead>
+                    <TableHead>
+                      <span className="inline-flex items-center gap-1">
+                        Kind
+                        <InfoHint about="kind">
+                          How the user connected: signing in to the server or entering their own
+                          values.
+                        </InfoHint>
+                      </span>
+                    </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Connected</TableHead>
                     <TableHead className="w-0" />

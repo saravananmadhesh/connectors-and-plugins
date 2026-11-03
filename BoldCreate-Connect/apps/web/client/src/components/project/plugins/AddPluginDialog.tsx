@@ -80,7 +80,7 @@ export function AddPluginDialog({
   return (
     <Dialog open onOpenChange={(open) => !open && !save.isPending && onClose()}>
       <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
-        <DialogTitle>{`Add ${displayName}`}</DialogTitle>
+        <DialogTitle>{`Install ${displayName}`}</DialogTitle>
         <div className="mt-4 space-y-5">
           {error && <Alert variant="destructive">{error}</Alert>}
           <QueryFrame
@@ -152,7 +152,7 @@ export function AddPluginDialog({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={save.isPending || !complete}>
-                  Add plugin
+                  Install
                 </Button>
               </div>
             </form>

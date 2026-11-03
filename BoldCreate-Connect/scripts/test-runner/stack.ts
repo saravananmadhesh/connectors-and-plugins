@@ -4,6 +4,7 @@
  * development stack is never touched.
  */
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
+import pg from 'pg';
 import {
   createWriteStream,
   existsSync,
@@ -65,6 +66,13 @@ export interface RunningStack {
    * the stack came up (the static file list is read once at start).
    */
   restartWeb: () => Promise<void>;
+  /**
+   * True when the database answers a query and every service answers its health check. False
+   * while Postgres restarts its processes after one of them exited, and after a service died.
+   */
+  health: () => Promise<boolean>;
+  /** The log of the stack's Postgres, for the lines that say why it was unusable. */
+  postgresLog: string;
   stop: () => Promise<void>;
 }
 
@@ -179,6 +187,11 @@ export async function startStack(options: {
       api: {
         LOGIN_THROTTLE_IP_EMAIL_LIMIT: '100000',
         LOGIN_THROTTLE_IP_LIMIT: '100000',
+        // The suites revoke, rotate and suspend a key and expect the next call to fail at once.
+        // A load run measures the cache as deployed; LOAD_PROJECT_KEY_CACHE_TTL_SECONDS=0 turns it off.
+        PROJECT_KEY_CACHE_TTL_SECONDS:
+          process.env['LOAD_PROJECT_KEY_CACHE_TTL_SECONDS'] ??
+          (process.env['LOAD_RAMP'] === '1' || process.env['LOAD_FULL'] === '1' ? '30' : '0'),
         UPSTREAM_ALLOWED_PORTS: String(ports.upstreamFixture),
       },
       // The admin app accepts this owner; the worker accepts none, so a queued sync fails at once
@@ -288,5 +301,30 @@ export async function startStack(options: {
     throw error;
   }
 
-  return { env: base, restartWeb, stop };
+  const health = async (): Promise<boolean> => {
+    if (crashed.length > 0) return false;
+    const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 2000 });
+    client.on('error', () => undefined);
+    try {
+      await client.connect();
+      await client.query('SELECT 1');
+    } catch {
+      return false;
+    } finally {
+      await client.end().catch(() => undefined);
+    }
+    for (const port of [ports.api, ports.gateway, ports.admin, ports.web, ports.workerHealth]) {
+      try {
+        const response = await fetch(`http://localhost:${port}/healthz`, {
+          signal: AbortSignal.timeout(2000),
+        });
+        if (!response.ok) return false;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  return { env: base, restartWeb, health, postgresLog: join(options.logDir, 'postgres.log'), stop };
 }

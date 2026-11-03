@@ -53,7 +53,7 @@ function keyView(row: KeyRow): Plain<ProjectKeyResponse> {
     lastFour: row.lastFour,
     scopes: row.scopes as ProjectKeyScope[],
     allowedCidrs: row.allowedCidrs,
-    expiresAt: row.expiresAt.toISOString(),
+    expiresAt: row.expiresAt?.toISOString() ?? null,
     revokedAt: row.revokedAt?.toISOString() ?? null,
     lastUsedAt: row.lastUsedAt?.toISOString() ?? null,
     lastUsedIp: row.lastUsedIp,
@@ -400,8 +400,9 @@ export async function listProjectKeys(
 }
 
 /**
- * Creates a key. The raw key is returned once and only its hash is stored. The expiry is required
- * and at most `keyLifetimeDaysMax` days away. A project has at most `keysPerProject` active keys.
+ * Creates a key. The raw key is returned once and only its hash is stored. Without an expiry the
+ * key lasts `keyLifetimeDaysDefault` days; an explicit `null` never expires, and a date is at most
+ * `keyLifetimeDaysMax` days away. A project has at most `keysPerProject` active keys.
  */
 export async function createProjectKey(
   tx: Executor,
@@ -412,14 +413,21 @@ export async function createProjectKey(
 ): Promise<Plain<ProjectKeyCreatedResponse>> {
   requireAction(principal, 'project-key:create', { orgId });
   const now = new Date();
-  const expiresAt = new Date(body.expiresAt);
   const latest = now.getTime() + PROJECT_LIMITS.keyLifetimeDaysMax * DAY_MS;
-  if (
-    Number.isNaN(expiresAt.getTime()) ||
-    expiresAt.getTime() <= now.getTime() ||
-    expiresAt.getTime() > latest
-  ) {
-    throw appError('api_key_expiry_out_of_range');
+  let expiresAt: Date | null;
+  if (body.expiresAt === undefined) {
+    expiresAt = new Date(now.getTime() + PROJECT_LIMITS.keyLifetimeDaysDefault * DAY_MS);
+  } else if (body.expiresAt === null) {
+    expiresAt = null;
+  } else {
+    expiresAt = new Date(body.expiresAt);
+    if (
+      Number.isNaN(expiresAt.getTime()) ||
+      expiresAt.getTime() <= now.getTime() ||
+      expiresAt.getTime() > latest
+    ) {
+      throw appError('api_key_expiry_out_of_range');
+    }
   }
   const cidrs = body.allowedCidrs ? normalizedCidrs(body.allowedCidrs) : null;
   const { keyId, secret, lastFour } = generateApiKeyParts('project');
@@ -494,7 +502,9 @@ export async function rotateProjectKey(
       .where(and(eq(projectKeyTable.id, keyRowId), eq(projectKeyTable.projectId, projectId)))
       .limit(1);
     if (!old) throw notFound();
-    if (old.revokedAt || old.expiresAt.getTime() <= now.getTime()) throw appError('conflict');
+    if (old.revokedAt || (old.expiresAt && old.expiresAt.getTime() <= now.getTime())) {
+      throw appError('conflict');
+    }
     const [active] = await inner
       .select({ n: count() })
       .from(projectKeyTable)
@@ -504,7 +514,8 @@ export async function rotateProjectKey(
     }
 
     const graceEnds = new Date(now.getTime() + PROJECT_LIMITS.keyRotationGraceSeconds * 1000);
-    const oldEnds = graceEnds.getTime() < old.expiresAt.getTime() ? graceEnds : old.expiresAt;
+    const oldEnds =
+      old.expiresAt && old.expiresAt.getTime() < graceEnds.getTime() ? old.expiresAt : graceEnds;
     await inner
       .update(projectKeyTable)
       .set({ expiresAt: oldEnds })

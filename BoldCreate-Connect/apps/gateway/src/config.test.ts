@@ -51,6 +51,64 @@ describe('loadGatewayConfig', () => {
     expect(failure({ ...valid, DATA_SOURCE: 'cache' })).toContain('DATA_SOURCE');
   });
 
+  it('refuses the database as data source when deployed', () => {
+    expect(failure(deployed)).toContain('DATA_SOURCE must be api');
+    expect(failure({ ...deployed, DATA_SOURCE: 'api' })).not.toContain('DATA_SOURCE');
+  });
+
+  it('has safe defaults for the load limits', () => {
+    const config = loadGatewayConfig(valid);
+    expect(config).toMatchObject({
+      HTTP_MAX_INFLIGHT: 200,
+      EVENT_LOOP_LAG_SHED_MS: 250,
+      HEAP_SHED_PERCENT: 85,
+      DB_MAX_CONCURRENCY: 0,
+      DB_QUEUE_MAX_DEPTH: 100,
+      DB_QUEUE_MAX_WAIT_SECONDS: 5,
+      DB_QUEUE_PROJECT_SHARE_PCT: 25,
+    });
+  });
+
+  it('reads the load limits from the environment and keeps 0 for "off"', () => {
+    const config = loadGatewayConfig({
+      ...valid,
+      HTTP_MAX_INFLIGHT: '0',
+      DB_MAX_CONCURRENCY: '12',
+      DB_QUEUE_MAX_DEPTH: '40',
+      DB_QUEUE_PROJECT_SHARE_PCT: '0',
+    });
+    expect(config).toMatchObject({
+      HTTP_MAX_INFLIGHT: 0,
+      DB_MAX_CONCURRENCY: 12,
+      DB_QUEUE_MAX_DEPTH: 40,
+      DB_QUEUE_PROJECT_SHARE_PCT: 0,
+    });
+  });
+
+  it.each([
+    ['DB_QUEUE_MAX_DEPTH', '0'],
+    ['DB_QUEUE_MAX_WAIT_SECONDS', '0'],
+    ['DB_QUEUE_PROJECT_SHARE_PCT', '101'],
+    ['DB_QUEUE_PROJECT_SHARE_PCT', '-1'],
+    ['DB_MAX_CONCURRENCY', '-1'],
+    ['DB_MAX_CONCURRENCY', 'many'],
+    ['HEAP_SHED_PERCENT', '100'],
+  ])('rejects %s=%s', (name, value) => {
+    expect(failure({ ...valid, [name]: value })).toContain(name);
+  });
+
+  it('caps tool calls across all servers at 100 by default and accepts 0 for no cap', () => {
+    expect(loadGatewayConfig(valid).MCP_MAX_INFLIGHT_CALLS).toBe(100);
+    expect(
+      loadGatewayConfig({ ...valid, MCP_MAX_INFLIGHT_CALLS: '0' }).MCP_MAX_INFLIGHT_CALLS,
+    ).toBe(0);
+    expect(failure({ ...valid, MCP_MAX_INFLIGHT_CALLS: '-1' })).toContain('MCP_MAX_INFLIGHT_CALLS');
+  });
+
+  it('waits five seconds for a database connection by default', () => {
+    expect(loadGatewayConfig(valid).DB_POOL_WAIT_SECONDS).toBe(5);
+  });
+
   it.each(['DATABASE_URL'])('fails without %s', (name) => {
     const env: Record<string, string | undefined> = { ...valid };
     delete env[name];

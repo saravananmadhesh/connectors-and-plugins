@@ -32,6 +32,8 @@ export interface ServiceObservability {
   close(): Promise<void>;
 }
 
+const DROP_LOG_INTERVAL_MS = 10_000;
+
 /**
  * What every service creates at start: the store for errors and events, and the reporter that
  * writes to it. The reporter pauses after repeated write failures, so a store that is down or
@@ -41,6 +43,7 @@ export function createServiceObservability(
   options: ServiceObservabilityOptions,
 ): ServiceObservability {
   const { config, log } = options;
+  const dropLog = new Map<string, { at: number; count: number }>();
   const store = createObservabilityStore({
     databaseUrl: config.DATABASE_URL,
     observabilityDatabaseUrl: config.OBSERVABILITY_DATABASE_URL,
@@ -56,7 +59,18 @@ export function createServiceObservability(
     db: store.db,
     onDrop: (reason, count) => {
       // A paused sink is already reported once when it pauses; its dropped batches stay quiet.
-      if (reason !== 'sink_paused') log.error({ reason, count }, 'Error capture dropped reports');
+      // During a storm every report is dropped, so the line is written at most once per interval
+      // per reason, with the number dropped since the last line.
+      if (reason === 'sink_paused') return;
+      const entry = dropLog.get(reason) ?? { at: 0, count: 0 };
+      entry.count += count;
+      const at = Date.now();
+      if (at - entry.at >= DROP_LOG_INTERVAL_MS) {
+        log.error({ reason, count: entry.count }, 'Error capture dropped reports');
+        entry.at = at;
+        entry.count = 0;
+      }
+      dropLog.set(reason, entry);
     },
     guard: {
       failureThreshold: config.OBSERVABILITY_SINK_FAILURE_THRESHOLD,

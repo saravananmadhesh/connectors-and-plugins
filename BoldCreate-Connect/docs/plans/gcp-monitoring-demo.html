@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monitoring demo</title>
+    <style>
+      :root {
+        --bg: #fff;
+        --fg: #111;
+        --mut: #666;
+        --line: #e3e3e3;
+        --card: #fafafa;
+        --s1: #111;
+        --s2: #888;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b0b0b;
+          --fg: #f2f2f2;
+          --mut: #999;
+          --line: #2a2a2a;
+          --card: #131313;
+          --s1: #f2f2f2;
+          --s2: #777;
+        }
+      }
+      :root[data-theme='light'] {
+        --bg: #fff;
+        --fg: #111;
+        --mut: #666;
+        --line: #e3e3e3;
+        --card: #fafafa;
+        --s1: #111;
+        --s2: #888;
+      }
+      :root[data-theme='dark'] {
+        --bg: #0b0b0b;
+        --fg: #f2f2f2;
+        --mut: #999;
+        --line: #2a2a2a;
+        --card: #131313;
+        --s1: #f2f2f2;
+        --s2: #777;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+        padding: 16px;
+        max-width: 1200px;
+        margin-inline: auto;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+      }
+      .badge {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      .ctl {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      button,
+      select {
+        background: var(--card);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 5px 10px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button.on {
+        background: var(--fg);
+        color: var(--bg);
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 12px;
+      }
+      .tabs button {
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        background: none;
+        padding: 8px 12px;
+        color: var(--mut);
+      }
+      .tabs button.on {
+        color: var(--fg);
+        border-bottom-color: var(--fg);
+        background: none;
+      }
+      .tabs .later {
+        opacity: 0.6;
+      }
+      .note {
+        color: var(--mut);
+        font-size: 12px;
+        margin: 0 0 12px;
+      }
+      .sum {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .tile {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .tile b {
+        display: block;
+        font-size: 22px;
+        margin-top: 4px;
+      }
+      .tile span {
+        color: var(--mut);
+        font-size: 12px;
+      }
+      .svc {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 16px;
+      }
+      .svc h2 {
+        font-size: 15px;
+        margin: 0 0 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--fg);
+        display: inline-block;
+      }
+      .dot.warn {
+        background: transparent;
+        border: 2px solid var(--fg);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .pn {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--bg);
+      }
+      .pn .t {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      .pn .m {
+        font-size: 10px;
+        color: var(--mut);
+        font-family: ui-monospace, monospace;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .pn .v {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 2px 0 4px;
+      }
+      svg {
+        width: 100%;
+        height: 70px;
+        display: block;
+        cursor: crosshair;
+      }
+      .leg {
+        font-size: 11px;
+        color: var(--mut);
+        display: flex;
+        gap: 10px;
+      }
+      .cx {
+        stroke: var(--mut);
+        stroke-width: 1;
+        opacity: 0;
+      }
+      .empty {
+        border: 1px dashed var(--line);
+        border-radius: 10px;
+        padding: 24px;
+        color: var(--mut);
+        text-align: center;
+      }
+      .rules {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .rules th {
+        text-align: left;
+        font-weight: 500;
+        color: var(--mut);
+        font-size: 12px;
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--line);
+      }
+      .rules td {
+        padding: 8px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: middle;
+      }
+      .rules input[type='number'] {
+        width: 72px;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 4px 6px;
+        font: inherit;
+      }
+      .rules input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--fg);
+      }
+      .rules tr.off td {
+        opacity: 0.5;
+      }
+      .st {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 1px 9px;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      .st.warning {
+        color: var(--fg);
+        border-style: dashed;
+        border-color: var(--fg);
+      }
+      .st.critical {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: var(--fg);
+      }
+      .wrap {
+        overflow-x: auto;
+      }
+      .log {
+        font-size: 12px;
+        color: var(--mut);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .log li {
+        padding: 4px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .row input[type='text'] {
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 5px 8px;
+        font: inherit;
+        min-width: 240px;
+      }
+      #tip {
+        position: fixed;
+        pointer-events: none;
+        z-index: 10;
+        display: none;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 6px 9px;
+        font-size: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        white-space: nowrap;
+      }
+      #tip .h {
+        color: var(--mut);
+        margin-bottom: 3px;
+      }
+      #tip .r {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      #tip i {
+        display: inline-block;
+        width: 14px;
+        height: 0;
+        border-top: 2px solid var(--s1);
+      }
+      #tip i.d {
+        border-top-style: dashed;
+        border-color: var(--s2);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div style="display: flex; gap: 10px; align-items: center">
+        <h1>Monitoring</h1>
+        <span class="badge" id="src"></span>
+      </div>
+      <div class="ctl">
+        <select id="env">
+          <option>GCP staging</option>
+          <option>GCP production</option>
+          <option>Local</option>
+        </select>
+        <span id="ranges"></span>
+        <button id="auto" class="on">Auto-refresh: on</button>
+        <button id="theme">Theme</button>
+        <span class="badge" id="ts"></span>
+        <span class="badge" id="calls"></span>
+      </div>
+    </header>
+    <div class="tabs" id="tabs"></div>
+    <p class="note" id="note"></p>
+    <div class="sum" id="sum"></div>
+    <div id="svcs"></div>
+    <div id="tip"></div>
+
+    <script>
+      /* Demo only: all values are generated in the browser. */
+      const PANELS = {
+        cpu: {
+          t: 'CPU p50 / p95 of limit',
+          m: 'kubernetes.io/container/cpu/limit_utilization',
+          u: '%',
+          base: 35,
+          amp: 20,
+          two: 1,
+        },
+        cpur: {
+          t: 'CPU p50 / p95 of request',
+          m: 'kubernetes.io/container/cpu/request_utilization',
+          u: '%',
+          base: 60,
+          amp: 25,
+          two: 1,
+        },
+        mem: {
+          t: 'Memory p50 / p95 of limit',
+          m: 'kubernetes.io/container/memory/limit_utilization',
+          u: '%',
+          base: 55,
+          amp: 10,
+          two: 1,
+        },
+        memr: {
+          t: 'Memory p50 / p95 of request',
+          m: 'kubernetes.io/container/memory/request_utilization',
+          u: '%',
+          base: 80,
+          amp: 15,
+          two: 1,
+        },
+        memb: {
+          t: 'Memory used',
+          m: 'kubernetes.io/container/memory/used_bytes',
+          u: ' MiB',
+          base: 220,
+          amp: 80,
+        },
+        pods: {
+          t: 'Pods running',
+          m: 'kubernetes.io/container/uptime (series count)',
+          u: '',
+          base: 3,
+          amp: 2,
+          int: 1,
+        },
+        rst: {
+          t: 'Container restarts',
+          m: 'kubernetes.io/container/restart_count',
+          u: '',
+          base: 0,
+          amp: 1.4,
+          int: 1,
+        },
+        upt: {
+          t: 'Uptime oldest / newest pod',
+          m: 'kubernetes.io/container/uptime',
+          u: ' h',
+          base: 30,
+          amp: 20,
+          two: 1,
+        },
+        eph: {
+          t: 'Ephemeral storage of limit',
+          m: 'kubernetes.io/container/ephemeral_storage/limit_utilization',
+          u: '%',
+          base: 12,
+          amp: 6,
+        },
+        net: {
+          t: 'Pod network in / out',
+          m: 'kubernetes.io/pod/network/received_bytes_count, sent_bytes_count',
+          u: ' MB/s',
+          base: 4,
+          amp: 3,
+          two: 1,
+        },
+        ncpu: {
+          t: 'Node CPU of allocatable',
+          m: 'kubernetes.io/node/cpu/allocatable_utilization',
+          u: '%',
+          base: 45,
+          amp: 25,
+        },
+        nmem: {
+          t: 'Node memory of allocatable',
+          m: 'kubernetes.io/node/memory/allocatable_utilization',
+          u: '%',
+          base: 62,
+          amp: 12,
+        },
+        neph: {
+          t: 'Node ephemeral storage of allocatable',
+          m: 'kubernetes.io/node/ephemeral_storage/allocatable_utilization',
+          u: '%',
+          base: 30,
+          amp: 5,
+        },
+        nnet: {
+          t: 'Node network in / out',
+          m: 'kubernetes.io/node/network/received_bytes_count, sent_bytes_count',
+          u: ' MB/s',
+          base: 12,
+          amp: 8,
+          two: 1,
+        },
+        npods: {
+          t: 'Pods on node',
+          m: 'kubernetes.io/pod/network/received_bytes_count (series by node_name)',
+          u: '',
+          base: 18,
+          amp: 6,
+          int: 1,
+        },
+        inf: {
+          t: 'In-flight requests',
+          m: 'app metric: in_flight (not GCP)',
+          u: '',
+          base: 14,
+          amp: 10,
+          int: 1,
+        },
+        loop: {
+          t: 'Event-loop lag',
+          m: 'app metric: loop_lag (not GCP)',
+          u: ' ms',
+          base: 6,
+          amp: 8,
+        },
+        shed: {
+          t: 'Load shed / min',
+          m: 'app metric: load_shed_total (not GCP)',
+          u: '',
+          base: 0.5,
+          amp: 1.5,
+          int: 1,
+        },
+        gate: {
+          t: 'DB admission gate waiting',
+          m: 'app metric: db_admission_waiting (not GCP)',
+          u: '',
+          base: 1,
+          amp: 3,
+          int: 1,
+        },
+        pool: {
+          t: 'PgBouncer pool in use',
+          m: 'app metric: pgbouncer_pool_used (not GCP)',
+          u: '',
+          base: 12,
+          amp: 8,
+          int: 1,
+        },
+        err: { t: 'Restart health', m: 'derived from restart_count', u: '%', base: 0.6, amp: 0.8 },
+      };
+      const ALL = ['web', 'admin', 'api', 'gateway', 'worker'],
+        NODES = ['gke-pool-a-1', 'gke-pool-a-2', 'gke-pool-b-1'];
+      const TABS = [
+        {
+          id: 'overview',
+          label: 'Overview',
+          calls: 5,
+          groups: () => ALL.map((s) => ({ n: s, p: ['cpu', 'mem', 'memb', 'pods', 'rst', 'upt'] })),
+          sum: [
+            'Pods running',
+            'Restarts (1h)',
+            'Max CPU of limit',
+            'Max memory of limit',
+            'Oldest pod uptime',
+          ],
+        },
+        {
+          id: 'workloads',
+          label: 'Workloads',
+          calls: 8,
+          groups: () =>
+            [...ALL, 'pgbouncer', 'redis'].map((s) => ({
+              n: s,
+              p: ['cpur', 'memr', 'cpu', 'mem', 'eph', 'net', 'rst'],
+            })),
+          sum: [
+            'Pods running',
+            'Restarts (1h)',
+            'Max CPU of request',
+            'Max memory of request',
+            'Network out',
+          ],
+        },
+        {
+          id: 'nodes',
+          label: 'Nodes',
+          calls: 7,
+          groups: () => NODES.map((s) => ({ n: s, p: ['ncpu', 'nmem', 'neph', 'nnet', 'npods'] })),
+          sum: ['Nodes ready', 'Max node CPU', 'Max node memory', 'Max node disk', 'Pods total'],
+        },
+        {
+          id: 'app',
+          label: 'App signals',
+          calls: 0,
+          groups: () =>
+            ['api', 'gateway', 'worker'].map((s) => ({
+              n: s,
+              p: ['inf', 'loop', 'shed', 'gate', 'pool'],
+            })),
+          sum: ['In-flight', 'Loop lag', 'Load shed / min', 'Gate waiting', 'Pool in use'],
+          local: 1,
+        },
+        { id: 'alerts', label: 'Alerts', calls: 0, custom: 1 },
+      ];
+      let range = 60,
+        auto = true,
+        tick = 0,
+        tab = 'overview',
+        calls = 0;
+      const fetched = {}; /* tab -> last fetch ms: a tab that is not opened costs 0 calls */
+      const RANGES = [
+        ['15m', 15],
+        ['1h', 60],
+        ['6h', 360],
+        ['24h', 1440],
+      ];
+      const DATA = {};
+      const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
+      function rnd(s) {
+        s = Math.sin(s * 9301 + 49297) * 233280;
+        return s - Math.floor(s);
+      }
+      function series(name, key, off, n) {
+        const p = PANELS[key],
+          seed = hash(name + key),
+          out = [];
+        for (let i = 0; i < n; i++) {
+          const x = i + tick,
+            w = Math.sin((x + (seed % 13)) / 9) * 0.5 + 0.5;
+          let v = p.base + p.amp * w * (1 + off * 0.6) + rnd(x + seed) * p.amp * 0.3;
+          if (p.int) v = Math.round(v);
+          if (p.u === '%' && key !== 'err') v = Math.min(98, v);
+          out.push(Math.max(0, v));
+        }
+        return out;
+      }
+      function path(d, max, w, h) {
+        return d
+          .map(
+            (v, i) =>
+              (i ? 'L' : 'M') +
+              ((i / (d.length - 1)) * w).toFixed(1) +
+              ',' +
+              (h - (v / max) * (h - 4) - 2).toFixed(1),
+          )
+          .join(' ');
+      }
+      const fmt = (x) => (x >= 100 ? x.toFixed(0) : x.toFixed(1));
+      function panel(name, key) {
+        const p = PANELS[key],
+          n = range > 360 ? 60 : range > 60 ? 48 : 40;
+        const a = series(name, key, 0, n),
+          b = p.two ? series(name, key, 1, n) : null;
+        const max = Math.max(...a, ...(b || [])) * 1.15 || 1,
+          id = name + '|' + key;
+        DATA[id] = { a, b, p, n };
+        return `<div class="pn"><div class="t"><span>${p.t}</span></div><div class="m" title="${p.m}">${p.m}</div>
+  <div class="v">${fmt(a[n - 1])}${p.u}${b ? ` <span style="color:var(--mut);font-weight:400;font-size:13px">/ ${fmt(b[n - 1])}${p.u}</span>` : ''}</div>
+  <svg data-id="${id}" viewBox="0 0 240 70" preserveAspectRatio="none">
+    <line class="cx" x1="0" x2="0" y1="0" y2="70" vector-effect="non-scaling-stroke"/>
+    <path d="${path(a, max, 240, 70)}" fill="none" stroke="var(--s1)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+    ${b ? `<path d="${path(b, max, 240, 70)}" fill="none" stroke="var(--s2)" stroke-width="1.6" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>` : ''}
+  </svg><div class="leg"><span>${b ? 'solid p50/in, dashed p95/out' : 'value'}</span><span>last ${range >= 60 ? range / 60 + 'h' : range + 'm'}</span></div></div>`;
+      }
+      function maybeFetch(t, env) {
+        if (t.calls === 0 || (t.empty && false)) return;
+        const key = env + '|' + t.id + '|' + range,
+          now = Date.now();
+        if (!fetched[key] || now - fetched[key] >= 60000) {
+          fetched[key] = now;
+          calls += t.calls;
+        }
+      }
+      function render() {
+        tip.style.display = 'none';
+        const env = document.getElementById('env').value,
+          t = TABS.find((x) => x.id === tab);
+        document.getElementById('src').textContent = env + ' (demo data)';
+        document.getElementById('ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
+        const isLocal = env === 'Local';
+        if (!(isLocal && t.later)) maybeFetch(t.local && !isLocal ? { ...t, calls: 0 } : t, env);
+        document.getElementById('calls').textContent =
+          'GKE metric calls this session: ' +
+          calls +
+          (isLocal ? ' (local: 0)' : ' · monthly cap guard on (set in config)');
+        document.getElementById('note').textContent =
+          t.calls === 0
+            ? 'Source: our own app metrics. 0 GCP calls.'
+            : isLocal
+              ? 'Local source: process stats, embedded Postgres and app metrics. 0 GCP calls.'
+              : `This tab sends ${t.calls} grouped calls when opened and then at most once a minute while visible. Cached for 60 s and shared by all admins. Data is up to 3 minutes behind. No billing data.`;
+        if (t.custom) {
+          renderAlerts(env);
+          return;
+        }
+        const sum = document.getElementById('sum'),
+          out = document.getElementById('svcs');
+        if (t.empty) {
+          sum.innerHTML = '';
+          out.innerHTML = `<div class="empty">${t.empty}</div>`;
+          return;
+        }
+        if (isLocal && t.later) {
+          sum.innerHTML = '';
+          out.innerHTML = `<div class="empty">Not shown locally.</div>`;
+          return;
+        }
+        const vals = t.sum.map((l, i) => {
+          const k = Object.keys(PANELS)[((i * 3 + hash(t.id)) % 6) >> 0];
+          const s = series(
+            t.id,
+            Object.keys(PANELS)[(i + (hash(t.id) % 5) + 5) % Object.keys(PANELS).length],
+            0,
+            1,
+          )[0];
+          return [l, fmt(s)];
+        });
+        sum.innerHTML = vals
+          .map(([l, v]) => `<div class="tile"><span>${l}</span><b>${v}</b></div>`)
+          .join('');
+        out.innerHTML = t
+          .groups()
+          .map((g) => {
+            const e = series(g.n, 'err', 0, 1)[0];
+            return `<section class="svc"><h2><span class="dot ${e > 1.2 ? 'warn' : ''}"></span>${g.n}
+      <span class="badge">${isLocal ? 'local' : t.id === 'nodes' ? 'k8s_node' : t.id === 'app' ? 'app metrics, not GCP' : 'k8s_container'}</span></h2>
+      <div class="grid">${g.p.map((k) => panel(g.n, k)).join('')}</div></section>`;
+          })
+          .join('');
+      }
+      /* ---- Alerts tab: configurable thresholds with enable / disable ---- */
+      const RULES0 = [
+        {
+          id: 'cpu',
+          name: 'Container CPU p95 of limit',
+          key: 'cpu',
+          off: 1,
+          svcs: ALL,
+          unit: '%',
+          warn: 75,
+          crit: 90,
+          min: 10,
+          on: true,
+        },
+        {
+          id: 'mem',
+          name: 'Container memory p95 of limit',
+          key: 'mem',
+          off: 1,
+          svcs: ALL,
+          unit: '%',
+          warn: 80,
+          crit: 92,
+          min: 10,
+          on: true,
+        },
+        {
+          id: 'rst',
+          name: 'Container restarts',
+          key: 'rst',
+          off: 0,
+          svcs: ALL,
+          unit: '',
+          warn: 2,
+          crit: 5,
+          min: 1,
+          on: true,
+        },
+        {
+          id: 'eph',
+          name: 'Container ephemeral storage of limit',
+          key: 'eph',
+          off: 0,
+          svcs: ALL,
+          unit: '%',
+          warn: 70,
+          crit: 90,
+          min: 10,
+          on: true,
+        },
+        {
+          id: 'ncpu',
+          name: 'Node CPU of allocatable',
+          key: 'ncpu',
+          off: 0,
+          svcs: NODES,
+          unit: '%',
+          warn: 75,
+          crit: 90,
+          min: 10,
+          on: true,
+        },
+        {
+          id: 'nmem',
+          name: 'Node memory of allocatable',
+          key: 'nmem',
+          off: 0,
+          svcs: NODES,
+          unit: '%',
+          warn: 80,
+          crit: 92,
+          min: 10,
+          on: true,
+        },
+        {
+          id: 'neph',
+          name: 'Node ephemeral storage of allocatable',
+          key: 'neph',
+          off: 0,
+          svcs: NODES,
+          unit: '%',
+          warn: 75,
+          crit: 90,
+          min: 15,
+          on: true,
+        },
+        {
+          id: 'shed',
+          name: 'Load shed per minute (app)',
+          key: 'shed',
+          off: 0,
+          svcs: ['api', 'gateway', 'worker'],
+          unit: '',
+          warn: 5,
+          crit: 20,
+          min: 2,
+          on: true,
+        },
+        {
+          id: 'gate',
+          name: 'DB admission gate waiting (app)',
+          key: 'gate',
+          off: 0,
+          svcs: ['api', 'gateway', 'worker'],
+          unit: '',
+          warn: 8,
+          crit: 15,
+          min: 3,
+          on: false,
+        },
+        {
+          id: 'loop',
+          name: 'Event-loop lag (app)',
+          key: 'loop',
+          off: 0,
+          svcs: ['api', 'gateway', 'worker'],
+          unit: ' ms',
+          warn: 50,
+          crit: 150,
+          min: 3,
+          on: true,
+        },
+      ];
+      let RULES = JSON.parse(JSON.stringify(RULES0)),
+        RECIP = 'ops@example.com',
+        LOG = [],
+        PREV = {};
+      try {
+        const s = JSON.parse(localStorage.getItem('mon-alert-rules') || 'null');
+        if (s) {
+          RULES = RULES0.map((r) => ({ ...r, ...(s.rules || {})[r.id] }));
+          RECIP = s.recip || RECIP;
+        }
+      } catch (e) {}
+      function saveRules() {
+        try {
+          localStorage.setItem(
+            'mon-alert-rules',
+            JSON.stringify({
+              recip: RECIP,
+              rules: Object.fromEntries(
+                RULES.map((r) => [r.id, { warn: r.warn, crit: r.crit, min: r.min, on: r.on }]),
+              ),
+            }),
+          );
+        } catch (e) {}
+      }
+      function evalRule(r) {
+        let v = -1,
+          at = '';
+        r.svcs.forEach((s) => {
+          const x = series(s, r.key, r.off, 1)[0];
+          if (x > v) {
+            v = x;
+            at = s;
+          }
+        });
+        const st = !r.on ? 'disabled' : v >= r.crit ? 'critical' : v >= r.warn ? 'warning' : 'ok';
+        return { v, at, st };
+      }
+      function updateAlerts() {
+        const env = document.getElementById('env').value;
+        document.getElementById('ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
+        let c = 0,
+          w = 0,
+          en = 0;
+        RULES.forEach((r) => {
+          const e = evalRule(r),
+            key = env + r.id;
+          const cell = document.getElementById('v-' + r.id),
+            stc = document.getElementById('s-' + r.id);
+          if (!cell) return;
+          cell.textContent = r.on ? fmt(e.v) + r.unit + ' (' + e.at.split(' ')[0] + ')' : '-';
+          stc.textContent = e.st;
+          stc.className = 'st ' + e.st;
+          if (r.on) {
+            en++;
+            if (e.st === 'critical') c++;
+            if (e.st === 'warning') w++;
+          }
+          const prev = PREV[key] || 'ok';
+          if (r.on && e.st !== prev) {
+            LOG.unshift(
+              `${new Date().toLocaleTimeString()}  [${env}] ${e.st === 'ok' ? 'RECOVERED' : e.st.toUpperCase()}: ${r.name} ${fmt(e.v)}${r.unit} at ${e.at} (warn ${r.warn}, crit ${r.crit}) -> mail to ${RECIP}`,
+            );
+            LOG = LOG.slice(0, 10);
+          }
+          PREV[key] = r.on ? e.st : 'ok';
+        });
+        document.getElementById('a-en').textContent = en + ' / ' + RULES.length;
+        document.getElementById('a-c').textContent = c;
+        document.getElementById('a-w').textContent = w;
+        document.getElementById('a-d').textContent = RULES.length - en;
+        document.getElementById('a-log').innerHTML = LOG.length
+          ? LOG.map((l) => `<li>${l}</li>`).join('')
+          : '<li>No mail sent yet in this session.</li>';
+      }
+      function renderAlerts(env) {
+        document.getElementById('note').textContent =
+          'Rules are evaluated by the worker every 2 to 5 minutes from the same cached GKE series (no extra Google Cloud alert policies), and sent through our own email adapter (' +
+          (env === 'Local' ? 'Mailpit locally' : 'AWS SES') +
+          "). The demo re-evaluates every 5 seconds and treats the 'for' time as already met. Lower a threshold to see a state change. Edits are saved in this browser only.";
+        document.getElementById('sum').innerHTML = [
+          ['Rules enabled', 'a-en'],
+          ['Critical now', 'a-c'],
+          ['Warning now', 'a-w'],
+          ['Disabled', 'a-d'],
+        ]
+          .map(([l, id]) => `<div class="tile"><span>${l}</span><b id="${id}">-</b></div>`)
+          .join('');
+        document.getElementById('svcs').innerHTML = `
+  <section class="svc"><h2>Thresholds <span class="badge">${env}</span></h2>
+    <div class="row"><label>Recipients <input type="text" id="recip" value="${RECIP}"></label>
+      <button id="testmail">Send test mail</button><button id="reset">Reset to defaults</button></div>
+    <div class="wrap"><table class="rules"><thead><tr><th>On</th><th>Rule</th><th>Current (worst service)</th><th>Warning at</th><th>Critical at</th><th>For (min)</th><th>State</th></tr></thead><tbody>
+    ${RULES.map(
+      (
+        r,
+      ) => `<tr class="${r.on ? '' : 'off'}"><td><input type="checkbox" data-r="${r.id}" data-f="on" ${r.on ? 'checked' : ''} aria-label="Enable ${r.name}"></td>
+      <td>${r.name}</td><td id="v-${r.id}">-</td>
+      <td><input type="number" step="any" data-r="${r.id}" data-f="warn" value="${r.warn}"> ${r.unit}</td>
+      <td><input type="number" step="any" data-r="${r.id}" data-f="crit" value="${r.crit}"> ${r.unit}</td>
+      <td><input type="number" min="1" data-r="${r.id}" data-f="min" value="${r.min}"></td>
+      <td><span class="st" id="s-${r.id}">-</span></td></tr>`,
+    ).join('')}
+    </tbody></table></div></section>
+  <section class="svc"><h2>Recent mails</h2><ul class="log" id="a-log"></ul></section>`;
+        updateAlerts();
+      }
+      svcsEl_ready();
+      function svcsEl_ready() {
+        const el = document.getElementById('svcs');
+        el.addEventListener('change', (e) => {
+          const t = e.target;
+          if (t.id === 'recip') {
+            RECIP = t.value;
+            saveRules();
+            return;
+          }
+          const r = RULES.find((x) => x.id === t.dataset.r);
+          if (!r) return;
+          const f = t.dataset.f;
+          if (f === 'on') {
+            r.on = t.checked;
+            t.closest('tr').classList.toggle('off', !r.on);
+          } else {
+            const n = parseFloat(t.value);
+            if (isNaN(n)) return;
+            r[f] = n;
+            if (r.warn > r.crit) {
+              t.style.outline = '2px solid var(--fg)';
+              t.title = 'Warning must not exceed critical';
+            } else {
+              t.style.outline = '';
+              t.title = '';
+            }
+          }
+          saveRules();
+          updateAlerts();
+        });
+        el.addEventListener('click', (e) => {
+          if (e.target.id === 'reset') {
+            RULES = JSON.parse(JSON.stringify(RULES0));
+            saveRules();
+            renderAlerts(document.getElementById('env').value);
+          }
+          if (e.target.id === 'testmail') {
+            LOG.unshift(`${new Date().toLocaleTimeString()}  TEST: mail to ${RECIP}`);
+            updateAlerts();
+          }
+        });
+      }
+      const tip = document.getElementById('tip'),
+        svcsEl = document.getElementById('svcs');
+      function hideTip() {
+        tip.style.display = 'none';
+        svcsEl.querySelectorAll('.cx').forEach((l) => (l.style.opacity = 0));
+      }
+      svcsEl.addEventListener('mousemove', (e) => {
+        const svg = e.target.closest('svg[data-id]');
+        if (!svg) {
+          hideTip();
+          return;
+        }
+        const d = DATA[svg.dataset.id];
+        if (!d) {
+          hideTip();
+          return;
+        }
+        const r = svg.getBoundingClientRect(),
+          f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        const i = Math.round(f * (d.n - 1)),
+          t = new Date(Date.now() - (((d.n - 1 - i) * range * 60) / d.n) * 1000);
+        const line = svg.querySelector('.cx'),
+          x = (i / (d.n - 1)) * 240;
+        line.setAttribute('x1', x);
+        line.setAttribute('x2', x);
+        line.style.opacity = 1;
+        tip.innerHTML =
+          `<div class="h">${t.toLocaleTimeString()}</div>` +
+          (d.b
+            ? `<div class="r"><i></i>${d.p.t.split(' ')[0] === 'Network' ? 'in' : 'p50'} <b>${fmt(d.a[i])}${d.p.u}</b></div><div class="r"><i class="d"></i>${d.p.t.startsWith('Network') ? 'out' : 'p95'} <b>${fmt(d.b[i])}${d.p.u}</b></div>`
+            : `<div class="r"><i></i>${d.p.t} <b>${fmt(d.a[i])}${d.p.u}</b></div>`);
+        tip.style.display = 'block';
+        const w = tip.offsetWidth;
+        let left = e.clientX + 14;
+        if (left + w > innerWidth - 8) left = e.clientX - w - 14;
+        tip.style.left = left + 'px';
+        tip.style.top = e.clientY + 14 + 'px';
+      });
+      svcsEl.addEventListener('mouseleave', hideTip);
+      const tb = document.getElementById('tabs');
+      TABS.forEach((t) => {
+        const b = document.createElement('button');
+        b.textContent = t.label + (t.later ? ' (later)' : '');
+        if (t.later) b.className = 'later';
+        if (t.id === tab) b.classList.add('on');
+        b.onclick = () => {
+          tab = t.id;
+          [...tb.children].forEach((c) => c.classList.remove('on'));
+          b.classList.add('on');
+          render();
+        };
+        tb.appendChild(b);
+      });
+      const rb = document.getElementById('ranges');
+      RANGES.forEach(([l, m]) => {
+        const b = document.createElement('button');
+        b.textContent = l;
+        if (m === range) b.className = 'on';
+        b.onclick = () => {
+          range = m;
+          [...rb.children].forEach((c) => (c.className = ''));
+          b.className = 'on';
+          render();
+        };
+        rb.appendChild(b);
+      });
+      document.getElementById('env').onchange = render;
+      document.getElementById('auto').onclick = (e) => {
+        auto = !auto;
+        e.target.className = auto ? 'on' : '';
+        e.target.textContent = 'Auto-refresh: ' + (auto ? 'on' : 'off');
+      };
+      document.getElementById('theme').onclick = () => {
+        const r = document.documentElement;
+        const dark = r.dataset.theme
+          ? r.dataset.theme === 'dark'
+          : matchMedia('(prefers-color-scheme:dark)').matches;
+        r.dataset.theme = dark ? 'light' : 'dark';
+      };
+      setInterval(() => {
+        if (auto && !document.hidden) {
+          tick++;
+          if (tab === 'alerts') updateAlerts();
+          else render();
+        }
+      }, 5000);
+      render();
+    </script>
+  </body>
+</html>

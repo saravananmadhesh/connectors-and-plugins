@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: boldcreate-pgbouncer-ingress-preproduction, namespace: boldcreate-preprod }
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-pgbouncer-preproduction }
+  policyTypes: [Ingress]
+  ingress:
+    # Only the services that use the database. The web app and the migration job do not.
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-api-preproduction }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-gateway-preproduction }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-worker-preproduction }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-admin-preproduction }
+      ports: [{ protocol: TCP, port: 6432 }]

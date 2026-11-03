@@ -1,0 +1,907 @@
+<title>DCR Branding Reference</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<style>
+  /* Layout: two admin-style screens (global OAuth page, project consent-screen form) sharing one settings state. Monochrome, light and dark. */
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --sunken: #f1f1ef;
+    --fg: #1c1c1a;
+    --muted: #6b6b66;
+    --line: #dcdcd8;
+    --strong: #1c1c1a;
+    --on-strong: #fafaf9;
+    --ok: #2f6b45;
+    --bad: #a3342b;
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #121211;
+      --surface: #1a1a18;
+      --sunken: #232321;
+      --fg: #ecece8;
+      --muted: #9a9a94;
+      --line: #34342f;
+      --strong: #ecece8;
+      --on-strong: #121211;
+      --ok: #6fbf8a;
+      --bad: #e57a70;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #121211;
+    --surface: #1a1a18;
+    --sunken: #232321;
+    --fg: #ecece8;
+    --muted: #9a9a94;
+    --line: #34342f;
+    --strong: #ecece8;
+    --on-strong: #121211;
+    --ok: #6fbf8a;
+    --bad: #e57a70;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.5 var(--font);
+    padding-block: 20px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    display: grid;
+    gap: 20px;
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  h1 {
+    font-size: 18px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 2px 0 0;
+  }
+  nav {
+    display: flex;
+    gap: 4px;
+    background: var(--sunken);
+    padding: 3px;
+    border-radius: 6px;
+  }
+  nav a {
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  nav a[aria-current='page'] {
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--strong);
+    outline-offset: 2px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 820px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  section.panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+  h2 {
+    font-size: 13px;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .field {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+  }
+  label,
+  .lbl {
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .hint {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  input[type='text'],
+  input[type='url'],
+  select,
+  textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  input[aria-invalid='true'],
+  textarea[aria-invalid='true'] {
+    border-color: var(--bad);
+  }
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  textarea {
+    min-height: 76px;
+    resize: vertical;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .err {
+    color: var(--bad);
+    font-size: 12px;
+  }
+  .err:empty {
+    display: none;
+  }
+  .check {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 500;
+  }
+  .choice {
+    display: grid;
+    gap: 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .choice.on {
+    border-color: var(--strong);
+  }
+  .choice .head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 600;
+  }
+  .choice .body {
+    display: grid;
+    gap: 12px;
+    padding-left: 24px;
+    margin-top: 8px;
+    min-width: 0;
+  }
+  .kv {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 4px 10px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .kv dt {
+    color: var(--muted);
+  }
+  .kv dd {
+    margin: 0;
+  }
+  button {
+    font: inherit;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--fg);
+    cursor: pointer;
+  }
+  button.primary {
+    background: var(--strong);
+    color: var(--on-strong);
+    border-color: var(--strong);
+  }
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .note {
+    border: 1px solid var(--line);
+    background: var(--sunken);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .note.lock {
+    border-style: dashed;
+  }
+  code,
+  .mono {
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  .sent {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--sunken);
+    border-radius: 6px;
+    padding: 8px 10px;
+    overflow-wrap: anywhere;
+  }
+  .consent {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    padding: 20px;
+    display: grid;
+    gap: 14px;
+  }
+  .consent .prov {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .consent .dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--strong);
+    display: inline-block;
+  }
+  .consent h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  .consent ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .consent .links {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+  }
+  .consent .btns {
+    display: flex;
+    gap: 8px;
+  }
+  .consent .btns span {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .consent .btns span.go {
+    background: var(--strong);
+    color: var(--on-strong);
+    border-color: var(--strong);
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    background: var(--strong);
+    color: var(--on-strong);
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .sample {
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>DCR consent branding</h1>
+      <p class="sub">Reference screens with example data. Nothing here is saved.</p>
+    </div>
+    <div class="row">
+      <button type="button" id="theme-btn" aria-label="Switch theme">Dark theme</button>
+      <nav aria-label="Screens">
+        <a href="#admin" id="tab-admin">Admin: OAuth</a>
+        <a href="#project" id="tab-project">Project: Branding</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ADMIN -->
+  <main id="view-admin" hidden>
+    <div class="grid">
+      <section class="panel" aria-labelledby="a-def">
+        <h2 id="a-def">Defaults for projects that use platform details</h2>
+        <div class="field">
+          <div class="row">
+            <label for="a-name">Default client name *</label
+            ><span class="count" id="a-name-c"></span>
+          </div>
+          <input type="text" id="a-name" autocomplete="off" />
+          <div class="err" id="a-name-e"></div>
+        </div>
+        <div class="field">
+          <label for="a-uri">Default website</label
+          ><input type="url" id="a-uri" autocomplete="off" />
+          <div class="err" id="a-uri-e"></div>
+        </div>
+        <div class="field">
+          <label for="a-pol">Default privacy policy</label
+          ><input type="url" id="a-pol" autocomplete="off" />
+          <div class="err" id="a-pol-e"></div>
+        </div>
+        <div class="field">
+          <label for="a-tos">Default terms of service</label
+          ><input type="url" id="a-tos" autocomplete="off" />
+          <div class="err" id="a-tos-e"></div>
+        </div>
+
+        <h2>Name rules</h2>
+        <div class="field">
+          <div class="row">
+            <label for="a-suf">Suffix</label><span class="count" id="a-suf-c"></span>
+          </div>
+          <input type="text" id="a-suf" autocomplete="off" />
+          <div class="hint">
+            Added after a customer's custom name. Not added to the default name.
+          </div>
+          <div class="err" id="a-suf-e"></div>
+        </div>
+        <div class="field" role="radiogroup" aria-labelledby="a-pol-l">
+          <span class="lbl" id="a-pol-l">Suffix policy</span>
+          <label style="font-weight: 400"
+            ><input type="radio" name="a-policy" value="required" /> <b>Required</b>: every custom
+            name carries the suffix</label
+          >
+          <label style="font-weight: 400"
+            ><input type="radio" name="a-policy" value="optional" /> <b>Optional</b>: a project can
+            turn it off on its own form</label
+          >
+        </div>
+        <div class="field">
+          <label for="a-block">Blocked names (one per line)</label>
+          <textarea id="a-block"></textarea>
+          <div class="hint">
+            A project name that contains one of these is refused, in any letter case.
+            <span id="a-block-c"></span>
+          </div>
+          <div class="err" id="a-block-e"></div>
+        </div>
+
+        <div class="field">
+          <label for="a-reason">Reason for change *</label>
+          <input
+            type="text"
+            id="a-reason"
+            placeholder="Allow customers to show their own name only"
+            autocomplete="off"
+          />
+          <div class="err" id="a-reason-e"></div>
+        </div>
+        <div class="row">
+          <button class="primary" type="button" id="a-save">Save</button
+          ><span class="sample">Last changed 31 Oct 2026 by admin@example.com</span>
+        </div>
+        <div class="note">
+          This page holds platform values only. It never lists or searches customer projects.
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="a-pre">
+        <h2 id="a-pre">Example of the default name on a consent screen</h2>
+        <div class="note">Illustration only. Each provider draws its own screen.</div>
+        <div class="consent" aria-live="polite" id="a-consent"></div>
+        <div class="note">
+          Changing a default affects clients registered after the save. Clients that already exist
+          keep the name they registered with, so no user has to sign in again.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- PROJECT -->
+  <main id="view-project" hidden>
+    <div class="row">
+      <label for="p-proj">Project</label>
+      <select id="p-proj" style="width: auto">
+        <option value="platform">Acme Assistant (platform)</option>
+        <option value="for_you">Personal installs (for_you)</option>
+      </select>
+    </div>
+    <div class="grid" style="margin-top: 16px">
+      <section class="panel" aria-labelledby="p-h">
+        <h2 id="p-h">OAuth consent screen</h2>
+        <p class="sub" style="margin: 0">
+          Shown by providers such as Linear and Notion when your users connect an account.
+        </p>
+        <div class="note lock" id="p-lock" hidden>
+          For You projects always use the platform details, so there is nothing to customize here.
+        </div>
+
+        <div class="choice" id="c-default">
+          <label class="head"
+            ><input type="radio" name="p-mode" value="default" /> Use platform defaults</label
+          >
+          <dl class="kv body" id="p-defaults"></dl>
+        </div>
+
+        <div class="choice" id="c-custom">
+          <label class="head"
+            ><input type="radio" name="p-mode" value="custom" /> Use custom details</label
+          >
+          <div class="body" id="p-fields">
+            <div class="field">
+              <div class="row">
+                <label for="p-name">Product name *</label><span class="count" id="p-name-c"></span>
+              </div>
+              <input type="text" id="p-name" autocomplete="off" />
+              <div class="err" id="p-name-e"></div>
+            </div>
+            <div class="field">
+              <label for="p-uri">Website</label><input type="url" id="p-uri" autocomplete="off" />
+              <div class="err" id="p-uri-e"></div>
+            </div>
+            <div class="field">
+              <label for="p-pol">Privacy policy</label
+              ><input type="url" id="p-pol" autocomplete="off" />
+              <div class="err" id="p-pol-e"></div>
+            </div>
+            <div class="field">
+              <label for="p-tos">Terms of service</label
+              ><input type="url" id="p-tos" autocomplete="off" />
+              <div class="err" id="p-tos-e"></div>
+            </div>
+            <div class="field">
+              <label class="check"
+                ><input type="checkbox" id="p-suf" /> <span id="p-suf-l"></span
+              ></label>
+              <div class="hint" id="p-suf-h"></div>
+            </div>
+            <div class="err" id="p-size-e"></div>
+          </div>
+        </div>
+
+        <div class="row"><button class="primary" type="button" id="p-save">Save</button></div>
+        <div class="note">
+          One name for every MCP server in this project. Providers store the name when a server
+          first registers. Servers that are already registered keep their name, and nobody has to
+          reconnect.
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="p-pre">
+        <h2 id="p-pre">Name sent to providers</h2>
+        <div class="sent" id="p-sent"></div>
+        <div class="note">
+          Each provider draws its own consent screen, so its layout and wording will differ. This is
+          an illustration.
+        </div>
+        <div class="field">
+          <label for="p-prev-s">Example provider</label
+          ><select id="p-prev-s"></select>
+        </div>
+        <div class="consent" aria-live="polite" id="p-consent"></div>
+      </section>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+  (function () {
+    var $ = function (id) {
+      return document.getElementById(id);
+    };
+    // Platform settings (example data), shared by both screens.
+    var G = {
+      name: 'BoldConnect',
+      uri: 'https://boldconnect.example',
+      pol: 'https://boldconnect.example/privacy',
+      tos: 'https://boldconnect.example/terms',
+      suf: ' via BoldConnect',
+      policy: 'optional',
+      block: ['Google', 'Microsoft', 'GitHub'],
+    };
+    // Settings of the open platform project (example data).
+    var P = {
+      mode: 'custom',
+      name: 'Acme Assistant',
+      uri: 'https://acme.example/assistant',
+      pol: '',
+      tos: '',
+      showSuffix: true,
+    };
+    var SERVERS = [{ label: 'Linear' }, { label: 'Notion' }, { label: 'GitHub' }];
+    var projKind = 'platform';
+
+    /* One set of checks for both forms, as the real form and route share one function. */
+    function nameError(n) {
+      n = n.trim();
+      if (n.length < 2 || n.length > 60) return 'Use 2 to 60 characters.';
+      if (/https?:\/\//i.test(n) || /[\u0000-\u001f]/.test(n))
+        return 'Do not use links or control characters.';
+      var low = n.toLowerCase();
+      if (
+        G.block.some(function (b) {
+          return b && low.indexOf(b.toLowerCase()) !== -1;
+        })
+      )
+        return 'This name is reserved.';
+      return '';
+    }
+    function uriError(u) {
+      u = u.trim();
+      return !u || (u.length <= 2048 && /^https:\/\/[^\s\/]+\.[^\s]+$/i.test(u))
+        ? ''
+        : 'Enter an https:// address.';
+    }
+
+    function suffixApplies() {
+      return G.policy === 'required' || P.showSuffix;
+    }
+    function effective() {
+      if (projKind === 'for_you' || P.mode === 'default') {
+        return { name: G.name, uri: G.uri, pol: G.pol, tos: G.tos, suffixed: false };
+      }
+      var s = suffixApplies();
+      return {
+        name: P.name.trim() + (s ? G.suf : ''),
+        uri: P.uri.trim() || G.uri,
+        pol: P.pol.trim() || G.pol,
+        tos: P.tos.trim() || G.tos,
+        suffixed: s,
+      };
+    }
+    function esc(t) {
+      var d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+    function consentHtml(name, l, provider) {
+      return (
+        '<div class="prov"><span class="dot"></span>' +
+        esc(provider) +
+        ' · Authorize access</div>' +
+        '<h3>"' +
+        esc(name) +
+        '" wants to access your ' +
+        esc(provider) +
+        ' account.</h3>' +
+        '<ul><li>Read your profile</li><li>Read and write issues</li></ul>' +
+        '<div class="links"><span>' +
+        esc(l.uri || 'no website') +
+        '</span><span>Privacy: ' +
+        esc(l.pol || 'none') +
+        '</span><span>Terms: ' +
+        esc(l.tos || 'none') +
+        '</span></div>' +
+        '<div class="btns"><span>Cancel</span><span class="go">Allow</span></div>'
+      );
+    }
+    function toast(msg) {
+      var t = $('toast');
+      t.textContent = msg;
+      t.hidden = false;
+      clearTimeout(toast.h);
+      toast.h = setTimeout(function () {
+        t.hidden = true;
+      }, 2200);
+    }
+    function mark(id, msg) {
+      $(id + '-e').textContent = msg;
+      $(id).setAttribute('aria-invalid', msg ? 'true' : 'false');
+    }
+
+    /* ---------- admin ---------- */
+    function adminErrors() {
+      var e = {};
+      e.name = nameError(G.name);
+      e.uri = uriError(G.uri);
+      e.pol = uriError(G.pol);
+      e.tos = uriError(G.tos);
+      e.suf = G.suf.length > 40 ? 'Use up to 40 characters.' : '';
+      e.block =
+        G.block.length > 200
+          ? 'Use up to 200 names.'
+          : G.block.some(function (b) {
+                return b.length > 60;
+              })
+            ? 'Each name can have up to 60 characters.'
+            : '';
+      return e;
+    }
+    function renderAdmin() {
+      var e = adminErrors();
+      mark('a-name', e.name);
+      mark('a-uri', e.uri);
+      mark('a-pol', e.pol);
+      mark('a-tos', e.tos);
+      mark('a-suf', e.suf);
+      mark('a-block', e.block);
+      $('a-name-c').textContent = G.name.length + ' / 60';
+      $('a-suf-c').textContent = G.suf.length + ' / 40';
+      $('a-block-c').textContent = G.block.length + ' names';
+      $('a-consent').innerHTML = consentHtml(
+        G.name,
+        { uri: G.uri, pol: G.pol, tos: G.tos },
+        'Linear',
+      );
+    }
+    function bindAdmin() {
+      $('a-name').value = G.name;
+      $('a-uri').value = G.uri;
+      $('a-pol').value = G.pol;
+      $('a-tos').value = G.tos;
+      $('a-suf').value = G.suf;
+      $('a-block').value = G.block.join('\n');
+      document.querySelectorAll('input[name="a-policy"]').forEach(function (r) {
+        r.checked = r.value === G.policy;
+        r.onchange = function () {
+          G.policy = this.value;
+          renderAdmin();
+        };
+      });
+      $('a-name').oninput = function () {
+        G.name = this.value;
+        renderAdmin();
+      };
+      $('a-uri').oninput = function () {
+        G.uri = this.value;
+        renderAdmin();
+      };
+      $('a-pol').oninput = function () {
+        G.pol = this.value;
+        renderAdmin();
+      };
+      $('a-tos').oninput = function () {
+        G.tos = this.value;
+        renderAdmin();
+      };
+      $('a-suf').oninput = function () {
+        G.suf = this.value;
+        renderAdmin();
+      };
+      $('a-block').oninput = function () {
+        var seen = {};
+        G.block = this.value
+          .split('\n')
+          .map(function (x) {
+            return x.trim();
+          })
+          .filter(function (x) {
+            var k = x.toLowerCase();
+            if (!x || seen[k]) return false;
+            seen[k] = 1;
+            return true;
+          });
+        renderAdmin();
+      };
+      $('a-save').onclick = function () {
+        var e = adminErrors();
+        var bad = Object.keys(e).some(function (k) {
+          return e[k];
+        });
+        var reason = $('a-reason').value.trim();
+        $('a-reason-e').textContent = reason ? '' : 'Give a reason; it goes in the audit log.';
+        if (bad || !reason) {
+          toast('Fix the highlighted fields');
+          return;
+        }
+        toast('Saved and recorded in the audit log');
+      };
+      renderAdmin();
+    }
+
+    /* ---------- project ---------- */
+    function projectErrors() {
+      var e = { name: '', uri: '', pol: '', tos: '', size: '' };
+      if (P.mode !== 'custom' || projKind === 'for_you') return e;
+      e.name = P.name.trim() ? nameError(P.name) : 'Enter a product name.';
+      e.uri = uriError(P.uri);
+      e.pol = uriError(P.pol);
+      e.tos = uriError(P.tos);
+      if (!e.name && suffixApplies() && (P.name.trim() + G.suf).length > 60)
+        e.size = 'The name and the suffix together must be 60 characters or fewer.';
+      return e;
+    }
+    function renderProject() {
+      var lock = projKind === 'for_you';
+      var custom = P.mode === 'custom' && !lock;
+      $('p-lock').hidden = !lock;
+      document.querySelectorAll('input[name="p-mode"]').forEach(function (r) {
+        r.checked = r.value === (lock ? 'default' : P.mode);
+        r.disabled = lock;
+      });
+      $('c-default').className = 'choice' + (!custom ? ' on' : '');
+      $('c-custom').className = 'choice' + (custom ? ' on' : '');
+      $('p-defaults').innerHTML =
+        '<dt>Name</dt><dd>' +
+        esc(G.name) +
+        '</dd><dt>Website</dt><dd>' +
+        esc(G.uri || 'none') +
+        '</dd><dt>Privacy</dt><dd>' +
+        esc(G.pol || 'none') +
+        '</dd><dt>Terms</dt><dd>' +
+        esc(G.tos || 'none') +
+        '</dd>';
+      ['p-name', 'p-uri', 'p-pol', 'p-tos', 'p-suf'].forEach(function (id) {
+        $(id).disabled = !custom;
+      });
+      $('p-uri').placeholder = G.uri || 'Platform default';
+      $('p-pol').placeholder = G.pol || 'Platform default';
+      $('p-tos').placeholder = G.tos || 'Platform default';
+      $('p-name').placeholder = 'Your product name';
+      var required = G.policy === 'required';
+      $('p-suf').checked = required ? true : P.showSuffix;
+      $('p-suf').disabled = !custom || required;
+      $('p-suf-l').textContent = 'Add "' + G.suf.trim() + '" after the name';
+      $('p-suf-h').textContent = required
+        ? 'Required by the platform.'
+        : 'Optional. Leave it on unless you want only your own name.';
+      $('p-name-c').textContent = P.name.length + ' / 60';
+      var e = projectErrors();
+      mark('p-name', e.name);
+      mark('p-uri', e.uri);
+      mark('p-pol', e.pol);
+      mark('p-tos', e.tos);
+      $('p-size-e').textContent = e.size;
+      $('p-save').disabled =
+        lock ||
+        Object.keys(e).some(function (k) {
+          return e[k];
+        });
+      var eff = effective();
+      var sel = $('p-prev-s'),
+        cur = sel.value;
+      if (!sel.options.length)
+        SERVERS.forEach(function (s) {
+          var o = document.createElement('option');
+          o.value = s.label;
+          o.textContent = s.label;
+          sel.appendChild(o);
+        });
+      if (cur) sel.value = cur;
+      $('p-sent').textContent = eff.name || '(enter a product name)';
+      $('p-consent').innerHTML = consentHtml(eff.name || '…', eff, sel.value || SERVERS[0].label);
+    }
+    function bindProject() {
+      $('p-proj').onchange = function () {
+        projKind = this.value;
+        renderProject();
+      };
+      document.querySelectorAll('input[name="p-mode"]').forEach(function (r) {
+        r.onchange = function () {
+          P.mode = this.value;
+          renderProject();
+        };
+      });
+      $('p-name').value = P.name;
+      $('p-uri').value = P.uri;
+      $('p-pol').value = P.pol;
+      $('p-tos').value = P.tos;
+      $('p-name').oninput = function () {
+        P.name = this.value;
+        renderProject();
+      };
+      $('p-uri').oninput = function () {
+        P.uri = this.value;
+        renderProject();
+      };
+      $('p-pol').oninput = function () {
+        P.pol = this.value;
+        renderProject();
+      };
+      $('p-tos').oninput = function () {
+        P.tos = this.value;
+        renderProject();
+      };
+      $('p-suf').onchange = function () {
+        P.showSuffix = this.checked;
+        renderProject();
+      };
+      $('p-prev-s').onchange = renderProject;
+      $('p-save').onclick = function () {
+        toast(
+          P.mode === 'default'
+            ? 'Saved. This project follows the platform defaults.'
+            : 'Saved. New registrations use this name.',
+        );
+      };
+      renderProject();
+    }
+
+    /* ---------- routing and theme ---------- */
+    var booted = { admin: false, project: false };
+    function route() {
+      var v = location.hash === '#project' ? 'project' : 'admin';
+      $('view-admin').hidden = v !== 'admin';
+      $('view-project').hidden = v !== 'project';
+      $('tab-admin').removeAttribute('aria-current');
+      $('tab-project').removeAttribute('aria-current');
+      $('tab-' + v).setAttribute('aria-current', 'page');
+      if (!booted.admin) {
+        booted.admin = true;
+        bindAdmin();
+      }
+      if (!booted.project) {
+        booted.project = true;
+        bindProject();
+      }
+      if (v === 'project') renderProject();
+      else renderAdmin();
+    }
+    function setTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      $('theme-btn').textContent = t === 'light' ? 'Dark theme' : 'Light theme';
+    }
+    $('theme-btn').onclick = function () {
+      setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    };
+    setTheme('light');
+    window.addEventListener('hashchange', route);
+    route();
+  })();
+</script>

@@ -23,9 +23,11 @@ import {
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
+import { InfoHint } from '@/components/InfoHint';
 import { Section } from '@/components/Page';
+import { PageHeader } from '@/components/PageHeader';
 import { LogsTab } from './LogsTab';
-import { CursorPager, QueryFrame, type TabProps } from './shared';
+import { CursorPager, QueryFrame, RefreshButton, type TabProps } from './shared';
 import { messageOf, useCursorPaging } from './paging';
 
 const when = (iso: string | null) => (iso ? relativeTime(iso) : 'Never');
@@ -261,6 +263,12 @@ export function UsersTab({ orgId, projectId, canWrite }: TabProps) {
 
   return (
     <div className="space-y-3">
+      <PageHeader
+        title="Users"
+        description="The people of your product who have used this project. A user appears once your server opens a session for them."
+      >
+        <RefreshButton orgId={orgId} projectId={projectId} />
+      </PageHeader>
       <div className="relative w-full sm:w-72">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -297,8 +305,22 @@ export function UsersTab({ orgId, projectId, canWrite }: TabProps) {
                     <TableHead>User</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last seen</TableHead>
-                    <TableHead>Last synced</TableHead>
-                    <TableHead>Missing</TableHead>
+                    <TableHead>
+                      <span className="inline-flex items-center gap-1">
+                        Last synced
+                        <InfoHint about="last synced">
+                          When the user’s agent last applied the project’s plugins.
+                        </InfoHint>
+                      </span>
+                    </TableHead>
+                    <TableHead>
+                      <span className="inline-flex items-center gap-1">
+                        Missing
+                        <InfoHint about="missing">
+                          Connections the user still has to make for their plugins.
+                        </InfoHint>
+                      </span>
+                    </TableHead>
                     <TableHead>Sessions</TableHead>
                     <TableHead>Connections</TableHead>
                     <TableHead className="w-0" />

@@ -34,7 +34,17 @@ describe('plugin sets in settings', () => {
       ReturnType<typeof marketplace.listCategories>
     >);
     vi.spyOn(projects, 'catalog').mockResolvedValue({
-      items: [{ id: 'plg_2', displayName: 'Beta', summary: 'Second plugin' }],
+      items: [
+        {
+          id: 'plg_2',
+          displayName: 'Beta',
+          summary: 'Second plugin',
+          logoUrl: null,
+          verified: false,
+          featured: false,
+          componentCounts: { agent: 0, skill: 2, mcp: 0, hook: 0, rule: 0 },
+        },
+      ],
       total: 1,
       page: 1,
       pageSize: 8,

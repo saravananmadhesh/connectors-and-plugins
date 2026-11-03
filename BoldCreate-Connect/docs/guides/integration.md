@@ -74,7 +74,7 @@ Manifest shape:
 - Keep the key in memory or a secrets store; never in logs, checkpoints or the synced folder.
 - Treat archives as untrusted: verify `sha256`, block path traversal and symlinks, cap size, extract into a namespaced directory.
 - Never execute hooks unless the runtime has an explicit hook engine.
-- Honour `pollAfterSeconds` and `Retry-After`; a wrong-org or unknown resource is `404`.
+- Honour `pollAfterSeconds` and `Retry-After`; a wrong-org or unknown resource is `404`. Behaviour on `429` and `503`: [Handling limits and overload](handling-overload.md).
 - One key per user is the norm; products with many users give each user a project session, or use the organization key for shared agents.
 
 ## Level 4: a host product with the client package
@@ -102,6 +102,16 @@ const request = await session.authorize('some-server', {
 // send the user to request.redirectUrl, then: await request.waitForConnection();
 ```
 
+### When a plugin's server cannot sign users in
+
+Starting a connection can fail before the user is sent anywhere. The error carries the code and, in the TypeScript SDK, a `hint` that says what to do.
+
+| Code                          | Status | Meaning and what to do                                                                                                                                                |
+| ----------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `oauth_client_not_configured` | 409    | The server offers no automatic registration, or the auth config has no client. Add an auth config with the server's client ID and secret, then connect again.         |
+| `oauth_registration_failed`   | 502    | The server refused automatic registration. Ask its owner to allow the redirect URL of this service, or add an auth config with a pre-registered client ID and secret. |
+| `oauth_discovery_failed`      | 502    | The server's OAuth settings could not be read. Check its URL is reachable and supports OAuth with PKCE.                                                               |
+
 ### Host SDKs
 
 | Language              | Package                          | Reference                                                     |
@@ -117,7 +127,7 @@ A runnable script with a test is in `examples/project-host/`; the .NET version i
 
 - **Sessions.** A session lasts 30 days by default and at most 365, and deleting it ends it at once. A marketplace session names no plugin allow list, so a plugin the user installs later appears without a new session. Reuse a session instead of minting one per request: a user may have 20 live sessions.
 - **Keys.** Never put the project key in a browser, a log or a file the user can read. Rotate it by creating the second key, switching, then revoking the first; a key can be limited to addresses.
-- **Limits.** Read the rate limit headers and back off on `429`; the client does this for reads and for `PUT` and `DELETE`, and repeats a `POST` only when it carries an idempotency key. A marketplace page reads `GET /v1/project/user-plugins?userId=` instead of keeping a copy. Polling it counts against the project budget (3,000 a minute), so refresh on a webhook event rather than on a timer.
+- **Limits.** Read the rate limit headers and back off on `429`. `x-ratelimit-limit` is the calls allowed per window, `x-ratelimit-remaining` what is left, `x-ratelimit-reset` the seconds until the window ends, and `x-ratelimit-window-size` the window length in seconds (not a limit); the client does this for reads and for `PUT` and `DELETE`, and repeats a `POST` only when it carries an idempotency key. A marketplace page reads `GET /v1/project/user-plugins?userId=` instead of keeping a copy. Polling it counts against the project budget (5,000 a minute), so refresh on a webhook event rather than on a timer.
 - **Webhooks.** Deliveries repeat after a failure, so dedupe by event id.
 - **Files.** The client checks every archive against its hash, refuses unsafe paths, keeps a file the user changed by hand, and places hooks only when you ask. The token is never written to disk; MCP files carry `${CONNECT_TOKEN}`.
 

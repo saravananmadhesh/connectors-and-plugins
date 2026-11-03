@@ -43,13 +43,13 @@ export const PROJECT_SCOPE_INFO: Record<ProjectKeyScope, ProjectScopeInfo> = {
     preset: true,
   },
   'auth-configs:read': {
-    label: 'Read auth configs',
+    label: 'Read plugin settings',
     description: 'See which variables a plugin needs and whether they are set',
     destructive: false,
     preset: false,
   },
   'auth-configs:write': {
-    label: 'Manage auth configs',
+    label: 'Manage plugin settings',
     description: 'Set the variables a plugin needs',
     destructive: false,
     preset: false,

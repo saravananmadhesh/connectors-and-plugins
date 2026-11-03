@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: boldcreate-pgbouncer-config-production, namespace: boldcreate-prod }
+data:
+  # PgBouncer 1.26.1 or later (earlier releases carry three security fixes in 1.26.1).
+  # Each of the 2 replicas opens its own pool, so the per-role pool_size below is half of the
+  # role's share of the database (api 6, gateway 2, worker 2, admin 2 at 1 vCPU). The sizes
+  # are checked against the role limits by packages/db/src/pgbouncer-manifest.test.ts.
+  pgbouncer.ini: |
+    [databases]
+    * = host=#{PgBouncerDbHost}# port=5432
+
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 6432
+    unix_socket_dir =
+    pidfile =
+    logfile =
+
+    pool_mode = transaction
+    max_client_conn = 2000
+    default_pool_size = 1
+    min_pool_size = 0
+    reserve_pool_size = 0
+
+    query_wait_timeout = 5
+    server_idle_timeout = 300
+    server_lifetime = 3600
+    server_connect_timeout = 5
+    client_login_timeout = 10
+    idle_transaction_timeout = 15
+
+    ; The services send these as startup parameters; the role settings apply them instead.
+    ignore_startup_parameters = extra_float_digits,options,statement_timeout
+
+    auth_type = scram-sha-256
+    auth_file = /etc/pgbouncer/auth/userlist.txt
+
+    client_tls_sslmode = require
+    client_tls_cert_file = /etc/pgbouncer/tls/tls.crt
+    client_tls_key_file = /etc/pgbouncer/tls/tls.key
+    server_tls_sslmode = require
+
+    log_connections = 0
+    log_disconnections = 0
+    log_pooler_errors = 1
+    stats_period = 60
+
+    [users]
+    app_api = pool_size=3
+    app_gateway = pool_size=1
+    app_worker = pool_size=1
+    app_admin = pool_size=1

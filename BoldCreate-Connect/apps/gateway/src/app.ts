@@ -33,8 +33,16 @@ import type { GatewayRemote } from './remote.js';
 import { auditToolCall, callTool, listAllTools, type DispatchDeps } from './mcp/dispatch.js';
 import { createServerGuard } from './mcp/guard.js';
 
+/** Values an administrator can change while the pod runs; the pod reads them on every use. */
+export interface GatewayRuntime {
+  keyRatePerMinute: number;
+  mcpMaxCalls: number;
+}
+
 export interface GatewayDeps {
   db: Db;
+  /** Live values; the configuration's own when absent. */
+  runtime?: GatewayRuntime;
   /** Credentials and the guarded upstream fetch, shared with the api's server tests. */
   access: AccessDeps;
   logger: Logger;
@@ -123,6 +131,10 @@ export function buildApp(config: GatewayConfig, deps: GatewayDeps): HttpServer {
   });
   const { app } = server;
 
+  const runtime: GatewayRuntime = deps.runtime ?? {
+    keyRatePerMinute: config.KEY_RATE_LIMIT_PER_MINUTE,
+    mcpMaxCalls: config.MCP_MAX_INFLIGHT_CALLS,
+  };
   const dispatch: DispatchDeps = {
     db,
     remote: deps.remote,
@@ -132,6 +144,7 @@ export function buildApp(config: GatewayConfig, deps: GatewayDeps): HttpServer {
     resultMaxBytes: config.TOOL_RESULT_MAX_BYTES,
     guard: createServerGuard({
       maxConcurrency: config.SERVER_MAX_CONCURRENCY,
+      maxTotalConcurrency: () => runtime.mcpMaxCalls,
       failuresToOpen: config.BREAKER_FAILURES,
       openMs: config.BREAKER_OPEN_SECONDS * 1000,
     }),
@@ -165,7 +178,7 @@ export function buildApp(config: GatewayConfig, deps: GatewayDeps): HttpServer {
         .send(apiError(request, 'unauthenticated', 'A valid Bearer key is required.'));
       return null;
     }
-    const limit = config.KEY_RATE_LIMIT_PER_MINUTE;
+    const limit = runtime.keyRatePerMinute;
     if (deps.limiter && limit > 0) {
       try {
         const result = await deps.limiter.check(

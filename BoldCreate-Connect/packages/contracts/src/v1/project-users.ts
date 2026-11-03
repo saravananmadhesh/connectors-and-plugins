@@ -86,7 +86,7 @@ export const ProjectMeResponseSchema = z.object({
   key: z.object({
     prefix: z.string(),
     scopes: z.array(ProjectKeyScopeSchema),
-    expiresAt: IsoDateTimeSchema,
+    expiresAt: IsoDateTimeSchema.nullable(),
   }),
 });
 export type ProjectMeResponse = z.infer<typeof ProjectMeResponseSchema>;

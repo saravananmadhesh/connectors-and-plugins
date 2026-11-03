@@ -21,9 +21,9 @@ if (!args.some((arg) => arg.startsWith('--target=')) && stackGateway) {
 }
 
 // The test runner passes no arguments to a step; LOAD_FULL=1 picks the sizing run there.
-if (process.env['LOAD_FULL'] === '1' && !args.includes('--smoke') && !args.includes('--full')) {
-  args.push('--full');
-}
+const modeGiven = ['--smoke', '--full', '--ramp'].some((flag) => args.includes(flag));
+if (process.env['LOAD_RAMP'] === '1' && !modeGiven) args.push('--ramp');
+else if (process.env['LOAD_FULL'] === '1' && !modeGiven) args.push('--full');
 
 const plan = planLoadRun(args, process.env);
 if (isRefusal(plan)) {
@@ -51,6 +51,45 @@ function sizeOf(base: ScenarioSize): ScenarioSize {
 
 log(`${plan.mode} run against ${plan.target.origin}`);
 const project = await bootstrapLoadProject();
+const outDir = join(import.meta.dirname, '..', '..', 'reports', 'load');
+
+if (plan.mode === 'ramp') {
+  const { formatWindows, runRamp } = await import('./ramp.js');
+  const { liftRequestBudget } = await import('./bootstrap.js');
+  await liftRequestBudget(project.rawProjectId);
+  const read = (name: string, fallback: number) => {
+    const value = Number(process.env[name]);
+    return Number.isFinite(value) && value > 0 ? value : fallback;
+  };
+  const ramp = await runRamp({
+    gatewayUrl: plan.target.origin,
+    projectKey: project.projectKey,
+    targetUsers: read('RAMP_USERS', 3_000),
+    spawnPerSecond: read('RAMP_SPAWN_PER_SECOND', 100),
+    thinkMs: read('RAMP_THINK_MS', 3_000),
+    holdSeconds: read('RAMP_HOLD_SECONDS', 30),
+    timeoutMs: read('RAMP_TIMEOUT_MS', 10_000),
+    log,
+  });
+  process.stdout.write(`${formatWindows(ramp.windows)}
+`);
+  process.stdout.write(`totals: ${JSON.stringify(ramp.totals)}
+`);
+  log(
+    ramp.firstDegraded
+      ? `first degraded window: from ${ramp.firstDegraded.fromSecond} s with about ${ramp.firstDegraded.users} users`
+      : 'no degraded window',
+  );
+  await mkdir(outDir, { recursive: true });
+  await writeFile(
+    join(outDir, 'ramp.json'),
+    `${JSON.stringify(ramp, null, 2)}
+`,
+  );
+  // The ramp measures where the service gives out, so a degraded window is a finding, not a failure.
+  process.exit(0);
+}
+
 const result = await runScenario({
   gatewayUrl: plan.target.origin,
   projectKey: project.projectKey,
@@ -58,9 +97,8 @@ const result = await runScenario({
   log,
 });
 process.stdout.write(`${formatSummary(result.calls)}\n`);
-const dir = join(import.meta.dirname, '..', '..', 'reports', 'load');
-await mkdir(dir, { recursive: true });
-await writeFile(join(dir, `${plan.mode}.json`), `${JSON.stringify(result, null, 2)}\n`);
+await mkdir(outDir, { recursive: true });
+await writeFile(join(outDir, `${plan.mode}.json`), `${JSON.stringify(result, null, 2)}\n`);
 if (result.failed > 0) {
   log(`FAILED: ${result.failed} unexpected answers`);
   process.exitCode = 1;

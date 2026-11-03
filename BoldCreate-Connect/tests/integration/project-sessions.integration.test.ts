@@ -11,6 +11,7 @@ import { createDb, withTenant } from '../../packages/db/src/index.js';
 import { authenticateKey } from '../../packages/domain/src/delivery/key-auth.js';
 import { buildSync } from '../../packages/domain/src/delivery/sync.js';
 import { formatId } from '../../packages/contracts/src/v1/ids.js';
+import { PROJECT_LIMITS } from '../../packages/limits/src/index.js';
 import { loadVisibleServers } from '../../apps/gateway/src/mcp/servers.js';
 import { callTool, listAllTools, type DispatchDeps } from '../../apps/gateway/src/mcp/dispatch.js';
 import { apiUrl, roleConnectionString } from './test-env.js';
@@ -279,9 +280,17 @@ describe('minting a session', () => {
   it('carries the project request budget in headers', async () => {
     const h = await createHost();
     const res = await host(h, 'GET', '/sessions');
-    expect(res.headers.get('x-ratelimit-limit')).toBe('3000');
-    expect(Number(res.headers.get('x-ratelimit-remaining'))).toBeLessThan(3000);
+    expect(res.headers.get('x-ratelimit-limit')).toBe(
+      String(PROJECT_LIMITS.requestsPerMinutePerProject),
+    );
+    expect(Number(res.headers.get('x-ratelimit-remaining'))).toBeLessThan(
+      PROJECT_LIMITS.requestsPerMinutePerProject,
+    );
     expect(res.headers.get('x-ratelimit-window-size')).toBe('60');
+    const reset = Number(res.headers.get('x-ratelimit-reset'));
+    expect(Number.isInteger(reset)).toBe(true);
+    expect(reset).toBeGreaterThanOrEqual(1);
+    expect(reset).toBeLessThanOrEqual(60);
   });
 });
 

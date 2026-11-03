@@ -1,6 +1,13 @@
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Code2, Sparkles, type LucideIcon } from 'lucide-react';
-import { AREA_LABELS, areaDestination, pathArea, saveArea, type AreaKind } from '@/lib/area';
+import {
+  AREA_HINTS,
+  AREA_LABELS,
+  areaDestination,
+  pathArea,
+  saveArea,
+  type AreaKind,
+} from '@/lib/area';
 import { cn } from '@/lib/cn';
 
 const ICONS: Record<AreaKind, LucideIcon> = {
@@ -49,6 +56,7 @@ export function AreaSwitcher({
             type="button"
             aria-pressed={current}
             aria-label={AREA_LABELS[entry]}
+            title={AREA_HINTS[entry]}
             onClick={() => go(entry)}
             className={cn(
               'flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1 group-data-[collapsed=true]/sb:md:py-2 text-sm text-sidebar-muted outline-none transition-colors hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-ring',

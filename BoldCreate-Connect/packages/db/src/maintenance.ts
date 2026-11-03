@@ -1,5 +1,7 @@
 import { sql } from 'drizzle-orm';
+import { setTenant } from '@boldcreate-integrations/observability';
 import type { Db, Tx } from './client.js';
+import { setRlsContext, type TenantContext } from './tenant.js';
 import { MAINTENANCE_PURPOSES, type MaintenancePurpose } from './role-grants.js';
 
 /**
@@ -20,4 +22,15 @@ export async function withMaintenance<T>(
     await tx.execute(sql`SELECT set_config('app.maintenance', ${purpose}, true)`);
     return fn(tx);
   });
+}
+
+/**
+ * Ends maintenance access inside a `withMaintenance` transaction and sets the organization's own
+ * context, so the rest of the transaction reads and writes as that organization and nothing more.
+ * It saves a second transaction for work that has to find the tenant first.
+ */
+export async function leaveMaintenance(tx: Tx, context: TenantContext): Promise<void> {
+  await tx.execute(sql`SELECT set_config('app.maintenance', '', true)`);
+  await setRlsContext(tx, context);
+  if (context.orgId) setTenant(context.orgId);
 }

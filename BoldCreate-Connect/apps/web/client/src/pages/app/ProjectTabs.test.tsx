@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, marketplace, projects } from '@/lib/api';
 import { renderWithRouter } from '@/test/render-with-router';
+import { forgetAll } from '@/lib/remembered-state';
 import {
   ORG_ID,
   PROJECT_ID,
@@ -40,6 +41,7 @@ const authConfig = (isSet: boolean) =>
 
 describe('project tabs', () => {
   beforeEach(() => {
+    forgetAll();
     vi.restoreAllMocks();
     vi.spyOn(projects, 'get').mockResolvedValue(project());
     vi.spyOn(projects, 'users').mockResolvedValue(page([projectUser()]));
@@ -65,6 +67,33 @@ describe('project tabs', () => {
       await render('users');
       expect(await screen.findByRole('button', { name: 'host-user-1' })).toBeInTheDocument();
       expect(screen.getByText('Grace')).toBeInTheDocument();
+    });
+
+    it('opens the details of an installed plugin and goes back', async () => {
+      vi.spyOn(marketplace, 'listVersions').mockResolvedValue({ items: [] } as never);
+      vi.spyOn(projects, 'catalogPlugin').mockResolvedValue({
+        id: 'plg_1',
+        name: 'alpha',
+        displayName: 'Alpha',
+        summary: '',
+        description: '',
+        categories: [],
+        components: [],
+        variables: [],
+        latestVersion: { id: 'pv_1', version: '1.0.0' },
+        verified: false,
+        featured: false,
+        status: 'active',
+        logoUrl: null,
+        repositoryUrl: null,
+        updatedAt: new Date().toISOString(),
+      } as never);
+      await render('plugins');
+      await userEvent.click(await screen.findByRole('button', { name: 'Open Alpha details' }));
+      expect(await screen.findByRole('heading', { name: 'Alpha' })).toBeInTheDocument();
+      expect(screen.getByText('In this project')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Plugins' }));
+      expect(await screen.findByRole('table')).toBeInTheDocument();
     });
 
     it('says so when there are none', async () => {
@@ -138,7 +167,7 @@ describe('project tabs', () => {
     it('lists the plugins with their version', async () => {
       await render('plugins');
       expect(await screen.findByText('Alpha')).toBeInTheDocument();
-      expect(screen.getByText('1.0.0')).toBeInTheDocument();
+      expect(screen.getByRole('cell', { name: '1.0.0' })).toBeInTheDocument();
     });
 
     it('says so when there are none', async () => {
@@ -152,7 +181,17 @@ describe('project tabs', () => {
         ReturnType<typeof marketplace.listCategories>
       >);
       vi.spyOn(projects, 'catalog').mockResolvedValue({
-        items: [{ id: 'plg_2', displayName: 'Beta', summary: 'Second plugin' }],
+        items: [
+          {
+            id: 'plg_2',
+            displayName: 'Beta',
+            summary: 'Second plugin',
+            logoUrl: null,
+            verified: false,
+            featured: false,
+            componentCounts: { agent: 0, skill: 2, mcp: 0, hook: 0, rule: 0 },
+          },
+        ],
         total: 1,
         page: 1,
         pageSize: 8,
@@ -174,7 +213,7 @@ describe('project tabs', () => {
       const put = vi.spyOn(projects, 'putPlugin').mockResolvedValue(projectPlugin());
       await render('plugins');
       await userEvent.click(await screen.findByRole('button', { name: 'Browse' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Add Beta' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Install Beta' }));
       await waitFor(() => expect(put).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'plg_2', {}));
     });
 
@@ -187,13 +226,13 @@ describe('project tabs', () => {
       const put = vi.spyOn(projects, 'putPlugin').mockResolvedValue(projectPlugin());
       await render('plugins');
       await userEvent.click(await screen.findByRole('button', { name: 'Browse' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Add Beta' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Install Beta' }));
       await userEvent.selectOptions(await screen.findByLabelText('Type'), 'oauth_dcr');
       const dialog = screen.getByRole('dialog');
       const token = within(dialog).getByLabelText('API_TOKEN');
       expect(token).toHaveAttribute('type', 'password');
       await userEvent.type(token, SECRET_VALUE);
-      await userEvent.click(within(dialog).getByRole('button', { name: 'Add plugin' }));
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Install' }));
       await waitFor(() =>
         expect(put).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'plg_2', {
           authConfigs: { search: { name: 'Default', authMode: 'dcr', scopes: 'repo read:user' } },
@@ -208,12 +247,12 @@ describe('project tabs', () => {
       const put = vi.spyOn(projects, 'putPlugin').mockResolvedValue(projectPlugin());
       await render('plugins');
       await userEvent.click(await screen.findByRole('button', { name: 'Browse' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Add Beta' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Install Beta' }));
       await userEvent.selectOptions(await screen.findByLabelText('Type'), 'oauth_client');
       expect(await screen.findByLabelText('Callback URL')).toHaveValue(CALLBACK);
       await waitFor(() => expect(screen.getByLabelText('Scopes')).toHaveValue('repo read:user'));
       await userEvent.type(screen.getByLabelText('Client ID'), 'client-1');
-      await userEvent.click(screen.getByRole('button', { name: 'Add plugin' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Install' }));
       await waitFor(() =>
         expect(put).toHaveBeenCalledWith(ORG_ID, PROJECT_ID, 'plg_2', {
           authConfigs: {
@@ -239,7 +278,7 @@ describe('project tabs', () => {
       detail([{ kind: 'mcp', name: 'search' }], []);
       await render('plugins');
       await userEvent.click(await screen.findByRole('button', { name: 'Browse' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Add Beta' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Install Beta' }));
       const select = await screen.findByLabelText('Type');
       await waitFor(() => expect(within(select).queryByText(/OAuth/)).toBeNull());
       expect(within(select).getByText('API key')).toBeInTheDocument();
@@ -251,10 +290,10 @@ describe('project tabs', () => {
       vi.spyOn(projects, 'putPlugin').mockRejectedValue(new ApiError(409, 'conflict', 'Taken'));
       await render('plugins');
       await userEvent.click(await screen.findByRole('button', { name: 'Browse' }));
-      await userEvent.click(await screen.findByRole('button', { name: 'Add Beta' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Install Beta' }));
       await userEvent.selectOptions(await screen.findByLabelText('Type'), 'api_key');
       await userEvent.type(screen.getByLabelText('API key'), SECRET_VALUE);
-      await userEvent.click(screen.getByRole('button', { name: 'Add plugin' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Install' }));
       expect(await screen.findByText('Taken')).toBeInTheDocument();
       expect(screen.getByLabelText('API key')).toHaveValue(SECRET_VALUE);
     });
@@ -297,12 +336,12 @@ describe('project tabs', () => {
       );
       await render('plugins');
       await userEvent.selectOptions(await screen.findByLabelText('Status'), 'needs_values');
-      expect(screen.queryByRole('cell', { name: 'Alpha' })).toBeNull();
-      expect(screen.getByRole('cell', { name: 'Beta' })).toBeInTheDocument();
+      expect(screen.queryByText('Alpha')).toBeNull();
+      expect(screen.getByText('Beta')).toBeInTheDocument();
       await userEvent.selectOptions(screen.getByLabelText('Status'), '');
       await userEvent.type(screen.getByLabelText('Search added plugins'), 'alp');
-      expect(screen.getByRole('cell', { name: 'Alpha' })).toBeInTheDocument();
-      expect(screen.queryByRole('cell', { name: 'Beta' })).toBeNull();
+      expect(screen.getByText('Alpha')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).toBeNull();
     });
 
     it('sets up the sign-in of a server that has none, with the add call', async () => {
@@ -429,7 +468,7 @@ describe('project tabs', () => {
     it('hides the add, version and remove controls from a viewer', async () => {
       await render('plugins', 'VIEWER');
       await screen.findByText('Alpha');
-      expect(screen.queryByRole('button', { name: 'Add plugin' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Install' })).toBeNull();
       expect(screen.queryByRole('button', { name: 'Remove Alpha' })).toBeNull();
     });
   });

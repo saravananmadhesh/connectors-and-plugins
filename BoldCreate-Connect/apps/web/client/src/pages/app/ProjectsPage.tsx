@@ -6,13 +6,12 @@ import { Boxes, Plus } from 'lucide-react';
 import { projects } from '@/lib/api';
 import { useAbilities } from '@/lib/abilities';
 import { relativeTime } from '@/lib/format';
-import { parseOrigins } from '@/lib/project-origins';
 import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Input, Textarea } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Table,
@@ -32,17 +31,10 @@ import { messageOf, useCursorPaging } from '@/components/project/paging';
 function CreateProjectDialog({ orgId, onClose }: { orgId: string; onClose: () => void }) {
   const qc = useQueryClient();
   const [name, setName] = useState('');
-  const [origins, setOrigins] = useState('');
   const [error, setError] = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => {
-      const returnOrigins = parseOrigins(origins);
-      return projects.create(orgId, {
-        name: name.trim(),
-        ...(returnOrigins.length > 0 ? { returnOrigins } : {}),
-      });
-    },
+    mutationFn: () => projects.create(orgId, { name: name.trim() }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: qk.projects(orgId) });
       onClose();
@@ -72,19 +64,9 @@ function CreateProjectDialog({ orgId, onClose }: { orgId: string; onClose: () =>
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="project-origins">Return origins</Label>
-            <Textarea
-              id="project-origins"
-              placeholder="https://app.example.com"
-              value={origins}
-              onChange={(e) => setOrigins(e.target.value)}
-              aria-describedby="project-origins-help"
-            />
-            <p id="project-origins-help" className="text-xs text-muted-foreground">
-              Where users may be sent back to after connecting. One per line; optional.
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Return addresses, keys and the webhook are set up inside the project, under Settings.
+          </p>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
@@ -132,7 +114,7 @@ export function ProjectsPage() {
           <EmptyState
             icon={Boxes}
             title="No projects yet"
-            description="Create a project to mint keys, add plugins and see your users."
+            description="Create a project to get API keys, add plugins and see your users."
           >
             {canCreate && (
               <Button className="mt-2" onClick={() => setCreating(true)}>
@@ -148,7 +130,7 @@ export function ProjectsPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Active keys</TableHead>
+                    <TableHead>Active API keys</TableHead>
                     <TableHead>Created</TableHead>
                   </TableRow>
                 </TableHeader>

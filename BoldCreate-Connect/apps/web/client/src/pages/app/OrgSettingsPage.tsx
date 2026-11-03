@@ -64,7 +64,7 @@ export function OrgSettingsPage() {
           <CardDescription>
             {canEdit
               ? 'What members may create for themselves in this organization.'
-              : 'Only admins and members can change these settings.'}
+              : 'Admins and members can change these settings. Viewers can only read them.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -96,6 +96,22 @@ describe('OrgPage', () => {
     expect(screen.queryByRole('link', { name: /settings/i })).not.toBeInTheDocument();
   });
 
+  it('renames the organization from the header', async () => {
+    const update = vi
+      .spyOn(apiModule.orgs, 'update')
+      .mockResolvedValue({ ...ORG, name: 'Acme Inc' });
+    await renderWithRouter(OrgPage, ROUTE_PATH, RENDER_OPTS);
+    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    await userEvent.clear(dialog.getByLabelText('Name'));
+    await userEvent.type(dialog.getByLabelText('Name'), 'Acme Inc');
+    await userEvent.click(dialog.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledExactlyOnceWith(ORG_ID, { name: 'Acme Inc' }),
+    );
+  });
+
   it('allows an owner to delete an empty organization', async () => {
     await renderWithRouter(OrgPage, ROUTE_PATH, RENDER_OPTS);
     expect(screen.getByRole('button', { name: 'Delete organization' })).toBeEnabled();
@@ -208,15 +224,15 @@ describe('OrgPage', () => {
     expect(await screen.findByText('No members yet.')).toBeInTheDocument();
   });
 
-  it('shows the details of the organization and its rules', async () => {
+  it('shows who the organization is under its title, and leaves its rules to Settings', async () => {
     const orgMe = orgMeFor('u1', 'ADMIN');
     vi.spyOn(apiModule.orgs, 'me').mockResolvedValue(orgMe);
     await show([member(1, 'ADMIN')]);
-    const slug = await screen.findByText('/acme-corp');
-    const details = within(slug.closest('dl') as HTMLElement);
-    expect(details.getByText('Your role')).toBeInTheDocument();
-    expect(await details.findByText('Personal plugin installs')).toBeInTheDocument();
-    expect(details.getByText('Longest key lifetime')).toBeInTheDocument();
+    expect(await screen.findByText('/acme-corp')).toBeInTheDocument();
+    expect(await screen.findByText(/^Your role: /)).toBeInTheDocument();
+    expect(screen.getByText(/^Created /)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Details' })).toBeNull();
+    expect(screen.queryByText('Personal plugin installs')).toBeNull();
   });
 
   it('shows a dash instead of a total that could not be loaded', async () => {

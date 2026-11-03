@@ -50,6 +50,12 @@ export const httpServerShape = {
   METRICS_ENABLED: flag.default(true),
   SHUTDOWN_DRAIN_SECONDS: z.coerce.number().int().min(0).default(20),
   SHUTDOWN_PREDRAIN_SECONDS: z.coerce.number().int().min(0).default(5),
+  /** Requests a pod serves at once before it refuses new ones with a fast 503; 0 turns it off. */
+  HTTP_MAX_INFLIGHT: z.coerce.number().int().min(0).default(200),
+  /** p99 event loop delay in ms above which a pod refuses new requests; 0 turns it off. */
+  EVENT_LOOP_LAG_SHED_MS: z.coerce.number().int().min(0).default(250),
+  /** Percent of the heap limit above which a pod refuses new requests; 0 turns it off. */
+  HEAP_SHED_PERCENT: z.coerce.number().int().min(0).max(99).default(85),
 };
 
 export const WORKLOAD_AUTH_MODES = ['shared_secret', 'signed'] as const;

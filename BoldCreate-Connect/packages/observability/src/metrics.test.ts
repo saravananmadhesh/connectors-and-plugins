@@ -28,11 +28,24 @@ describe('createMetrics', () => {
   let metrics: Metrics | undefined;
   afterEach(() => metrics?.stop());
 
+  it('reports the database queue on each scrape', async () => {
+    metrics = createMetrics({ service: 'api', threadpoolProbeIntervalMs: 1000 });
+    let state = { active: 2, waiting: 5 };
+    metrics.observeAdmission(() => state);
+    let text = await metrics.scrape();
+    expect(text).toContain('boldcreate_api_db_queue_depth 5');
+    expect(text).toContain('boldcreate_api_db_admitted_active 2');
+    state = { active: 0, waiting: 0 };
+    text = await metrics.scrape();
+    expect(text).toContain('boldcreate_api_db_queue_depth 0');
+  });
+
   it('exposes the HTTP and runtime metrics', async () => {
     metrics = createMetrics({ service: 'api', threadpoolProbeIntervalMs: 20 });
     metrics.requestStarted();
     metrics.recordRequest({ method: 'GET', route: '/v1/orgs/:orgId', status: 200, seconds: 0.02 });
     metrics.requestFinished();
+    metrics.recordShed('inflight');
     await new Promise((resolve) => setTimeout(resolve, 60));
     const text = await metrics.scrape();
     for (const key of [
@@ -51,6 +64,37 @@ describe('createMetrics', () => {
       'boldcreate_api_http_requests_total{method="GET",route="/v1/orgs/:orgId",status_class="2xx"} 1',
     );
     expect(text).not.toMatch(/boldcreate_api_threadpool_probe_seconds_count 0\n/);
+  });
+
+  it('counts 429 responses by route template only', async () => {
+    metrics = createMetrics({ service: 'api' });
+    metrics.recordRequest({
+      method: 'GET',
+      route: '/v1/project/sessions',
+      status: 429,
+      seconds: 0.01,
+    });
+    metrics.recordRequest({
+      method: 'GET',
+      route: '/v1/project/sessions',
+      status: 429,
+      seconds: 0.01,
+    });
+    metrics.recordRequest({
+      method: 'GET',
+      route: '/v1/project/sessions',
+      status: 200,
+      seconds: 0.01,
+    });
+    metrics.recordRequest({
+      method: 'GET',
+      route: '/v1/project/users',
+      status: 404,
+      seconds: 0.01,
+    });
+    const text = await metrics.scrape();
+    expect(text).toContain('boldcreate_api_rate_limited_total{route="/v1/project/sessions"} 2');
+    expect(text).not.toContain('rate_limited_total{route="/v1/project/users"}');
   });
 
   it('raises the event loop gauge after a blocked loop and resets it per scrape', async () => {

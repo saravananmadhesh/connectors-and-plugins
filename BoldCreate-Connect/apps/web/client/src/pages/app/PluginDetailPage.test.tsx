@@ -102,7 +102,7 @@ describe('PluginDetailPage', () => {
     );
     expect(screen.queryByRole('tab', { name: /Overview/ })).not.toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Skills' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'MCPs' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'MCP servers' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Hooks' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /review/ })).toHaveAttribute(
       'href',

@@ -1,7 +1,15 @@
 import { Fragment, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
-import { ArrowLeft, ChevronRight, Copy, Trash2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Copy,
+  Trash2,
+} from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { Alert } from '../components/ui/alert';
 import { Badge } from '../components/ui/badge';
@@ -9,7 +17,7 @@ import { Button } from '../components/ui/button';
 import { RefreshButton } from '../components/RefreshButton';
 import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
 import { Skeleton } from '../components/ui/skeleton';
-import { adminApi, type AdminErrorOccurrence } from '../lib/api';
+import { adminApi, type AdminErrorGroup, type AdminErrorOccurrence } from '../lib/api';
 import { cn } from '../lib/cn';
 import { formatDateTime, relativeTime } from '../lib/format';
 import { errorMessage } from '../lib/messages';
@@ -17,9 +25,12 @@ import {
   ERROR_STATUS_TEXT,
   ERROR_STATUS_TONE,
   formatCount,
+  occurrenceText,
   recordRows,
+  errorJson,
   statusActions,
 } from '../lib/observability';
+import { CopyJsonButton } from '../components/observability/CopyJsonButton';
 import { Bug } from 'lucide-react';
 
 const errorKey = (id: string) => ['admin', 'observability', 'error', id] as const;
@@ -41,8 +52,42 @@ function Copyable({ value, label }: { value: string; label: string }) {
   );
 }
 
-function Occurrence({ item }: { item: AdminErrorOccurrence }) {
-  const [open, setOpen] = useState(false);
+function CopyTrace({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="mr-1.5 h-7 shrink-0 gap-1 px-2 text-xs"
+      aria-label="Copy trace"
+      onClick={() => void copy()}
+    >
+      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+      {copied ? 'Copied' : 'Copy trace'}
+    </Button>
+  );
+}
+
+function Occurrence({
+  item,
+  group,
+  open,
+  onToggle,
+}: {
+  item: AdminErrorOccurrence;
+  group: Pick<AdminErrorGroup, 'title' | 'service' | 'area'>;
+  open: boolean;
+  onToggle: () => void;
+}) {
   const context = recordRows(item.context);
   const facts: [string, string | null][] = [
     ['Time', formatDateTime(item.occurredAt)],
@@ -55,24 +100,33 @@ function Occurrence({ item }: { item: AdminErrorOccurrence }) {
   ];
   return (
     <li className="rounded-lg border">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-label={`${open ? 'Hide' : 'Show'} occurrence from ${formatDateTime(item.occurredAt)}`}
-        onClick={() => setOpen((current) => !current)}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50"
-      >
-        <ChevronRight className={cn('size-4 transition-transform', open && 'rotate-90')} />
-        <time dateTime={item.occurredAt} title={formatDateTime(item.occurredAt)}>
-          {relativeTime(item.occurredAt)}
-        </time>
-        <span className="text-muted-foreground">{item.environment}</span>
-        {item.requestId && (
-          <span className="ml-auto truncate font-mono text-xs text-muted-foreground">
-            {item.requestId}
-          </span>
-        )}
-      </button>
+      <div className="flex items-center">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={`${open ? 'Hide' : 'Show'} occurrence from ${formatDateTime(item.occurredAt)}`}
+          onClick={onToggle}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
+          <ChevronRight className={cn('size-4 transition-transform', open && 'rotate-90')} />
+          <time dateTime={item.occurredAt} title={formatDateTime(item.occurredAt)}>
+            {relativeTime(item.occurredAt)}
+          </time>
+          <span className="text-muted-foreground">{item.environment}</span>
+          {item.requestId && (
+            <span className="ml-auto truncate font-mono text-xs text-muted-foreground">
+              {item.requestId}
+            </span>
+          )}
+        </button>
+        <CopyTrace text={occurrenceText(group, item)} />
+        <CopyJsonButton
+          json={() => JSON.stringify({ ...group, occurrence: item }, null, 2)}
+          label="occurrence"
+          withText
+          className="mr-1.5 h-7 shrink-0 gap-1 px-2 text-xs"
+        />
+      </div>
       {open && (
         <div className="grid gap-6 border-t p-4 text-sm lg:grid-cols-2">
           <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-1.5 self-start">
@@ -119,6 +173,7 @@ export function ErrorDetailPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [opened, setOpened] = useState<ReadonlySet<string>>(new Set());
   const query = useQuery({
     queryKey: errorKey(groupId),
     queryFn: () => adminApi.getError(groupId),
@@ -204,6 +259,12 @@ export function ErrorDetailPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <CopyJsonButton
+            json={() => errorJson(group, occurrences)}
+            label="error with occurrences"
+            withText
+            className="h-9 gap-1.5 px-3"
+          />
           {statusActions(group.status).map((action, index) => (
             <Button
               key={action.to}
@@ -252,7 +313,29 @@ export function ErrorDetailPage() {
           {errorMessage(change.error)}
         </Alert>
       )}
-      <h2 className="mb-2 text-base font-semibold">Latest occurrences</h2>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold">Latest occurrences</h2>
+        {occurrences.length > 0 && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={opened.size === occurrences.length}
+              onClick={() => setOpened(new Set(occurrences.map((item) => item.id)))}
+            >
+              <ChevronsUpDown className="size-4" /> Expand all
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={opened.size === 0}
+              onClick={() => setOpened(new Set())}
+            >
+              <ChevronsDownUp className="size-4" /> Collapse all
+            </Button>
+          </div>
+        )}
+      </div>
       {occurrences.length === 0 ? (
         <EmptyState
           icon={Bug}
@@ -262,7 +345,19 @@ export function ErrorDetailPage() {
       ) : (
         <ul className="flex flex-col gap-2">
           {occurrences.map((item) => (
-            <Occurrence key={item.id} item={item} />
+            <Occurrence
+              key={item.id}
+              item={item}
+              group={group}
+              open={opened.has(item.id)}
+              onToggle={() =>
+                setOpened((current) => {
+                  const next = new Set(current);
+                  if (!next.delete(item.id)) next.add(item.id);
+                  return next;
+                })
+              }
+            />
           ))}
         </ul>
       )}

@@ -31,7 +31,7 @@ describe('Button', () => {
 
   it('applies destructive variant class', () => {
     render(<Button variant="destructive">Delete</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-destructive');
+    expect(screen.getByRole('button')).toHaveClass('bg-destructive-solid');
   });
 
   it('applies outline variant class', () => {

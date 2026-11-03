@@ -28,7 +28,11 @@ applyRuntimeEnv(config);
 const logger = createLogger({ service: 'admin', level: config.LOG_LEVEL });
 installProcessGuards(logger);
 
-const { db, pool } = createDb({ connectionString: config.DATABASE_URL, max: config.DB_POOL_MAX });
+const { db, pool } = createDb({
+  connectionString: config.DATABASE_URL,
+  max: config.DB_POOL_MAX,
+  onPoolError: (error) => logger.error({ err: error }, 'Database connection error'),
+});
 const observability = createServiceObservability({
   service: 'admin',
   environment: config.DEPLOY_ENV,

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { eq, and, isNull, desc, lt, lte, or, type SQL } from 'drizzle-orm';
 import type { Executor } from '@boldcreate-integrations/db';
+import { API_KEY_LIMITS } from '@boldcreate-integrations/limits';
 import {
   apiKeyTable,
   encodeCursor,
@@ -158,7 +159,7 @@ export async function createApiKey(
       revokedAt: null,
       lastUsedAt: null,
       lastUsedIp: null,
-      rateLimitPerMinute: body.rateLimitPerMinute ?? 60,
+      rateLimitPerMinute: body.rateLimitPerMinute ?? API_KEY_LIMITS.requestsPerMinutePerKey,
       createdAt: now,
       updatedAt: now,
     });

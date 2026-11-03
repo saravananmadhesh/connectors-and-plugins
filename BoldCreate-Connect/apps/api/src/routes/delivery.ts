@@ -53,7 +53,7 @@ async function authenticateRequest(
   if (!identity) throw new AppError('unauthenticated');
   requireAction(identity.principal, action, keyResource(identity.principal));
   if (identity.principal.projectId !== undefined) {
-    await countProjectCall(request, identity.principal.projectId);
+    await countProjectCall(request, identity.principal.projectId, identity.principal.orgId);
   }
   return identity.principal;
 }

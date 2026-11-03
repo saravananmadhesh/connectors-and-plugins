@@ -11,8 +11,12 @@ import {
   type WorkloadAuthenticator,
 } from '@boldcreate-integrations/http-server';
 import { isDeployed } from '@boldcreate-integrations/config';
-import { type FlagStore } from '@boldcreate-integrations/domain';
-import { API_KEY_LIMITS } from '@boldcreate-integrations/limits';
+import {
+  createProjectKeyCache,
+  type FlagStore,
+  type LimitStore,
+} from '@boldcreate-integrations/domain';
+import { API_KEY_LIMITS, LIMIT_DEFINITIONS } from '@boldcreate-integrations/limits';
 import type { ErrorReporter, Metrics } from '@boldcreate-integrations/observability';
 import type { BlobPort, LimiterPort } from '@boldcreate-integrations/ports';
 import type { ApiConfig } from './config.js';
@@ -35,6 +39,16 @@ import { projectSessionRoutes } from './routes/project-sessions.js';
 import { createSsrfGuard, type SsrfGuard } from '@boldcreate-integrations/security';
 import { projectConnectionRoutes } from './routes/project-connections.js';
 
+/** Serves the built-in values; used when no store is wired. */
+const builtInLimits: LimitStore = {
+  resolve: async (key) => ({
+    limit: LIMIT_DEFINITIONS[key].default,
+    windowSeconds: LIMIT_DEFINITIONS[key].windowSeconds,
+    source: 'default',
+  }),
+  invalidate: () => undefined,
+};
+
 export interface ApiDeps {
   db: Db;
   /** Seals secrets to organization public keys, reading them through the given transaction; the api never holds a private key. */
@@ -51,6 +65,8 @@ export interface ApiDeps {
   limiter: LimiterPort;
   /** Feature flags; without one every flag keeps its built-in value, so a flagged feature stays off. */
   flags?: FlagStore;
+  /** Adjustable limits; without one every limit keeps its built-in value. */
+  limits?: LimitStore;
   /** Checks the address of a project webhook; defaults to the strict guard of a deployed system. */
   webhookGuard?: SsrfGuard;
   logger: Logger;
@@ -119,6 +135,7 @@ export async function buildApp(config: ApiConfig, deps: ApiDeps): Promise<HttpSe
       void reply.header('x-ratelimit-limit', String(request.projectRate.limit));
       void reply.header('x-ratelimit-remaining', String(request.projectRate.remaining));
       void reply.header('x-ratelimit-window-size', String(request.projectRate.windowSeconds));
+      void reply.header('x-ratelimit-reset', String(request.projectRate.resetSeconds));
     }
     return payload;
   });
@@ -138,6 +155,11 @@ export async function buildApp(config: ApiConfig, deps: ApiDeps): Promise<HttpSe
   app.decorate('apiGate', {
     limiter: deps.limiter,
     requestsPerMinute: API_KEY_LIMITS.requestsPerMinutePerKey,
+    limits: deps.limits ?? builtInLimits,
+    projectKeyCache: createProjectKeyCache({
+      ttlSeconds: config.PROJECT_KEY_CACHE_TTL_SECONDS,
+      maxEntries: config.PROJECT_KEY_CACHE_MAX,
+    }),
   });
   await app.register(authRoutes, {
     prefix: '/v1/auth',
@@ -193,7 +215,12 @@ export async function buildApp(config: ApiConfig, deps: ApiDeps): Promise<HttpSe
     sealerFor: deps.sealerFor,
   });
   await app.register(mcpRoutes, { prefix: '/v1', db: deps.db, runtime: deps.mcp });
-  await app.register(gatewayRoutes, { prefix: '/v1', db: deps.db, access: deps.mcp.deps });
+  await app.register(gatewayRoutes, {
+    prefix: '/v1',
+    db: deps.db,
+    access: deps.mcp.deps,
+    ...(deps.limits ? { limits: deps.limits } : {}),
+  });
   await app.register(deliveryRoutes, {
     prefix: '/v1',
     db: deps.db,

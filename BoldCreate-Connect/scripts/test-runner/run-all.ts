@@ -24,6 +24,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -39,6 +40,21 @@ import {
   stripAnsi,
   type StepResult,
 } from './report.js';
+import {
+  archiveLogs,
+  archiveReport,
+  archiveTests,
+  cancelFile,
+  pruneRuns,
+  recordRejected,
+  runIdFor,
+  runLabel,
+  writeRun,
+  type RunMeta,
+} from './history.js';
+import { buildLiveState } from './live.js';
+import { postgresProblems, recoveryNote, waitUntilHealthy } from './stack-health.js';
+import { parseVitestEntries } from './test-entries.js';
 import { acquireLock, releaseLock } from './run-lock.js';
 import { devStackNote } from './dev-stack.js';
 import { startStack, type RunningStack } from './stack.js';
@@ -83,8 +99,23 @@ const selected = steps
       : step,
   );
 
+const runMeta: RunMeta = {
+  pid: process.pid,
+  cwd: process.cwd(),
+  // npm passes a lone `--` before the runner's own options; it says nothing to a reader.
+  args: args.filter((arg) => arg !== '--').join(' '),
+  label: runLabel(process.env),
+};
+const startedAt = new Date();
+const runId = runIdFor(startedAt, process.pid);
+
 const lock = acquireLock(lockPath);
 if (!lock.acquired) {
+  try {
+    recordRejected(root, { runId, now: startedAt, meta: runMeta, holder: lock.holder });
+  } catch {
+    // The record is a convenience; the refusal below is what matters.
+  }
   console.error(
     `[test-runner] another test run is active (pid ${lock.holder.pid}, started ${lock.holder.startedAt}). ` +
       'Wait for it to finish; two runs share the same ports and report folder. ' +
@@ -115,6 +146,11 @@ if (lock.replacedStale && selected.some((step) => step.needsStack)) {
 
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(logDir, { recursive: true });
+try {
+  pruneRuns(root);
+} catch {
+  // Old records stay; the run goes on.
+}
 
 const running = new Set<ChildProcess>();
 
@@ -153,7 +189,6 @@ function runCommand(
   });
 }
 
-const startedAt = new Date();
 const results = new Map<string, StepResult>();
 let failed = false;
 let stack: RunningStack | undefined;
@@ -175,6 +210,36 @@ function ensureStack(): Promise<void> {
   return stackStart;
 }
 
+const runningSteps = new Map<string, Date>();
+const liveFile = join(outDir, 'live.json');
+
+/**
+ * Publishes the state of the run for the dev dashboard. Written to a temporary file and renamed,
+ * so a reader never sees half a file; a failure to write never stops the run.
+ */
+function writeLive(finished = false, cancelled = false) {
+  try {
+    const live = buildLiveState({
+      runId,
+      startedAt,
+      now: new Date(),
+      all: steps,
+      selected: selected.map((step) => step.id),
+      results,
+      running: runningSteps,
+      finished,
+      cancelled,
+    });
+    const stored = { ...live, meta: runMeta };
+    writeFileSync(`${liveFile}.tmp`, JSON.stringify(stored));
+    renameSync(`${liveFile}.tmp`, liveFile);
+    writeRun(root, stored);
+  } catch {
+    // The dashboard view is a convenience; the run goes on without it.
+  }
+}
+writeLive();
+
 let interrupted = false;
 async function shutdown(code: number) {
   if (interrupted) return;
@@ -182,10 +247,36 @@ async function shutdown(code: number) {
   for (const child of running) killTree(child);
   if (stackStart) await stackStart;
   if (stack) await stack.stop();
+  // Say how the run ended. A step that was going, and every step after it, did not finish; that
+  // is the cancel, not a problem in the code, so none of them counts as an issue.
+  for (const step of selected) {
+    if (results.has(step.id)) continue;
+    const wasRunning = runningSteps.has(step.id);
+    results.set(
+      step.id,
+      skippedResult(step, wasRunning ? 'Cancelled while running' : 'Cancelled before it started'),
+    );
+    runningSteps.delete(step.id);
+  }
+  writeLive(true, true);
+  try {
+    archiveLogs(root, runId, logDir);
+  } catch {
+    // The logs stay in reports/test-run until the next run.
+  }
   process.exit(code);
 }
 process.on('SIGINT', () => void shutdown(130));
 process.on('SIGTERM', () => void shutdown(143));
+
+// A request to stop, from the dashboard or any other process, is a file next to the run's state.
+const cancelPath = cancelFile(root, runId);
+setInterval(() => {
+  if (existsSync(cancelPath)) {
+    console.log('[test-runner] cancel requested, stopping');
+    void shutdown(130);
+  }
+}, 500).unref();
 
 const skippedResult = (step: StepDefinition, note: string): StepResult => ({
   id: step.id,
@@ -231,6 +322,52 @@ function ensureBrowsers(env: NodeJS.ProcessEnv): Promise<void> {
   return browsersReady;
 }
 
+/** How long a step waits for Postgres to finish restarting its processes before the stack is rebuilt. */
+const STACK_RECOVERY_MS = 60_000;
+let stackRebuilds = 0;
+
+/**
+ * Makes sure the stack can be used by the next step. When Postgres has restarted its processes
+ * (one of them exited) the stack is back within seconds, so this waits. When it does not come
+ * back, or a service died, the stack is rebuilt once per run. Returns a note for the step that
+ * had to wait or rebuild, with the lines of the Postgres log that say why.
+ */
+async function recoverStack(): Promise<{ note?: string; failed?: string }> {
+  if (!stack) return {};
+  const waited = await waitUntilHealthy({
+    check: () => stack!.health(),
+    timeoutMs: STACK_RECOVERY_MS,
+    intervalMs: 1000,
+  });
+  const readLog = () =>
+    existsSync(stack!.postgresLog) ? readFileSync(stack!.postgresLog, 'utf8') : '';
+  if (waited.healthy) {
+    return waited.waitedMs === 0
+      ? {}
+      : {
+          note: recoveryNote({
+            waitedMs: waited.waitedMs,
+            rebuilt: false,
+            problems: postgresProblems(readLog()),
+          }),
+        };
+  }
+  const problems = postgresProblems(readLog());
+  if (stackRebuilds >= 1) {
+    return { failed: recoveryNote({ waitedMs: waited.waitedMs, rebuilt: false, problems }) };
+  }
+  stackRebuilds += 1;
+  console.log('[test-runner] the test stack is not usable; rebuilding it once');
+  await stack.stop().catch(() => undefined);
+  stack = undefined;
+  stackStart = undefined;
+  stackError = undefined;
+  await ensureStack();
+  if (!stack)
+    return { failed: `Live stack unavailable after a rebuild: ${stackError ?? 'not started'}` };
+  return { note: recoveryNote({ waitedMs: waited.waitedMs, rebuilt: true, problems }) };
+}
+
 async function runStep(step: StepDefinition): Promise<StepResult> {
   const base: StepResult = {
     id: step.id,
@@ -254,6 +391,15 @@ async function runStep(step: StepDefinition): Promise<StepResult> {
         note: `Live stack unavailable: ${stackError ?? 'not started'}`,
       };
     }
+  }
+
+  let stackNote: string | undefined;
+  if (step.needsStack) {
+    const recovered = await recoverStack();
+    if (recovered.failed) {
+      return { ...base, status: 'failed', exitCode: null, note: recovered.failed };
+    }
+    stackNote = recovered.note;
   }
 
   const env = plainOutputEnv({
@@ -290,12 +436,19 @@ async function runStep(step: StepDefinition): Promise<StepResult> {
     durationMs: Date.now() - started,
     warnings: countWarnings(output),
     status: code === 0 ? 'passed' : 'failed',
+    ...(stackNote ? { note: stackNote } : {}),
   };
 
   if (step.vitest) {
     const file = join(root, jsonOut(step.id));
     if (existsSync(file)) {
-      const parsed = parseVitestJson(readFileSync(file, 'utf8'));
+      const raw = readFileSync(file, 'utf8');
+      const parsed = parseVitestJson(raw);
+      try {
+        archiveTests(root, runId, step.id, parseVitestEntries(raw, root));
+      } catch {
+        // The list of single tests is a convenience; the counts above are what counts.
+      }
       result.tests = parsed.tests;
       result.failures = parsed.failures;
       result.detailFile = `${step.id}.json`;
@@ -324,15 +477,22 @@ async function runStep(step: StepDefinition): Promise<StepResult> {
   return result;
 }
 
-// Start the live stack in the background so its startup overlaps with the earlier steps
-if (selected.some((step) => step.needsStack)) void ensureStack();
+// The stack starts when the first step that needs it is reached. Starting it early would only
+// overlap its start with the earlier steps, but it would then sit idle through the memory-heavy
+// client tests, which is when its Postgres has been seen to exit. TEST_STACK_EARLY=1 restores it.
+if (process.env['TEST_STACK_EARLY'] === '1' && selected.some((step) => step.needsStack)) {
+  void ensureStack();
+}
 
 async function executeStep(step: StepDefinition): Promise<void> {
   if (bail && failed) {
     results.set(step.id, skippedResult(step, 'Not run: an earlier step failed (--bail)'));
+    writeLive();
     return;
   }
   console.log(`[test-runner] ${step.name} ...`);
+  runningSteps.set(step.id, new Date());
+  writeLive();
   let result: StepResult;
   try {
     result = await runStep(step);
@@ -343,6 +503,8 @@ async function executeStep(step: StepDefinition): Promise<void> {
     };
   }
   results.set(step.id, result);
+  runningSteps.delete(step.id);
+  writeLive();
   if (result.status === 'failed') failed = true;
   const counts = result.tests ? ` (${result.tests.passed}/${result.tests.total} tests)` : '';
   console.log(
@@ -386,7 +548,19 @@ const summary = buildSummary(
   },
 );
 writeFileSync(join(outDir, 'summary.json'), JSON.stringify(summary, null, 2));
-writeFileSync(join(outDir, 'index.html'), renderHtml(summary));
+const reportHtml = renderHtml(summary);
+writeFileSync(join(outDir, 'index.html'), reportHtml);
+try {
+  archiveReport(root, runId, reportHtml);
+} catch {
+  // The latest report is still in reports/test-run.
+}
+writeLive(true);
+try {
+  archiveLogs(root, runId, logDir);
+} catch {
+  // The logs stay in reports/test-run until the next run.
+}
 
 console.log(
   `\n[test-runner] overall: ${summary.overall.toUpperCase()} in ${(summary.durationMs / 1000).toFixed(1)} s`,

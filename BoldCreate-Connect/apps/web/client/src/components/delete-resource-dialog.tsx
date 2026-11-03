@@ -8,6 +8,8 @@ import { Alert } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
 
 type DeleteResourceDialogProps = {
+  /** What is being deleted; an organization when not given. */
+  kind?: 'organization' | 'project';
   name: string;
   slug: string;
   onDelete: (confirmSlug: string) => Promise<unknown>;
@@ -16,12 +18,14 @@ type DeleteResourceDialogProps = {
 };
 
 export function DeleteResourceDialog({
+  kind = 'organization',
   name,
   slug,
   onDelete,
   onDeleted,
   onClose,
 }: DeleteResourceDialogProps) {
+  const project = kind === 'project';
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [confirmation, setConfirmation] = useState('');
   const [acknowledged, setAcknowledged] = useState(false);
@@ -52,11 +56,20 @@ export function DeleteResourceDialog({
       }}
     >
       <h2 id="delete-resource-title" className="text-base font-semibold tracking-tight">
-        Delete organization
+        Delete {kind}
       </h2>
       <p id="delete-resource-description" className="mt-2 text-sm text-muted-foreground">
-        Permanently delete {name} and all its projects and resources. This cannot be undone. Access
-        is revoked immediately once deletion is accepted. Cleanup runs in the background.
+        {project ? (
+          <>
+            Permanently delete {name}, its users, keys, plugins and connections. This cannot be
+            undone. Its keys stop working immediately.
+          </>
+        ) : (
+          <>
+            Permanently delete {name} and all its projects and resources. This cannot be undone.
+            Access is revoked immediately once deletion is accepted. Cleanup runs in the background.
+          </>
+        )}
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         External connection tokens are not revoked. Revoke them directly with the upstream service
@@ -80,7 +93,9 @@ export function DeleteResourceDialog({
           <Alert variant="destructive">
             {mutation.error instanceof ApiError && mutation.error.status < 500
               ? mutation.error.message
-              : `Could not queue deletion of this organization. Please try again.`}
+              : project
+                ? 'Could not delete this project. Please try again.'
+                : 'Could not queue deletion of this organization. Please try again.'}
           </Alert>
         )}
         <div className="space-y-2">
@@ -103,8 +118,9 @@ export function DeleteResourceDialog({
             disabled={mutation.isPending || accepted}
             className="mt-1 h-4 w-4 shrink-0 accent-primary"
           />
-          I understand that this organization and all its projects and resources will be permanently
-          deleted.
+          {project
+            ? 'I understand that this project and everything in it will be permanently deleted.'
+            : 'I understand that this organization and all its projects and resources will be permanently deleted.'}
         </label>
         <div className="flex justify-end gap-2">
           <Button
@@ -122,7 +138,7 @@ export function DeleteResourceDialog({
             aria-busy={mutation.isPending}
           >
             {mutation.isPending && <Spinner />}
-            {accepted ? 'Deletion queued' : 'Delete organization'}
+            {accepted ? (project ? 'Deleted' : 'Deletion queued') : `Delete ${kind}`}
           </Button>
         </div>
       </form>

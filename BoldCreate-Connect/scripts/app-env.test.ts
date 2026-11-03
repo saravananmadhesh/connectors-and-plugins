@@ -80,3 +80,31 @@ describe('appEnv database logins', () => {
     expect(appEnv('web', context)).not.toHaveProperty('DATABASE_URL');
   });
 });
+
+describe('appEnv through the pooler', () => {
+  const pooled: AppEnvContext = { ...context, pooler: { port: 6432 } };
+
+  it.each(['admin', 'api', 'gateway', 'worker'] as const satisfies AppName[])(
+    'sends %s to the pooler with its own role login',
+    (app) => {
+      const url = new URL(appEnv(app, pooled)['DATABASE_URL']!);
+      expect(url.hostname).toBe('127.0.0.1');
+      expect(url.port).toBe('6432');
+      expect(url.pathname).toBe('/boldcreate');
+      expect(url.username).toBe(`app_${app}`);
+      expect(url.password).toBe(`pw-${app}`);
+      expect(url.toString()).not.toContain('superuser-password');
+    },
+  );
+
+  it('keeps the direct address when no pooler is given', () => {
+    expect(new URL(appEnv('api', context)['DATABASE_URL']!).port).toBe('54329');
+    expect(new URL(appEnv('api', { ...context, pooler: undefined })['DATABASE_URL']!).port).toBe(
+      '54329',
+    );
+  });
+
+  it('still gives the web app no database', () => {
+    expect(appEnv('web', pooled)).not.toHaveProperty('DATABASE_URL');
+  });
+});

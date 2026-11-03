@@ -159,6 +159,17 @@ describe('checkUrl', () => {
     );
   });
 
+  it('pins an IPv4 answer even when DNS lists IPv6 first, and an IPv6 one only when alone', async () => {
+    const dual = async () => ['2600:1f14::1', '2600:1f14::2', '93.184.216.34', '93.184.216.35'];
+    const picked = await check('https://dual.example/', { resolver: dual });
+    expect(picked.address).toBe('93.184.216.34');
+    expect(picked.family).toBe(4);
+
+    const only6 = await check('https://six.example/', { resolver: async () => ['2600:1f14::1'] });
+    expect(only6.address).toBe('2600:1f14::1');
+    expect(only6.family).toBe(6);
+  });
+
   it('fails closed on NXDOMAIN, an empty answer and a timeout', async () => {
     const nxdomain = async () => {
       throw Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' });

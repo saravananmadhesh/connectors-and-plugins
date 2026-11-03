@@ -129,7 +129,7 @@ export function MarketplacePage() {
     <Page className="space-y-6">
       <PageHeader
         title="Marketplace"
-        description="Browse published plugins and install them for your team."
+        description="A plugin packs agents, skills, MCP servers, hooks and rules together. Install one for yourself or for your team."
       />
 
       <div className="flex flex-wrap items-center gap-3">

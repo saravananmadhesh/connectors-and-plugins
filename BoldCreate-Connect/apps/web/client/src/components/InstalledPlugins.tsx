@@ -41,6 +41,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActiveBadge } from '@/components/StatusBadge';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { InstallSetupDialog } from '@/components/InstallSetup';
+import { InfoHint } from '@/components/InfoHint';
 import { PluginTile } from '@/components/PluginTile';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { VariablesDialog } from '@/components/VariablesDialog';
@@ -148,9 +149,23 @@ export function InstalledPlugins({ orgId, scopeKey, items, canUpdate, canDelete 
             <TableRow className="hover:bg-transparent">
               <TableHead>Plugin</TableHead>
               <TableHead>Version</TableHead>
-              <TableHead>Updates</TableHead>
+              <TableHead>
+                <span className="inline-flex items-center gap-1">
+                  Updates
+                  <InfoHint about="updates">
+                    Follows latest moves to each new version. Pinned stays on the version you chose.
+                  </InfoHint>
+                </span>
+              </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Setup</TableHead>
+              <TableHead>
+                <span className="inline-flex items-center gap-1">
+                  Setup
+                  <InfoHint about="setup">
+                    Needs setup means a variable or an MCP server sign-in is still missing.
+                  </InfoHint>
+                </span>
+              </TableHead>
               <TableHead>Updated</TableHead>
               <TableHead className="w-12">
                 <span className="sr-only">Actions</span>
@@ -184,7 +199,14 @@ export function InstalledPlugins({ orgId, scopeKey, items, canUpdate, canDelete 
                       ) : (
                         <ActiveBadge active={item.active} />
                       )}
-                      {item.required && <Badge variant="info">Enforced</Badge>}
+                      {item.required && (
+                        <>
+                          <Badge variant="info">Enforced</Badge>
+                          <InfoHint about="enforced">
+                            An administrator requires this plugin for your team.
+                          </InfoHint>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -234,7 +256,7 @@ export function InstalledPlugins({ orgId, scopeKey, items, canUpdate, canDelete 
                           {canUpdate && (
                             <DropdownMenuItem onSelect={() => setSettingUp(item)}>
                               <Plug />
-                              {state === 'needs-setup' ? 'Set up' : 'Connection'}
+                              Set up
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onSelect={() => setConfiguring(item)}>

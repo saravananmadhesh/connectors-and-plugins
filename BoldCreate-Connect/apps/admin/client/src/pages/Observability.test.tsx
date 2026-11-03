@@ -113,6 +113,23 @@ describe('errors list', () => {
     expect(screen.getByText('2 errors shown')).toBeInTheDocument();
   });
 
+  it('copies one listed error as JSON without opening it', async () => {
+    stubObservability({ [ERRORS]: () => ({ nextCursor: null, items: [group()] }) });
+    await renderApp('/observability?tab=errors');
+    const user = userEvent.setup();
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Copy error KMS unwrap failed: permission denied as JSON',
+      }),
+    );
+    expect(JSON.parse(await navigator.clipboard.readText())).toMatchObject({
+      id: GROUP_ID,
+      count: 1234,
+      service: 'api',
+    });
+    expect(screen.queryByText(/^Seen 1,234 times/)).not.toBeInTheDocument();
+  });
+
   it('fetches older errors with the cursor the server gave', async () => {
     const calls = stubObservability({
       [ERRORS]: (query) =>
@@ -198,6 +215,69 @@ describe('error detail', () => {
     expect(await screen.findByText(/No stack was kept/)).toBeInTheDocument();
   });
 
+  it('expands and collapses every occurrence at once', async () => {
+    stubObservability({
+      [`${ERRORS}/${GROUP_ID}`]: () =>
+        detail(group(), [
+          occurrence({ id: '00000000-0000-4000-8000-0000000000b1' }),
+          occurrence({ id: '00000000-0000-4000-8000-0000000000b2' }),
+        ]),
+    });
+    await renderApp(`/observability/errors/${GROUP_ID}`);
+    const user = userEvent.setup();
+    const collapse = await screen.findByRole('button', { name: /Collapse all/ });
+    expect(collapse).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /Expand all/ }));
+    expect(await screen.findAllByText(/at unwrap \(kms\.ts:10:5\)/)).toHaveLength(2);
+    expect(screen.getByRole('button', { name: /Expand all/ })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /Collapse all/ }));
+    expect(screen.queryByText(/at unwrap \(kms\.ts:10:5\)/)).not.toBeInTheDocument();
+  });
+
+  it('copies one occurrence as a single block of text', async () => {
+    stubObservability({ [`${ERRORS}/${GROUP_ID}`]: () => detail() });
+    await renderApp(`/observability/errors/${GROUP_ID}`);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Copy trace' }));
+    const text = await navigator.clipboard.readText();
+    expect(text).toContain('Error: KMS unwrap failed: permission denied');
+    expect(text).toContain('Request: req-42');
+    expect(text).toContain('keyVersion: 3');
+    expect(text).toContain('at unwrap (kms.ts:10:5)');
+    expect(await screen.findByText('Copied')).toBeInTheDocument();
+  });
+
+  it('copies the group with all its occurrences as JSON', async () => {
+    stubObservability({ [`${ERRORS}/${GROUP_ID}`]: () => detail() });
+    await renderApp(`/observability/errors/${GROUP_ID}`);
+    const user = userEvent.setup();
+    await user.click(
+      await screen.findByRole('button', { name: 'Copy error with occurrences as JSON' }),
+    );
+    const copied = JSON.parse(await navigator.clipboard.readText()) as AdminErrorGroup & {
+      occurrences: AdminErrorOccurrence[];
+    };
+    expect(copied).toMatchObject({ id: GROUP_ID, title: 'KMS unwrap failed: permission denied' });
+    expect(copied.occurrences).toHaveLength(1);
+    expect(copied.occurrences[0]).toMatchObject({
+      requestId: 'req-42',
+      context: { keyVersion: 3 },
+    });
+  });
+
+  it('copies one occurrence with its group as JSON', async () => {
+    stubObservability({ [`${ERRORS}/${GROUP_ID}`]: () => detail() });
+    await renderApp(`/observability/errors/${GROUP_ID}`);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Copy occurrence as JSON' }));
+    const copied = JSON.parse(await navigator.clipboard.readText()) as {
+      id: string;
+      occurrence: AdminErrorOccurrence;
+    };
+    expect(copied.id).toBe(GROUP_ID);
+    expect(copied.occurrence.stack).toContain('at unwrap (kms.ts:10:5)');
+  });
+
   it('resolves the group and shows its new state', async () => {
     const calls = stubObservability({
       [`${ERRORS}/${GROUP_ID}`]: () => detail(),
@@ -247,6 +327,19 @@ describe('events', () => {
     await user.click(screen.getByRole('button', { name: 'Show details of Startup check failed' }));
     expect(await screen.findByText('PermissionDenied')).toBeInTheDocument();
     expect(screen.getByText('worker-1')).toBeInTheDocument();
+  });
+
+  it('copies one event as JSON', async () => {
+    stubObservability({ [EVENTS]: () => ({ nextCursor: null, items: [event()] }) });
+    await renderApp('/observability?tab=events');
+    const user = userEvent.setup();
+    await user.click(
+      await screen.findByRole('button', { name: 'Copy event Startup check failed as JSON' }),
+    );
+    expect(JSON.parse(await navigator.clipboard.readText())).toMatchObject({
+      kind: 'startup_check_failed',
+      detail: { check: 'kms' },
+    });
   });
 
   it('sends the kind once typing is committed', async () => {

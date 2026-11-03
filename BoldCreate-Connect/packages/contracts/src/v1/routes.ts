@@ -23,6 +23,13 @@ import {
 } from './categories.js';
 import { AdminAuditListResponseSchema, AdminAuditQuerySchema } from './admin-audit.js';
 import {
+  AdminLimitListResponseSchema,
+  AdminLimitParamsSchema,
+  AdminLimitResponseSchema,
+  ResetGlobalLimitQuerySchema,
+  SetGlobalLimitBodySchema,
+} from './admin-limits.js';
+import {
   AdminErrorGroupDetailResponseSchema,
   AdminErrorGroupParamsSchema,
   AdminErrorGroupStatusBodySchema,
@@ -242,6 +249,7 @@ import {
 import {
   GatewayAuthenticateBodySchema,
   GatewayAuthenticateResponseSchema,
+  GatewayLimitsResponseSchema,
   GatewayAccessBodySchema,
   GatewayAccessResponseSchema,
   GatewayServersBodySchema,
@@ -431,6 +439,17 @@ const auth: RouteDef[] = [
 
 /** What the gateway asks of the api so it does not need the database itself. */
 const gatewayInternal: RouteDef[] = [
+  route(
+    'gateway.limits',
+    'GET',
+    '/v1/gateway/limits',
+    {
+      principals: ['wl'],
+      action: 'workload:gateway-resolve',
+      responses: { 200: GatewayLimitsResponseSchema },
+    },
+    { exposure: 'internal' },
+  ),
   route(
     'gateway.authenticate',
     'POST',
@@ -1908,6 +1927,19 @@ const adminPlugins: RouteDef[] = [
   adminRoute('adminAudit.list', 'GET', '/api/v1/admin/audit', {
     query: AdminAuditQuerySchema,
     responses: { 200: AdminAuditListResponseSchema },
+  }),
+  adminRoute('adminLimits.list', 'GET', '/api/v1/admin/limits', {
+    responses: { 200: AdminLimitListResponseSchema },
+  }),
+  adminRoute('adminLimits.setGlobal', 'PUT', '/api/v1/admin/limits/{key}/global', {
+    params: AdminLimitParamsSchema,
+    body: SetGlobalLimitBodySchema,
+    responses: { 200: AdminLimitResponseSchema },
+  }),
+  adminRoute('adminLimits.resetGlobal', 'DELETE', '/api/v1/admin/limits/{key}/global', {
+    params: AdminLimitParamsSchema,
+    query: ResetGlobalLimitQuerySchema,
+    responses: { 200: AdminLimitResponseSchema },
   }),
   adminRoute('adminObservability.listErrors', 'GET', '/api/v1/admin/observability/errors', {
     query: AdminErrorGroupsQuerySchema,

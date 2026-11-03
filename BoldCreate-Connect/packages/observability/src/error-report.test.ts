@@ -50,6 +50,28 @@ describe('fingerprint', () => {
     expect(a.fingerprint).toBe(b.fingerprint);
   });
 
+  it('groups one throw site reached through different operations', () => {
+    const thrown = (): Error => {
+      const error = new Error('db down');
+      error.stack = 'Error: db down\n    at query (/srv/packages/db/src/client.ts:10:3)';
+      return error;
+    };
+    const a = fingerprintOf('api', thrown(), { area: 'http', operation: 'GET /v1/a' });
+    const b = fingerprintOf('api', thrown(), { area: 'http', operation: 'POST /v1/b' });
+    expect(a.fingerprint).toBe(b.fingerprint);
+  });
+
+  it('falls back to the operation when the stack has no application frames', () => {
+    const bare = (): Error => {
+      const error = new Error('x');
+      error.stack = 'Error: x';
+      return error;
+    };
+    const a = fingerprintOf('api', bare(), { operation: 'GET /a' });
+    const b = fingerprintOf('api', bare(), { operation: 'GET /b' });
+    expect(a.fingerprint).not.toBe(b.fingerprint);
+  });
+
   it('keeps application frames only and drops line numbers', () => {
     const stack = [
       'Error: boom',
@@ -172,6 +194,19 @@ describe('error reporter', () => {
     r.reportError(new Error('x'));
     await expect(r.flush()).resolves.toBeUndefined();
     expect(onDrop).toHaveBeenCalledWith('write_failed', 1);
+    await r.stop();
+  });
+
+  it('keeps an error storm to a fixed number of stored reports and writes', async () => {
+    const { sink } = memorySink();
+    const write = vi.spyOn(sink, 'write');
+    const r = reporter(sink, { maxPerMinute: 50, maxQueue: 20 });
+    for (let i = 0; i < 10_000; i += 1) r.reportError(new Error(`failure ${i % 7}`));
+    const { queued, dropped } = r.stats();
+    expect(queued).toBeLessThanOrEqual(20);
+    expect(dropped.rate_capped + dropped.queue_full).toBeGreaterThanOrEqual(9_950);
+    await r.flush();
+    expect(write.mock.calls.length).toBeLessThanOrEqual(1);
     await r.stop();
   });
 

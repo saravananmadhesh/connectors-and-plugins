@@ -209,7 +209,7 @@ If the plugin is already installed, the call returns the existing state. A confi
 
 ## 8. DCR
 
-Today `registerClient` (`packages/domain/src/mcp/oauth.ts`) sends a fixed `client_name` of "BoldCreate Integrations" (`servers.ts:624`). Registration retries a public client, then a secret-holding one.
+Today `registerClient` (`packages/domain/src/mcp/oauth.ts`) sent a fixed `client_name` of "BoldCreate Integrations" (now "BoldConnect") (`servers.ts:624`). Registration retries a public client, then a secret-holding one.
 
 ```mermaid
 sequenceDiagram

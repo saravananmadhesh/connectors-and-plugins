@@ -17,7 +17,7 @@ export const CreateApiKeyBodySchema = z.strictObject({
     .min(1)
     .refine((p) => new Set(p).size === p.length, { message: 'duplicate permissions' }),
   expiresAt: IsoDateTimeSchema.optional(),
-  rateLimitPerMinute: z.number().int().min(1).max(1000).optional(),
+  rateLimitPerMinute: z.number().int().min(1).max(3000).optional(),
 });
 export type CreateApiKeyBody = z.infer<typeof CreateApiKeyBodySchema>;
 

@@ -166,14 +166,17 @@ export function fingerprintOf(
   const err = error instanceof Error ? error : undefined;
   const name = err?.name ?? typeof error;
   const message = normalizeMessage(redactText(err?.message ?? String(error)));
+  const frames = applicationFrames(err?.stack);
   const parts = [
     service,
     context.area ?? '',
-    context.operation ?? '',
+    // The throw site identifies the failure; the route or job that reached it is only a fallback,
+    // otherwise one bug seen through ten routes would be ten issues.
+    frames.length > 0 ? '' : (context.operation ?? ''),
     name,
     // Typed failures with a code are the same failure whatever the message says.
     context.errorCode ?? message,
-    ...applicationFrames(err?.stack),
+    ...frames,
   ];
   const fingerprint = createHash('sha256').update(parts.join('\n')).digest('hex').slice(0, 32);
   return { fingerprint, title: `${name}: ${message}`.slice(0, MAX_TITLE) };

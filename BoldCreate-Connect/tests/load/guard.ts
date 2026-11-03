@@ -2,7 +2,7 @@
  * Refusal rules of the load runner. A load run only ever targets a host the operator named in
  * the allow list, never a production host, and only when the operator opted in explicitly.
  */
-export type LoadMode = 'smoke' | 'full';
+export type LoadMode = 'smoke' | 'full' | 'ramp';
 
 export interface LoadPlan {
   target: URL;
@@ -30,12 +30,14 @@ export function planLoadRun(
 ): LoadPlan | LoadRefusal {
   for (const arg of args) {
     if (arg === '--') continue;
-    if (arg !== '--smoke' && arg !== '--full' && !arg.startsWith('--target=')) {
-      return { refusal: `Unknown option "${arg}". Options: --target=<url>, --smoke, --full` };
+    if (arg !== '--smoke' && arg !== '--full' && arg !== '--ramp' && !arg.startsWith('--target=')) {
+      return {
+        refusal: `Unknown option "${arg}". Options: --target=<url>, --smoke, --full, --ramp`,
+      };
     }
   }
-  if (args.includes('--smoke') && args.includes('--full')) {
-    return { refusal: 'Choose either --smoke or --full, not both' };
+  if (['--smoke', '--full', '--ramp'].filter((flag) => args.includes(flag)).length > 1) {
+    return { refusal: 'Choose either --smoke, --full or --ramp, not more than one' };
   }
   const rawTarget = optionValue(args, 'target');
   if (!rawTarget) return { refusal: '--target=<url> is required' };
@@ -64,7 +66,12 @@ export function planLoadRun(
   if (!allowed.includes(host)) {
     return { refusal: `Host ${host} is not in K6_ALLOWED_HOSTS (${allowed.join(', ')})` };
   }
-  return { target, mode: args.includes('--full') ? 'full' : 'smoke' };
+  const mode: LoadMode = args.includes('--ramp')
+    ? 'ramp'
+    : args.includes('--full')
+      ? 'full'
+      : 'smoke';
+  return { target, mode };
 }
 
 export function isRefusal(plan: LoadPlan | LoadRefusal): plan is LoadRefusal {

@@ -28,6 +28,8 @@ const SCOPES = [
   'plugins:write',
   'connections:read',
   'connections:write',
+  'auth-configs:read',
+  'auth-configs:write',
 ];
 const SCAN = JSON.stringify({
   fileCount: 1,
@@ -394,6 +396,30 @@ describe('the host starts a connection for a user', () => {
       [a.rawProjectId],
     );
     expect(members).toHaveLength(0);
+  });
+
+  it('starts a sign-in for a server that has no row yet, when a project auth config sets it up', async () => {
+    const plugin = await seedPlugin(`${FIXTURE_ORIGIN}/project-mcp`, SERVER_NAME);
+    expect((await host(a, 'PUT', `/plugins/${plugin.pluginId}`, {})).status).toBe(201);
+    const made = await host(a, 'POST', '/auth-configs', {
+      componentId: plugin.componentId,
+      name: `config-${randomUUID().slice(0, 8)}`,
+      authMode: 'dcr',
+    });
+    expect(made.status).toBe(201);
+    expect(
+      await sql(`SELECT 1 FROM mcp_server WHERE component_id = $1`, [plugin.componentRaw]),
+    ).toHaveLength(0);
+
+    const res = await startAsHost(a, userRef(), plugin);
+    expect(res.status).toBe(200);
+    const { connectUrl } = (await res.json()) as { connectUrl: string };
+    expect(`${new URL(connectUrl).origin}${new URL(connectUrl).pathname}`).toBe(
+      `${FIXTURE_ORIGIN}/authorize`,
+    );
+    expect(
+      await sql(`SELECT 1 FROM mcp_server WHERE component_id = $1`, [plugin.componentRaw]),
+    ).toHaveLength(1);
   });
 
   it.each([

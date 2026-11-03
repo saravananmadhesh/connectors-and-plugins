@@ -62,23 +62,14 @@ describe('ProjectsPage', () => {
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 
-  it('creates a project from a name and return origins', async () => {
+  it('creates a project from a name alone', async () => {
     const create = vi.spyOn(projects, 'create').mockResolvedValue(project({ name: 'Docs' }));
     vi.spyOn(projects, 'list').mockResolvedValue(page([project()]));
     await render();
     await userEvent.click(await screen.findByRole('button', { name: /create project/i }));
     await userEvent.type(screen.getByLabelText('Name'), ' Docs ');
-    await userEvent.type(
-      screen.getByLabelText('Return origins'),
-      'https://a.example.com, https://b.example.com',
-    );
     await userEvent.click(submit());
-    await waitFor(() =>
-      expect(create).toHaveBeenCalledWith(ORG_ID, {
-        name: 'Docs',
-        returnOrigins: ['https://a.example.com', 'https://b.example.com'],
-      }),
-    );
+    await waitFor(() => expect(create).toHaveBeenCalledWith(ORG_ID, { name: 'Docs' }));
     await waitFor(() => expect(screen.queryByLabelText('Name')).toBeNull());
   });
 

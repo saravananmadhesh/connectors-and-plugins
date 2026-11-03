@@ -5,11 +5,18 @@ import { adminApi, type AdminOpsEvent, type AdminOpsEventsQuery } from '../../li
 import { cn } from '../../lib/cn';
 import { formatDateTime, relativeTime } from '../../lib/format';
 import { errorMessage } from '../../lib/messages';
-import { SEVERITY_TEXT, SEVERITY_TONE, eventKindText, recordRows } from '../../lib/observability';
+import {
+  SEVERITY_TEXT,
+  SEVERITY_TONE,
+  eventJson,
+  eventKindText,
+  recordRows,
+} from '../../lib/observability';
 import { Alert } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { CopyJsonButton } from './CopyJsonButton';
 import { ListSkeleton, LoadMore } from './LoadMore';
 
 const PAGE = 25;
@@ -85,11 +92,14 @@ function Row({ event }: { event: AdminOpsEvent }) {
         </TableCell>
         <TableCell className="font-medium">{summary}</TableCell>
         <TableCell className="text-muted-foreground">{event.service}</TableCell>
+        <TableCell className="w-10 pr-2">
+          <CopyJsonButton json={() => eventJson(event)} label={`event ${summary}`} />
+        </TableCell>
       </TableRow>
       {open && (
         <TableRow className="bg-muted/30 hover:bg-muted/30">
           <TableCell />
-          <TableCell colSpan={4} className="pt-1 pb-4">
+          <TableCell colSpan={5} className="pt-1 pb-4">
             <Detail event={event} />
           </TableCell>
         </TableRow>
@@ -134,6 +144,9 @@ export function EventList({ filters = {}, empty }: Props) {
               <TableHead>Severity</TableHead>
               <TableHead>What happened</TableHead>
               <TableHead>Service</TableHead>
+              <TableHead className="w-10">
+                <span className="sr-only">Copy</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

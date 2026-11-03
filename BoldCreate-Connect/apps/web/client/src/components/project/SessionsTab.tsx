@@ -20,7 +20,9 @@ import {
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
-import { CursorPager, QueryFrame, type TabProps } from './shared';
+import { PageHeader } from '@/components/PageHeader';
+import { InfoHint } from '@/components/InfoHint';
+import { CursorPager, QueryFrame, RefreshButton, type TabProps } from './shared';
 import { messageOf, useCursorPaging } from './paging';
 
 /** The sessions of a project, newest first, with a way to end one. */
@@ -48,6 +50,12 @@ export function SessionsTab({ orgId, projectId, canWrite }: TabProps) {
 
   return (
     <div className="space-y-3">
+      <PageHeader
+        title="Sessions"
+        description="Temporary access your server opens for one user. Revoke a session to end that access."
+      >
+        <RefreshButton orgId={orgId} projectId={projectId} />
+      </PageHeader>
       {error && <Alert variant="destructive">{error}</Alert>}
       <QueryFrame
         label="sessions"
@@ -59,7 +67,7 @@ export function SessionsTab({ orgId, projectId, canWrite }: TabProps) {
           <EmptyState
             icon={KeyRound}
             title="No sessions"
-            description="Sessions appear when your server opens one for a user."
+            description="Sessions appear when your server opens one for a user of your product."
           />
         ) : (
           <>
@@ -68,8 +76,20 @@ export function SessionsTab({ orgId, projectId, canWrite }: TabProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>User</TableHead>
-                    <TableHead>Plugins</TableHead>
-                    <TableHead>Tools</TableHead>
+                    <TableHead>
+                      <span className="inline-flex items-center gap-1">
+                        Plugins
+                        <InfoHint about="plugins">Which plugins this session can use.</InfoHint>
+                      </span>
+                    </TableHead>
+                    <TableHead>
+                      <span className="inline-flex items-center gap-1">
+                        Tools
+                        <InfoHint about="tools">
+                          Which tools of those plugins the session may call.
+                        </InfoHint>
+                      </span>
+                    </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Expires</TableHead>
                     <TableHead className="w-0" />

@@ -4,6 +4,7 @@ import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-route
 import {
   Activity,
   Compass,
+  Gauge,
   LayoutDashboard,
   Menu,
   PanelLeftClose,
@@ -37,6 +38,7 @@ interface Section {
     | '/discover'
     | '/categories'
     | '/allowed-users'
+    | '/limits'
     | '/observability'
     | '/audit';
   label: string;
@@ -59,6 +61,7 @@ const GROUPS: { label?: string; sections: Section[] }[] = [
     label: 'System',
     sections: [
       { to: '/allowed-users', label: 'Allowed users', icon: UserCheck },
+      { to: '/limits', label: 'Limits', icon: Gauge },
       { to: '/observability', label: 'Observability', icon: Activity },
       { to: '/audit', label: 'Audit', icon: ScrollText },
     ],

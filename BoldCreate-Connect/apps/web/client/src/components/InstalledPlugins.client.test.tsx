@@ -53,6 +53,12 @@ function renderTable(
 describe('InstalledPlugins', () => {
   afterEach(() => vi.restoreAllMocks());
 
+  it('explains the updates and setup columns', async () => {
+    await renderTable('pinned');
+    expect(await screen.findByRole('button', { name: 'About updates' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'About setup' })).toBeInTheDocument();
+  });
+
   it('shows whether a plugin is pinned or follows the latest version', async () => {
     await renderTable('follow_latest');
     expect(await screen.findByText('Follows latest')).toBeInTheDocument();

@@ -38,6 +38,7 @@ import { ensureDevSecrets, withSuperuserLogin } from './dev-secrets.js';
 import { startDataViewers } from './data-viewers.js';
 import { repoRoot, startInfra } from './local-infra.js';
 import { resolvePostgresSettings } from './postgres-docker.js';
+import { startNativePooler, stopNativePooler } from './pgbouncer-native.js';
 import { attachCapture, createRunCapture } from './dev-dashboard/log-capture.js';
 import { openBrowser, startDashboardServer } from './dev-dashboard/server.js';
 
@@ -77,6 +78,23 @@ const infra = await startInfra({
   console.error(`[dev] ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
 });
+// The apps reach the database through PgBouncer, as they do when deployed. It starts after the
+// roles exist (their passwords are the pooler's user list). --no-pooler or POOLER=off skips it,
+// and a pooler that cannot start leaves the apps on the direct connection with a warning.
+const poolerOff = process.argv.includes('--no-pooler') || process.env['POOLER'] === 'off';
+const poolerEnv = { ...process.env, ...devSecrets, POOLER_PORT: String(ports.pooler) };
+let pooler: { port: number } | undefined;
+if (!poolerOff) {
+  try {
+    await startNativePooler(poolerEnv);
+    pooler = { port: ports.pooler };
+    console.log(`[dev] PgBouncer is pooling database connections on 127.0.0.1:${ports.pooler}`);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.warn(`[dev] PgBouncer did not start, so the apps use the database directly: ${reason}`);
+  }
+}
+
 const databaseWhere =
   postgres.mode === 'embedded'
     ? '.cache/dev/postgres'
@@ -129,6 +147,7 @@ const envContext = {
     redis: ports.redis,
   },
   objectStore: { port: ports.objectStore, bucket: 'boldcreate-dev' },
+  pooler,
   deployEnv: 'local' as const,
   keyringPath: join(dataDir, 'kms-keyring.json'),
   // Set KMS_CLOUD_KEY_NAME to wrap keys with Cloud KMS instead of the local keyring.
@@ -232,6 +251,7 @@ function shutdown() {
     for (const { cleanup } of processes) cleanup();
     capture.close();
     stopDataViewers();
+    stopNativePooler(poolerEnv);
     void infra.stop().finally(() => process.exit(0));
   }, 2000);
 }

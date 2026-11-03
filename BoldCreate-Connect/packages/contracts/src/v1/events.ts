@@ -45,6 +45,8 @@ export const AUDIT_ACTIONS = [
   'member.reinstated',
   'user.deleted',
   'feature_flag.changed',
+  'limit.changed',
+  'limit.reset',
   'kill_switch.created',
   'kill_switch.lifted',
   'admin.signed_in',

@@ -16,7 +16,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { EmptyState } from '@/components/EmptyState';
-import { CursorPager, QueryFrame, type TabProps } from './shared';
+import { PageHeader } from '@/components/PageHeader';
+import { CursorPager, QueryFrame, RefreshButton, type TabProps } from './shared';
 import { useCursorPaging } from './paging';
 
 /** The activity log of a project, filtered by the host's user id and by action. */
@@ -51,6 +52,14 @@ export function LogsTab({ orgId, projectId, userId }: TabProps & { userId?: stri
 
   return (
     <div className="space-y-3">
+      {!userId && (
+        <PageHeader
+          title="Logs"
+          description="Everything that happened in this project: tool calls, sign-ins and changes."
+        >
+          <RefreshButton orgId={orgId} projectId={projectId} />
+        </PageHeader>
+      )}
       {!userId && (
         <div className="flex flex-wrap gap-2">
           <Input
