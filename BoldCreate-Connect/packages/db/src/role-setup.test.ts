@@ -6,6 +6,7 @@ import {
   dbRoleName,
   grantStatements,
   type LoginRole,
+  POOLED_SESSION_DEFAULTS,
   type SqlClient,
 } from './role-setup.js';
 
@@ -56,6 +57,43 @@ describe('createRoles', () => {
     expect(migrator).toContain("PASSWORD 'pw-mig''rator'");
     const api = statements.find((s) => s.startsWith('ALTER ROLE "app_api"'));
     expect(api).toContain('CONNECTION LIMIT 7');
+  });
+
+  it('stores no session settings unless asked', async () => {
+    const { client, statements } = recorder();
+    await createRoles(client, { passwords });
+    expect(statements.some((s) => s.includes(' SET '))).toBe(false);
+  });
+
+  it('stores the pooled defaults on each serving role and never on the migrator', async () => {
+    const { client, statements } = recorder();
+    await createRoles(client, { passwords, sessionDefaults: POOLED_SESSION_DEFAULTS });
+    expect(statements).toContain('ALTER ROLE "app_api" SET statement_timeout = 15000');
+    for (const role of ['api', 'gateway', 'worker', 'admin']) {
+      expect(statements).toContain(
+        `ALTER ROLE "app_${role}" SET idle_in_transaction_session_timeout = 15000`,
+      );
+    }
+    expect(statements.some((s) => s.startsWith('ALTER ROLE "app_worker" SET statement'))).toBe(
+      false,
+    );
+    expect(statements.some((s) => s.includes('"app_migrator" SET'))).toBe(false);
+  });
+
+  it('sets the session settings after the role exists', async () => {
+    const { client, statements } = recorder();
+    await createRoles(client, { passwords, sessionDefaults: POOLED_SESSION_DEFAULTS });
+    const created = statements.findIndex((s) => s.startsWith('ALTER ROLE "app_api" WITH'));
+    const tuned = statements.findIndex((s) => s.startsWith('ALTER ROLE "app_api" SET'));
+    expect(created).toBeGreaterThanOrEqual(0);
+    expect(tuned).toBeGreaterThan(created);
+  });
+
+  it.each([-1, 1.5, Number.NaN])('rejects a timeout of %s', async (value) => {
+    const { client } = recorder();
+    await expect(
+      createRoles(client, { passwords, sessionDefaults: { api: { statementTimeoutMs: value } } }),
+    ).rejects.toThrow('whole number of milliseconds');
   });
 });
 

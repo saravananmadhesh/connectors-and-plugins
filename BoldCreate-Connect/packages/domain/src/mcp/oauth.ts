@@ -11,6 +11,8 @@ import type { UpstreamFetch, UpstreamResponse } from './upstream.js';
 export type OAuthFailureCode =
   | 'oauth_discovery_failed'
   | 'oauth_registration_failed'
+  /** The server offers no registration endpoint, so a client has to be configured by hand. */
+  | 'oauth_registration_unsupported'
   | 'oauth_token_failed'
   /** The refresh token or code is no longer accepted; the member must connect again. */
   | 'oauth_invalid_grant'
@@ -164,7 +166,7 @@ export async function registerClient(
   clientName: string,
   onRejected?: (rejection: RegistrationRejection) => void,
 ): Promise<RegisteredClient> {
-  if (!metadata.registrationEndpoint) throw new OAuthError('oauth_registration_failed');
+  if (!metadata.registrationEndpoint) throw new OAuthError('oauth_registration_unsupported');
   for (const attempt of REGISTRATION_ATTEMPTS) {
     let response: UpstreamResponse;
     try {

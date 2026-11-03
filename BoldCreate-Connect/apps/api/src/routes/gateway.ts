@@ -13,6 +13,7 @@ import {
   type ApiKeyPrincipal,
   type GatewayAccessResponse,
   type GatewayAuthenticateResponse,
+  type GatewayLimitsResponse,
   type GatewayServersResponse,
 } from '@boldcreate-integrations/contracts';
 import { withTenant, type Db } from '@boldcreate-integrations/db';
@@ -24,7 +25,9 @@ import {
   resolveAccess,
   writeAudit,
   type AccessDeps,
+  type LimitStore,
 } from '@boldcreate-integrations/domain';
+import { LIMIT_KEYS } from '@boldcreate-integrations/limits';
 
 const GATEWAY_CALLER = 'gateway';
 
@@ -45,15 +48,30 @@ function allow(req: FastifyRequest, action: 'workload:gateway-resolve' | 'worklo
 
 export async function gatewayRoutes(
   app: FastifyInstance,
-  opts: { db: Db; access: AccessDeps },
+  opts: { db: Db; access: AccessDeps; limits?: LimitStore },
 ): Promise<void> {
-  const { db, access } = opts;
+  const { db, access, limits } = opts;
 
   async function principalOf(key: string, ip?: string): Promise<ApiKeyPrincipal> {
     const identity = await authenticateKey(db, bearerKey(`Bearer ${key}`), { ip });
     if (!identity) throw new AppError('unauthenticated');
     return identity.principal;
   }
+
+  // GET /v1/gateway/limits — the values an administrator set, so the gateway follows them. Read
+  // only, numbers only, and only for the gateway's own workload identity.
+  app.get('/gateway/limits', async (req, reply) => {
+    allow(req, 'workload:gateway-resolve');
+    const values: GatewayLimitsResponse['values'] = {};
+    if (limits) {
+      for (const key of LIMIT_KEYS) {
+        const resolved = await limits.resolve(key, {});
+        if (resolved.source !== 'default') values[key] = resolved.limit;
+      }
+    }
+    void reply.header('cache-control', 'no-store');
+    return reply.status(200).send({ values });
+  });
 
   // POST /v1/gateway/authenticate — the same key check the gateway runs against the database.
   app.post('/gateway/authenticate', async (req, reply) => {

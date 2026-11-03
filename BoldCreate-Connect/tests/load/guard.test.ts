@@ -18,8 +18,15 @@ describe('planLoadRun', () => {
     expect(plan).toMatchObject({ mode: 'full' });
   });
 
+  it('accepts the ramp', () => {
+    expect(planLoadRun(['--target=http://localhost:3002', '--ramp'], allowed)).toMatchObject({
+      mode: 'ramp',
+    });
+  });
+
   it.each([
     [[], allowed, '--target'],
+    [['--target=http://localhost', '--ramp', '--smoke'], allowed, 'either'],
     [['--target=not a url'], allowed, 'not a valid URL'],
     [['--target=ftp://localhost'], allowed, 'http or https'],
     [['--target=http://localhost'], {}, 'K6_ALLOW_LOAD=1'],

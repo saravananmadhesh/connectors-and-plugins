@@ -100,7 +100,7 @@ describe('OrgSettingsPage', () => {
     await renderWithRouter(OrgSettingsPage, ROUTE_PATH, options('VIEWER'));
     expect(screen.getByLabelText(/install plugins for themselves/i)).toBeDisabled();
     expect(screen.getByLabelText(/create personal api keys/i)).toBeDisabled();
-    expect(screen.getByText(/only admins and members can change/i)).toBeInTheDocument();
+    expect(screen.getByText(/admins and members can change these settings/i)).toBeInTheDocument();
     expect(update).not.toHaveBeenCalled();
   });
 

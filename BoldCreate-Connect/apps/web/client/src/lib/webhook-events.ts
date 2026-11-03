@@ -6,7 +6,7 @@ export const WEBHOOK_EVENT_INFO: Record<WebhookEvent, string> = {
   'user_plugin.installed': 'A user installed a plugin',
   'user_plugin.updated': 'A user changed the version or values of a plugin',
   'user_plugin.removed': 'A user removed a plugin',
-  'connection.activated': 'A user connected an MCP server',
+  'connection.activated': 'A user signed in to a plugin’s server',
   'connection.expired': 'A user’s connection needs signing in again',
   'sync.reported': 'A user’s agent reported what it applied',
   'plugin.suspended': 'A plugin of the project was suspended',

@@ -24,6 +24,8 @@ const ACTION_TEXT: Record<string, string> = {
   'category.created': 'Created a category',
   'category.renamed': 'Changed a category',
   'category.deleted': 'Deleted a category',
+  'limit.changed': 'Changed a limit',
+  'limit.reset': 'Reset a limit to its default',
   'admin.signed_in': 'Admin signed in',
   'admin.sign_in_failed': 'Admin sign-in failed',
   'admin.signed_out': 'Admin signed out',

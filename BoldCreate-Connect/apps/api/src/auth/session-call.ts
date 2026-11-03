@@ -36,7 +36,7 @@ export async function authenticateSessionCall(
   if (principal.projectId === undefined || principal.userId === undefined) {
     throw new AppError('session_required');
   }
-  await countProjectCall(req, principal.projectId);
+  await countProjectCall(req, principal.projectId, principal.orgId);
   return {
     principal,
     userId: principal.userId,

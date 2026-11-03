@@ -5,6 +5,7 @@
 import type { FastifyRequest } from 'fastify';
 import { AppError, ROUTES, type RouteDef } from '@boldcreate-integrations/contracts';
 import { toFastifyPath } from '@boldcreate-integrations/http-server';
+import type { LimitStore, ProjectKeyCache } from '@boldcreate-integrations/domain';
 import { globalKey, type LimiterPort } from '@boldcreate-integrations/ports';
 
 /** What the key branches need from the app; set once when the server is built. */
@@ -12,6 +13,10 @@ export interface ApiGate {
   limiter: LimiterPort;
   /** Requests one key may make per minute. */
   requestsPerMinute: number;
+  /** Adjustable limits, resolved per project through a short in-process cache. */
+  limits: LimitStore;
+  /** Verified project keys, so a busy key does not cost a database lookup on every call. */
+  projectKeyCache: ProjectKeyCache;
 }
 
 declare module 'fastify' {

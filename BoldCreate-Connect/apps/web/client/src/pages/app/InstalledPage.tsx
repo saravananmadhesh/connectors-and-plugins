@@ -1,5 +1,5 @@
 /**
- * Installed plugins and the agents, skills, MCPs, hooks and rules they ship, for the whole
+ * Installed plugins and the agents, skills, MCP servers, hooks and rules they ship, for the whole
  * organization or the caller alone.
  */
 import { useEffect, useState } from 'react';
@@ -98,14 +98,10 @@ export function InstalledPage() {
 
   return (
     <Page className="space-y-6">
-      <PageHeader title="Installed" description="Plugins and components that are active for you.">
-        <Button asChild>
-          <Link to="/orgs/$orgId/marketplace" params={{ orgId }}>
-            <Store />
-            Browse marketplace
-          </Link>
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="Installed"
+        description="Plugins installed for you or your team, and the agents, skills, MCP servers, hooks and rules they bring. Turn them on or off here."
+      />
 
       {oauth && (
         <Alert
@@ -140,6 +136,12 @@ export function InstalledPage() {
               onChange={(e) => setTyped(e.target.value)}
             />
           </div>
+          <Button asChild className="ml-auto">
+            <Link to="/orgs/$orgId/marketplace" params={{ orgId }}>
+              <Store />
+              Browse marketplace
+            </Link>
+          </Button>
         </div>
       </div>
 

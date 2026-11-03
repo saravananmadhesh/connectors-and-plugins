@@ -26,6 +26,17 @@ describe('mapError', () => {
     expect(JSON.stringify(mapped.body)).not.toContain('hunter2');
   });
 
+  it.each([
+    [Object.assign(new Error('too many connections for role "app_api"'), { code: '53300' })],
+    [new Error('too many connections for role "app_api"')],
+    [new Error('timeout exceeded when trying to connect')],
+  ])('answers 503 and still logs when the database has no connection to give', (error) => {
+    const mapped = mapError(error, 'r');
+    expect(mapped).toMatchObject({ code: 'service_unavailable', status: 503, unexpected: true });
+    expect(mapped.retryAfterSeconds).toBe(1);
+    expect(JSON.stringify(mapped.body)).not.toContain('app_api');
+  });
+
   it('adds Retry-After for the codes that need it', () => {
     expect(mapError(new AppError('rate_limited'), 'r').retryAfterSeconds).toBe(1);
     expect(

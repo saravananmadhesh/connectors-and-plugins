@@ -51,6 +51,12 @@ export interface HttpServerConfig {
   REQUEST_TIMEOUT_MS?: number | undefined;
   KEEP_ALIVE_TIMEOUT_MS?: number | undefined;
   MAX_PARAM_LENGTH?: number | undefined;
+  /** Requests one pod serves at once before it refuses new ones with a 503; 0 or absent is off. */
+  HTTP_MAX_INFLIGHT?: number | undefined;
+  /** p99 event loop delay (ms) above which a pod refuses new requests; 0 or absent is off. */
+  EVENT_LOOP_LAG_SHED_MS?: number | undefined;
+  /** Percent of the heap limit above which a pod refuses new requests; 0 or absent is off. */
+  HEAP_SHED_PERCENT?: number | undefined;
 }
 
 export interface AuditEvent {

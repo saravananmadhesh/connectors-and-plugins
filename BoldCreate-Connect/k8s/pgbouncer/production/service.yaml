@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Service
+metadata: { name: boldcreate-pgbouncer-production, namespace: boldcreate-prod }
+spec:
+  type: ClusterIP
+  selector: { app.kubernetes.io/name: boldcreate-pgbouncer-production }
+  ports: [{ name: pg, port: 6432, targetPort: pg }]

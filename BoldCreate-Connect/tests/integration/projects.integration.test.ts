@@ -23,7 +23,7 @@ interface KeyBody {
   rawKey: string;
   scopes: string[];
   allowedCidrs: string[] | null;
-  expiresAt: string;
+  expiresAt: string | null;
   revokedAt: string | null;
 }
 
@@ -230,7 +230,7 @@ describe('project keys', () => {
     expect(body).toContain(key.prefix);
   });
 
-  it('refuse unknown scopes, duplicates, a missing, past or too distant expiry, and bad addresses', async () => {
+  it('refuse unknown scopes, duplicates, a past or too distant expiry, and bad addresses', async () => {
     const project = await createProject();
     const attempt = (body: Record<string, unknown>) =>
       callApi('POST', `${base()}/${project.id}/keys`, owner(), body);
@@ -238,12 +238,34 @@ describe('project keys', () => {
     expect((await attempt({ ...ok, scopes: ['admin'] })).status).toBe(400);
     expect((await attempt({ ...ok, scopes: [] })).status).toBe(400);
     expect((await attempt({ ...ok, scopes: ['sessions:read', 'sessions:read'] })).status).toBe(400);
-    expect((await attempt({ scopes: ['sessions:read'] })).status).toBe(400);
     const past = await attempt({ ...ok, expiresAt: inDays(-1) });
     expect(await code(past)).toBe('api_key_expiry_out_of_range');
     const far = await attempt({ ...ok, expiresAt: inDays(400) });
     expect(await code(far)).toBe('api_key_expiry_out_of_range');
     expect((await attempt({ ...ok, allowedCidrs: ['not-an-address'] })).status).toBe(400);
+  });
+
+  it('last 90 days without an expiry, and never expire when it is null', async () => {
+    const project = await createProject();
+    const make = (extra: Record<string, unknown>) =>
+      callApi('POST', `${base()}/${project.id}/keys`, owner(), {
+        scopes: ['sessions:read'],
+        ...extra,
+      });
+    const defaulted = await make({});
+    expect(defaulted.status).toBe(201);
+    const days =
+      (new Date(((await defaulted.json()) as KeyBody).expiresAt!).getTime() - Date.now()) / DAY;
+    expect(days).toBeGreaterThan(89.9);
+    expect(days).toBeLessThanOrEqual(90);
+
+    const forever = await make({ expiresAt: null });
+    expect(forever.status).toBe(201);
+    const key = (await forever.json()) as KeyBody;
+    expect(key.expiresAt).toBeNull();
+    const rotated = await callApi('POST', `${base()}/${project.id}/keys/${key.id}/rotate`, owner());
+    expect(rotated.status).toBe(201);
+    expect(((await rotated.json()) as KeyBody).expiresAt).toBeNull();
   });
 
   it('are limited per project and a revoked key frees a place', async () => {
@@ -324,7 +346,7 @@ describe('key rotation', () => {
       items: KeyBody[];
     };
     const shown = listed.items.find((item) => item.id === old.id)!;
-    const ends = new Date(shown.expiresAt).getTime() - Date.now();
+    const ends = new Date(shown.expiresAt!).getTime() - Date.now();
     expect(ends).toBeGreaterThan(3_500_000);
     expect(ends).toBeLessThanOrEqual(3_600_000);
     expect(shown.revokedAt).toBeNull();

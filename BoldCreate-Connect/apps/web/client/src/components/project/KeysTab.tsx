@@ -25,12 +25,14 @@ import {
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
+import { PageHeader } from '@/components/PageHeader';
 import { RawKeyDialog } from '@/components/RawKeyDialog';
 import { cn } from '@/lib/cn';
 import { CursorPager, QueryFrame, type TabProps } from './shared';
 import { messageOf, useCursorPaging } from './paging';
 
-const LIFETIMES = [30, 90, 180] as const;
+/** Days a key lasts; `null` is a key that never expires. */
+const LIFETIMES = [30, 90, 180, null] as const;
 const DAY_MS = 86_400_000;
 
 function CreateKeyDialog({
@@ -46,7 +48,7 @@ function CreateKeyDialog({
 }) {
   const qc = useQueryClient();
   const [scopes, setScopes] = useState<ProjectKeyScope[]>([...PROJECT_SCOPE_PRESET]);
-  const [days, setDays] = useState<number>(90);
+  const [days, setDays] = useState<number | null>(90);
   const [cidrs, setCidrs] = useState('');
   const [error, setError] = useState('');
 
@@ -58,7 +60,7 @@ function CreateKeyDialog({
         .filter(Boolean);
       return projects.createKey(orgId, projectId, {
         scopes,
-        expiresAt: new Date(Date.now() + days * DAY_MS).toISOString(),
+        expiresAt: days === null ? null : new Date(Date.now() + days * DAY_MS).toISOString(),
         ...(allowedCidrs.length > 0 ? { allowedCidrs } : {}),
       });
     },
@@ -137,14 +139,14 @@ function CreateKeyDialog({
             <div className="flex gap-2" role="group" aria-label="Key lifetime">
               {LIFETIMES.map((option) => (
                 <Button
-                  key={option}
+                  key={option ?? 'none'}
                   type="button"
                   size="sm"
                   variant={days === option ? 'default' : 'outline'}
                   aria-pressed={days === option}
                   onClick={() => setDays(option)}
                 >
-                  {option} days
+                  {option === null ? 'No expiry' : `${option} days`}
                 </Button>
               ))}
             </div>
@@ -159,7 +161,8 @@ function CreateKeyDialog({
               className="font-mono text-xs"
             />
             <p className="text-xs text-muted-foreground">
-              One range per line. Leave empty to allow the key from any address.
+              One IP address or range (CIDR, such as 203.0.113.0/24) per line. Leave empty to allow
+              the key from any address.
             </p>
           </div>
           <div className="flex justify-end gap-2">
@@ -179,7 +182,7 @@ function CreateKeyDialog({
 
 const keyState = (key: ProjectKeyResponse, now: number): 'revoked' | 'expired' | 'active' => {
   if (key.revokedAt) return 'revoked';
-  return new Date(key.expiresAt).getTime() <= now ? 'expired' : 'active';
+  return key.expiresAt !== null && new Date(key.expiresAt).getTime() <= now ? 'expired' : 'active';
 };
 
 /** The keys a project's server uses: create, rotate, revoke. A key is shown once, when made. */
@@ -228,14 +231,17 @@ export function KeysTab({ orgId, projectId, canWrite }: TabProps) {
 
   return (
     <div className="space-y-3">
-      {canWrite && (
-        <div className="flex justify-end">
+      <PageHeader
+        title="API keys"
+        description="Let your backend call BoldConnect for this project. Keep them secret; each one is shown only once."
+      >
+        {canWrite && (
           <Button onClick={() => setCreating(true)}>
             <Plus aria-hidden="true" />
             Create key
           </Button>
-        </div>
-      )}
+        )}
+      </PageHeader>
       {error && <Alert variant="destructive">{error}</Alert>}
       <QueryFrame
         label="keys"
@@ -271,17 +277,33 @@ export function KeysTab({ orgId, projectId, canWrite }: TabProps) {
                         <TableCell className="font-mono text-xs">
                           {key.prefix}…{key.lastFour}
                         </TableCell>
-                        <TableCell className="max-w-xs text-xs text-muted-foreground">
-                          {key.scopes.join(', ')}
-                          {key.allowedCidrs && ` · from ${key.allowedCidrs.join(', ')}`}
+                        <TableCell className="max-w-sm">
+                          <div className="flex flex-wrap gap-1">
+                            {key.scopes.map((scope) => (
+                              <Badge
+                                key={scope}
+                                variant="outline"
+                                title={PROJECT_SCOPE_INFO[scope].description}
+                              >
+                                {PROJECT_SCOPE_INFO[scope].label}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {key.allowedCidrs
+                              ? `Only from ${key.allowedCidrs.join(', ')}`
+                              : 'From any address'}
+                          </p>
                         </TableCell>
                         <TableCell>
                           <Badge variant={state === 'active' ? 'secondary' : 'outline'}>
                             {state}
                           </Badge>
                         </TableCell>
-                        <TableCell title={formatDateTime(key.expiresAt)}>
-                          {relativeTime(key.expiresAt)}
+                        <TableCell
+                          title={key.expiresAt ? formatDateTime(key.expiresAt) : undefined}
+                        >
+                          {key.expiresAt ? relativeTime(key.expiresAt) : 'Never'}
                         </TableCell>
                         <TableCell>
                           {key.lastUsedAt ? relativeTime(key.lastUsedAt) : 'Never'}

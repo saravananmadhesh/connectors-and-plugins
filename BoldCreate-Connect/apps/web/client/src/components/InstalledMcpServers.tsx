@@ -12,6 +12,7 @@ import { AUTH_OPTIONS, connectionLabel, healthLabel, healthVariant } from '@/lib
 import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { InfoHint } from '@/components/InfoHint';
 import { PluginTile } from '@/components/PluginTile';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -76,7 +77,7 @@ export function InstalledMcpServers({ orgId, scopeKey, items, canUpdate }: Props
         <EmptyState
           icon={Server}
           title="No MCP servers installed"
-          description="None of the installed plugins ships an MCP server."
+          description="None of the installed plugins includes an MCP server, a connection that gives agents extra tools."
         />
       </div>
     );
@@ -91,7 +92,15 @@ export function InstalledMcpServers({ orgId, scopeKey, items, canUpdate }: Props
             <TableRow className="hover:bg-transparent">
               <TableHead>Name</TableHead>
               <TableHead>Plugin</TableHead>
-              <TableHead>Authentication</TableHead>
+              <TableHead>
+                <span className="inline-flex items-center gap-1">
+                  Authentication
+                  <InfoHint about="authentication">
+                    How people get access: no credentials, one API key shared by everyone, or each
+                    member signs in with OAuth.
+                  </InfoHint>
+                </span>
+              </TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-24 text-right">Details</TableHead>
             </TableRow>

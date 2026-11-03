@@ -6,4 +6,5 @@ data:
   NODE_ENV: production
   LOG_LEVEL: info
   PORT_GATEWAY: '3002'
+  DATA_SOURCE: api
   API_BASE_URL: http://boldcreate-integrations-api-preproduction.boldcreate-preprod.svc.cluster.local:3001

@@ -17,6 +17,45 @@ function setup() {
   };
 }
 
+describe('pod-wide cap', () => {
+  it('refuses a call over the total even when its own server has room', () => {
+    const guard = createServerGuard({
+      maxConcurrency: 5,
+      maxTotalConcurrency: 2,
+      failuresToOpen: 3,
+      openMs: 1000,
+    });
+    const first = guard.acquire('a');
+    guard.acquire('b');
+    expect(guard.acquire('c')).toBe('busy');
+    if (typeof first === 'string') throw new Error('refused');
+    first.release('ok');
+    expect(typeof guard.acquire('c')).toBe('object');
+  });
+
+  it('does not count a refused call, and zero means no cap', () => {
+    const open = createServerGuard({
+      maxConcurrency: 1,
+      maxTotalConcurrency: 0,
+      failuresToOpen: 3,
+      openMs: 1000,
+    });
+    for (const key of ['a', 'b', 'c', 'd']) expect(typeof open.acquire(key)).toBe('object');
+    const capped = createServerGuard({
+      maxConcurrency: 1,
+      maxTotalConcurrency: 1,
+      failuresToOpen: 3,
+      openMs: 1000,
+    });
+    const held = capped.acquire('a');
+    expect(capped.acquire('a')).toBe('busy');
+    expect(capped.acquire('b')).toBe('busy');
+    if (typeof held === 'string') throw new Error('refused');
+    held.release('ignore');
+    expect(typeof capped.acquire('b')).toBe('object');
+  });
+});
+
 const take = (guard: ReturnType<typeof createServerGuard>, key = 's') => {
   const gate = guard.acquire(key);
   if (typeof gate === 'string') throw new Error(`refused: ${gate}`);
@@ -67,5 +106,25 @@ describe('server guard', () => {
     gate.release('failure');
     for (let i = 0; i < 2; i += 1) take(guard).release('failure');
     expect(typeof guard.acquire('s')).toBe('object');
+  });
+});
+
+describe('pod-wide cap that changes while running', () => {
+  it('reads the cap on every call', () => {
+    let cap = 1;
+    const guard = createServerGuard({
+      maxConcurrency: 10,
+      maxTotalConcurrency: () => cap,
+      failuresToOpen: 3,
+      openMs: 1000,
+    });
+    const first = guard.acquire('a');
+    expect(first).not.toBe('busy');
+    expect(guard.acquire('b')).toBe('busy');
+    cap = 2;
+    const second = guard.acquire('b');
+    expect(second).not.toBe('busy');
+    cap = 0;
+    expect(guard.acquire('c')).not.toBe('busy');
   });
 });

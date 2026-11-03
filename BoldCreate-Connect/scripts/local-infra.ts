@@ -324,6 +324,8 @@ export interface InfraOptions {
   persistent: boolean;
   /** Delete existing data first, so a new database is created. */
   reset?: boolean;
+  /** Start PostgreSQL and migrate it, touching nothing else (a running dev stack stays as it is). */
+  postgresOnly?: boolean;
 }
 
 export interface Infra {
@@ -444,17 +446,21 @@ export async function startInfra(options: InfraOptions): Promise<Infra> {
   mkdirSync(options.logDir, { recursive: true });
   mkdirSync(options.dataDir, { recursive: true });
 
-  await stopLeftoverInfra(options.dataDir, embeddedPostgres);
+  if (!options.postgresOnly) await stopLeftoverInfra(options.dataDir, embeddedPostgres);
 
   for (const [label, busyPort] of [
     ...(embeddedPostgres ? ([['PostgreSQL', port]] as const) : []),
-    ['Mailpit SMTP', options.mailpitSmtpPort],
-    ['Mailpit web', options.mailpitHttpPort],
-    ['Redis', options.redisPort],
-    ['Object store', options.objectStorePort],
-    ...(options.objectStoreUiPort === undefined
+    ...(options.postgresOnly
       ? []
-      : ([['Object store UI', options.objectStoreUiPort]] as const)),
+      : ([
+          ['Mailpit SMTP', options.mailpitSmtpPort],
+          ['Mailpit web', options.mailpitHttpPort],
+          ['Redis', options.redisPort],
+          ['Object store', options.objectStorePort],
+          ...(options.objectStoreUiPort === undefined
+            ? []
+            : ([['Object store UI', options.objectStoreUiPort]] as const)),
+        ] as const)),
   ] as const) {
     if (await isPortOpen(busyPort)) {
       throw new Error(
@@ -479,11 +485,13 @@ export async function startInfra(options: InfraOptions): Promise<Infra> {
   let created = false;
 
   const stop = async () => {
-    mailpit?.kill();
-    redis?.kill();
-    objectStore?.kill();
-    for (const name of ['mailpit', 'redis', 'object-store']) {
-      rmSync(join(options.dataDir, `${name}.pid`), { force: true });
+    if (!options.postgresOnly) {
+      mailpit?.kill();
+      redis?.kill();
+      objectStore?.kill();
+      for (const name of ['mailpit', 'redis', 'object-store']) {
+        rmSync(join(options.dataDir, `${name}.pid`), { force: true });
+      }
     }
     if (postgres) await postgres.stop().catch(() => undefined);
     if (externalPostgres) await externalPostgres.stop().catch(() => undefined);
@@ -564,6 +572,7 @@ export async function startInfra(options: InfraOptions): Promise<Infra> {
 
     const env = { ...process.env, ...options.secrets, DATABASE_URL: options.databaseUrl };
     runScript('scripts/migrate.ts', env);
+    if (options.postgresOnly) return { created, stop };
 
     const binary = await ensureMailpit();
     mailpit = spawn(

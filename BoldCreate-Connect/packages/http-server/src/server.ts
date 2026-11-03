@@ -7,12 +7,18 @@ import Fastify, {
   type FastifyRequest,
 } from 'fastify';
 import { isDeployed } from '@boldcreate-integrations/config';
-import { AppError, type ErrorDetail, type RouteDef } from '@boldcreate-integrations/contracts';
+import {
+  AppError,
+  toErrorBody,
+  type ErrorDetail,
+  type RouteDef,
+} from '@boldcreate-integrations/contracts';
 import { runWithContext } from '@boldcreate-integrations/observability';
 import { globalKey } from '@boldcreate-integrations/ports';
 import { ABORTED_STATUS, accessLogLevel } from './access-log.js';
 import { createTrustedProxyMatcher, resolveClientIp } from './client-ip.js';
 import { isParseError, mapError } from './errors.js';
+import { createLoadShed } from './load-shed.js';
 import { registerRoute, type RouteHandler } from './routes.js';
 import { createShutdown, defaultSleep, listenForSignals } from './shutdown.js';
 import type { Stage } from './stages.js';
@@ -27,6 +33,12 @@ export interface HttpServer {
   listen(options: { port: number; host?: string }): Promise<string>;
   /** Stops accepting connections, waits for in-flight requests, runs the shutdown hooks once. */
   close(): Promise<void>;
+  /** Changes the in-flight cap of this pod while it runs; 0 turns it off. */
+  setMaxInflight(value: number): void;
+  /** Changes the event loop delay limit (milliseconds) while running; 0 turns it off. */
+  setEventLoopLagMs(value: number): void;
+  /** Changes the heap limit (percent) while running; 0 turns it off. */
+  setHeapPercent(value: number): void;
 }
 
 type ReadyChecks = Record<string, 'ok' | 'error'>;
@@ -129,6 +141,53 @@ export function createServer(options: CreateServerOptions): HttpServer {
     runWithContext(request.requestContext, fn);
   const routeOf = (request: FastifyRequest): RouteDef | undefined =>
     request.routeOptions.config.route;
+
+  // Before stage 1: a pod at its own limit refuses new work with a fast 503 and does no further
+  // work for it, so overload cannot grow the queue, the heap or the database load. Probes and
+  // metrics are never refused.
+  const shed = createLoadShed({
+    maxInflight: config.HTTP_MAX_INFLIGHT ?? 0,
+    eventLoopLagMs: config.EVENT_LOOP_LAG_SHED_MS ?? 0,
+    heapPercent: config.HEAP_SHED_PERCENT ?? 0,
+  });
+  // One warning per reason every ten seconds, with the number refused since the last one, so a
+  // flood of refusals does not become a flood of log lines.
+  const shedLog = new Map<string, { at: number; count: number }>();
+  const noteShed = (reason: string): void => {
+    const entry = shedLog.get(reason) ?? { at: 0, count: 0 };
+    entry.count += 1;
+    const at = Date.now();
+    if (at - entry.at >= 10_000) {
+      logger.warn({ reason, refused: entry.count, inflight: shed.inflight() }, 'Refusing requests');
+      entry.at = at;
+      entry.count = 0;
+    }
+    shedLog.set(reason, entry);
+  };
+  app.addHook('onRequest', async (request, reply) => {
+    if (request.routeOptions.config.edgeExempt) return;
+    const reason = shed.check();
+    if (reason === null) {
+      shed.enter();
+      reply.raw.once('close', () => shed.leave());
+      return;
+    }
+    // The audit hook writes to the database, which is what an overloaded pod must not do.
+    stateOf(request).audited = true;
+    const seconds = options.retryAfterSeconds?.service_unavailable ?? 1;
+    void reply.header('x-request-id', request.id);
+    void reply.header('retry-after', String(seconds));
+    void reply.header('x-shed-reason', reason);
+    metrics.recordShed(reason);
+    noteShed(reason);
+    metrics.recordRequest({
+      method: request.method,
+      route: request.routeOptions.url ?? 'unmatched',
+      status: 503,
+      seconds: 0,
+    });
+    return reply.status(503).send(toErrorBody(new AppError('service_unavailable'), request.id));
+  });
 
   // Stage 1: request id, client address, request context, metrics and the access log.
   app.addHook('onRequest', (request, reply, done) => {
@@ -467,6 +526,7 @@ export function createServer(options: CreateServerOptions): HttpServer {
   }
 
   app.addHook('onClose', async () => {
+    shed.stop();
     metrics.stop();
   });
 
@@ -510,5 +570,8 @@ export function createServer(options: CreateServerOptions): HttpServer {
       return address;
     },
     close,
+    setMaxInflight: (value) => shed.setMaxInflight(value),
+    setEventLoopLagMs: (value) => shed.setEventLoopLagMs(value),
+    setHeapPercent: (value) => shed.setHeapPercent(value),
   };
 }

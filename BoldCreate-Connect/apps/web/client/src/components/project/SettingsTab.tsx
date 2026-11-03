@@ -118,7 +118,8 @@ function WebhookForm({
           onChange={(e) => setUrl(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
-          An https address on the public internet. Each event is signed with the secret.
+          An https address on the public internet. Each event is signed with the signing secret so
+          you can check it came from us.
         </p>
       </div>
       <fieldset className="space-y-2">
@@ -265,7 +266,7 @@ export function SettingsTab({ orgId, projectId, canWrite }: TabProps) {
         {error && <Alert variant="destructive">{error}</Alert>}
         <Section
           title="Webhook"
-          description="Your server hears about users, plugins and connections as they change."
+          description="BoldConnect sends your server a signed request when users, plugins or connections change."
           action={
             canWrite && current ? (
               <div className="flex gap-2">

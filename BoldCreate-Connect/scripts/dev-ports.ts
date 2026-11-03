@@ -16,6 +16,7 @@ export const defaultDevPorts = {
   objectStore: 9000,
   objectStoreUi: 9001,
   postgresUi: 8081,
+  pooler: 6432,
 } as const;
 
 export type DevPorts = Record<keyof typeof defaultDevPorts, number>;
@@ -34,6 +35,7 @@ const envNames: Record<keyof DevPorts, string> = {
   objectStore: 'PORT_OBJECT_STORE',
   objectStoreUi: 'PORT_OBJECT_STORE_UI',
   postgresUi: 'PORT_POSTGRES_UI',
+  pooler: 'PORT_POOLER',
 };
 
 /** Reads the ports from `env`; a missing, empty or invalid value falls back to the default. */

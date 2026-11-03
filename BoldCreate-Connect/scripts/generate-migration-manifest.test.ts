@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   generateMigrationManifest,
@@ -6,6 +8,26 @@ import {
 } from './generate-migration-manifest.js';
 
 afterEach(() => vi.unstubAllEnvs());
+
+describe('committed migration job manifests', () => {
+  it.each(['staging', 'production'] as const)(
+    'list every migration file with its current content for %s',
+    (env) => {
+      const manifest = readFileSync(
+        join(import.meta.dirname, '..', 'k8s', `migration-${env}-job.yaml`),
+        'utf8',
+      );
+      for (const { filename, content } of getMigrationFiles()) {
+        expect(manifest, `${filename} is missing; regenerate the manifest`).toContain(
+          `  ${filename}: |-`,
+        );
+        // The first statement line proves the embedded body is the file, not a stale copy.
+        const firstLine = content.split('\n').find((line) => line.trim().length > 0);
+        expect(manifest).toContain(firstLine?.trim());
+      }
+    },
+  );
+});
 
 describe('generate-migration-manifest', () => {
   it.each(['staging', 'preproduction', 'production'] as const)(

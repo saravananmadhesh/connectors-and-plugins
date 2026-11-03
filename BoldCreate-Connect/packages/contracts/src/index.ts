@@ -15,6 +15,7 @@ export * from './v1/plugin-sources.js';
 export * from './v1/admin-allowed-emails.js';
 export * from './v1/categories.js';
 export * from './v1/admin-audit.js';
+export * from './v1/admin-limits.js';
 export * from './v1/admin-observability.js';
 export * from './v1/admin-plugins.js';
 export * from './v1/admin-stats.js';

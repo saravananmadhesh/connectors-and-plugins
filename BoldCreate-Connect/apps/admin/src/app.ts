@@ -20,6 +20,8 @@ import {
   type AdminPluginListQuery,
   type AdminPluginStatusBody,
   type AdminPluginUpdateBody,
+  type ResetGlobalLimitQuery,
+  type SetGlobalLimitBody,
   type AdminStatsQuery,
   type VersionChange,
   type BulkIdsBody,
@@ -54,6 +56,9 @@ import {
   getAdminPlugin,
   getAdminVersion,
   listAdminCategories,
+  listAdminLimits,
+  resetGlobalLimit,
+  setGlobalLimit,
   bulkDeletePlugins,
   bulkPublishLatest,
   bulkSyncPlugins,
@@ -85,6 +90,7 @@ import {
 } from '@boldcreate-integrations/domain';
 import { createServer, type HttpServer } from '@boldcreate-integrations/http-server';
 import type { ErrorReporter, Metrics } from '@boldcreate-integrations/observability';
+import { environmentLimits } from './environment-limits.js';
 import { ADMIN_CSRF_COOKIE, ADMIN_SESSION_COOKIE, type AdminConfig } from './config.js';
 
 export interface AdminDeps {
@@ -140,6 +146,9 @@ const ADMIN_ROUTE_IDS = [
   'adminPlugins.update',
   'adminPlugins.updateSource',
   'adminAudit.list',
+  'adminLimits.list',
+  'adminLimits.setGlobal',
+  'adminLimits.resetGlobal',
   'adminObservability.listErrors',
   'adminObservability.getError',
   'adminObservability.setErrorStatus',
@@ -348,6 +357,11 @@ export async function buildApp(config: AdminConfig, deps: AdminDeps): Promise<Ht
     requestId: request.id,
     ip: request.clientIp,
   });
+  const limitActorOf = (request: FastifyRequest) => ({
+    ...actorOf(request),
+    identityId: (request.adminSession as AdminSession).identityId,
+  });
+  const limitKeyOf = (request: FastifyRequest) => (request.params as { key: string }).key;
   const sourceIdOf = (request: FastifyRequest) => (request.params as { sourceId: string }).sourceId;
 
   server.register('adminPluginSources.list', async (_request, reply) => {
@@ -613,6 +627,32 @@ export async function buildApp(config: AdminConfig, deps: AdminDeps): Promise<Ht
       actorOf(request),
     );
     return noStore(reply).status(200).send(plugin);
+  });
+
+  server.register('adminLimits.list', async (_request, reply) => {
+    return noStore(reply)
+      .status(200)
+      .send({ items: await listAdminLimits(deps.db, environmentLimits(config)) });
+  });
+
+  server.register('adminLimits.setGlobal', async (request, reply) => {
+    const limit = await setGlobalLimit(
+      deps.db,
+      limitKeyOf(request),
+      request.body as SetGlobalLimitBody,
+      limitActorOf(request),
+    );
+    return noStore(reply).status(200).send(limit);
+  });
+
+  server.register('adminLimits.resetGlobal', async (request, reply) => {
+    const limit = await resetGlobalLimit(
+      deps.db,
+      limitKeyOf(request),
+      request.query as ResetGlobalLimitQuery,
+      limitActorOf(request),
+    );
+    return noStore(reply).status(200).send(limit);
   });
 
   const emailOf = (request: FastifyRequest) => (request.params as { email: string }).email;

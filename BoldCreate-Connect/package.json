@@ -20,7 +20,8 @@
     "openapi": "tsx --conditions=development scripts/generate-openapi.ts",
     "db:check": "drizzle-kit check",
     "db:migrate": "tsx --conditions=development scripts/migrate.ts",
-    "k8s:migration": "tsx scripts/generate-migration-manifest.ts"
+    "k8s:migration": "tsx scripts/generate-migration-manifest.ts",
+    "pooler": "tsx --conditions=development scripts/pooler.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/client": "catalog:",

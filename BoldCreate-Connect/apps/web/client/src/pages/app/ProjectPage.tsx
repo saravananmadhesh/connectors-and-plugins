@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { projects } from '@/lib/api';
 import { useAbilities } from '@/lib/abilities';
 import { PROJECT_TABS, type ProjectTab } from '@/lib/project-search';
-import { formatDate } from '@/lib/format';
 import { qk } from '@/lib/query-keys';
 import { Tabs } from '@/components/ui/tabs';
 import { Page } from '@/components/Page';
@@ -15,9 +14,13 @@ import { OverviewTab } from '@/components/project/OverviewTab';
 import { PluginSetsPanel } from '@/components/project/PluginSetsSection';
 import { PluginsView } from '@/components/project/plugins/PluginsView';
 import { SessionsTab } from '@/components/project/SessionsTab';
+import {
+  ProjectDangerZone,
+  ProjectGeneralSection,
+  ReturnAddressesSection,
+} from '@/components/project/ProjectManageSection';
 import { SettingsTab } from '@/components/project/SettingsTab';
 import { QueryFrame, type TabProps } from '@/components/project/shared';
-import { ProjectStatusBadge } from '@/components/project/status';
 import { UsersTab } from '@/components/project/UsersTab';
 
 const PANELS: Record<ProjectTab, (props: TabProps, activeKeyCount: number) => React.ReactNode> = {
@@ -30,8 +33,15 @@ const PANELS: Record<ProjectTab, (props: TabProps, activeKeyCount: number) => Re
   keys: (props) => <KeysTab {...props} />,
   settings: (props) => (
     <div className="space-y-8">
+      <PageHeader
+        title="Settings"
+        description="The name, return addresses, webhook and plugin sets of this project."
+      />
+      <ProjectGeneralSection orgId={props.orgId} projectId={props.projectId} />
+      <ReturnAddressesSection orgId={props.orgId} projectId={props.projectId} />
       <SettingsTab {...props} />
       <PluginSetsPanel orgId={props.orgId} projectId={props.projectId} />
+      <ProjectDangerZone orgId={props.orgId} projectId={props.projectId} />
     </div>
   ),
 };
@@ -79,12 +89,6 @@ export function ProjectPage() {
         error={project.error}
         onRetry={() => void project.refetch()}
       >
-        <PageHeader
-          title={project.data?.name ?? ''}
-          description={project.data ? `Created ${formatDate(project.data.createdAt)}` : undefined}
-        >
-          {project.data && <ProjectStatusBadge status={project.data.status} />}
-        </PageHeader>
         <Tabs
           label="Project sections"
           // On a phone the sections are a pinned row under the top bar; from md up they live in the sidebar.

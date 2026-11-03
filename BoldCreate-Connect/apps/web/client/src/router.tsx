@@ -10,7 +10,7 @@ import { qk } from './lib/query-keys';
 import { readActiveOrg, resolveActiveOrg } from './lib/active-org';
 import { validateInstalledSearch } from './lib/installed-search';
 import { validateMarketplaceSearch } from './lib/marketplace-search';
-import { PROJECT_TABS, validateProjectSearch } from './lib/project-search';
+import { validatePluginsSearch, PROJECT_TABS, validateProjectSearch } from './lib/project-search';
 
 // ── Layouts ───────────────────────────────────────────────────────────────────
 import { RootLayout } from './layouts/RootLayout';
@@ -249,6 +249,7 @@ const projectRoute = createRoute({
 const projectTabRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/orgs/$orgId/projects/$projectId/$tab',
+  validateSearch: validatePluginsSearch,
   beforeLoad: ({ params }) => {
     const known = PROJECT_TABS.some((item) => item.value === params.tab);
     if (!known || params.tab === 'overview') {

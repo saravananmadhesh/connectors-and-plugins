@@ -8,6 +8,7 @@
 | [architecture/invariants.md](architecture/invariants.md)                       | Rules every change must keep, failure behaviour, migrations    |
 | [architecture/decisions.md](architecture/decisions.md)                         | One-way-door decisions and why (record new ones here)          |
 | [guides/integration.md](guides/integration.md)                                 | Connect an agent, IDE, CLI or product with an API key          |
+| [guides/handling-overload.md](guides/handling-overload.md)                     | Backoff, jitter, idempotency keys, tool-call retries, polling  |
 | [guides/operations.md](guides/operations.md)                                   | Run, configure, deploy, observe                                |
 | [guides/deployment.md](guides/deployment.md)                                   | Images, CI pipeline, Kubernetes layout, release order          |
 | [guides/run-with-staging-secrets.md](guides/run-with-staging-secrets.md)       | Run the apps locally against shared staging services           |

@@ -19,14 +19,19 @@ import {
 } from '@boldcreate-integrations/domain';
 import { toFastifyPath } from '@boldcreate-integrations/http-server';
 import { setKeyId, setTenant } from '@boldcreate-integrations/observability';
-import { PROJECT_LIMITS } from '@boldcreate-integrations/limits';
-import { globalKey, type LimiterPort } from '@boldcreate-integrations/ports';
+import { globalKey } from '@boldcreate-integrations/ports';
 
 declare module 'fastify' {
   interface FastifyRequest {
     projectIdentity?: ProjectKeyIdentity;
     /** The project's request budget as of this call, for the `X-RateLimit-*` headers. */
-    projectRate?: { limit: number; remaining: number; windowSeconds: number };
+    projectRate?: {
+      limit: number;
+      remaining: number;
+      windowSeconds: number;
+      /** Whole seconds until the current window ends. */
+      resetSeconds: number;
+    };
   }
 }
 
@@ -42,10 +47,16 @@ const API_ROUTES = new Map<string, RouteDef>(
  * Counts a call against its project's minute. Project keys and sessions share one budget, so a host
  * cannot widen its limit by minting more of either. An unreachable limiter refuses the call.
  */
-export async function countProjectCall(request: FastifyRequest, projectId: string): Promise<void> {
-  const limiter: LimiterPort = request.server.apiGate.limiter;
-  const limit = PROJECT_LIMITS.requestsPerMinutePerProject;
-  const windowSeconds = PROJECT_LIMITS.requestWindowSeconds;
+export async function countProjectCall(
+  request: FastifyRequest,
+  projectId: string,
+  organizationId?: string,
+): Promise<void> {
+  const { limiter, limits } = request.server.apiGate;
+  const { limit, windowSeconds } = await limits.resolve('project_requests_per_minute', {
+    projectId,
+    organizationId,
+  });
   let result;
   try {
     result = await limiter.check(globalKey('ratelimit', 'project', projectId), {
@@ -55,9 +66,15 @@ export async function countProjectCall(request: FastifyRequest, projectId: strin
   } catch {
     throw new AppError('service_unavailable');
   }
-  request.projectRate = { limit, remaining: Math.max(0, result.remaining), windowSeconds };
+  const resetSeconds = Math.max(1, Math.ceil((result.resetAt.getTime() - Date.now()) / 1000));
+  request.projectRate = {
+    limit,
+    remaining: Math.max(0, result.remaining),
+    windowSeconds,
+    resetSeconds,
+  };
   if (result.allowed) return;
-  request.retryAfter = Math.max(1, Math.ceil((result.resetAt.getTime() - Date.now()) / 1000));
+  request.retryAfter = resetSeconds;
   throw new AppError('rate_limited');
 }
 
@@ -74,12 +91,13 @@ export async function authenticateProjectCall(
 
   const identity = await authenticateProjectKey(db, projectBearer(request.headers.authorization), {
     ip: request.clientIp,
+    cache: request.server.apiGate.projectKeyCache,
   });
   if (!identity) throw new AppError('unauthenticated');
   setKeyId(identity.keyId);
   setTenant(identity.organizationId);
 
-  await countProjectCall(request, identity.projectId);
+  await countProjectCall(request, identity.projectId, identity.organizationId);
 
   // A route nobody opened to project keys stays closed, whatever the key holds.
   const route = API_ROUTES.get(`${request.method} ${request.routeOptions.url}`);

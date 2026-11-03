@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Service
+metadata: { name: boldcreate-pgbouncer-staging, namespace: boldcreate-stag }
+spec:
+  type: ClusterIP
+  selector: { app.kubernetes.io/name: boldcreate-pgbouncer-staging }
+  ports: [{ name: pg, port: 6432, targetPort: pg }]

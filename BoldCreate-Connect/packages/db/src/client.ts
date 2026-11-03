@@ -2,6 +2,7 @@ import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgDatabase } from 'drizzle-orm/pg-core';
 import type { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
+import type { AdmissionGate } from './admission-gate.js';
 import * as schema from './schema/index.js';
 
 export type Db = NodePgDatabase<typeof schema>;
@@ -25,6 +26,14 @@ export interface DbConfig {
   connectionTimeoutMs?: number;
   /** Shown in `pg_stat_activity`, so a connection can be traced to the service that owns it. */
   applicationName?: string;
+  /** How long a spare connection is kept before it is closed. Unset: the driver default (10 s). */
+  idleTimeoutMs?: number;
+  /** Called when a spare connection fails (a database restart or failover); never throws. */
+  onPoolError?: (error: Error) => void;
+  /** Queue in front of the pool: callers beyond its limits wait, then are refused. Unset: none. */
+  admission?: AdmissionGate;
+  /** Who a call counts for in the admission queue (for example the organization); unset: nobody. */
+  admissionOwner?: () => string | undefined;
 }
 
 /** Pool settings that are not about where the database is. */
@@ -37,9 +46,89 @@ function poolLimits(config: DbConfig): pg.PoolConfig {
         }
       : {}),
     ...(config.connectionTimeoutMs ? { connectionTimeoutMillis: config.connectionTimeoutMs } : {}),
+    ...(config.idleTimeoutMs ? { idleTimeoutMillis: config.idleTimeoutMs } : {}),
     ...(config.applicationName ? { application_name: config.applicationName } : {}),
     ...(config.lockTimeoutMs ? { options: `-c lock_timeout=${config.lockTimeoutMs}` } : {}),
   };
+}
+
+/** True when Postgres refused a login because the role is at its connection limit. */
+export function isRoleSaturated(err: unknown): boolean {
+  const e = err as { code?: unknown; message?: unknown } | null;
+  return (
+    e?.code === '53300' ||
+    (typeof e?.message === 'string' && e.message.startsWith('too many connections'))
+  );
+}
+
+const RETRY_MIN_MS = 25;
+const RETRY_MAX_MS = 250;
+
+/**
+ * A pool that queues instead of failing when the role's connection limit is reached. The driver
+ * already queues callers while its own pool is full, but a server-side refusal (`53300`) comes
+ * back at once, so the caller never waited. Here the refusal is retried with jittered backoff
+ * until `waitMs` has passed, then the original error is raised (and mapped to a 503).
+ */
+class QueueingPool extends pg.Pool {
+  constructor(
+    config: pg.PoolConfig,
+    private readonly waitMs: number,
+    private readonly admission?: AdmissionGate,
+    private readonly ownerOf?: () => string | undefined,
+  ) {
+    super(config);
+  }
+
+  private async connectWithRetry(): Promise<pg.PoolClient> {
+    const deadline = Date.now() + this.waitMs;
+    for (;;) {
+      try {
+        return await super.connect();
+      } catch (err) {
+        if (!isRoleSaturated(err) || Date.now() >= deadline) throw err;
+        const delay = RETRY_MIN_MS + Math.random() * (RETRY_MAX_MS - RETRY_MIN_MS);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  /** Takes a slot from the admission queue, then a connection; the slot returns with the connection. */
+  private async admitted(): Promise<pg.PoolClient> {
+    const give = (await this.admission?.acquire(this.ownerOf?.())) ?? (() => undefined);
+    try {
+      const client = await this.connectWithRetry();
+      const release = client.release.bind(client);
+      client.release = (error?: Error | boolean) => {
+        give();
+        release(error);
+      };
+      return client;
+    } catch (err) {
+      give();
+      throw err;
+    }
+  }
+
+  override connect(): Promise<pg.PoolClient>;
+  override connect(
+    callback: (
+      err: Error | undefined,
+      client: pg.PoolClient | undefined,
+      done: (release?: unknown) => void,
+    ) => void,
+  ): void;
+  override connect(callback?: Parameters<pg.Pool['connect']>[0]): Promise<pg.PoolClient> | void {
+    if (this.waitMs <= 0 && !this.admission) {
+      return callback ? super.connect(callback) : super.connect();
+    }
+    const attempt = this.admitted();
+    if (!callback) return attempt;
+    attempt.then(
+      (client) => callback(undefined, client, (release) => client.release(release as boolean)),
+      (err: Error) => callback(err, undefined, () => undefined),
+    );
+  }
 }
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
@@ -86,7 +175,16 @@ export function createDb(config: DbConfig): { db: Db; pool: pg.Pool } {
     poolConfig = { connectionString: rawUrl, max, ...poolLimits(config) };
   }
 
-  const pool = new pg.Pool(poolConfig);
+  const pool = new QueueingPool(
+    poolConfig,
+    config.connectionTimeoutMs ?? 0,
+    config.admission,
+    config.admissionOwner,
+  );
+
+  // Without a listener, an error on a spare connection is an unhandled event and ends the process.
+  // The pool discards the failed connection and opens a new one on the next query.
+  pool.on('error', (error) => config.onPoolError?.(error));
 
   const db = drizzle(pool, { schema });
   return { db, pool };

@@ -19,6 +19,13 @@ export const PROJECT_TABS: readonly { value: ProjectTab; label: string }[] = [
   { value: 'settings', label: 'Settings' },
 ];
 
+/** Which list the Plugins tab shows; installed is the default. */
+export type PluginsView = 'installed' | 'browse';
+
+export function validatePluginsSearch(search: Record<string, unknown>): { view?: PluginsView } {
+  return search.view === 'installed' || search.view === 'browse' ? { view: search.view } : {};
+}
+
 /** The project page's tab as it lives in the address; the overview is the default and is left out. */
 export interface ProjectSearch {
   tab?: ProjectTab | undefined;

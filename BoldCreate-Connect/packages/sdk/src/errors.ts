@@ -6,6 +6,19 @@ export function redact(text: string): string {
   return text.replace(KEY_PATTERN, '$1.[redacted]');
 }
 
+/**
+ * What a host can do about a code whose published message does not say. The API wording of a
+ * code never changes, so the advice lives here and is added to the message.
+ */
+const HINTS: Readonly<Record<string, string>> = {
+  oauth_client_not_configured:
+    "This plugin's server has no OAuth client and does not offer automatic registration. Add an auth config with its client ID and secret for the project, then connect again.",
+  oauth_registration_failed:
+    "The plugin's server refused automatic OAuth registration. Ask its owner to allow the redirect URL of this service, or add an auth config with a pre-registered client ID and secret.",
+  oauth_discovery_failed:
+    "The plugin's server did not publish usable OAuth settings. Check that its URL is reachable and supports OAuth with PKCE.",
+};
+
 export interface ConnectErrorInit {
   code: string;
   status: number;
@@ -17,9 +30,13 @@ export class ConnectError extends Error {
   readonly code: string;
   readonly status: number;
   readonly requestId: string | undefined;
+  /** What to do about it, for the codes that have advice; also part of `message`. */
+  readonly hint: string | undefined;
 
   constructor(message: string, init: ConnectErrorInit) {
-    super(redact(message));
+    const hint = HINTS[init.code];
+    super(redact(hint && !message.includes(hint) ? `${message} ${hint}` : message));
+    this.hint = hint;
     this.name = new.target.name;
     this.code = init.code;
     this.status = init.status;

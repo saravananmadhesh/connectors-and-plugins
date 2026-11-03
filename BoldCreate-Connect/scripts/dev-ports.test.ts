@@ -48,3 +48,11 @@ describe('localUrl', () => {
     expect(localUrl(3001, '')).toBe('http://localhost:3001');
   });
 });
+
+describe('pooler port', () => {
+  it('defaults to 6432 and can be moved', () => {
+    expect(devPorts({}).pooler).toBe(6432);
+    expect(devPorts({ PORT_POOLER: '6500' }).pooler).toBe(6500);
+    expect(devPorts({ PORT_POOLER: 'x' }).pooler).toBe(6432);
+  });
+});

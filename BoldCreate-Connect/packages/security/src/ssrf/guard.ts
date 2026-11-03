@@ -86,7 +86,9 @@ export function createSsrfGuard(options: SsrfGuardOptions): SsrfGuard {
     if (!exempt && answers.some((answer) => isBlockedAddress(answer))) {
       throw new SsrfError('url_not_allowed', 'blocked_address');
     }
-    const address = answers[0]!;
+    // One address is pinned for the connection. Prefer IPv4: a deployment without IPv6 routes would
+    // fail on an IPv6 answer that DNS happens to list first, though the host is reachable.
+    const address = answers.find((answer) => addressFamily(answer) === 4) ?? answers[0]!;
     return { address, family: addressFamily(address) };
   }
 

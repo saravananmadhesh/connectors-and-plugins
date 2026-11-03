@@ -637,6 +637,10 @@ export async function prepareOAuth(
     };
   } catch (error) {
     if (error instanceof OAuthError) {
+      // A server without dynamic registration is a setup gap the admin can close, not an outage.
+      if (error.code === 'oauth_registration_unsupported') {
+        throw appError('oauth_client_not_configured');
+      }
       throw appError(
         error.code === 'oauth_registration_failed'
           ? 'oauth_registration_failed'
@@ -708,6 +712,11 @@ export async function startAuthorization(
   const config = prepared.authConfig;
   const scopesSet = config ? config.scopes : (server?.oauthScopes ?? null);
   await db.transaction(async (tx) => {
+    // The state row hangs off the server row, which exists only once something has set it up.
+    await tx
+      .insert(mcpServerTable)
+      .values({ installationId, componentId, organizationId: orgId })
+      .onConflictDoNothing();
     if (config) {
       await tx
         .update(authConfigTable)

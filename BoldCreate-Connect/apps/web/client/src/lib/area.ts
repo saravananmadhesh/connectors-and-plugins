@@ -6,6 +6,13 @@ export type AreaKind = 'for-you' | 'platform';
 
 export const AREA_STORAGE_KEY = 'web-area';
 
+/** What each area holds, shown as a tooltip on its switcher button. */
+export const AREA_HINTS: Record<AreaKind, string> = {
+  'for-you':
+    'Plugins from the marketplace, installed for you or your organization, and API keys for your agents.',
+  platform: 'Projects: the apps you build on this platform, with their users, keys and sessions.',
+};
+
 export const AREA_LABELS: Record<AreaKind, string> = {
   'for-you': 'For You',
   platform: 'Platform',

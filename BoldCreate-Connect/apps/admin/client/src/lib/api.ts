@@ -15,6 +15,8 @@ import type {
   AdminErrorGroupsResponse,
   AdminErrorGroupStatusBody,
   AdminImpactResponse,
+  AdminLimitListResponse,
+  AdminLimitResponse,
   AdminObservabilityOverviewQuery,
   AdminObservabilityOverviewResponse,
   AdminObservabilityPurgeBody,
@@ -65,6 +67,7 @@ export type {
 
 export type {
   AdminAllowedEmailResponse,
+  AdminLimitResponse,
   AdminAuditEntry,
   AdminAuditListResponse,
   AdminAuditQuery,
@@ -288,6 +291,14 @@ export const adminApi = {
     request<void>('POST', `/api/v1/admin/allowed-emails/${encodeURIComponent(email)}/invite`),
   removeAllowedEmail: (email: string) =>
     request<void>('DELETE', `/api/v1/admin/allowed-emails/${encodeURIComponent(email)}`),
+  listLimits: () => request<AdminLimitListResponse>('GET', '/api/v1/admin/limits'),
+  setGlobalLimit: (key: string, body: { value: number; reason: string }) =>
+    request<AdminLimitResponse>('PUT', `/api/v1/admin/limits/${key}/global`, body),
+  resetGlobalLimit: (key: string, reason: string) =>
+    request<AdminLimitResponse>(
+      'DELETE',
+      `/api/v1/admin/limits/${key}/global?reason=${encodeURIComponent(reason)}`,
+    ),
   yankVersion: (id: string, force: boolean) =>
     request<AdminVersionDetailResponse>('POST', `/api/v1/admin/plugin-versions/${id}/yank`, {
       force,

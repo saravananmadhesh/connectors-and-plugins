@@ -108,6 +108,20 @@ export const pgwebAssets: Record<string, ToolAsset> = {
   },
 };
 
+export const PGBOUNCER_VERSION = '1.26.1';
+
+/**
+ * PgBouncer's own release has a Windows build (the project publishes no other binaries; Linux and
+ * macOS install pgbouncer and set `PGBOUNCER_BIN`). The archive holds one folder.
+ */
+export const pgbouncerAssets: Record<string, ToolAsset> = {
+  'win32-x64': {
+    url: `https://github.com/pgbouncer/pgbouncer/releases/download/pgbouncer_${PGBOUNCER_VERSION.replaceAll('.', '_')}/pgbouncer-${PGBOUNCER_VERSION}-windows-x86_64.zip`,
+    sha256: '5d3fa0bc9bd40f8845655f50a9bafd315db9e9ac51ee1a511393e9f60828b57b',
+    binary: `pgbouncer-${PGBOUNCER_VERSION}-windows-x86_64/pgbouncer.exe`,
+  },
+};
+
 export type FetchLike = (url: string) => Promise<{
   ok: boolean;
   status: number;

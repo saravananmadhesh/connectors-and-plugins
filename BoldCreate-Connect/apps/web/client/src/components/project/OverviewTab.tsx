@@ -1,12 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import {
+  ArrowRight,
+  CalendarDays,
+  KeyRound,
+  Settings,
+  TriangleAlert,
+  Users,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { projects } from '@/lib/api';
 import { useAbilities } from '@/lib/abilities';
-import { formatDate } from '@/lib/format';
 import { qk } from '@/lib/query-keys';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/EmptyState';
 import {
   Table,
   TableBody,
@@ -16,8 +25,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Section } from '@/components/Page';
+import { PageHeader } from '@/components/PageHeader';
+import { EditProjectButton } from './ProjectManageSection';
 import { ProjectStatusBadge } from './status';
-import { QueryFrame, type TabProps } from './shared';
+import { QueryFrame, RefreshButton, type TabProps } from './shared';
 
 const number = (value: number) => value.toLocaleString();
 const percent = (part: number, whole: number) =>
@@ -34,13 +45,71 @@ const day = (date: string) =>
     day: 'numeric',
   });
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <Card className="p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-2xl font-semibold tabular-nums">{value}</p>
-      {hint && <p className="mt-0.5 truncate text-xs text-muted-foreground">{hint}</p>}
+interface StatProps {
+  label: string;
+  value: string;
+  hint?: string | undefined;
+  icon: LucideIcon;
+  /** The tab this tile opens; a tile without one is only a figure. */
+  tab?: string;
+  orgId: string;
+  projectId: string;
+}
+
+/** A figure with an icon, shaped like the tiles of the organization overview. */
+function Stat({ label, value, hint, icon: Icon, tab, orgId, projectId }: StatProps) {
+  const tile = (
+    <Card
+      className={
+        tab
+          ? 'flex h-full items-center gap-3 p-4 transition-colors hover:bg-muted/50'
+          : 'flex h-full items-center gap-3 p-4'
+      }
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+        <Icon aria-hidden="true" className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-2xl leading-none font-semibold tabular-nums">{value}</span>
+        <span className="mt-1 block truncate text-sm font-medium">{label}</span>
+        {hint && <span className="block truncate text-xs text-muted-foreground">{hint}</span>}
+      </span>
+      {tab && <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />}
     </Card>
+  );
+  return tab ? (
+    <Link
+      to="/orgs/$orgId/projects/$projectId/$tab"
+      params={{ orgId, projectId, tab }}
+      className="rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {tile}
+    </Link>
+  ) : (
+    tile
+  );
+}
+
+/** A one-line prompt for a step still to do; its link is the action. */
+function Nudge({
+  text,
+  hint,
+  children,
+}: {
+  text: string;
+  hint: string;
+  children: React.ReactElement;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border bg-card px-3 py-2">
+      <p className="min-w-0 text-sm">
+        <span className="font-medium">{text}</span>
+        <span className="text-muted-foreground"> · {hint}</span>
+      </p>
+      <Button asChild size="sm" variant="outline" className="h-7">
+        {children}
+      </Button>
+    </div>
   );
 }
 
@@ -68,66 +137,59 @@ export function OverviewTab({
   // Newest first: what happened lately is what a reader looks for.
   const recent = [...days].sort((a, b) => b.date.localeCompare(a.date));
   const topCalls = (data?.topUsers ?? []).reduce((sum, user) => sum + user.toolCalls, 0);
-
-  const details: { label: string; value: React.ReactNode }[] = project.data
-    ? [
-        { label: 'Status', value: <ProjectStatusBadge status={project.data.status} /> },
-        { label: 'Active keys', value: number(project.data.activeKeyCount) },
-        {
-          label: 'Return addresses',
-          value:
-            project.data.returnOrigins.length === 0 ? (
-              'None'
-            ) : (
-              <span className="flex flex-col items-end gap-0.5 font-mono text-xs break-all">
-                {project.data.returnOrigins.map((origin) => (
-                  <span key={origin}>{origin}</span>
-                ))}
-              </span>
-            ),
-        },
-        { label: 'Created', value: formatDate(project.data.createdAt) },
-        { label: 'Updated', value: formatDate(project.data.updatedAt) },
-      ]
-    : [];
+  const needsKey = can('project-key:create') && activeKeyCount === 0;
+  const needsReturn =
+    can('project:update') && project.data !== undefined && project.data.returnOrigins.length === 0;
 
   return (
     <div className="space-y-8">
-      {can('project-key:create') && activeKeyCount === 0 && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <div>
-            <p className="text-sm font-medium">Connect your product</p>
-            <p className="text-xs text-muted-foreground">
-              Create a key for this project to call it from your backend.
-            </p>
-          </div>
-          <Button asChild size="sm">
+      <PageHeader
+        title={project.data?.name ?? 'Project'}
+        description="The project at a glance: how much it is used and by whom."
+      >
+        {project.data && project.data.status !== 'active' && (
+          <ProjectStatusBadge status={project.data.status} />
+        )}
+        {project.data && <EditProjectButton orgId={orgId} project={project.data} />}
+        {can('project-webhook:read') && (
+          <Button asChild variant="outline" size="sm">
             <Link
-              to="/orgs/$orgId/projects/$projectId"
-              params={{ orgId, projectId }}
-              search={{ tab: 'keys' }}
+              to="/orgs/$orgId/projects/$projectId/$tab"
+              params={{ orgId, projectId, tab: 'settings' }}
             >
-              Create key
+              <Settings />
+              Settings
             </Link>
           </Button>
-        </Card>
-      )}
-      <Section title="Details" description="What this project is and how it is set up.">
-        {project.data ? (
-          <Card>
-            <dl className="divide-y text-sm">
-              {details.map((row) => (
-                <div key={row.label} className="flex items-start justify-between gap-4 px-4 py-3">
-                  <dt className="text-muted-foreground">{row.label}</dt>
-                  <dd className="text-right">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </Card>
-        ) : (
-          <Skeleton className="h-40 w-full" role="status" aria-label="Loading details" />
         )}
-      </Section>
+        <RefreshButton orgId={orgId} projectId={projectId} />
+      </PageHeader>
+
+      {(needsKey || needsReturn) && (
+        <div className="space-y-2">
+          {needsKey && (
+            <Nudge text="Connect your product" hint="Create an API key for your backend.">
+              <Link
+                to="/orgs/$orgId/projects/$projectId"
+                params={{ orgId, projectId }}
+                search={{ tab: 'keys' }}
+              >
+                Create key
+              </Link>
+            </Nudge>
+          )}
+          {needsReturn && (
+            <Nudge text="Add a return address" hint="Where users return after signing in.">
+              <Link
+                to="/orgs/$orgId/projects/$projectId/$tab"
+                params={{ orgId, projectId, tab: 'settings' }}
+              >
+                Add in Settings
+              </Link>
+            </Nudge>
+          )}
+        </div>
+      )}
 
       <QueryFrame
         label="usage"
@@ -136,69 +198,56 @@ export function OverviewTab({
         onRetry={() => void usage.refetch()}
       >
         <div className="space-y-8">
-          <Section
-            title="Activity"
-            description={
-              days.length > 0
-                ? `The last ${number(days.length)} ${days.length === 1 ? 'day' : 'days'}.`
-                : 'No activity in this period yet.'
-            }
-          >
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat label="Calls" value={number(calls)} />
-              <Stat
-                label="Errors"
-                value={number(errors)}
-                hint={calls > 0 ? `${percent(errors, calls)} of calls` : undefined}
-              />
-              <Stat
-                label="Busiest day"
-                value={number(Math.max(0, ...days.map((entry) => entry.toolCalls)))}
-                hint="calls in one day"
-              />
-              <Stat label="Top users" value={number(data?.topUsers.length ?? 0)} />
-            </div>
-          </Section>
+          <section aria-label="Totals" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <Stat
+              orgId={orgId}
+              projectId={projectId}
+              icon={Zap}
+              label="Calls"
+              value={number(calls)}
+              hint={
+                days.length > 0
+                  ? `Last ${number(days.length)} ${days.length === 1 ? 'day' : 'days'}`
+                  : 'No activity in this period yet'
+              }
+            />
+            <Stat
+              orgId={orgId}
+              projectId={projectId}
+              icon={TriangleAlert}
+              label="Errors"
+              value={number(errors)}
+              hint={calls > 0 ? `${percent(errors, calls)} of calls` : undefined}
+            />
+            <Stat
+              orgId={orgId}
+              projectId={projectId}
+              icon={Users}
+              label="Top users"
+              value={number(data?.topUsers.length ?? 0)}
+              hint="Who made calls"
+              tab="users"
+            />
+            <Stat
+              orgId={orgId}
+              projectId={projectId}
+              icon={KeyRound}
+              label="Active API keys"
+              value={number(project.data?.activeKeyCount ?? activeKeyCount)}
+              hint="Used by your server"
+              tab={can('project-key:read') ? 'keys' : undefined}
+            />
+          </section>
 
           <div className="grid gap-8 lg:grid-cols-2">
-            <Section title="Per day" description="Newest first.">
-              {recent.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No activity in this period yet.</p>
-              ) : (
-                <Card className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Day</TableHead>
-                        <TableHead className="text-right">Active users</TableHead>
-                        <TableHead className="text-right">Calls</TableHead>
-                        <TableHead className="text-right">Errors</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {recent.map((entry) => (
-                        <TableRow key={entry.date}>
-                          <TableCell>{day(entry.date)}</TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {number(entry.activeUsers)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {number(entry.toolCalls)}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {number(entry.errors)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Card>
-              )}
-            </Section>
-
             <Section title="Top users" description="Who made the most calls.">
               {(data?.topUsers.length ?? 0) === 0 ? (
-                <p className="text-sm text-muted-foreground">No users have made calls yet.</p>
+                <EmptyState
+                  icon={Users}
+                  title="No top users yet"
+                  description="Users appear here once they make calls through this project."
+                  className="min-h-40 py-8"
+                />
               ) : (
                 <Card className="overflow-x-auto">
                   <Table>
@@ -224,6 +273,46 @@ export function OverviewTab({
                           </TableCell>
                           <TableCell className="text-right text-muted-foreground tabular-nums">
                             {percent(user.toolCalls, topCalls)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              )}
+            </Section>
+
+            <Section title="Per day" description="Activity by day, newest first.">
+              {recent.length === 0 ? (
+                <EmptyState
+                  icon={CalendarDays}
+                  title="No activity yet"
+                  description="Daily calls, errors and active users show here once your users start using this project."
+                  className="py-8"
+                />
+              ) : (
+                <Card className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Day</TableHead>
+                        <TableHead className="text-right">Active users</TableHead>
+                        <TableHead className="text-right">Calls</TableHead>
+                        <TableHead className="text-right">Errors</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recent.map((entry) => (
+                        <TableRow key={entry.date}>
+                          <TableCell>{day(entry.date)}</TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {number(entry.activeUsers)}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {number(entry.toolCalls)}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {number(entry.errors)}
                           </TableCell>
                         </TableRow>
                       ))}

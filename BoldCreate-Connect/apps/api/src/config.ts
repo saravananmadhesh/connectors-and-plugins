@@ -38,6 +38,24 @@ const ApiEnvSchema = BaseSchema.extend({
   /** Database login for role `app_api`. */
   DATABASE_URL: secret,
   DB_POOL_MAX: positive(10),
+  /** Seconds a verified project key is trusted without a database lookup; 0 turns the cache off. */
+  PROJECT_KEY_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).max(300).default(30),
+  /** Verified project keys kept in memory at once. */
+  PROJECT_KEY_CACHE_MAX: positive(5000),
+  /** Seconds a spare database connection is kept before it is closed. */
+  DB_POOL_IDLE_SECONDS: positive(60),
+  /** Seconds a call waits for a free database connection before it is refused with a 503. */
+  DB_POOL_WAIT_SECONDS: positive(5),
+  /** Database calls one pod runs at once; 0 uses the pool size. Callers beyond it wait in a queue. */
+  DB_MAX_CONCURRENCY: z.coerce.number().int().min(0).default(0),
+  /** Callers that may wait for the database at once; more are refused with a 503. */
+  DB_QUEUE_MAX_DEPTH: positive(100),
+  /** Seconds a caller waits in that queue before it is refused with a 503. */
+  DB_QUEUE_MAX_WAIT_SECONDS: positive(5),
+  /** Percent of the queue one organization may fill while another waits; 0 turns it off. */
+  DB_QUEUE_PROJECT_SHARE_PCT: z.coerce.number().int().min(0).max(100).default(25),
+  /** Milliseconds one statement may run; 0 for no limit. */
+  DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().min(0).default(15_000),
   ...workloadShape,
   ...httpServerShape,
   ...observabilityDbShape,
@@ -70,6 +88,8 @@ const ApiEnvSchema = BaseSchema.extend({
   IDEMPOTENCY_TTL_SECONDS: positive(86_400),
   /** Seconds a flag or kill switch may stay in the process-local cache. */
   FLAG_CACHE_TTL_SECONDS: positive(5),
+  /** Seconds adjustable limits are served from memory before they are read again. */
+  LIMIT_CACHE_TTL_SECONDS: positive(30),
   ...originShape(...ORIGIN_KEYS),
 })
   .superRefine((value, ctx) => {

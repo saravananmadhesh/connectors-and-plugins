@@ -81,6 +81,10 @@ export function CreateOrgDialog({ onClose }: { onClose: () => void }) {
                     field.handleChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
                   }
                 />
+                <p className="text-xs text-muted-foreground">
+                  The short name in this organization's address. Left empty, it is made from the
+                  name.
+                </p>
               </div>
             )}
           </form.Field>

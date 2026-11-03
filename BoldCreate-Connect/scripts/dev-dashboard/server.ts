@@ -13,6 +13,8 @@ import { cpus, freemem, loadavg, totalmem } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { devPorts, localUrl } from '../dev-ports.js';
+import { RUN_ID } from '../test-runner/history.js';
+import { createTestRunController } from './test-runs.js';
 
 // ── Service catalog ───────────────────────────────────────────────────────────
 
@@ -115,6 +117,14 @@ export function serviceCatalog(): ServiceEndpoint[] {
       host: 'localhost',
       port: ports.objectStoreUi,
       url: http(ports.objectStoreUi, '/files?path=/buckets/boldcreate-dev'),
+    },
+    {
+      id: 'pgbouncer',
+      name: 'PgBouncer',
+      category: 'Infrastructure',
+      description: `postgres://localhost:${ports.pooler}; pools the database connections of the api, gateway, worker and admin`,
+      host: 'localhost',
+      port: ports.pooler,
     },
     {
       id: 'postgres',
@@ -287,7 +297,26 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const validName = /^run-[a-zA-Z0-9-]+\.jsonl$/;
 const defaultDirectory = fileURLToPath(new URL('./logs/', import.meta.url));
 
-export function createDashboardServer(directory = defaultDirectory) {
+/** Reads a small JSON body; anything larger or malformed is refused. */
+async function readJsonBody(
+  request: AsyncIterable<Buffer | string>,
+  limit = 4096,
+): Promise<unknown> {
+  let size = 0;
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    const part = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+    size += part.length;
+    if (size > limit) throw new Error('body too large');
+    chunks.push(part);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null');
+}
+
+export function createDashboardServer(
+  directory = defaultDirectory,
+  tests = createTestRunController(),
+) {
   return createServer(async (request, response) => {
     const host = request.headers.host ?? '';
     if (
@@ -305,7 +334,7 @@ export function createDashboardServer(directory = defaultDirectory) {
     response.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     response.setHeader(
       'Content-Security-Policy',
-      "default-src 'none'; img-src data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
+      "default-src 'none'; img-src data:; font-src data:; frame-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
     );
     const path = request.url ?? '';
     if (request.method === 'DELETE' && path === '/api/files') {
@@ -337,8 +366,81 @@ export function createDashboardServer(directory = defaultDirectory) {
       }
       return;
     }
+    if (request.method === 'POST' && /^\/api\/tests\/runs\/[^/]+\/cancel$/.test(path)) {
+      // Stopping a run is as much a command as starting one: same origin and its own header.
+      if (
+        request.headers.origin !== `http://${host}` ||
+        request.headers['x-viewer-action'] !== 'cancel-test-run'
+      ) {
+        response.writeHead(403).end();
+        return;
+      }
+      let force = false;
+      try {
+        const body = (await readJsonBody(request)) as { force?: unknown } | null;
+        force = body?.force === true;
+      } catch {
+        response.writeHead(400).end(JSON.stringify({ error: 'Send {"force": true} or nothing.' }));
+        return;
+      }
+      const runId = path.split('/')[4] ?? '';
+      const result = force ? tests.forceStop(runId) : tests.cancel(runId);
+      response.setHeader('Content-Type', 'application/json');
+      response.writeHead(result.ok ? 202 : result.status).end(JSON.stringify(result));
+      return;
+    }
+    if (request.method === 'POST' && (path === '/api/tests/run' || path === '/api/tests/stop')) {
+      // Starting a run is a command on this machine: same origin, plus a header a page cannot add
+      // to a cross-site form post.
+      const action = path === '/api/tests/run' ? 'run-tests' : 'stop-tests';
+      if (
+        request.headers.origin !== `http://${host}` ||
+        request.headers['x-viewer-action'] !== action
+      ) {
+        response.writeHead(403).end();
+        return;
+      }
+      response.setHeader('Content-Type', 'application/json');
+      if (path === '/api/tests/stop') {
+        response.end(JSON.stringify({ stopped: tests.stop() }));
+        return;
+      }
+      let ids: unknown;
+      try {
+        const body = (await readJsonBody(request)) as { steps?: unknown } | null;
+        ids = body?.steps;
+      } catch {
+        response.writeHead(400).end(JSON.stringify({ error: 'Send {"steps": ["unit", ...]}.' }));
+        return;
+      }
+      if (!Array.isArray(ids) || !ids.every((id): id is string => typeof id === 'string')) {
+        response.writeHead(400).end(JSON.stringify({ error: 'Send {"steps": ["unit", ...]}.' }));
+        return;
+      }
+      const started = tests.start(ids);
+      response.writeHead(started.ok ? 202 : started.status).end(JSON.stringify(started));
+      return;
+    }
+    if (
+      request.method === 'DELETE' &&
+      (/^\/api\/tests\/runs\/[^/]+$/.test(path) || path === '/api/tests/runs')
+    ) {
+      // Deleting history is destructive: same origin and a header of its own, as for the logs.
+      const one = path !== '/api/tests/runs';
+      if (
+        request.headers.origin !== `http://${host}` ||
+        request.headers['x-viewer-action'] !== (one ? 'delete-test-run' : 'delete-test-runs')
+      ) {
+        response.writeHead(403).end();
+        return;
+      }
+      const result = one ? tests.remove(path.split('/')[4] ?? '') : tests.removeFinished();
+      response.setHeader('Content-Type', 'application/json');
+      response.writeHead(result.ok ? 200 : result.status).end(JSON.stringify(result));
+      return;
+    }
     if (request.method !== 'GET') {
-      response.writeHead(405, { Allow: 'GET, DELETE' }).end();
+      response.writeHead(405, { Allow: 'GET, POST, DELETE' }).end();
       return;
     }
     try {
@@ -350,12 +452,80 @@ export function createDashboardServer(directory = defaultDirectory) {
         } finally {
           await file.close();
         }
+      } else if (path.startsWith('/runs/') && RUN_ID.test(path.slice('/runs/'.length))) {
+        // One page for every run; the id in the address says which run it shows.
+        const file = await open(new URL('./run.html', import.meta.url), 'r');
+        try {
+          // The dashboard shows this page in a popup frame; only a page of this origin may.
+          response.setHeader('X-Frame-Options', 'SAMEORIGIN');
+          response.setHeader(
+            'Content-Security-Policy',
+            "default-src 'none'; img-src data:; font-src data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'self'; form-action 'none'",
+          );
+          response.setHeader('Content-Type', 'text/html; charset=utf-8');
+          response.end(await file.readFile());
+        } finally {
+          await file.close();
+        }
       } else if (path === '/api/services') {
         response.setHeader('Content-Type', 'application/json');
         response.end(JSON.stringify(await serviceStatuses()));
       } else if (path === '/api/system') {
         response.setHeader('Content-Type', 'application/json');
         response.end(JSON.stringify(await systemInfo(directory)));
+      } else if (/^\/api\/tests\/runs\/[^/?]+\/tests\/[^/?]+(\?.*)?$/.test(path)) {
+        const url = new URL(path, 'http://localhost');
+        const [, , , , runId, , stepId] = url.pathname.split('/');
+        const status = url.searchParams.get('status');
+        const page = tests.tests(runId ?? '', stepId ?? '', {
+          status:
+            status === 'passed' || status === 'failed' || status === 'skipped' ? status : 'all',
+          q: url.searchParams.get('q') ?? '',
+          offset: Number(url.searchParams.get('offset') ?? 0) || 0,
+          limit: Number(url.searchParams.get('limit') ?? 100) || 100,
+        });
+        if (page === undefined) {
+          response.writeHead(404).end();
+        } else {
+          response.setHeader('Content-Type', 'application/json');
+          response.end(JSON.stringify(page));
+        }
+      } else if (path === '/api/tests') {
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify(await tests.state()));
+      } else if (/^\/api\/tests\/runs\/[^/]+\/log\/[^/]+$/.test(path)) {
+        const [, , , , runId, , stepId] = path.split('/');
+        const log = await tests.log(runId ?? '', stepId ?? '');
+        if (log === undefined) {
+          response.writeHead(404).end();
+        } else {
+          response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          response.end(log);
+        }
+      } else if (/^\/api\/tests\/runs\/[^/]+\/report$/.test(path)) {
+        const report = await tests.report(path.split('/')[4] ?? '');
+        if (report === undefined) {
+          response.writeHead(404).end();
+        } else {
+          response.setHeader('Content-Type', 'text/html; charset=utf-8');
+          response.end(report);
+        }
+      } else if (/^\/api\/tests\/runs\/[^/]+$/.test(path)) {
+        const detail = tests.run(path.slice('/api/tests/runs/'.length));
+        if (detail === undefined) {
+          response.writeHead(404).end();
+        } else {
+          response.setHeader('Content-Type', 'application/json');
+          response.end(JSON.stringify(detail));
+        }
+      } else if (path === '/api/tests/report') {
+        const report = await tests.report();
+        if (report === undefined) {
+          response.writeHead(404).end();
+        } else {
+          response.setHeader('Content-Type', 'text/html; charset=utf-8');
+          response.end(report);
+        }
       } else if (path === '/api/scripts') {
         response.setHeader('Content-Type', 'application/json');
         response.end(JSON.stringify(await repoScripts()));

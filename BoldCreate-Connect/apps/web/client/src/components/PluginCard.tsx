@@ -13,6 +13,22 @@ const COUNT_LABELS: readonly { kind: ComponentKind; label: string }[] = [
   { kind: 'rule', label: 'Rules' },
 ];
 
+/** What a plugin customizes, as "Agents 2 · Skills 1"; nothing when it ships none of these. */
+export function PluginCounts({ counts }: { counts: PluginListItemResponse['componentCounts'] }) {
+  const shown = COUNT_LABELS.filter(({ kind }) => counts[kind] > 0);
+  if (shown.length === 0) return null;
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 text-xs leading-4 text-muted-foreground">
+      {shown.map(({ kind, label }, index) => (
+        <span key={kind}>
+          {index > 0 && <span aria-hidden="true">· </span>}
+          {label} <strong className="font-medium tabular-nums">{counts[kind]}</strong>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /** A marketplace card: logo, name and what the plugin customizes, with an install menu by scope. */
 export function PluginCard({
   plugin,
@@ -30,8 +46,6 @@ export function PluginCard({
   installed: boolean;
   onInstall: (scope: InstallScope) => void;
 }) {
-  const counts = COUNT_LABELS.filter(({ kind }) => plugin.componentCounts[kind] > 0);
-
   return (
     <article className="flex min-h-[66px] items-center gap-3 rounded-lg border bg-card p-3 transition-colors focus-within:ring-2 focus-within:ring-ring hover:bg-muted/40">
       <Link
@@ -46,19 +60,9 @@ export function PluginCard({
             <span className="truncate text-sm leading-5 font-medium">{plugin.displayName}</span>
             <PluginMarks verified={plugin.verified} featured={plugin.featured} />
           </span>
-          {counts.length > 0 && (
-            <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-4 text-muted-foreground">
-              {counts.map(({ kind, label }, index) => (
-                <span key={kind}>
-                  {index > 0 && <span aria-hidden="true">· </span>}
-                  {label}{' '}
-                  <strong className="font-medium tabular-nums">
-                    {plugin.componentCounts[kind]}
-                  </strong>
-                </span>
-              ))}
-            </span>
-          )}
+          <span className="mt-0.5">
+            <PluginCounts counts={plugin.componentCounts} />
+          </span>
         </span>
       </Link>
       {plugin.latestVersion && (

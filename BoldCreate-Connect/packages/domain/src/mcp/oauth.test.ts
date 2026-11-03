@@ -224,8 +224,16 @@ describe('registerClient', () => {
     expect(bodies).toHaveLength(1);
   });
 
+  it('names a missing registration endpoint as unsupported, without calling out', async () => {
+    const seen: { url: string }[] = [];
+    const { registrationEndpoint: _r, ...withoutEndpoint } = metadata;
+    await expect(
+      registerClient(routes({}, seen), withoutEndpoint, 'https://app/cb', 'App'),
+    ).rejects.toMatchObject({ code: 'oauth_registration_unsupported' });
+    expect(seen).toEqual([]);
+  });
+
   it.each([
-    ['no registration endpoint', (({ registrationEndpoint: _r, ...rest }) => rest)(metadata), {}],
     ['a refusal', metadata, { 'https://auth.example.com/register': ok({ error: 'x' }, 400) }],
     ['a reply without a client id', metadata, { 'https://auth.example.com/register': ok({}) }],
     ['a transport error', metadata, { 'https://auth.example.com/register': new Error('x') }],

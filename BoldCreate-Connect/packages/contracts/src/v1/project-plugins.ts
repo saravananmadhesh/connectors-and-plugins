@@ -1,6 +1,7 @@
 import * as z from 'zod/v4';
 import { IsoDateTimeSchema, PageSchema } from './common.js';
 import { IdInputSchema, IdSchema } from './ids.js';
+import { ComponentCountsSchema } from './marketplace.js';
 import { PutVariablesBodySchema, VariableStatusSchema } from './variables.js';
 
 /**
@@ -34,6 +35,9 @@ export const ProjectPluginResponseSchema = z.object({
   /** Present on the project's plugin list. */
   setup: ProjectPluginSetupSchema.optional(),
   servers: z.array(ProjectPluginServerSchema).optional(),
+  /** Present on the project's plugin list, so it can show each plugin with its logo and what it ships. */
+  logoUrl: z.string().nullable().optional(),
+  componentCounts: ComponentCountsSchema.optional(),
 });
 export type ProjectPluginResponse = z.infer<typeof ProjectPluginResponseSchema>;
 

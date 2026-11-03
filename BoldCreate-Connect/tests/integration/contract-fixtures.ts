@@ -519,6 +519,10 @@ const FIXED: Record<string, Fixture> = {
       headers: { ...workloadHeaders, 'x-caller-id': 'gateway' },
       body: JSON.stringify({ key: 'nope' }),
     }),
+  'gateway.limits': () =>
+    fetch(`${apiUrl}/v1/gateway/limits`, {
+      headers: { ...workloadHeaders, 'x-caller-id': 'gateway' },
+    }),
   'gateway.servers': async (seed) =>
     gatewayCall('/v1/gateway/servers', { key: await newGatewayKey(seed) }),
   'gateway.access': async (seed) =>

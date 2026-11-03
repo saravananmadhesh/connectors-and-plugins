@@ -57,7 +57,8 @@ export type TableName =
   | 'project_webhook_delivery'
   | 'error_group'
   | 'error_event'
-  | 'ops_event';
+  | 'ops_event'
+  | 'limit_setting';
 
 export type Privilege = 'select' | 'insert' | 'update' | 'delete';
 
@@ -170,6 +171,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     },
     error_event: { privileges: ['insert'] },
     ops_event: { privileges: ['insert'] },
+    limit_setting: READ,
   },
   worker: {
     user: {
@@ -276,6 +278,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
       privileges: ['select', 'insert', 'delete'],
       columns: { select: ['id', 'kind', 'occurred_at', 'detail'] },
     },
+    limit_setting: NONE,
   },
   admin: {
     user: NONE,
@@ -324,6 +327,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     error_group: FULL,
     error_event: { privileges: ['select', 'delete'] },
     ops_event: { privileges: ['select', 'insert', 'delete'] },
+    limit_setting: { privileges: ['select', 'insert', 'update', 'delete'] },
   },
   gateway: {
     // The key check of a session reads whether its project user is active and notes the sign-in.
@@ -404,6 +408,7 @@ export const ROLE_GRANTS: Record<RoleName, Record<TableName, TableGrant>> = {
     },
     error_event: { privileges: ['insert'] },
     ops_event: { privileges: ['insert'] },
+    limit_setting: NONE,
   },
 };
 
@@ -486,6 +491,7 @@ export const RLS_TABLES: Record<TableName, RlsEntry> = {
   error_group: { rls: 'none', reason: PLATFORM },
   error_event: { rls: 'none', reason: PLATFORM },
   ops_event: { rls: 'none', reason: PLATFORM },
+  limit_setting: { rls: 'none', reason: PLATFORM },
   project_webhook_delivery: {
     rls: 'tenant',
     maintenance: {

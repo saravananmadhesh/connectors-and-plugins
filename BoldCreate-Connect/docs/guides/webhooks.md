@@ -87,4 +87,4 @@ Each delivery shows its event id, type, status, number of attempts and the time 
 
 ## Refresh on an event, not on a timer
 
-A marketplace page that shows what a user has installed reads `GET /v1/project/user-plugins?userId=` instead of keeping a copy. Polling it counts against the project budget (3,000 a minute), so refresh when `user_plugin.*`, `connection.*` or `sync.reported` arrives for that user.
+A marketplace page that shows what a user has installed reads `GET /v1/project/user-plugins?userId=` instead of keeping a copy. Polling it counts against the project budget (5,000 a minute), so refresh when `user_plugin.*`, `connection.*` or `sync.reported` arrives for that user.

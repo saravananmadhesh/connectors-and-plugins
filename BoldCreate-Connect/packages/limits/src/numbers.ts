@@ -22,7 +22,7 @@ export const PROJECT_LIMITS = {
   installsPerProjectUser: 25,
   sessionsPerUser: 20,
   /** What a project's calls, by key and by session together, may make in one window. */
-  requestsPerMinutePerProject: 3_000,
+  requestsPerMinutePerProject: 5_000,
   requestWindowSeconds: 60,
   pluginsPerSession: 100,
   sessionToolPolicyEntries: 50,
@@ -30,7 +30,7 @@ export const PROJECT_LIMITS = {
   idempotencyWindowSeconds: 86_400,
   sessionLifetimeSecondsDefault: 2_592_000,
   sessionLifetimeSecondsMax: 31_536_000,
-  requestsPerMinutePerKey: 3_000,
+  requestsPerMinutePerKey: 5_000,
   /** The longest range one usage read covers, and how far back it reaches by default. */
   usageRangeDays: 92,
   /** Sends of one webhook event before it is given up. */

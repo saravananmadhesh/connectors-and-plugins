@@ -1,5 +1,6 @@
 export * from './schema/index.js';
 export * from './client.js';
+export * from './connection-budget.js';
 export * from './scope.js';
 export * from './cursor.js';
 export * from './outbox.js';
@@ -13,3 +14,4 @@ export * from './error-alerts.js';
 export * from './observability-retention.js';
 export * from './observability-store.js';
 export * from './service-observability.js';
+export * from './admission-gate.js';

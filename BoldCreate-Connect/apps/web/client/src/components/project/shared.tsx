@@ -1,10 +1,33 @@
 /** Small pieces every project tab uses: paging by cursor, a loading and error frame, messages. */
 import type { ReactNode } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip } from '@/components/ui/tooltip';
 import { messageOf } from './paging';
+
+/** Loads the tab again: everything this project has on screen is fetched anew. */
+export function RefreshButton({ orgId, projectId }: { orgId: string; projectId: string }) {
+  const qc = useQueryClient();
+  const fetching = useIsFetching({ queryKey: qk.project(orgId, projectId) }) > 0;
+  return (
+    <Tooltip label="Refresh">
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label="Refresh"
+        disabled={fetching}
+        onClick={() => void qc.invalidateQueries({ queryKey: qk.project(orgId, projectId) })}
+      >
+        <RefreshCw className={cn(fetching && 'animate-spin')} aria-hidden="true" />
+      </Button>
+    </Tooltip>
+  );
+}
 
 /** What every tab is given: the project it shows and whether the caller may change it. */
 export interface TabProps {

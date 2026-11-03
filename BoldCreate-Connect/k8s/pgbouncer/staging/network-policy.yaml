@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: boldcreate-pgbouncer-ingress-staging, namespace: boldcreate-stag }
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-pgbouncer-staging }
+  policyTypes: [Ingress]
+  ingress:
+    # Only the services that use the database. The web app and the migration job do not.
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-api-staging }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-gateway-staging }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-worker-staging }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-integrations-admin-staging }
+      ports: [{ protocol: TCP, port: 6432 }]

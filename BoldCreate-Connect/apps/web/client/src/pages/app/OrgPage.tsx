@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
   ArrowRight,
@@ -19,10 +19,14 @@ import { qk } from '@/lib/query-keys';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteResourceDialog } from '@/components/delete-resource-dialog';
 import { Page, Section } from '@/components/Page';
 import { PageHeader } from '@/components/PageHeader';
+import { messageOf } from '@/components/project/paging';
 
 const ROLE_NAMES: Record<string, string> = PUBLIC_ROLE_LABELS;
 
@@ -64,7 +68,66 @@ function StatTile({ stat }: { stat: Stat }) {
   );
 }
 
-const allowed = (value: boolean) => (value ? 'Allowed' : 'Not allowed');
+/** Renames the organization; its slug and address stay as they are. */
+function EditOrgDialog({
+  orgId,
+  name: current,
+  onClose,
+}: {
+  orgId: string;
+  name: string;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const [name, setName] = useState(current);
+  const [error, setError] = useState('');
+  const mutation = useMutation({
+    mutationFn: () => orgs.update(orgId, { name: name.trim() }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: qk.org(orgId) });
+      void qc.invalidateQueries({ queryKey: qk.me() });
+      onClose();
+    },
+    onError: (err) => setError(messageOf(err)),
+  });
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogTitle>Edit organization</DialogTitle>
+        <form
+          className="mt-4 space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setError('');
+            mutation.mutate();
+          }}
+        >
+          {error && <Alert variant="destructive">{error}</Alert>}
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-org-name">Name</Label>
+            <Input
+              id="edit-org-name"
+              value={name}
+              maxLength={60}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={name.trim() === '' || name.trim() === current || mutation.isPending}
+            >
+              Save changes
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 /** The organization at a glance: totals, how its people split by role, and its details and rules. */
 export function OrgPage() {
@@ -72,6 +135,7 @@ export function OrgPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [showDelete, setShowDelete] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const meQuery = useQuery({ queryKey: qk.me(), queryFn: auth.me });
   const orgQuery = useQuery({ queryKey: qk.org(orgId), queryFn: () => orgs.get(orgId) });
@@ -95,6 +159,7 @@ export function OrgPage() {
   const myRole =
     orgMe?.role ?? meQuery.data?.memberships.find((m) => m.organizationId === orgId)?.role;
   const canDelete = can('org:delete');
+  const canEdit = can('org:update');
   const canConfigure = can('org-policy:update');
 
   if (orgQuery.isLoading) {
@@ -110,7 +175,6 @@ export function OrgPage() {
   const members = membersQuery.data?.items;
   const active = members?.filter((member) => member.status === 'active');
   const suspended = (members?.length ?? 0) - (active?.length ?? 0);
-  const policy = orgMe?.policy;
   const stats: Stat[] = [
     {
       label: 'Projects',
@@ -141,32 +205,34 @@ export function OrgPage() {
       to: `/orgs/${orgId}/installed`,
     },
   ];
-  const details: { label: string; value: string; mono?: boolean }[] = [
-    { label: 'Slug', value: `/${org?.slug ?? ''}`, mono: true },
-    { label: 'Your role', value: myRole ? (ROLE_NAMES[myRole] ?? myRole) : '–' },
-    { label: 'Created', value: org ? formatDate(org.createdAt) : '–' },
-    { label: 'Updated', value: org ? formatDate(org.updatedAt) : '–' },
-    ...(policy
-      ? [
-          { label: 'Personal plugin installs', value: allowed(policy.allowPersonalInstalls) },
-          { label: 'Personal API keys', value: allowed(policy.allowPersonalApiKeys) },
-          {
-            label: 'Longest key lifetime',
-            value: policy.maxPersonalKeyExpiryDays
-              ? `${policy.maxPersonalKeyExpiryDays} days`
-              : 'No limit',
-          },
-        ]
-      : []),
-  ];
 
   return (
     <Page className="space-y-8">
       <PageHeader
         title={org?.name ?? 'Organization'}
-        description="The organization at a glance: its people, projects and rules."
+        description="The organization at a glance: its people and projects."
+        meta={
+          org && (
+            <>
+              <span className="font-mono">/{org.slug}</span>
+              {myRole && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>Your role: {ROLE_NAMES[myRole] ?? myRole}</span>
+                </>
+              )}
+              <span aria-hidden="true">·</span>
+              <span>Created {formatDate(org.createdAt)}</span>
+            </>
+          )
+        }
       >
         <div className="flex gap-2">
+          {canEdit && org && (
+            <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
+              Edit
+            </Button>
+          )}
           <Button asChild variant="outline" size="sm">
             <Link to="/orgs/$orgId/members" params={{ orgId }}>
               <Users />
@@ -190,7 +256,7 @@ export function OrgPage() {
         ))}
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div>
         <Section
           title="Members by role"
           description="How the people of this organization are split."
@@ -231,19 +297,6 @@ export function OrgPage() {
             )}
           </Card>
         </Section>
-
-        <Section title="Details" description="Who this organization is and the rules it sets.">
-          <Card>
-            <dl className="divide-y text-sm">
-              {details.map((row) => (
-                <div key={row.label} className="flex justify-between gap-4 px-4 py-3">
-                  <dt className="text-muted-foreground">{row.label}</dt>
-                  <dd className={row.mono ? 'font-mono break-all' : 'text-right'}>{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </Card>
-        </Section>
       </div>
 
       {canDelete && org && (
@@ -259,6 +312,10 @@ export function OrgPage() {
             </Button>
           </Alert>
         </Section>
+      )}
+
+      {showEdit && canEdit && org && (
+        <EditOrgDialog orgId={orgId} name={org.name} onClose={() => setShowEdit(false)} />
       )}
 
       {showDelete && canDelete && org && (

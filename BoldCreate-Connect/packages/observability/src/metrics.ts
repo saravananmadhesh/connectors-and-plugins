@@ -33,6 +33,10 @@ export interface Metrics {
   readonly registry: Registry;
   /** Records one finished HTTP request. `route` is the route template, never a concrete URL. */
   recordRequest(input: { method: string; route: string; status: number; seconds: number }): void;
+  /** Counts one request a pod refused to take on; `reason` is a small fixed set. */
+  recordShed(reason: string): void;
+  /** Reports the database admission queue on each scrape; `read` must be cheap and never throw. */
+  observeAdmission(read: () => { active: number; waiting: number }): void;
   requestStarted(): void;
   requestFinished(): void;
   /** Prometheus text exposition. */
@@ -69,6 +73,19 @@ export function createMetrics(options: CreateMetricsOptions): Metrics {
     name: name('httpRequests'),
     help: 'HTTP requests handled',
     labelNames: httpLabels,
+    registers: [registry],
+  });
+  // Route template only: no project, key or organization label, so the series count stays bounded.
+  const rateLimited = new Counter({
+    name: name('rateLimited'),
+    help: 'Requests refused with 429 by route template',
+    labelNames: ['route'],
+    registers: [registry],
+  });
+  const shed = new Counter({
+    name: name('loadShed'),
+    help: 'Requests refused by pod load shedding, by reason',
+    labelNames: ['reason'],
     registers: [registry],
   });
   const inflight = new Gauge({
@@ -139,6 +156,26 @@ export function createMetrics(options: CreateMetricsOptions): Metrics {
       const labels = { method, route, status_class: statusClass(status) };
       duration.observe(labels, seconds);
       requests.inc(labels);
+      if (status === 429) rateLimited.inc({ route });
+    },
+    recordShed: (reason) => shed.inc({ reason }),
+    observeAdmission(read) {
+      new Gauge({
+        name: name('dbQueueDepth'),
+        help: 'Callers waiting for a database slot on this pod',
+        registers: [registry],
+        collect() {
+          this.set(read().waiting);
+        },
+      });
+      new Gauge({
+        name: name('dbAdmittedActive'),
+        help: 'Callers holding a database slot on this pod',
+        registers: [registry],
+        collect() {
+          this.set(read().active);
+        },
+      });
     },
     requestStarted: () => inflight.inc(),
     requestFinished: () => inflight.dec(),

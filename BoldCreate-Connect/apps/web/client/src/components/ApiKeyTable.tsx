@@ -1,3 +1,4 @@
+import { InfoHint } from '@/components/InfoHint';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import type { ApiKeyResponse } from '@/lib/api';
 import { activeKeys } from '@/lib/active-keys';
@@ -44,7 +45,12 @@ export function ApiKeyTable({
           <TableRow className="hover:bg-transparent">
             <TableHead>Name</TableHead>
             <TableHead>Key</TableHead>
-            <TableHead>Permissions</TableHead>
+            <TableHead>
+              <span className="inline-flex items-center gap-1.5">
+                Permissions
+                <InfoHint about="permissions">What this key may do through the gateway.</InfoHint>
+              </span>
+            </TableHead>
             <TableHead>Expires</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="w-12">

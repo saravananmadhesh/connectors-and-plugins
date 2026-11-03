@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: boldcreate-pgbouncer-preproduction, namespace: boldcreate-preprod }
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  # No surge: an extra replica would open a second set of server connections for each role.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 0, maxUnavailable: 1 }
+  selector:
+    matchLabels: { app.kubernetes.io/name: boldcreate-pgbouncer-preproduction }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: boldcreate-pgbouncer-preproduction }
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app.kubernetes.io/name: boldcreate-pgbouncer-preproduction }
+      containers:
+        - name: pgbouncer
+          # Mirror the 1.26.1 build into this registry before the first rollout.
+          image: us-central1-docker.pkg.dev/codestudio-dev/synccodestudio/pgbouncer:1.26.1
+          imagePullPolicy: IfNotPresent
+          args: ['/etc/pgbouncer/pgbouncer.ini']
+          ports: [{ name: pg, containerPort: 6432 }]
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: '1', memory: 256Mi }
+          startupProbe:
+            tcpSocket: { port: pg }
+            periodSeconds: 2
+            failureThreshold: 15
+          readinessProbe:
+            tcpSocket: { port: pg }
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket: { port: pg }
+            periodSeconds: 10
+            failureThreshold: 6
+          lifecycle:
+            # Let clients finish their transaction, then stop taking new ones.
+            preStop: { exec: { command: ['sleep', '5'] } }
+          volumeMounts:
+            - {
+                name: config,
+                mountPath: /etc/pgbouncer/pgbouncer.ini,
+                subPath: pgbouncer.ini,
+                readOnly: true,
+              }
+            - { name: auth, mountPath: /etc/pgbouncer/auth, readOnly: true }
+            - { name: tls, mountPath: /etc/pgbouncer/tls, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+      volumes:
+        - name: config
+          configMap: { name: boldcreate-pgbouncer-config-preproduction }
+        - name: auth
+          secret: { secretName: boldcreate-pgbouncer-auth-preproduction }
+        - name: tls
+          secret: { secretName: boldcreate-pgbouncer-tls-preproduction }
+        - name: tmp
+          emptyDir: {}

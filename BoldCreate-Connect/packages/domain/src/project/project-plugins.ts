@@ -16,6 +16,7 @@ import {
   installationTable,
   installationVariableTable,
   mcpServerTable,
+  pluginSourceTable,
   pluginTable,
   pluginVersionTable,
   projectTable,
@@ -34,6 +35,7 @@ import { writeAudit, type AuditEntry } from '../audit/write-audit.js';
 import { conflict, isUniqueViolation, limitExceeded, notFound } from '../errors.js';
 import { writeVariables } from '../installation/variables.js';
 import { scanOf } from '../marketplace/admin-plugins.js';
+import { logoUrl } from '../ingestion/logo.js';
 import type { ProjectScope } from './project-users.js';
 import { revokeSessionsForPlugin } from './sessions.js';
 
@@ -99,7 +101,7 @@ async function withSetup(
     .innerJoin(pluginVersionTable, eq(pluginVersionTable.id, installationTable.pluginVersionId))
     .where(and(projectInstalls(project), inArray(installationTable.pluginId, pluginIds)));
   const installIds = installs.map((install) => install.id);
-  const [servers, defaults, stored] = await Promise.all([
+  const [servers, defaults, stored, shown] = await Promise.all([
     tx
       .select({
         installationId: installationComponentTable.installationId,
@@ -138,7 +140,18 @@ async function withSetup(
       })
       .from(installationVariableTable)
       .where(inArray(installationVariableTable.installationId, installIds)),
+    tx
+      .select({
+        id: pluginTable.id,
+        owner: pluginSourceTable.owner,
+        repository: pluginSourceTable.repository,
+        path: pluginSourceTable.path,
+      })
+      .from(pluginTable)
+      .leftJoin(pluginSourceTable, eq(pluginSourceTable.id, pluginTable.sourceId))
+      .where(inArray(pluginTable.id, pluginIds)),
   ]);
+  const shownOf = new Map(shown.map((row) => [row.id, row]));
   const installOf = new Map(installs.map((install) => [install.pluginId, install]));
   return items.map((item) => {
     const install = installOf.get(item.pluginId);
@@ -170,7 +183,24 @@ async function withSetup(
           : own.some((server) => server.defaultAuthConfigId !== null) || have.size > 0
             ? 'ready'
             : 'no_sign_in';
-    return { ...item, servers: own, setup: { status, missing } } as PluginView;
+    const about = shownOf.get(item.pluginId);
+    const counts = { agent: 0, skill: 0, mcp: 0, hook: 0, rule: 0 };
+    for (const component of scanOf(install.version)?.components ?? []) counts[component.kind] += 1;
+    return {
+      ...item,
+      servers: own,
+      setup: { status, missing },
+      logoUrl:
+        about?.owner && about.repository
+          ? logoUrl(
+              { owner: about.owner, repository: about.repository },
+              install.version.commitSha,
+              about.path ?? '',
+              (install.version.manifest as { logo?: unknown } | null)?.logo,
+            )
+          : null,
+      componentCounts: counts,
+    } as PluginView;
   });
 }
 

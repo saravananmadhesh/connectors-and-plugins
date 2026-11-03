@@ -6,7 +6,7 @@ export const INSTALLED_TABS: readonly { value: InstalledTab; label: string }[] =
   { value: 'plugins', label: 'Plugins' },
   { value: 'agent', label: 'Agents' },
   { value: 'skill', label: 'Skills' },
-  { value: 'mcp', label: 'MCPs' },
+  { value: 'mcp', label: 'MCP servers' },
   { value: 'hook', label: 'Hooks' },
   { value: 'rule', label: 'Rules' },
 ];

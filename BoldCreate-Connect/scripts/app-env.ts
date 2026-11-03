@@ -4,6 +4,7 @@
  * process is stripped of every generated secret and of the database URL.
  */
 import { DEV_SECRET_NAMES } from './dev-secrets.js';
+import { pooledDatabaseUrl } from './pgbouncer-config.js';
 
 export type AppName = 'web' | 'admin' | 'api' | 'gateway' | 'worker';
 
@@ -43,6 +44,8 @@ export interface AppEnvContext {
    * login), which the base environment passes through.
    */
   cloudKmsKeyName?: string | undefined;
+  /** When set, the apps reach the database through the pooler on this port. */
+  pooler?: { port: number } | undefined;
   /** Non-secret values that replace the defaults, for example fixture hosts in tests. */
   overrides?: Partial<Record<AppName, Record<string, string>>>;
 }
@@ -81,7 +84,12 @@ export function appEnv(app: AppName, ctx: AppEnvContext): Record<string, string>
     if (value === undefined) throw new Error(`missing generated secret ${name}`);
     return value;
   };
-  const databaseUrl = (role: string) => roleDatabaseUrl(ctx.databaseUrl, role, secrets);
+  const databaseUrl = (role: string) =>
+    roleDatabaseUrl(
+      ctx.pooler ? pooledDatabaseUrl(ctx.databaseUrl, ctx.pooler.port) : ctx.databaseUrl,
+      role,
+      secrets,
+    );
   const common = { NODE_ENV: 'development', DEPLOY_ENV: ctx.deployEnv };
   const kms: Record<string, string> = ctx.cloudKmsKeyName
     ? { KMS_ADAPTER: 'cloud-kms', KMS_CLOUD_KEY_NAME: ctx.cloudKmsKeyName }
