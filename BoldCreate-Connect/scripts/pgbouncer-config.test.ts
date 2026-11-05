@@ -9,6 +9,7 @@ import {
   userlist,
   userlistLine,
 } from './pgbouncer-config.js';
+import { localPoolSizes } from './pgbouncer-native.js';
 
 const base = {
   dbHost: '127.0.0.1',
@@ -121,5 +122,13 @@ describe('the pinned Windows release', () => {
     expect(asset?.url).toContain(`pgbouncer-${PGBOUNCER_VERSION}-windows-x86_64.zip`);
     expect(asset?.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(asset?.binary.endsWith('pgbouncer.exe')).toBe(true);
+  });
+});
+
+describe('localPoolSizes', () => {
+  it('keeps the default pools without DB_VCPU and follows the database size with it', () => {
+    expect(localPoolSizes({})).toEqual(LOCAL_POOL_SIZES);
+    expect(localPoolSizes({ DB_VCPU: '1' })).toEqual({ api: 6, gateway: 1, worker: 2, admin: 1 });
+    expect(localPoolSizes({ DB_VCPU: '2' })).toEqual({ api: 8, gateway: 1, worker: 3, admin: 1 });
   });
 });
