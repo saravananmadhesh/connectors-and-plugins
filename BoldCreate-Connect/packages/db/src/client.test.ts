@@ -1,9 +1,14 @@
+import { EventEmitter } from 'node:events';
 import pg from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import { createAdmissionGate } from './admission-gate.js';
 import { createDb, isRoleSaturated, resolveSsl } from './client.js';
 
 const TLS = { rejectUnauthorized: false };
+
+/** A stand-in for a pooled connection: an event emitter with the pool's `release`. */
+const fakeClient = (release: () => void = vi.fn<() => void>()) =>
+  Object.assign(new EventEmitter(), { release });
 
 describe('resolveSsl', () => {
   it('uses TLS for a remote host and none for a local one', () => {
@@ -53,6 +58,14 @@ describe('createDb pool errors', () => {
     expect(() => pool.emit('error', new Error('reset'))).not.toThrow();
     await pool.end();
   });
+
+  it('survives a connection that drops while a caller holds it', async () => {
+    const { pool } = createDb({ databaseUrl: 'postgres://u:p@127.0.0.1:1/app' });
+    const held = new EventEmitter();
+    pool.emit('connect', held);
+    expect(() => held.emit('error', new Error('Connection terminated unexpectedly'))).not.toThrow();
+    await pool.end();
+  });
 });
 
 describe('createDb admission', () => {
@@ -60,13 +73,31 @@ describe('createDb admission', () => {
     const admission = createAdmissionGate({ maxConcurrency: 1, maxDepth: 0, maxWaitMs: 100 });
     const { pool } = createDb({ databaseUrl: 'postgres://u:p@127.0.0.1:1/app', admission });
     const release = vi.fn<() => void>();
-    const client = { release };
+    const client = fakeClient(release);
     const base = vi.spyOn(pg.Pool.prototype, 'connect').mockResolvedValue(client as never);
     const held = await pool.connect();
     expect(admission.stats().active).toBe(1);
-    await expect(pool.connect()).rejects.toThrow('too many connections');
+    await expect(pool.connect()).rejects.toThrow('database admission queue');
     held.release();
     expect(admission.stats().active).toBe(0);
+    expect(release).toHaveBeenCalledTimes(1);
+    base.mockRestore();
+    await pool.end();
+  });
+
+  it('hands back a held connection that drops, even when the caller never releases it', async () => {
+    const admission = createAdmissionGate({ maxConcurrency: 1, maxDepth: 0, maxWaitMs: 100 });
+    const { pool } = createDb({ databaseUrl: 'postgres://u:p@127.0.0.1:1/app', admission });
+    const release = vi.fn<(error?: unknown) => void>();
+    const client = fakeClient(release);
+    const base = vi.spyOn(pg.Pool.prototype, 'connect').mockResolvedValue(client as never);
+    const held = await pool.connect();
+    expect(admission.stats().active).toBe(1);
+    const drop = new Error('Connection terminated unexpectedly');
+    client.emit('error', drop);
+    expect(admission.stats().active).toBe(0);
+    expect(release).toHaveBeenCalledWith(drop);
+    held.release();
     expect(release).toHaveBeenCalledTimes(1);
     base.mockRestore();
     await pool.end();
@@ -88,7 +119,9 @@ describe('createDb admission with the callback form', () => {
     const admission = createAdmissionGate({ maxConcurrency: 1, maxDepth: 0, maxWaitMs: 100 });
     const { pool } = createDb({ databaseUrl: 'postgres://u:p@127.0.0.1:1/app', admission });
     const release = vi.fn<() => void>();
-    const base = vi.spyOn(pg.Pool.prototype, 'connect').mockResolvedValue({ release } as never);
+    const base = vi
+      .spyOn(pg.Pool.prototype, 'connect')
+      .mockResolvedValue(fakeClient(release) as never);
     const seen = await new Promise<{ error: Error | undefined; done: (r?: unknown) => void }>(
       (resolve) => {
         (pool.connect as (cb: unknown) => void)(
@@ -112,7 +145,7 @@ describe('createDb admission with the callback form', () => {
     const error = await new Promise<Error | undefined>((resolve) => {
       (pool.connect as (cb: unknown) => void)((err: Error | undefined) => resolve(err));
     });
-    expect(error?.message).toContain('too many connections');
+    expect(error?.message).toContain('database admission queue');
     await pool.end();
   });
 
@@ -126,9 +159,7 @@ describe('createDb admission with the callback form', () => {
       admission,
       admissionOwner: () => 'org-1',
     });
-    const base = vi.spyOn(pg.Pool.prototype, 'connect').mockResolvedValue({
-      release: vi.fn<() => void>(),
-    } as never);
+    const base = vi.spyOn(pg.Pool.prototype, 'connect').mockResolvedValue(fakeClient() as never);
     (await pool.connect()).release();
     expect(seen).toEqual(['org-1']);
     base.mockRestore();
@@ -144,7 +175,7 @@ describe('createDb queueing', () => {
       databaseUrl: 'postgres://u:p@127.0.0.1:1/app',
       connectionTimeoutMs: 2000,
     });
-    const client = { release: vi.fn<() => void>() };
+    const client = fakeClient();
     const base = vi
       .spyOn(pg.Pool.prototype, 'connect')
       .mockRejectedValueOnce(saturated())

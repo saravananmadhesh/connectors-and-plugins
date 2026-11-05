@@ -103,19 +103,19 @@ These are defined but not yet connected to a monitoring system, and have not bee
 
 ## Database connections and PgBouncer
 
-The database allows 100 connections. Role limits come from `DB_VCPU` (1 vCPU gives api 8, gateway 3, worker 4, admin 3 and migrator 5, with 10 kept free). The manifests are in `k8s/pgbouncer/<environment>/`, and `packages/db/src/pgbouncer-manifest.test.ts` fails if a pool, a replica count or a role limit would overflow the database.
+The database allows 100 connections. Role limits come from `DB_VCPU` (1 vCPU gives api 8, gateway 3, worker 4, admin 3 and migrator 5, with 10 kept free; 2 vCPU gives api 10, gateway 3, worker 5, admin 3). Staging has 2 vCPU and its pools are sized for that; preproduction and production are sized for 1 vCPU. The manifests are in `k8s/pgbouncer/<environment>/`, and `packages/db/src/pgbouncer-manifest.test.ts` fails if a pool, a replica count or a role limit would overflow the database.
 
 Cut over one environment at a time, in this order. Do not run the migration job with `DB_VCPU` before step 4: the new limits are lower than what the pods use today.
 
 1. Mirror PgBouncer 1.26.1 into the registry and set `PgBouncerDbHost` in the pipeline.
 2. Create the secrets `boldcreate-pgbouncer-auth-<env>` (a `userlist.txt` of SCRAM verifiers for the four roles) and `boldcreate-pgbouncer-tls-<env>`.
 3. Apply `k8s/pgbouncer/<env>`, then point `DATABASE_URL` of the api, then of the worker, admin and gateway, at `boldcreate-pgbouncer-<env>:6432`.
-4. Run the migration job with `DB_VCPU` and `DB_POOLED=1` set. It lowers the role limits and stores `statement_timeout` and `idle_in_transaction_session_timeout` on the roles.
+4. Lower the role limits to the pool plus 2. The k8s migration job only runs the SQL files: it does not read `DB_VCPU` or `DB_POOLED`, and `pnpm db:migrate` keeps its own migration history, so do not point that at a deployed database. Set the limits as the database owner instead, for example at 2 vCPU: `ALTER ROLE app_api CONNECTION LIMIT 10; ALTER ROLE app_gateway CONNECTION LIMIT 3; ALTER ROLE app_worker CONNECTION LIMIT 5; ALTER ROLE app_admin CONNECTION LIMIT 3;` (1 vCPU: 8, 3, 4, 3). The time limits need no step: the services send them and PgBouncer passes them on.
 5. Check `SELECT rolname, rolconnlimit FROM pg_roles WHERE rolname LIKE 'app_%'`, and that no `53300` error appears while the pods scale.
 
 ### The pooler on your machine
 
-`pnpm dev` starts PgBouncer after the database and the roles exist, and gives the api, gateway, worker and admin a `DATABASE_URL` that points at it (`127.0.0.1:6432`, or `PORT_POOLER`), as they have when deployed. Migrations, the data browsers and the test runner still use the database directly. On the first run it downloads the PgBouncer 1.26.1 Windows release from the PgBouncer project, checked against a pinned sha256. It uses the same settings as `k8s/pgbouncer` (transaction mode, one pool per role, the same ignored startup parameters; no TLS, because the local database has none). Logs and the generated files are in `.cache/dev/pgbouncer`, and `pnpm dev` stops it on exit.
+`pnpm dev` starts PgBouncer after the database and the roles exist, and gives the api, gateway, worker and admin a `DATABASE_URL` that points at it (`127.0.0.1:6432`, or `PORT_POOLER`), as they have when deployed. Migrations, the data browsers and the test runner still use the database directly. On the first run it downloads the PgBouncer 1.26.1 Windows release from the PgBouncer project, checked against a pinned sha256. It uses the same settings as `k8s/pgbouncer` (transaction mode, one pool per role, the same handling of startup parameters; no TLS, because the local database has none). Logs and the generated files are in `.cache/dev/pgbouncer`, and `pnpm dev` stops it on exit.
 
 - `pnpm dev --no-pooler` (or `POOLER=off`) connects the apps to the database directly.
 - If PgBouncer cannot start (no pinned release for this platform and no `PGBOUNCER_BIN`, or the port is taken), `pnpm dev` says so and the apps use the database directly.
