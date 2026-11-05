@@ -54,6 +54,17 @@ describe('resolvePostgresSettings', () => {
     expect(settings).toMatchObject({ container: 'test-pg', reset: true });
   });
 
+  it('reads the container size for a load test', () => {
+    const env = { POSTGRES_DOCKER_CPUS: '1.5', POSTGRES_DOCKER_MAX_CONNECTIONS: '150' };
+    expect(resolvePostgresSettings(env, [])).toMatchObject({ cpus: 1.5, maxConnections: 150 });
+    expect(() => resolvePostgresSettings({ POSTGRES_DOCKER_CPUS: 'two' }, [])).toThrow(
+      'POSTGRES_DOCKER_CPUS',
+    );
+    expect(() => resolvePostgresSettings({ POSTGRES_DOCKER_MAX_CONNECTIONS: '1.5' }, [])).toThrow(
+      'whole number',
+    );
+  });
+
   it('rejects an unknown mode and names the valid ones', () => {
     expect(() => resolvePostgresSettings({ POSTGRES_MODE: 'rds' }, [])).toThrow(
       /embedded, docker, external/,
@@ -71,6 +82,19 @@ describe('dockerRunArgs', () => {
     expect(args).toContain('POSTGRES_PASSWORD');
     expect(args.join(' ')).not.toMatch(/POSTGRES_PASSWORD=/);
     expect(args).not.toContain('--volume');
+  });
+
+  it('caps the CPUs and sets max_connections only when asked', () => {
+    const plain = dockerRunArgs(settings, { port: 5432, user: 'app', volume: undefined });
+    expect(plain).not.toContain('--cpus');
+    expect(plain.join(' ')).not.toContain('max_connections');
+    const sized = dockerRunArgs(
+      { ...settings, cpus: 2, maxConnections: 150 },
+      { port: 5432, user: 'app', volume: undefined },
+    );
+    expect(sized[sized.indexOf('--cpus') + 1]).toBe('2');
+    expect(sized.indexOf('--cpus')).toBeLessThan(sized.indexOf('postgres:17'));
+    expect(sized.slice(-2)).toEqual(['-c', 'max_connections=150']);
   });
 
   it('mounts the named volume when data is kept', () => {
