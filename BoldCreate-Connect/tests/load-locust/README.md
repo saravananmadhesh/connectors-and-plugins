@@ -287,3 +287,87 @@ Set one in PowerShell with `$env:CAPACITY_STEP_SECONDS = "60"`, on macOS with
 
 One Locust process uses one CPU core. If Locust warns that its CPU is above 90%, the numbers show
 the test machine's limit, not the service's; lower the users or run from a bigger machine.
+
+## Local capacity test with a Docker database
+
+A database in Docker can be capped like a deployed one, so you can compare database sizes on your
+own machine. The rest of the app runs on the same machine, so the numbers are lower than on a
+cluster; compare the rounds with each other, not with staging.
+
+You need Docker Desktop running, and the repo set up for `pnpm dev`.
+
+Three settings size the run:
+
+| Setting                           | What it does                                                                  |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `POSTGRES_DOCKER_CPUS`            | CPUs the database container may use                                           |
+| `POSTGRES_DOCKER_MAX_CONNECTIONS` | the database's `max_connections`                                              |
+| `DB_VCPU`                         | role connection limits and the local PgBouncer pools for a database that size |
+
+### Round A: 1 CPU, 100 connections
+
+PowerShell, in the `BoldCreate-Connect` folder:
+
+```powershell
+$env:POSTGRES_MODE = "docker"
+$env:POSTGRES_DOCKER_CPUS = "1"
+$env:POSTGRES_DOCKER_MAX_CONNECTIONS = "100"
+$env:DB_VCPU = "1"
+pnpm dev
+```
+
+macOS / Linux:
+
+```sh
+POSTGRES_MODE=docker POSTGRES_DOCKER_CPUS=1 POSTGRES_DOCKER_MAX_CONNECTIONS=100 DB_VCPU=1 pnpm dev
+```
+
+Check the container got the cap (prints `1000000000` for 1 CPU, and the arguments end with
+`max_connections=100`):
+
+```powershell
+docker inspect boldcreate-dev-postgres --format "{{.HostConfig.NanoCpus}} {{.Args}}"
+```
+
+Then, the first time only:
+
+1. Open http://localhost:3000, sign up, and confirm the mail in Mailpit (linked from the dev
+   dashboard, http://localhost:5080).
+2. In the local admin (http://localhost:3004), Limits page, set "Project requests per window" to
+   100000 for the total capacity round.
+
+In a second PowerShell window, start the control panel and fill in:
+
+```powershell
+python tests/load-locust/control_panel.py
+```
+
+- Web: `http://localhost:3000`
+- Gateway: `http://localhost:3002`
+- Email and password: the account from step 1
+
+Run "Total capacity". Each run is saved in `tests/load-locust/results/`.
+
+### Round B: 2 CPUs, 150 connections
+
+Stop `pnpm dev` (Ctrl+C) and start it again with the new size. The data stays; the container is
+made again with the new cap.
+
+```powershell
+$env:POSTGRES_DOCKER_CPUS = "2"
+$env:POSTGRES_DOCKER_MAX_CONNECTIONS = "150"
+$env:DB_VCPU = "2"
+pnpm dev
+```
+
+Check with `docker inspect` as above (`2000000000`, `max_connections=150`), then run the same round
+in the control panel.
+
+### Comparing
+
+Put the two `summary.json` files side by side: `capacity_ok_per_second` is the healthy rate, and
+`safe_per_minute_70pct` is the number to start the limits from. Close other heavy programs during
+both rounds, so they get the same machine.
+
+To go back to the normal local database, close the PowerShell window (the settings go with it) or
+run `Remove-Item Env:POSTGRES_MODE, Env:POSTGRES_DOCKER_CPUS, Env:POSTGRES_DOCKER_MAX_CONNECTIONS, Env:DB_VCPU`.
