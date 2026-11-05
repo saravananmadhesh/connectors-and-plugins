@@ -13,6 +13,7 @@ import argparse
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 from guard import validate_target
@@ -26,6 +27,7 @@ def main():
     parser.add_argument("--project-keys", default="", help="Several projects, comma separated")
     parser.add_argument("--project-keys-file", default="", help="A file with one project key per line")
     parser.add_argument("--busy-share", type=float, default=None, help="Percent of users on the first key")
+    parser.add_argument("--live", action="store_true", help="Also show Locust's live charts at http://localhost:8089")
     args = parser.parse_args()
 
     ensure_file_limits()
@@ -49,18 +51,24 @@ def main():
         sys.exit(2)
 
     here = Path(__file__).resolve().parent
-    out = here.parent.parent / "reports" / "load-locust" / "capacity"
+    out = Path(env.get("CAPACITY_OUT_DIR") or here.parent.parent / "reports" / "load-locust" / "capacity")
     out.mkdir(parents=True, exist_ok=True)
     cmd = [
         sys.executable, "-m", "locust",
         "-f", str(here / "capacity.py"),
         "--host", args.target,
-        "--headless",
-        "--only-summary",
+        *(["--autostart", "--autoquit", "30", "--web-host", "127.0.0.1"] if args.live else ["--headless", "--only-summary"]),
         "--html", str(out / "report.html"),
     ]
     print(f"[capacity] Target: {args.target}")
-    sys.exit(subprocess.call(cmd, env=env, cwd=str(here)))
+    if args.live:
+        print("[capacity] Live charts: open http://localhost:8089 (closes 30 s after the run ends)")
+    started = time.time()
+    code = subprocess.call(cmd, env=env, cwd=str(here))
+    # Locust exits with 1 whenever any call failed, which a capacity run expects near its end; the
+    # run succeeded when it wrote its summary.
+    summary = out / "summary.json"
+    sys.exit(0 if summary.exists() and summary.stat().st_mtime >= started else code or 1)
 
 
 if __name__ == "__main__":
