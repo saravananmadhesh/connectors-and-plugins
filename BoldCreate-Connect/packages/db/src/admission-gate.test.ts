@@ -79,7 +79,7 @@ describe('admission gate', () => {
     const g = gate({ maxConcurrency: 1, maxDepth: 1, onReject });
     await g.acquire();
     void g.acquire().catch(() => undefined);
-    await expect(g.acquire()).rejects.toThrow('too many connections');
+    await expect(g.acquire()).rejects.toThrow('database admission queue');
     expect(onReject).toHaveBeenCalledWith('full');
   });
 
@@ -115,7 +115,7 @@ describe('admission gate', () => {
   it('refuses everything that cannot run at once while the depth is zero', async () => {
     const g = gate({ maxConcurrency: 1, maxDepth: 0 });
     const release = await g.acquire();
-    await expect(g.acquire()).rejects.toThrow('too many connections');
+    await expect(g.acquire()).rejects.toThrow('database admission queue');
     release();
     await expect(g.acquire()).resolves.toBeTypeOf('function');
   });

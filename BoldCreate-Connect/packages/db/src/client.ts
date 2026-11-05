@@ -48,7 +48,8 @@ function poolLimits(config: DbConfig): pg.PoolConfig {
     ...(config.connectionTimeoutMs ? { connectionTimeoutMillis: config.connectionTimeoutMs } : {}),
     ...(config.idleTimeoutMs ? { idleTimeoutMillis: config.idleTimeoutMs } : {}),
     ...(config.applicationName ? { application_name: config.applicationName } : {}),
-    ...(config.lockTimeoutMs ? { options: `-c lock_timeout=${config.lockTimeoutMs}` } : {}),
+    // A startup parameter, not `options`, so PgBouncer can carry it to the server connection.
+    ...(config.lockTimeoutMs ? { lock_timeout: config.lockTimeoutMs } : {}),
   };
 }
 
@@ -93,16 +94,28 @@ class QueueingPool extends pg.Pool {
     }
   }
 
-  /** Takes a slot from the admission queue, then a connection; the slot returns with the connection. */
+  /**
+   * Takes a slot from the admission queue, then a connection; the slot returns with the connection.
+   * A connection that drops while held is handed back at once: a caller does not always release a
+   * connection whose query failed (drizzle's `transaction` skips the release when `BEGIN` fails),
+   * and every such connection would keep its pool place and its slot for good.
+   */
   private async admitted(): Promise<pg.PoolClient> {
     const give = (await this.admission?.acquire(this.ownerOf?.())) ?? (() => undefined);
     try {
       const client = await this.connectWithRetry();
       const release = client.release.bind(client);
-      client.release = (error?: Error | boolean) => {
+      let released = false;
+      const releaseOnce = (error?: Error | boolean) => {
+        if (released) return;
+        released = true;
+        client.off('error', onDrop);
         give();
         release(error);
       };
+      const onDrop = (error: Error) => releaseOnce(error);
+      client.once('error', onDrop);
+      client.release = releaseOnce;
       return client;
     } catch (err) {
       give();
@@ -119,9 +132,6 @@ class QueueingPool extends pg.Pool {
     ) => void,
   ): void;
   override connect(callback?: Parameters<pg.Pool['connect']>[0]): Promise<pg.PoolClient> | void {
-    if (this.waitMs <= 0 && !this.admission) {
-      return callback ? super.connect(callback) : super.connect();
-    }
     const attempt = this.admitted();
     if (!callback) return attempt;
     attempt.then(
@@ -130,6 +140,9 @@ class QueueingPool extends pg.Pool {
     );
   }
 }
+
+/** See the `connect` listener in `createDb`: the error reaches the caller through its query. */
+function ignoreHeldConnectionError(): void {}
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 
@@ -185,6 +198,11 @@ export function createDb(config: DbConfig): { db: Db; pool: pg.Pool } {
   // Without a listener, an error on a spare connection is an unhandled event and ends the process.
   // The pool discards the failed connection and opens a new one on the next query.
   pool.on('error', (error) => config.onPoolError?.(error));
+  // The pool listens only while a connection is spare. A connection that drops while a caller
+  // holds it (PgBouncer or Postgres restarting mid-transaction) would end the process as well.
+  // The caller still sees the failure on its query, and the pool discards the connection when it
+  // comes back, so this listener only has to keep the process alive.
+  pool.on('connect', (client) => client.on('error', ignoreHeldConnectionError));
 
   const db = drizzle(pool, { schema });
   return { db, pool };
