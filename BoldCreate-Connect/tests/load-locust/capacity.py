@@ -60,7 +60,10 @@ READ_ONLY = os.getenv("CAPACITY_READ_ONLY") == "1"
 BUSY_SHARE_PCT = _num("CAPACITY_BUSY_SHARE_PCT", 0)
 KEYS = _keys()
 
-OUT_DIR = Path(__file__).resolve().parent.parent.parent / "reports" / "load-locust" / "capacity"
+OUT_DIR = Path(
+    os.getenv("CAPACITY_OUT_DIR")
+    or Path(__file__).resolve().parent.parent.parent / "reports" / "load-locust" / "capacity"
+)
 
 # How many users each project has, so new users go where the plan says.
 _users_per_project = [0] * max(1, len(KEYS))

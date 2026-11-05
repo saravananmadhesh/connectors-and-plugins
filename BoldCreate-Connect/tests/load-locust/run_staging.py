@@ -31,6 +31,7 @@ def main():
     parser.add_argument("--projects", type=int, default=3)
     parser.add_argument("--busy-share", type=float, default=None, help="Percent of users on the first project")
     parser.add_argument("--keep", action="store_true", help="Keep the test data after the run")
+    parser.add_argument("--live", action="store_true", help="Show Locust's live charts at http://localhost:8089")
     args = parser.parse_args()
 
     if step("test_data.py", "setup", f"--web={args.web}", f"--projects={args.projects}") != 0:
@@ -40,6 +41,8 @@ def main():
     run = ["run_capacity.py", f"--target={args.gateway}", "--project-keys-file=keys.txt"]
     if args.busy_share is not None:
         run.append(f"--busy-share={args.busy_share}")
+    if args.live:
+        run.append("--live")
     code = 1
     try:
         code = step(*run)

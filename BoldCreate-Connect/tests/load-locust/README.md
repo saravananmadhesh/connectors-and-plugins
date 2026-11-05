@@ -79,6 +79,32 @@ end, even if the test fails or you stop it.
 Each virtual user calls with only 10 to 50 ms between calls, so one virtual user is a busy host
 server, not one person.
 
+### The easy way: the control panel
+
+After the one-time preparation below, start the control panel and use it in your browser:
+
+PowerShell (Windows):
+
+```powershell
+python control_panel.py
+```
+
+Terminal (macOS):
+
+```sh
+python3 control_panel.py
+```
+
+Open http://127.0.0.1:8090. Fill in the web and gateway addresses, the load-test account, the round
+and the number of projects, tick the confirmation and click **Run**. The page shows each step as it
+finishes and links to Locust's live charts while the test runs. **Stop** ends the test early; the
+test data is still removed. Every run is saved in `results/<time>-<round>/` next to the script
+(settings without the password, the log, `summary.json`, `steps.csv`, `projects.csv` and the Locust
+report), and the page lists past runs with their capacity and the 70% figure. The panel only
+listens on your own computer, and the password is never saved.
+
+The commands below do the same from the terminal.
+
 ### One-time preparation
 
 1. Install Python 3.10 or later (on Windows, tick "Add python.exe to PATH" in the installer).
@@ -239,7 +265,8 @@ python3 test_data.py cleanup --web=https://connect-staging.boldcreate.ai
   the account named `loadtest-...`, for when the state file was lost. Nothing else is deleted.
   Each deleted organization sends the account the usual deletion mail, and the audit log keeps
   its rows, as for every deletion.
-- `run_staging.py --keep` keeps the test data for another run.
+- `run_staging.py --keep` keeps the test data for another run, and `--live` shows Locust's live
+  charts at http://127.0.0.1:8089 during the run.
 
 ### Settings
 
