@@ -260,7 +260,7 @@ label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}input,select{font
 .rounds{display:flex;gap:12px;flex-wrap:wrap}.rounds label{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:6px;padding:10px;flex:1;min-width:240px;color:var(--fg)}
 button{font:inherit;padding:8px 16px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}button.ghost{background:transparent;color:var(--accent)}button:disabled{opacity:.5;cursor:default}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.muted{color:var(--muted);font-size:.85rem}.err{color:var(--bad)}
-pre{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;max-height:320px;overflow:auto;font-size:.8rem;margin:0}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;max-height:320px;overflow:auto;font-size:.8rem;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}
 .tbl{overflow-x:auto}.ok{color:var(--good)}.no{color:var(--bad)}a{color:var(--accent)}
 </style></head><body><main>
