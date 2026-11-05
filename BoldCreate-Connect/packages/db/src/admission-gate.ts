@@ -43,11 +43,14 @@ const REFUSAL_TEXT: Record<AdmissionRejection, string> = {
   share: 'share is used up',
 };
 
-/** The refusal. The message starts the way the HTTP layer reads as a database overload (a 503). */
+/**
+ * The refusal. The HTTP layer reads its `code` as a database overload (a 503). The message names
+ * the queue, so a log never mistakes it for Postgres refusing a login (`too many connections`).
+ */
 export class AdmissionRefused extends Error {
   readonly code = 'admission_refused';
   constructor(reason: AdmissionRejection) {
-    super(`too many connections: admission queue ${REFUSAL_TEXT[reason]}`);
+    super(`database admission queue ${REFUSAL_TEXT[reason]}`);
     this.name = 'AdmissionRefused';
   }
 }

@@ -42,6 +42,7 @@ describe('pgbouncerIni', () => {
     'query_wait_timeout',
     'idle_transaction_timeout',
     'ignore_startup_parameters',
+    'track_extra_parameters',
     'auth_type',
     'reserve_pool_size',
     'max_client_conn',

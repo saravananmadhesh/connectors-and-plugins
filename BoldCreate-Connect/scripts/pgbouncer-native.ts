@@ -77,6 +77,14 @@ function readPid(env: Record<string, string | undefined>): number | undefined {
 
 /** True only when the recorded process is PgBouncer, so a reused pid is never killed. */
 function isPgbouncer(pid: number): boolean {
+  if (process.platform !== 'win32') {
+    try {
+      return readFileSync(`/proc/${pid}/comm`, 'utf8').trim().startsWith('pgbouncer');
+    } catch {
+      const ps = spawnSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8' });
+      return ps.status === 0 && ps.stdout.toLowerCase().includes('pgbouncer');
+    }
+  }
   const result = spawnSync('tasklist', ['/FI', `PID eq ${pid}`, '/FO', 'CSV', '/NH'], {
     encoding: 'utf8',
   });
@@ -91,7 +99,8 @@ export function nativePoolerRunning(env: Record<string, string | undefined>): bo
 export function stopNativePooler(env: Record<string, string | undefined>): void {
   const pid = readPid(env);
   if (pid !== undefined && isPgbouncer(pid)) {
-    spawnSync('taskkill', ['/PID', String(pid), '/T', '/F']);
+    if (process.platform === 'win32') spawnSync('taskkill', ['/PID', String(pid), '/T', '/F']);
+    else process.kill(pid, 'SIGTERM');
   }
   rmSync(pidFile(env), { force: true });
 }

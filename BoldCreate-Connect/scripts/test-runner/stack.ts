@@ -29,6 +29,7 @@ import {
   type Infra,
 } from '../local-infra.js';
 import { resolvePostgresSettings } from '../postgres-docker.js';
+import { startNativePooler, stopNativePooler } from '../pgbouncer-native.js';
 
 export interface StackPorts {
   postgres: number;
@@ -168,12 +169,20 @@ export async function startStack(options: {
     stopping = true;
     for (const child of children) child.kill();
     await sleep(500);
+    if (process.env['LOAD_POOLER'] === '1') stopNativePooler(poolerEnv);
     for (const log of logs) log.end();
     if (infra) await infra.stop();
   };
 
   // Each app gets only its own keys; the test process keeps the generated secrets in `base`.
-  const appContext = {
+  const poolerEnv = {
+    ...process.env,
+    ...devSecrets,
+    DATABASE_URL: databaseUrl,
+    POOLER_PORT: process.env['LOAD_POOLER_PORT'] ?? '16432',
+    POOLER_DATA_DIR: join(dataDir, 'pgbouncer'),
+  };
+  const appContext: Parameters<typeof appEnv>[1] = {
     secrets: devSecrets,
     databaseUrl,
     ports,
@@ -268,6 +277,12 @@ export async function startStack(options: {
       logDir: options.logDir,
       persistent: false,
     });
+
+    // LOAD_POOLER=1 puts PgBouncer between the services and the database, as deployed.
+    if (process.env['LOAD_POOLER'] === '1') {
+      await startNativePooler(poolerEnv);
+      appContext.pooler = { port: Number(poolerEnv.POOLER_PORT) };
+    }
 
     for (const app of ['api', 'gateway', 'admin', 'worker', 'web'] as const) {
       const child = launch(app);

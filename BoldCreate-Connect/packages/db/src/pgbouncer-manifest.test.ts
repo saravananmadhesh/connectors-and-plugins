@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { checkServerCapacity, deriveConnectionBudget } from './connection-budget.js';
 
-/** The database the manifests are sized for: 1 vCPU, `max_connections` 100. */
-const DB_VCPU = 1;
+/** The database each environment's manifests are sized for, all with `max_connections` 100. */
+const DB_VCPU = { staging: 2, preproduction: 1, production: 1 } as const;
 const MAX_CONNECTIONS = 100;
 const MIGRATOR_LIMIT = 5;
 const ENVIRONMENTS = ['staging', 'preproduction', 'production'] as const;
@@ -32,7 +32,7 @@ describe.each(ENVIRONMENTS)('PgBouncer manifests for %s', (environment) => {
   const ini = read(environment, 'config-map.yaml');
   const deployment = read(environment, 'deployment.yaml');
   const replicas = Number(/replicas:\s*(\d+)/.exec(deployment)?.[1]);
-  const budget = deriveConnectionBudget(DB_VCPU);
+  const budget = deriveConnectionBudget(DB_VCPU[environment]);
   const reserve = Number(setting(ini, 'reserve_pool_size'));
   const pools = userPools(ini);
 
@@ -90,9 +90,13 @@ describe.each(ENVIRONMENTS)('PgBouncer manifests for %s', (environment) => {
     expect(major * 1_000_000 + minor * 1_000 + patch).toBeGreaterThanOrEqual(1_026_001);
   });
 
-  it('ignores the startup parameters the services send', () => {
+  it('keeps the time limits the services send instead of dropping them', () => {
     const ignored = setting(ini, 'ignore_startup_parameters').split(',');
-    expect(ignored).toEqual(expect.arrayContaining(['options', 'statement_timeout']));
+    const tracked = setting(ini, 'track_extra_parameters').split(',');
+    for (const limit of ['statement_timeout', 'lock_timeout']) {
+      expect(ignored).not.toContain(limit);
+      expect(tracked).toContain(limit);
+    }
   });
 
   it('accepts connections only from the services that use the database', () => {

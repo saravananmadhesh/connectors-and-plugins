@@ -1,5 +1,5 @@
 {
-  "files": ["^apps/web/client/src/App.(?:tsx|css)$"],
+  "files": ["^apps/web/client/src/App.(?:tsx|css)$", "^tests/load-locust/[a-z_]+\\.py$"],
   "singularSegments": [
     "me",
     "gateway",
