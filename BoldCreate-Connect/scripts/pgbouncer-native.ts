@@ -10,6 +10,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { connect } from 'node:net';
 import { join } from 'node:path';
+import { deriveConnectionBudget } from '../packages/db/src/connection-budget.js';
 import { ensureArchivedTool, PGBOUNCER_VERSION, pgbouncerAssets } from './infra-tools.js';
 import {
   DEFAULT_POOLER_PORT,
@@ -105,6 +106,18 @@ export function stopNativePooler(env: Record<string, string | undefined>): void 
   rmSync(pidFile(env), { force: true });
 }
 
+/**
+ * The pools of the one local PgBouncer. With `DB_VCPU` set they are the whole budget of a database
+ * that size (what all deployed replicas hold together), so a load test sees the deployed shares.
+ */
+export function localPoolSizes(
+  env: Record<string, string | undefined>,
+): Record<PoolerRole, number> {
+  const raw = env['DB_VCPU']?.trim();
+  if (!raw) return { ...LOCAL_POOL_SIZES };
+  return { ...deriveConnectionBudget(Number(raw)).poolSize };
+}
+
 /** Starts PgBouncer and returns the pooled `DATABASE_URL`; resolves once the port accepts. */
 export async function startNativePooler(env: Record<string, string | undefined>): Promise<string> {
   const databaseUrl = env['DATABASE_URL'];
@@ -129,7 +142,7 @@ export async function startNativePooler(env: Record<string, string | undefined>)
     pgbouncerIni({
       dbHost: '127.0.0.1',
       dbPort: Number(new URL(databaseUrl).port || 5432),
-      poolSizes: LOCAL_POOL_SIZES,
+      poolSizes: localPoolSizes(env),
       authFile: slashed(join(dir, 'userlist.txt')),
       listenPort: port,
       logFile: slashed(logPath),

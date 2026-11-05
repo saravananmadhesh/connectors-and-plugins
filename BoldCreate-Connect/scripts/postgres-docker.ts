@@ -8,6 +8,10 @@
  *   embedded  PostgreSQL from the embedded-postgres package (no Docker needed)
  *   docker    a container started and stopped here (`POSTGRES_DOCKER_IMAGE`, default postgres:17)
  *   external  a server you run; `DATABASE_URL` must carry a login that may create databases
+ *
+ * In `docker` mode the container can be sized like a deployed database, for a load test:
+ * `POSTGRES_DOCKER_CPUS` (for example 1 or 2) caps its CPUs and `POSTGRES_DOCKER_MAX_CONNECTIONS`
+ * sets `max_connections` (Postgres default 100).
  */
 import { spawnSync } from 'node:child_process';
 import { connect } from 'node:net';
@@ -27,6 +31,20 @@ export interface PostgresSettings {
   container: string;
   /** Delete the database first (`docker`: container and volume; `external`: the database). */
   reset: boolean;
+  /** CPUs the container may use, `docker` mode only. Unset: no cap. */
+  cpus?: number;
+  /** `max_connections` of the server, `docker` mode only. Unset: the Postgres default. */
+  maxConnections?: number;
+}
+
+function positiveNumber(env: Record<string, string | undefined>, name: string, whole: boolean) {
+  const raw = env[name]?.trim();
+  if (!raw) return undefined;
+  const value = Number(raw);
+  if (!(value > 0) || (whole && !Number.isInteger(value))) {
+    throw new Error(`${name} must be a ${whole ? 'whole ' : ''}number above 0, not "${raw}"`);
+  }
+  return value;
 }
 
 export const DEFAULT_POSTGRES_IMAGE = 'postgres:17';
@@ -53,8 +71,13 @@ export function resolvePostgresSettings(
       overrides.container ??
       (env['POSTGRES_DOCKER_CONTAINER']?.trim() || DEFAULT_POSTGRES_CONTAINER),
     reset: overrides.reset ?? false,
+    ...optional('cpus', positiveNumber(env, 'POSTGRES_DOCKER_CPUS', false)),
+    ...optional('maxConnections', positiveNumber(env, 'POSTGRES_DOCKER_MAX_CONNECTIONS', true)),
   };
 }
+
+const optional = <K extends string>(key: K, value: number | undefined) =>
+  (value === undefined ? {} : { [key]: value }) as Partial<Record<K, number>>;
 
 /** Same throwaway-data settings the embedded server uses, so both behave alike. */
 export const DOCKER_POSTGRES_FLAGS = [
@@ -75,7 +98,7 @@ export const DOCKER_POSTGRES_FLAGS = [
  * never appears in the process list; the caller puts the value in the child's environment.
  */
 export function dockerRunArgs(
-  settings: Pick<PostgresSettings, 'image' | 'container'>,
+  settings: Pick<PostgresSettings, 'image' | 'container' | 'cpus' | 'maxConnections'>,
   options: { port: number; user: string; volume: string | undefined },
 ): string[] {
   return [
@@ -94,8 +117,10 @@ export function dockerRunArgs(
     '--env',
     'POSTGRES_DB=postgres',
     ...(options.volume ? ['--volume', `${options.volume}:/var/lib/postgresql/data`] : []),
+    ...(settings.cpus ? ['--cpus', String(settings.cpus)] : []),
     settings.image,
     ...DOCKER_POSTGRES_FLAGS,
+    ...(settings.maxConnections ? ['-c', `max_connections=${settings.maxConnections}`] : []),
   ];
 }
 
