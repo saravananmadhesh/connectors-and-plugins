@@ -44,9 +44,9 @@ export interface RoleSetupOptions {
   passwords: Record<LoginRole, string>;
   connectionLimits?: Partial<Record<LoginRole, number>>;
   /**
-   * Settings stored on the role. A transaction pooler drops the startup parameters a service
-   * sends (`statement_timeout`), so these are what keep a runaway statement or a stuck
-   * transaction from holding a shared connection.
+   * Settings stored on the role, a second guard next to the time limits a service sends at
+   * startup (PgBouncer passes those on), so a runaway statement or a stuck transaction cannot
+   * hold a shared connection.
    */
   sessionDefaults?: Partial<Record<LoginRole, RoleSessionDefaults>>;
 }

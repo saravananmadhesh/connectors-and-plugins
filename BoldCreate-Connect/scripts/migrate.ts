@@ -141,8 +141,8 @@ function roleSetupOptions(): RoleSetupOptions {
     }
     passwords[role] = password;
   }
-  // DB_POOLED=1 once the services connect through the pooler: it ignores the startup
-  // parameters they send, so the timeouts are stored on the roles instead.
+  // DB_POOLED=1 once the services connect through the pooler: the timeouts are also stored on
+  // the roles, as a second guard next to the ones the services send.
   const sessionDefaults = process.env['DB_POOLED'] === '1' ? POOLED_SESSION_DEFAULTS : undefined;
   return {
     passwords: passwords as Record<LoginRole, string>,

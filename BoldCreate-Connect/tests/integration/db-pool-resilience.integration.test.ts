@@ -74,6 +74,48 @@ describe('a database that drops its connections', () => {
     }
   });
 
+  it('does not end the process when a held connection drops mid-transaction', async () => {
+    const { pool } = createDb({ connectionString: databaseUrl, max: 2, applicationName: APP });
+    try {
+      const client = await pool.connect();
+      // The pool stops listening once a connection is handed out, so the client adds its own.
+      expect(client.listenerCount('error')).toBeGreaterThan(0);
+      await client.query('BEGIN');
+      await endBackends();
+      // The drop arrives as an 'error' event on the held connection; nothing else listens then.
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      await expect(client.query('SELECT 1')).rejects.toThrow(/not queryable|Connection terminated/);
+      client.release(true);
+
+      const result = await pool.query('SELECT 8 AS n');
+      expect(result.rows[0]).toEqual({ n: 8 });
+    } finally {
+      await pool.end();
+    }
+  });
+
+  it('frees the slot of a dropped connection that its caller never releases', async () => {
+    // drizzle's transaction() does not release when BEGIN fails, as it does while PgBouncer stops.
+    const admission = createAdmissionGate({ maxConcurrency: 1, maxDepth: 5, maxWaitMs: 2000 });
+    const { pool } = createDb({
+      connectionString: databaseUrl,
+      max: 1,
+      applicationName: APP,
+      admission,
+    });
+    try {
+      await pool.connect();
+      await endBackends();
+      await until(() => admission.stats().active === 0);
+      expect(admission.stats().active).toBe(0);
+
+      const result = await pool.query('SELECT 9 AS n');
+      expect(result.rows[0]).toEqual({ n: 9 });
+    } finally {
+      await pool.end();
+    }
+  });
+
   it('gives back the admission slot of a call whose connection was ended', async () => {
     const admission = createAdmissionGate({ maxConcurrency: 1, maxDepth: 5, maxWaitMs: 2000 });
     const { pool } = createDb({
@@ -148,7 +190,7 @@ describe('the admission queue against a real pool', () => {
       const holder = await pool.connect();
       const waiting = [pool.query('SELECT 1'), pool.query('SELECT 2')];
       await until(() => admission.stats().waiting === 2);
-      await expect(pool.query('SELECT 3')).rejects.toThrow('too many connections');
+      await expect(pool.query('SELECT 3')).rejects.toThrow('database admission queue');
       expect(reasons).toEqual(['full']);
 
       holder.release();

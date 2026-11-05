@@ -30,8 +30,11 @@ data:
     client_login_timeout = 10
     idle_transaction_timeout = 15
 
-    ; The services send these as startup parameters; the role settings apply them instead.
-    ignore_startup_parameters = extra_float_digits,options,statement_timeout
+    ; The services send their time limits as startup parameters. PgBouncer keeps them per client
+    ; and sets them on whichever server connection the client gets, so each limit still applies.
+    ; A change here needs a pod restart: PgBouncer reads track_extra_parameters only at start.
+    ignore_startup_parameters = extra_float_digits,options
+    track_extra_parameters = IntervalStyle,statement_timeout,lock_timeout
 
     auth_type = scram-sha-256
     auth_file = /etc/pgbouncer/auth/userlist.txt

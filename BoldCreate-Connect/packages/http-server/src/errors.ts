@@ -28,12 +28,13 @@ function frameworkCode(err: unknown): ErrorCode | null {
 }
 
 /**
- * True when the database had no connection to give: the role is at its connection limit (`53300`)
- * or the pool's wait for a free connection ran out. The caller can retry, so it is a 503.
+ * True when the database had no connection to give: the role is at its connection limit (`53300`),
+ * the service's admission queue refused the call, or the pool's wait for a free connection ran
+ * out. The caller can retry, so it is a 503.
  */
 export function isDbSaturated(err: unknown): boolean {
   const e = err as { code?: unknown; message?: unknown } | null;
-  if (e?.code === '53300') return true;
+  if (e?.code === '53300' || e?.code === 'admission_refused') return true;
   return (
     typeof e?.message === 'string' &&
     (e.message.startsWith('timeout exceeded when trying to connect') ||
