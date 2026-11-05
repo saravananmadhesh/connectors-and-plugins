@@ -101,6 +101,37 @@ Results go to `reports/load-locust/capacity/`: `steps.csv` (one row per step), `
 row per project per step), `summary.json`
 (the capacity and 70% of it, per second and per minute) and the Locust HTML report.
 
+### Test data, made and removed by script
+
+`test_data.py` makes the organizations, projects and keys for a run and removes them after. It signs
+in to the web app as a normal user, so first sign up one account for load tests on staging and
+verify its email.
+
+```sh
+LOCUST_ALLOW_LOAD=1 LOCUST_ALLOWED_HOSTS="connect-staging.boldcreate.ai,connect-gateway-staging.boldcreate.ai" \
+LOAD_EMAIL="loadtest@example.com" LOAD_PASSWORD="..." \
+python3 tests/load-locust/test_data.py setup --web=https://connect-staging.boldcreate.ai --projects=3
+
+python3 tests/load-locust/run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai \
+  --project-keys-file=tests/load-locust/keys.txt
+
+python3 tests/load-locust/test_data.py cleanup --web=https://connect-staging.boldcreate.ai
+```
+
+`run_staging.py` does all three in one go and removes the data even when the run fails or is
+stopped: `python3 tests/load-locust/run_staging.py --projects=3` (add `--busy-share=60` for the
+busy-neighbour run, `--keep` to keep the data).
+
+- `setup` makes one organization per project (slug `loadtest-<run>-<n>`), a project "Load test" in
+  each and a key with `sessions:read` and `sessions:write` that ends after 7 days
+  (`--key-days`). Keys go to `keys.txt`, ids to `load-test-state.json`; git ignores both, and no
+  key is printed.
+- `cleanup` deletes the organizations in the state file. That removes their projects, keys, and
+  the users and sessions the run made. `--all` also deletes any other organization of that account
+  whose slug starts with `loadtest-`, for a state file that was lost. Nothing else is deleted.
+- Each deleted organization sends its members the usual deletion mail. The audit log keeps its
+  rows about the deleted projects, as it does for every deletion.
+
 ### Before the run
 
 1. Check what the environment runs: the PgBouncer cut-over, migration `0006`, the role connection
