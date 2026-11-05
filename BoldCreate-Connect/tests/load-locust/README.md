@@ -419,17 +419,58 @@ and Locust then run in Ubuntu too; the Windows browser still opens `http://local
    ~/locust-venv/bin/pip install -r tests/load-locust/requirements.txt
    ```
 
-7. **Run the rounds.** Each time you open Ubuntu to start the app, first tell it where Redis and
-   PgBouncer are:
+7. **Start Round A (1 CPU, 100 connections).** Ubuntu window 1, in the `BoldCreate-Connect`
+   folder (`cd ~/BoldCreate-Plugins/BoldCreate-Connect`). The first line tells the app where Redis
+   and PgBouncer are; type it every time you open a new Ubuntu window:
 
    ```sh
    export REDIS_SERVER_BIN=/usr/bin/redis-server PGBOUNCER_BIN=/usr/sbin/pgbouncer
    POSTGRES_MODE=docker POSTGRES_DOCKER_CPUS=1 POSTGRES_DOCKER_MAX_CONNECTIONS=100 DB_VCPU=1 pnpm dev
    ```
 
-   (Round B: `2`, `150`, `2`.) In a second Ubuntu window, in the same folder:
-   `~/locust-venv/bin/python tests/load-locust/control_panel.py`, then open
-   `http://localhost:8090` in the Windows browser.
+   Leave this window open; closing it stops the app. When http://localhost:3000 opens in the
+   Windows browser, the app is ready. To check the size, open a second Ubuntu window and run
+   `docker inspect boldcreate-dev-postgres --format "{{.HostConfig.NanoCpus}} {{.Args}}"`: it
+   prints `1000000000` and the arguments end with `max_connections=100`.
+
+8. **First time only: account and limit.** In the Windows browser:
+   - http://localhost:3000: sign up, then open the confirmation mail in Mailpit
+     (http://localhost:8025) and click the link.
+   - http://localhost:3004 (admin), Limits page: set "Project requests per window" to 100000.
+
+   Both stay saved for later rounds, because the database keeps its data.
+
+9. **Run the test.** Ubuntu window 2, in the same folder:
+
+   ```sh
+   ~/locust-venv/bin/python tests/load-locust/control_panel.py
+   ```
+
+   Open http://localhost:8090 in the Windows browser and fill in: Web app address
+   `http://localhost:3000`, Gateway address `http://localhost:3002`, the email and password from
+   step 8. Pick "Total capacity", tick the test-environment box, and press Run. Wait until the
+   log ends with `--- finished ---` (up to about an hour with the default steps). The results are
+   in `tests/load-locust/results/`, one folder per run.
+
+10. **Stop Round A.** Press Ctrl+C in window 2 (control panel), then Ctrl+C in window 1 (app).
+    Wait until window 1 shows the normal `$` prompt again; that means the app and the database
+    container have stopped.
+
+11. **Round B (2 CPUs, 150 connections).** In window 1, start the app again with the new size:
+
+    ```sh
+    POSTGRES_MODE=docker POSTGRES_DOCKER_CPUS=2 POSTGRES_DOCKER_MAX_CONNECTIONS=150 DB_VCPU=2 pnpm dev
+    ```
+
+    (If you closed the window, open Ubuntu, `cd` to the folder and type the `export` line from
+    step 7 first.) The `docker inspect` check now prints `2000000000` and `max_connections=150`.
+    Skip step 8, then repeat steps 9 and 10.
+
+12. **See the results in Windows.** In Ubuntu: `explorer.exe tests/load-locust/results` opens
+    the folder in Windows Explorer. Compare the two runs as described in [Comparing](#comparing).
+
+Nothing needs deleting between rounds: no cache, no state file. Close other heavy programs on
+the PC during both rounds, so each round gets the same machine.
 
 Commands copied from a chat or a web page sometimes lose a `|` or a line break; if a command
 fails in a strange way ("could not resolve host: sudo"), type it again by hand.
