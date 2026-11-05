@@ -56,120 +56,207 @@ The `GatewayHostUser` simulates a host product interacting with the public Gatew
 - `GET /v1/project/me` - Project configuration lookups.
 - Automatic retry on HTTP `429` with exponential/`Retry-After` backoff.
 
-## Capacity run (finding the limit)
+## Staging capacity test
 
-`run_capacity.py` runs the same host-product calls, but adds users in steps and stops by itself
-after the first step that is over the line (more than 1% failures, or p95 over 1 second). The last
-step under the line is the capacity. Use it to size the limits on the admin Limits page.
+This test answers two questions about an environment such as staging:
 
-```sh
-LOCUST_ALLOW_LOAD=1 \
-LOCUST_ALLOWED_HOSTS="connect-gateway-staging.boldcreate.ai" \
-python3 tests/load-locust/run_capacity.py \
-  --target="https://connect-gateway-staging.boldcreate.ai" \
-  --project-key="prk_your_test_project_key"
-```
+1. **How much can it handle in total?** (Round 1)
+2. **Does the per-project limit keep one busy customer from slowing down the others?** (Round 2)
 
-| Variable                  | Default | Meaning                                                    |
-| ------------------------- | ------- | ---------------------------------------------------------- |
-| `CAPACITY_START_USERS`    | 20      | Users in the first step                                    |
-| `CAPACITY_STEP_USERS`     | 20      | Users added each step                                      |
-| `CAPACITY_MAX_USERS`      | 600     | The run never goes above this                              |
-| `CAPACITY_STEP_SECONDS`   | 120     | How long each step lasts                                   |
-| `CAPACITY_WARMUP_SECONDS` | 20      | Start of each step left out of its numbers                 |
-| `CAPACITY_MAX_FAIL_PCT`   | 1       | Failures (`503`, other `5xx`, no answer) that end the run  |
-| `CAPACITY_MAX_P95_MS`     | 1000    | p95 that ends the run                                      |
-| `CAPACITY_READ_ONLY`      | unset   | `1` sends only GET calls, so no users or sessions are made |
-| `CAPACITY_BUSY_SHARE_PCT` | 0       | Share of users on the first key (`--busy-share`); 0 = even |
+You do not create anything by hand. `run_staging.py` signs in with a test account, creates the
+test organizations, projects and keys, runs the test, and deletes everything it created at the
+end, even if the test fails or you stop it.
 
-### Several projects
+### How the test works
 
-`--project-keys=prk_a,prk_b,prk_c` or `--project-keys-file=keys.txt` (one key per line) spreads the
-users evenly over the projects, and the results show each project's share in `projects.csv` and
-at the end of the run. Make each test project in its own organization: the database queue shares
-its room per organization (`db_queue_project_share_pct`), so projects of one organization count as
-one.
+- It starts with 20 virtual users and adds 20 more every 2 minutes.
+- After each step it checks two things: did more than 1% of calls fail, and did the slowest 5% of
+  calls take longer than 1 second (p95)?
+- At the first step that fails either check, it stops. The step before is the **capacity**.
+- It prints the capacity in calls per second, and **70% of it** per second and per minute. Plan
+  limits from the 70% figure, so there is room for spikes.
 
-`--busy-share=60` puts 60% of the users on the first key and spreads the rest over the others: a
-busy neighbour. Run it after setting "Project requests per window" to the value you plan. The
-first project should get `429`s while the others stay healthy.
+Each virtual user calls with only 10 to 50 ms between calls, so one virtual user is a busy host
+server, not one person.
 
-Each user calls with only 10 to 50 ms between calls, so one Locust user is a busy host server, not
-one person.
+### One-time preparation
 
-Results go to `reports/load-locust/capacity/`: `steps.csv` (one row per step), `projects.csv` (one
-row per project per step), `summary.json`
-(the capacity and 70% of it, per second and per minute) and the Locust HTML report.
+1. Install Python 3.10 or later (on Windows, tick "Add python.exe to PATH" in the installer).
+2. On staging, sign up one normal account only for load tests and verify its email. The test
+   creates and deletes organizations under this account.
+3. Install Locust, from this folder (`tests/load-locust`):
 
-### Test data, made and removed by script
-
-`test_data.py` makes the organizations, projects and keys for a run and removes them after. It signs
-in to the web app as a normal user, so first sign up one account for load tests on staging and
-verify its email.
-
-```sh
-LOCUST_ALLOW_LOAD=1 LOCUST_ALLOWED_HOSTS="connect-staging.boldcreate.ai,connect-gateway-staging.boldcreate.ai" \
-LOAD_EMAIL="loadtest@example.com" LOAD_PASSWORD="..." \
-python3 tests/load-locust/test_data.py setup --web=https://connect-staging.boldcreate.ai --projects=3
-
-python3 tests/load-locust/run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai \
-  --project-keys-file=tests/load-locust/keys.txt
-
-python3 tests/load-locust/test_data.py cleanup --web=https://connect-staging.boldcreate.ai
-```
-
-`run_staging.py` does all three in one go and removes the data even when the run fails or is
-stopped: `python3 tests/load-locust/run_staging.py --projects=3` (add `--busy-share=60` for the
-busy-neighbour run, `--keep` to keep the data).
-
-- `setup` makes one organization per project (slug `loadtest-<run>-<n>`), a project "Load test" in
-  each and a key with `sessions:read` and `sessions:write` that ends after 7 days
-  (`--key-days`). Keys go to `keys.txt`, ids to `load-test-state.json`; git ignores both, and no
-  key is printed.
-- `cleanup` deletes the organizations in the state file. That removes their projects, keys, and
-  the users and sessions the run made. `--all` also deletes any other organization of that account
-  whose slug starts with `loadtest-`, for a state file that was lost. Nothing else is deleted.
-- Each deleted organization sends its members the usual deletion mail. The audit log keeps its
-  rows about the deleted projects, as it does for every deletion.
-
-### Before the run
-
-1. Check what the environment runs: the PgBouncer cut-over, migration `0006`, the role connection
-   limits for its vCPU count (`DB_VCPU`), and how many api and gateway pods may run (note the
-   autoscaler's minimum and maximum, or pin them for the run so the result is repeatable).
-2. Raise "Project requests per window" on the Limits page for the run (or for the test project
-   only, with a `limit_setting` row of scope `project`). Otherwise the run measures that limit:
-   steps with many `429`s mean the budget was hit, not the service.
-3. Keep the Cloud SQL CPU graph, the pod CPU graph and the PgBouncer pool graph open during the
-   run.
-
-### From the result to the limits
-
-- **Capacity** is the healthiest step's `ok_per_second`. Note which part was busy at that step:
-  database CPU near 80 to 90% means the database is the limit; pods at their CPU limit with a
-  quiet database means more pods (or bigger ones) would help.
-- **Safe rate** is 70% of the capacity (`safe_per_minute_70pct`), leaving room for spikes and
-  background work.
-- **Project requests per window** (per minute): the safe rate per minute divided by the number of
-  projects you expect to be busy at the same time. With a safe rate of 12,000 a minute and three
-  busy customers, about 4,000 each.
-- **Callers one api pod lets wait for the database** and **Seconds a call waits for the
-  database**: raise them only if the run shows `503`s while database CPU was low.
-- Check the plan with `--busy-share`: the busy project is held at its limit and the others keep
-  a p95 under a second.
-- Run again after any change of database size, pod count or limits.
-
-### On Windows (PowerShell)
+PowerShell (Windows):
 
 ```powershell
-cd BoldCreate-Connect
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r tests/load-locust/requirements.txt
-$env:LOCUST_ALLOW_LOAD = "1"
-$env:LOCUST_ALLOWED_HOSTS = "connect-gateway-staging.boldcreate.ai"
-python tests/load-locust/run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai --project-keys-file=keys.txt
+pip install -r requirements.txt
 ```
+
+Terminal (macOS):
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Before each run
+
+Open a new terminal in this folder, activate `.venv` as above, and set the account and the allowed
+hosts. The scripts refuse to run against any other host and never against production.
+
+PowerShell (Windows):
+
+```powershell
+$env:LOCUST_ALLOW_LOAD = "1"
+$env:LOCUST_ALLOWED_HOSTS = "connect-staging.boldcreate.ai,connect-gateway-staging.boldcreate.ai"
+$env:LOAD_EMAIL = "your-load-test-account@example.com"
+$env:LOAD_PASSWORD = "your-password"
+```
+
+Terminal (macOS):
+
+```sh
+export LOCUST_ALLOW_LOAD=1
+export LOCUST_ALLOWED_HOSTS="connect-staging.boldcreate.ai,connect-gateway-staging.boldcreate.ai"
+export LOAD_EMAIL="your-load-test-account@example.com"
+export LOAD_PASSWORD="your-password"
+```
+
+Also check what the environment runs: the PgBouncer cut-over, migration `0006`, and how many api
+and gateway pods may run (note the autoscaler's minimum and maximum). Keep the Cloud SQL CPU graph
+open during the run.
+
+### Round 1: total capacity
+
+On the admin **Limits** page, set **Project requests per window** to `100000`, so the run measures
+the service and not that limit. Then run:
+
+PowerShell (Windows):
+
+```powershell
+python run_staging.py --projects=3
+```
+
+Terminal (macOS):
+
+```sh
+python3 run_staging.py --projects=3
+```
+
+The users are spread evenly over 3 projects, each in its own organization (projects of one
+organization share one place in the database queue). The end of the output looks like this:
+
+```text
+[capacity] step  users   ok/s  failed%  429s   p50   p95   p99  healthy
+[capacity]    1     20  309.2      0.0     0    26    84   108  yes
+[capacity]    2     40  281.4      0.0     0   179   253   288  yes
+[capacity]    3     60  229.3     8.14     0   460   548   581  NO
+[capacity] capacity: about 309.2 calls/s with 20 users; 70% of that is 216.4 calls/s (12986 a minute)
+```
+
+Write down the **70% per minute** figure (12,986 in this example).
+
+### Round 2: one busy project
+
+Work out the per-project limit: the 70% per-minute figure divided by the number of customers you
+expect to be busy at the same time. With 12,986 a minute and three busy customers, about 4,300.
+Set **Project requests per window** to that value on the Limits page, then run:
+
+PowerShell (Windows):
+
+```powershell
+python run_staging.py --projects=3 --busy-share=60
+```
+
+Terminal (macOS):
+
+```sh
+python3 run_staging.py --projects=3 --busy-share=60
+```
+
+60% of the users now call with project 1. The result is good when project 1 gets `429` answers
+("slow down") and projects 2 and 3 have no failures and a p95 under 1,000 ms, for example:
+
+```text
+[capacity] project   ok/min  failed%  429s   p95
+[capacity]       1     4300      0.0   385    90
+[capacity]       2     4680      0.0     0   120
+[capacity]       3     4344      0.0     0   118
+```
+
+If projects 2 and 3 slow down too, lower the limit and run round 2 again. The value fits this
+environment only: production needs its own figure when its database size or pod count differs.
+
+### Results
+
+Each run writes to `reports/load-locust/capacity/` (two folders above this one):
+
+| File           | What it holds                                |
+| -------------- | -------------------------------------------- |
+| `summary.json` | Every step, the capacity and the 70% figures |
+| `steps.csv`    | One row per step                             |
+| `projects.csv` | One row per project per step                 |
+| `report.html`  | Locust's own report with charts              |
+
+### Reading the result
+
+- Database CPU near 80 to 90% when the run stopped means the database is the limit.
+- Pods at their CPU limit with a quiet database means more pods (or bigger ones) would help.
+- Many `503` answers while the database was quiet mean the api's waiting line is full: raise
+  "Callers one api pod lets wait for the database" on the Limits page.
+- Many `429` answers in round 1 mean the project limit was not raised.
+- Run both rounds again after any change of database size, pod count or limits.
+
+### The parts, if you want to run them one by one
+
+`run_staging.py` calls these three in order:
+
+PowerShell (Windows):
+
+```powershell
+python test_data.py setup --web=https://connect-staging.boldcreate.ai --projects=3
+python run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai --project-keys-file=keys.txt
+python test_data.py cleanup --web=https://connect-staging.boldcreate.ai
+```
+
+Terminal (macOS):
+
+```sh
+python3 test_data.py setup --web=https://connect-staging.boldcreate.ai --projects=3
+python3 run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai --project-keys-file=keys.txt
+python3 test_data.py cleanup --web=https://connect-staging.boldcreate.ai
+```
+
+- `setup` makes one organization per project (named `loadtest-<run>-<n>`), a project "Load test"
+  in each, and a key with `sessions:read` and `sessions:write` that ends after 7 days
+  (`--key-days`). Keys go to `keys.txt` and ids to `load-test-state.json`; git ignores both, and
+  no key is printed.
+- `cleanup` deletes the organizations in `load-test-state.json`, which removes their projects,
+  keys, and the users and sessions the run made. `--all` also deletes any other organization of
+  the account named `loadtest-...`, for when the state file was lost. Nothing else is deleted.
+  Each deleted organization sends the account the usual deletion mail, and the audit log keeps
+  its rows, as for every deletion.
+- `run_staging.py --keep` keeps the test data for another run.
+
+### Settings
+
+| Variable                  | Default | Meaning                                                           |
+| ------------------------- | ------- | ----------------------------------------------------------------- |
+| `CAPACITY_START_USERS`    | 20      | Users in the first step                                           |
+| `CAPACITY_STEP_USERS`     | 20      | Users added each step                                             |
+| `CAPACITY_MAX_USERS`      | 600     | The run never goes above this                                     |
+| `CAPACITY_STEP_SECONDS`   | 120     | How long each step lasts                                          |
+| `CAPACITY_WARMUP_SECONDS` | 20      | Start of each step left out of its numbers                        |
+| `CAPACITY_MAX_FAIL_PCT`   | 1       | Failures (any `4xx` but `429`, `5xx`, no answer) that end the run |
+| `CAPACITY_MAX_P95_MS`     | 1000    | p95 that ends the run                                             |
+| `CAPACITY_READ_ONLY`      | unset   | `1` sends only GET calls, so no users or sessions are made        |
+| `CAPACITY_BUSY_SHARE_PCT` | 0       | Share of users on the first key (`--busy-share`); 0 = even        |
+
+Set one in PowerShell with `$env:CAPACITY_STEP_SECONDS = "60"`, on macOS with
+`export CAPACITY_STEP_SECONDS=60`.
 
 One Locust process uses one CPU core. If Locust warns that its CPU is above 90%, the numbers show
 the test machine's limit, not the service's; lower the users or run from a bigger machine.
