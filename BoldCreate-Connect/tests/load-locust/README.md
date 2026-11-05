@@ -294,7 +294,10 @@ A database in Docker can be capped like a deployed one, so you can compare datab
 own machine. The rest of the app runs on the same machine, so the numbers are lower than on a
 cluster; compare the rounds with each other, not with staging.
 
-You need Docker Desktop running, and the repo set up for `pnpm dev`.
+You need Docker and the repo set up for `pnpm dev`. On Windows that is either Docker Desktop (then
+use the PowerShell commands below), or, where Docker Desktop is not allowed, Docker Engine inside
+Ubuntu on WSL (see [Windows without Docker Desktop](#windows-without-docker-desktop); then every
+command runs in Ubuntu, using the macOS / Linux lines).
 
 Three settings size the run:
 
@@ -362,6 +365,74 @@ pnpm dev
 
 Check with `docker inspect` as above (`2000000000`, `max_connections=150`), then run the same round
 in the control panel.
+
+### Windows without Docker Desktop
+
+Docker Engine, the command-line Docker, is free and runs inside Ubuntu on WSL. The app, PgBouncer
+and Locust then run in Ubuntu too; the Windows browser still opens `http://localhost:3000`.
+
+1. **Check virtualization.** In PowerShell: `systeminfo | Select-String "Hyper-V|hypervisor"`.
+   "A hypervisor has been detected" or "Virtualization Enabled In Firmware: Yes" means it is on.
+2. **Install WSL and Ubuntu.** PowerShell as administrator: `wsl --install`, then restart. Open
+   "Ubuntu" from the Start menu (or type `wsl` in PowerShell) and create a user. Answer `n` to the
+   platform metrics question.
+3. **Docker Engine.** In Ubuntu, one line at a time:
+
+   ```sh
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sudo sh get-docker.sh
+   sudo usermod -aG docker $USER
+   ```
+
+   Close and reopen Ubuntu, then `docker run --rm hello-world` should print "Hello from Docker!".
+
+4. **Tools the app needs on Linux** (on Windows `pnpm dev` downloads these itself):
+
+   ```sh
+   sudo apt install -y git unzip curl redis-server pgbouncer python3-venv
+   sudo systemctl disable --now redis-server pgbouncer
+   curl -fsSL https://fnm.vercel.app/install -o fnm-install.sh
+   bash fnm-install.sh
+   ```
+
+   The second line stops the Redis and PgBouncer services apt started, because they take the ports
+   `pnpm dev` uses. Close and reopen Ubuntu, then `fnm install 24`, `corepack enable` and
+   `node --version` (v24).
+
+5. **The repo, inside Ubuntu** (much faster than a Windows drive). A private repo asks for a token
+   as the password: GitHub, Settings, Developer settings, Tokens (tick "repo"); Gitea, Settings,
+   Applications, Generate New Token.
+
+   ```sh
+   git clone -b internal-development https://github.com/saravananmadhesh/BoldCreate-Plugins.git
+   cd BoldCreate-Plugins/BoldCreate-Connect
+   grep -c POSTGRES_DOCKER_CPUS scripts/postgres-docker.ts
+   pnpm install
+   ```
+
+   The `grep` line must print a number above 0; 0 means the copy is older than these settings.
+
+6. **Python for Locust:**
+
+   ```sh
+   python3 -m venv ~/locust-venv
+   ~/locust-venv/bin/pip install -r tests/load-locust/requirements.txt
+   ```
+
+7. **Run the rounds.** Each time you open Ubuntu to start the app, first tell it where Redis and
+   PgBouncer are:
+
+   ```sh
+   export REDIS_SERVER_BIN=/usr/bin/redis-server PGBOUNCER_BIN=/usr/sbin/pgbouncer
+   POSTGRES_MODE=docker POSTGRES_DOCKER_CPUS=1 POSTGRES_DOCKER_MAX_CONNECTIONS=100 DB_VCPU=1 pnpm dev
+   ```
+
+   (Round B: `2`, `150`, `2`.) In a second Ubuntu window, in the same folder:
+   `~/locust-venv/bin/python tests/load-locust/control_panel.py`, then open
+   `http://localhost:8090` in the Windows browser.
+
+Commands copied from a chat or a web page sometimes lose a `|` or a line break; if a command
+fails in a strange way ("could not resolve host: sudo"), type it again by hand.
 
 ### Comparing
 
