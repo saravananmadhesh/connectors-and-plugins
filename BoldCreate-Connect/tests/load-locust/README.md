@@ -80,11 +80,25 @@ python3 tests/load-locust/run_capacity.py \
 | `CAPACITY_MAX_FAIL_PCT`   | 1       | Failures (`503`, other `5xx`, no answer) that end the run  |
 | `CAPACITY_MAX_P95_MS`     | 1000    | p95 that ends the run                                      |
 | `CAPACITY_READ_ONLY`      | unset   | `1` sends only GET calls, so no users or sessions are made |
+| `CAPACITY_BUSY_SHARE_PCT` | 0       | Share of users on the first key (`--busy-share`); 0 = even |
+
+### Several projects
+
+`--project-keys=prk_a,prk_b,prk_c` or `--project-keys-file=keys.txt` (one key per line) spreads the
+users evenly over the projects, and the results show each project's share in `projects.csv` and
+at the end of the run. Make each test project in its own organization: the database queue shares
+its room per organization (`db_queue_project_share_pct`), so projects of one organization count as
+one.
+
+`--busy-share=60` puts 60% of the users on the first key and spreads the rest over the others: a
+busy neighbour. Run it after setting "Project requests per window" to the value you plan. The
+first project should get `429`s while the others stay healthy.
 
 Each user calls with only 10 to 50 ms between calls, so one Locust user is a busy host server, not
 one person.
 
-Results go to `reports/load-locust/capacity/`: `steps.csv` (one row per step), `summary.json`
+Results go to `reports/load-locust/capacity/`: `steps.csv` (one row per step), `projects.csv` (one
+row per project per step), `summary.json`
 (the capacity and 70% of it, per second and per minute) and the Locust HTML report.
 
 ### Before the run
@@ -110,4 +124,21 @@ Results go to `reports/load-locust/capacity/`: `steps.csv` (one row per step), `
   busy customers, about 4,000 each.
 - **Callers one api pod lets wait for the database** and **Seconds a call waits for the
   database**: raise them only if the run shows `503`s while database CPU was low.
+- Check the plan with `--busy-share`: the busy project is held at its limit and the others keep
+  a p95 under a second.
 - Run again after any change of database size, pod count or limits.
+
+### On Windows (PowerShell)
+
+```powershell
+cd BoldCreate-Connect
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r tests/load-locust/requirements.txt
+$env:LOCUST_ALLOW_LOAD = "1"
+$env:LOCUST_ALLOWED_HOSTS = "connect-gateway-staging.boldcreate.ai"
+python tests/load-locust/run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai --project-keys-file=keys.txt
+```
+
+One Locust process uses one CPU core. If Locust warns that its CPU is above 90%, the numbers show
+the test machine's limit, not the service's; lower the users or run from a bigger machine.
