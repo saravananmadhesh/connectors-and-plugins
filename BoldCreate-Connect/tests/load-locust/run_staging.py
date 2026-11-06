@@ -28,19 +28,39 @@ def main():
     parser = argparse.ArgumentParser(description="Set up, run and clean up a staging capacity run")
     parser.add_argument("--web", default="https://connect-staging.boldcreate.ai")
     parser.add_argument("--gateway", default="https://connect-gateway-staging.boldcreate.ai")
-    parser.add_argument("--projects", type=int, default=3)
-    parser.add_argument("--busy-share", type=float, default=None, help="Percent of users on the first project")
+    parser.add_argument("--orgs", type=int, default=3)
+    parser.add_argument("--projects-per-org", type=int, default=1)
+    parser.add_argument("--busy-share", type=float, default=None, help="Percent of users on the busy project(s)")
+    parser.add_argument(
+        "--busy-target",
+        choices=["first-key", "first-of-each-org"],
+        default=None,
+        help="Which project(s) carry the busy share",
+    )
     parser.add_argument("--keep", action="store_true", help="Keep the test data after the run")
     parser.add_argument("--live", action="store_true", help="Show Locust's live charts at http://localhost:8089")
     args = parser.parse_args()
 
-    if step("test_data.py", "setup", f"--web={args.web}", f"--projects={args.projects}") != 0:
+    if step(
+        "test_data.py",
+        "setup",
+        f"--web={args.web}",
+        f"--orgs={args.orgs}",
+        f"--projects-per-org={args.projects_per_org}",
+    ) != 0:
         print("[staging] setup failed; removing whatever it made")
         step("test_data.py", "cleanup", f"--web={args.web}")
         sys.exit(1)
-    run = ["run_capacity.py", f"--target={args.gateway}", "--project-keys-file=keys.txt"]
+    run = [
+        "run_capacity.py",
+        f"--target={args.gateway}",
+        "--project-keys-file=keys.txt",
+        f"--projects-per-org={args.projects_per_org}",
+    ]
     if args.busy_share is not None:
         run.append(f"--busy-share={args.busy_share}")
+    if args.busy_target is not None:
+        run.append(f"--busy-target={args.busy_target}")
     if args.live:
         run.append("--live")
     code = 1

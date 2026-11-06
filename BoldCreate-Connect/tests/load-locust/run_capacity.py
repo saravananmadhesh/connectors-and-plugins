@@ -26,7 +26,16 @@ def main():
     parser.add_argument("--project-key", default=os.getenv("PROJECT_KEY", ""), help="One project")
     parser.add_argument("--project-keys", default="", help="Several projects, comma separated")
     parser.add_argument("--project-keys-file", default="", help="A file with one project key per line")
-    parser.add_argument("--busy-share", type=float, default=None, help="Percent of users on the first key")
+    parser.add_argument("--busy-share", type=float, default=None, help="Percent of users on the busy key(s)")
+    parser.add_argument(
+        "--busy-target",
+        choices=["first-key", "first-of-each-org"],
+        default=None,
+        help="Which key(s) carry the busy share: the single first key, or the first project of each org",
+    )
+    parser.add_argument(
+        "--projects-per-org", type=int, default=None, help="Projects per org (for --busy-target=first-of-each-org)"
+    )
     parser.add_argument("--live", action="store_true", help="Also show Locust's live charts at http://localhost:8089")
     args = parser.parse_args()
 
@@ -40,6 +49,10 @@ def main():
         env["PROJECT_KEYS_FILE"] = str(Path(args.project_keys_file).resolve())
     if args.busy_share is not None:
         env["CAPACITY_BUSY_SHARE_PCT"] = str(args.busy_share)
+    if args.busy_target is not None:
+        env["CAPACITY_BUSY_TARGET"] = args.busy_target
+    if args.projects_per_org is not None:
+        env["CAPACITY_PROJECTS_PER_ORG"] = str(args.projects_per_org)
     if not (env.get("PROJECT_KEY") or env.get("PROJECT_KEYS") or env.get("PROJECT_KEYS_FILE")):
         sys.stderr.write(
             "[capacity] A project key is required: --project-key, --project-keys or --project-keys-file\n"
