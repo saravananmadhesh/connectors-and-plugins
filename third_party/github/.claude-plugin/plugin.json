@@ -1,7 +1,7 @@
 {
   "name": "github",
   "displayName": "GitHub",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Manage repos, issues, pull requests, and Actions.",
   "author": {
     "name": "Syncfusion"
@@ -18,22 +18,10 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
-  "userConfig": {
-    "GITHUB_PERSONAL_ACCESS_TOKEN": {
-      "type": "string",
-      "title": "GitHub personal access token",
-      "description": "Fine-grained or classic PAT from https://github.com/settings/tokens with the repo scopes you want the agent to use.",
-      "required": true,
-      "sensitive": true
-    }
-  },
   "mcpServers": {
     "github": {
       "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${user_config.GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
+      "url": "https://api.githubcopilot.com/mcp/"
     }
   }
 }

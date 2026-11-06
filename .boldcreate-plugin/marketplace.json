@@ -202,7 +202,7 @@
     {
       "name": "github",
       "displayName": "GitHub",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "description": "Manage repos, issues, pull requests, and Actions.",
       "source": "third_party/github",
       "logo": "third_party/github/assets/logo.svg",
@@ -214,9 +214,9 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
