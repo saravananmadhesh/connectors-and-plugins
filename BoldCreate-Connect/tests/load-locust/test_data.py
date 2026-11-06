@@ -140,23 +140,28 @@ def setup(args):
     state = {"web": args.web, "run": run, "orgs": []}
     keys = []
     try:
-        for n in range(1, args.projects + 1):
+        for n in range(1, args.orgs + 1):
             slug = f"{SLUG_PREFIX}{run}-{n}"
             org = client.call("POST", "/v1/orgs", {"name": f"Load test {run} {n}", "slug": slug})
-            entry = {"id": org["id"], "slug": slug}
+            entry = {"id": org["id"], "slug": slug, "projects": []}
             state["orgs"].append(entry)
             _write_state(state)
-            project = client.call("POST", f"/v1/orgs/{org['id']}/projects", {"name": "Load test"})
-            entry["projectId"] = project["id"]
-            key = client.call(
-                "POST",
-                f"/v1/orgs/{org['id']}/projects/{project['id']}/keys",
-                {"scopes": SCOPES, "expiresAt": expires},
+            for p in range(1, args.projects_per_org + 1):
+                project = client.call(
+                    "POST", f"/v1/orgs/{org['id']}/projects", {"name": f"Load test {p}"}
+                )
+                key = client.call(
+                    "POST",
+                    f"/v1/orgs/{org['id']}/projects/{project['id']}/keys",
+                    {"scopes": SCOPES, "expiresAt": expires},
+                )
+                entry["projects"].append({"projectId": project["id"], "keyId": key["id"]})
+                keys.append(key["rawKey"])
+                _write_state(state)
+            print(
+                f"[test-data] {n}/{args.orgs}: organization {slug} "
+                f"with {args.projects_per_org} project(s) and key(s) made"
             )
-            entry["keyId"] = key["id"]
-            keys.append(key["rawKey"])
-            _write_state(state)
-            print(f"[test-data] {n}/{args.projects}: organization {slug}, project and key made")
     finally:
         if keys:
             KEYS_FILE.write_text("\n".join(keys) + "\n", encoding="utf-8")
@@ -202,14 +207,17 @@ def main():
     parser = argparse.ArgumentParser(description="Make or remove load-test organizations, projects and keys")
     parser.add_argument("command", choices=["setup", "cleanup"])
     parser.add_argument("--web", default=os.getenv("TEST_WEB_URL", "http://localhost:3000"), help="The web app")
-    parser.add_argument("--projects", type=int, default=3, help="Projects to make, each in its own organization")
+    parser.add_argument("--orgs", type=int, default=3, help="Organizations to make")
+    parser.add_argument("--projects-per-org", type=int, default=1, help="Projects to make in each organization")
     parser.add_argument("--key-days", type=int, default=7, help="Days until the keys end")
     parser.add_argument("--all", action="store_true", help="cleanup: also any other loadtest-* organization")
     args = parser.parse_args()
     _check_target(args.web)
     if args.command == "setup":
-        if not 1 <= args.projects <= 20:
-            parser.error("--projects must be 1 to 20")
+        if not 1 <= args.orgs <= 20:
+            parser.error("--orgs must be 1 to 20")
+        if not 1 <= args.projects_per_org <= 20:
+            parser.error("--projects-per-org must be 1 to 20")
         setup(args)
     else:
         cleanup(args)

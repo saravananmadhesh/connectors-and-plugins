@@ -19,7 +19,10 @@ Settings (environment):
   CAPACITY_MAX_FAIL_PCT    failures (any 4xx but 429, 5xx, no answer) above this end the run (default 1)
   CAPACITY_MAX_P95_MS      p95 above this ends the run                     (default 1000)
   CAPACITY_READ_ONLY=1     only GET calls, so no users or sessions are created
-  CAPACITY_BUSY_SHARE_PCT  share of users on the first key, 0 = even       (default 0)
+  CAPACITY_BUSY_SHARE_PCT  share of users on the busy key(s), 0 = even     (default 0)
+  CAPACITY_BUSY_TARGET     first-key (one busy project) or first-of-each-org
+                           (the first project of every org)                (default first-key)
+  CAPACITY_PROJECTS_PER_ORG  projects per org, so first-of-each-org can find them (default 1)
 """
 
 import json
@@ -58,7 +61,21 @@ MAX_FAIL_PCT = _num("CAPACITY_MAX_FAIL_PCT", 1)
 MAX_P95_MS = _num("CAPACITY_MAX_P95_MS", 1000)
 READ_ONLY = os.getenv("CAPACITY_READ_ONLY") == "1"
 BUSY_SHARE_PCT = _num("CAPACITY_BUSY_SHARE_PCT", 0)
+# first-key          the single first key carries the busy share (one busy project)
+# first-of-each-org  the first project of every org shares the busy load (one busy project per org)
+BUSY_TARGET = os.getenv("CAPACITY_BUSY_TARGET", "first-key").strip().lower()
+PROJECTS_PER_ORG = max(1, int(_num("CAPACITY_PROJECTS_PER_ORG", 1)))
 KEYS = _keys()
+
+
+def _busy_indices() -> list[int]:
+    """Which keys carry the busy share."""
+    if BUSY_TARGET == "first-of-each-org":
+        return list(range(0, len(KEYS), PROJECTS_PER_ORG))
+    return [0]
+
+
+BUSY_SET = set(_busy_indices())
 
 OUT_DIR = Path(
     os.getenv("CAPACITY_OUT_DIR")
@@ -70,14 +87,15 @@ _users_per_project = [0] * max(1, len(KEYS))
 
 
 def _pick_project() -> int:
-    """The project the next user belongs to: the busy share on the first key, the rest even."""
+    """The project the next user belongs to: the busy share on the busy keys, the rest even."""
     if len(KEYS) <= 1:
         return 0
-    total = sum(_users_per_project)
-    if BUSY_SHARE_PCT > 0:
-        if _users_per_project[0] < (total + 1) * BUSY_SHARE_PCT / 100:
-            return 0
-        others = range(1, len(KEYS))
+    if BUSY_SHARE_PCT > 0 and BUSY_SET and len(BUSY_SET) < len(KEYS):
+        total = sum(_users_per_project)
+        on_busy = sum(_users_per_project[i] for i in BUSY_SET)
+        if on_busy < (total + 1) * BUSY_SHARE_PCT / 100:
+            return min(BUSY_SET, key=lambda i: _users_per_project[i])
+        others = [i for i in range(len(KEYS)) if i not in BUSY_SET]
         return min(others, key=lambda i: _users_per_project[i])
     return min(range(len(KEYS)), key=lambda i: _users_per_project[i])
 

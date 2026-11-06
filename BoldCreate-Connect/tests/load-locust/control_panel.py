@@ -110,12 +110,19 @@ class Run:
         }
         result = "finished"
         try:
-            if self.step("Making test data", ["test_data.py", "setup", f"--web={web}", f"--projects={form['projects']}"], env) != 0:
+            if self.step("Making test data", ["test_data.py", "setup", f"--web={web}", f"--orgs={form['orgs']}", f"--projects-per-org={form['projectsPerOrg']}"], env) != 0:
                 result = "setup failed"
             elif not self.stopping:
-                run = ["run_capacity.py", f"--target={gateway}", "--project-keys-file=keys.txt", "--live"]
+                run = [
+                    "run_capacity.py",
+                    f"--target={gateway}",
+                    "--project-keys-file=keys.txt",
+                    f"--projects-per-org={form['projectsPerOrg']}",
+                    "--live",
+                ]
                 if form["round"] == "busy":
                     run.append(f"--busy-share={form['busyShare']}")
+                    run.append(f"--busy-target={form['busyTarget']}")
                 if self.step("Capacity run", run, env) != 0 and not self.stopping:
                     result = "run failed"
         finally:
@@ -152,11 +159,14 @@ def check_form(form: dict) -> str | None:
             return f"{url.hostname} looks like production; load runs never go there."
     if form["round"] not in ("capacity", "busy"):
         return "Pick a round."
+    if form.get("busyTarget") not in ("first-key", "first-of-each-org"):
+        return "Pick a busy target."
     if not form.get("confirm"):
         return "Please confirm this is a test environment and the limit is set."
     try:
         for name, low, high in (
-            ("projects", 1, 20),
+            ("orgs", 1, 20),
+            ("projectsPerOrg", 1, 20),
             ("startUsers", 1, 5000),
             ("stepUsers", 1, 5000),
             ("stepSeconds", 30, 3600),
@@ -266,6 +276,7 @@ table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:
 </style></head><body><main>
 <h1>Load Test Control Panel</h1>
 <div class="panel"><h2>1. Environment and account</h2><div class="grid">
+<label>Test name (optional, shown in past runs)<input id="testName" placeholder="e.g. roundA-1cpu-100conn"></label>
 <label>Web app address<input id="web" value="https://connect-staging.boldcreate.ai"></label>
 <label>Gateway address<input id="gateway" value="https://connect-gateway-staging.boldcreate.ai"></label>
 <label>Load-test account email<input id="email" autocomplete="username"></label>
@@ -276,8 +287,10 @@ table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:
 <label><input type="radio" name="round" value="busy"><span><b>One busy project</b><br><span class="muted">One project gets most of the users. Before you run: set "Project requests per window" to the limit you plan.</span></span></label>
 </div>
 <div class="grid" style="margin-top:12px">
-<label>Projects (each in its own organization)<input id="projects" type="number" value="3" min="1" max="20"></label>
+<label>Organizations<input id="orgs" type="number" value="3" min="1" max="20"></label>
+<label>Projects per organization<input id="projectsPerOrg" type="number" value="1" min="1" max="20"></label>
 <label>Busy project share, % (busy round only)<input id="busyShare" type="number" value="60" min="1" max="99"></label>
+<label>Busy target (busy round only)<select id="busyTarget"><option value="first-key">First project only (one busy project)</option><option value="first-of-each-org">First project of each org</option></select></label>
 <label>Limit you set (for the record)<input id="limitNote" placeholder="e.g. 4300 a minute"></label>
 </div>
 <details style="margin-top:10px"><summary class="muted">Step settings</summary><div class="grid" style="margin-top:8px">
@@ -293,7 +306,7 @@ table{border-collapse:collapse;width:100%;font-size:.85rem;font-variant-numeric:
 <p id="error" class="err"></p>
 <div class="tbl"><table id="steps"><thead><tr><th>Step</th><th>Users</th><th>OK calls/s</th><th>Failed %</th><th>p95 ms</th><th>429s</th><th>Result</th></tr></thead><tbody></tbody></table></div>
 <details style="margin-top:10px"><summary class="muted">Log</summary><pre id="log"></pre></details></div>
-<div class="panel"><h2>Past runs</h2><p class="muted">Saved in tests/load-locust/results/.</p><div class="tbl"><table id="runs"><thead><tr><th>When</th><th>Round</th><th>Projects</th><th>Capacity (calls/s)</th><th>70% a minute</th><th>Limit set</th><th>Result</th><th>Files</th></tr></thead><tbody></tbody></table></div>
+<div class="panel"><h2>Past runs</h2><p class="muted">Saved in tests/load-locust/results/.</p><div class="tbl"><table id="runs"><thead><tr><th>When</th><th>Name</th><th>Round</th><th>Orgs × projects</th><th>Capacity (calls/s)</th><th>70% a minute</th><th>Limit set</th><th>Result</th><th>Files</th></tr></thead><tbody></tbody></table></div>
 <div id="detail"></div></div>
 </main><script>
 const $=id=>document.getElementById(id);
@@ -301,8 +314,8 @@ try{$('email').value=localStorage.getItem('lt-email')||'';}catch(e){}
 const num=id=>Number($(id).value);
 $('run').onclick=async()=>{$('error').textContent='';
  const round=document.querySelector('input[name=round]:checked').value;
- const body={web:$('web').value,gateway:$('gateway').value,email:$('email').value,password:$('password').value,round,
-  projects:num('projects'),busyShare:num('busyShare'),startUsers:num('startUsers'),stepUsers:num('stepUsers'),stepSeconds:num('stepSeconds'),maxUsers:num('maxUsers'),limitNote:$('limitNote').value,confirm:$('confirm').checked};
+ const body={testName:$('testName').value,web:$('web').value,gateway:$('gateway').value,email:$('email').value,password:$('password').value,round,
+  orgs:num('orgs'),projectsPerOrg:num('projectsPerOrg'),busyShare:num('busyShare'),busyTarget:$('busyTarget').value,startUsers:num('startUsers'),stepUsers:num('stepUsers'),stepSeconds:num('stepSeconds'),maxUsers:num('maxUsers'),limitNote:$('limitNote').value,confirm:$('confirm').checked};
  try{localStorage.setItem('lt-email',body.email);}catch(e){}
  const r=await fetch('/api/run',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
  const d=await r.json(); if(d.error)$('error').textContent=d.error; poll();};
@@ -318,7 +331,8 @@ async function poll(){const s=await (await fetch('/api/status')).json();
 async function loadRuns(){const runs=await (await fetch('/api/runs')).json();
  document.querySelector('#runs tbody').innerHTML=runs.map(r=>{const st=r.settings||{},su=r.summary||{};
   const files=['summary.json','projects.csv','log.txt'].map(f=>`<a href="/results/${r.name}/${f}" target="_blank">${f.split('.')[0]}</a>`).join(' ')+(r.hasReport?` <a href="/results/${r.name}/report.html" target="_blank">charts</a>`:'');
-  return `<tr><td><a href="#" data-run="${esc(r.name)}">${esc(st.started||r.name)}</a></td><td>${st.round==='busy'?'One busy project':'Total capacity'}</td><td>${esc(st.projects??'')}</td><td>${su.capacity_ok_per_second??'–'}</td><td>${su.safe_per_minute_70pct??'–'}</td><td>${esc(st.limitNote||'')}</td><td>${esc(st.result||'')}</td><td>${files}</td></tr>`;}).join('');
+  const orgsProjects=(st.orgs!=null)?`${esc(st.orgs)} × ${esc(st.projectsPerOrg??1)}`:esc(st.projects??'');
+  return `<tr><td><a href="#" data-run="${esc(r.name)}">${esc(st.started||r.name)}</a></td><td>${esc(st.testName||'')}</td><td>${st.round==='busy'?'One busy project':'Total capacity'}</td><td>${orgsProjects}</td><td>${su.capacity_ok_per_second??'–'}</td><td>${su.safe_per_minute_70pct??'–'}</td><td>${esc(st.limitNote||'')}</td><td>${esc(st.result||'')}</td><td>${files}</td></tr>`;}).join('');
  document.querySelectorAll('[data-run]').forEach(a=>a.onclick=e=>{e.preventDefault();show(runs.find(r=>r.name===a.dataset.run));});}
 function show(r){const su=r.summary; if(!su){$('detail').innerHTML='<p class="muted">This run has no results.</p>';return;}
  const steps=su.steps.map(s=>`<tr><td>${s.step}</td><td>${s.users}</td><td>${s.ok_per_second}</td><td>${s.failed_pct}</td><td>${s.p95_ms}</td><td>${s.throttled_429}</td><td class="${s.healthy?'ok':'no'}">${s.healthy?'healthy':'over the line'}</td></tr>`).join('');
