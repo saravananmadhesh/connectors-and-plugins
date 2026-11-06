@@ -1,0 +1,75 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-calendar",
+  "displayName": "Google Calendar",
+  "version": "0.7.0",
+  "description": "List calendars, read events, and check free/busy time.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "productivity",
+  "keywords": [
+    "google calendar",
+    "calendar",
+    "scheduling",
+    "google workspace",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "preview",
+  "docs": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "A Google OAuth client your team created. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The secret for that OAuth client. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-calendar",
+        "transport": "streamable-http",
+        "url": "https://calendarmcp.googleapis.com/mcp/v1",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+            "https://www.googleapis.com/auth/calendar.events.freebusy",
+            "https://www.googleapis.com/auth/calendar.events.readonly"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+  }
+}

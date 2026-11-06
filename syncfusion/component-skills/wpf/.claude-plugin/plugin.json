@@ -1,0 +1,21 @@
+{
+  "name": "syncfusion-wpf",
+  "displayName": "Syncfusion WPF Controls",
+  "version": "1.0.3",
+  "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/wpf",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "wpf",
+    "desktop",
+    "ui-controls",
+    "data-grid",
+    "charts"
+  ],
+  "icon": "./assets/logo.png"
+}

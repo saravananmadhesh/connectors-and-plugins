@@ -1,0 +1,18 @@
+{
+  "name": "syncfusion-winforms",
+  "displayName": "Syncfusion WinForms Controls",
+  "version": "1.0.1",
+  "description": "Skills for building Windows Forms desktop apps with Syncfusion WinForms controls: data grid, charts, ribbon, docking, editors and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/winforms",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "winforms",
+    "desktop"
+  ],
+  "icon": "./assets/logo.png"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "syncfusion-xamarin-to-maui",
+  "displayName": "Syncfusion Xamarin to .NET MAUI Migration",
+  "version": "1.0.1",
+  "description": "Skills for moving Xamarin.Forms apps to .NET MAUI: project and framework changes, platform-specific code, renderers to handlers, and Syncfusion Xamarin controls to their .NET MAUI equivalents.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/migration-skills/xamarin-to-maui",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "syncfusion",
+    "xamarin",
+    "dotnet-maui",
+    "migration"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "syncfusion",
+    "migration",
+    "skills"
+  ],
+  "skills": "./skills/"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-resource-manager",
+  "displayName": "Google Cloud Resource Manager",
+  "version": "0.7.0",
+  "description": "Browse Google Cloud organizations, folders, and projects.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/resource-manager/docs/use-resourcemanager-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "resource manager",
+    "projects",
+    "folders",
+    "organization",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-resource-manager": {
+      "type": "http",
+      "url": "https://cloudresourcemanager.googleapis.com/mcp"
+    }
+  }
+}

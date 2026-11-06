@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/syncfusion/BoldCreate-Plugins/schemas/boldcreate.schema.json",
+  "title": "BoldCreate plugin metadata",
+  "description": "Extra metadata BoldCreate Connect needs that the Cursor and Claude manifests have no field for.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phase", "docs"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "phase": { "type": "integer", "minimum": 1, "description": "Rollout phase this plugin belongs to." },
+    "wave": { "enum": ["A", "B"], "description": "Test wave. A = token or no auth, B = OAuth." },
+    "transport": {
+      "enum": ["streamable-http", "stdio", "sse", "websocket"],
+      "description": "MCP transport. Required for MCP plugins. BoldCreate Connect supports streamable-http only today."
+    },
+    "auth": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"], "description": "Auth this package is configured for. Required for MCP plugins." },
+    "alternativeAuth": {
+      "type": "array",
+      "items": { "enum": ["none", "bearer", "header", "basic-api-token", "oauth"] },
+      "uniqueItems": true,
+      "description": "Other auth methods the server supports."
+    },
+    "hostedBy": { "enum": ["vendor", "customer", "boldcreate", "local"], "description": "Who runs the MCP server. Required for MCP plugins. customer = the customer hosts it (for example gitea-mcp next to their Gitea)." },
+    "stage": { "enum": ["ga", "preview", "beta", "early-access"], "description": "Launch stage: the vendor's stage for an MCP server, or the plugin's own stage for a first-party plugin." },
+    "oauthScopes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "description": "OAuth scopes to request, for servers that need them (Google)." },
+    "docs": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "commit", "license"],
+      "description": "Where a community plugin was copied from. The original LICENSE file stays in the plugin folder.",
+      "properties": {
+        "repository": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "path": { "type": "string", "description": "Plugin folder inside the source repository." },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        "author": { "type": "string", "description": "Author named in the source manifest." },
+        "license": { "type": "string" }
+      }
+    },
+    "endpointCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lastLiveCheck": { "type": ["string", "null"], "format": "date" },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}

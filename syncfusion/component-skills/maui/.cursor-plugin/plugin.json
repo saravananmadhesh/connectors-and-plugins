@@ -1,0 +1,28 @@
+{
+  "name": "syncfusion-maui",
+  "displayName": "Syncfusion .NET MAUI Controls",
+  "version": "1.0.2",
+  "description": "Skills for building .NET MAUI apps with Syncfusion .NET MAUI controls: data grid, charts, scheduler, inputs, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/maui",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "syncfusion",
+    "dotnet-maui",
+    "maui",
+    "ui-controls",
+    "data-grid",
+    "charts"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "syncfusion",
+    "ui-components",
+    "skills"
+  ],
+  "skills": "./skills/"
+}

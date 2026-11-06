@@ -1,0 +1,21 @@
+{
+  "name": "syncfusion-react",
+  "displayName": "Syncfusion React UI Components",
+  "version": "1.0.1",
+  "description": "Skills for building React apps with Syncfusion React UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/react",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "react",
+    "ui-components",
+    "data-grid",
+    "charts",
+    "scheduler"
+  ],
+  "icon": "./assets/logo.png"
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-cloud-resource-manager",
+  "displayName": "Google Cloud Resource Manager",
+  "version": "0.7.0",
+  "description": "Browse Google Cloud organizations, folders, and projects.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/resource-manager/docs/use-resourcemanager-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "cloud",
+  "keywords": [
+    "resource manager",
+    "projects",
+    "folders",
+    "organization",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "ga",
+  "docs": "https://docs.cloud.google.com/resource-manager/docs/use-resourcemanager-mcp",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "A Google OAuth client your team created. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The secret for that OAuth client. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-cloud-resource-manager",
+        "transport": "streamable-http",
+        "url": "https://cloudresourcemanager.googleapis.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

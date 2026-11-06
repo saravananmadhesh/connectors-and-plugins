@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "linear",
+  "displayName": "Linear",
+  "version": "0.7.1",
+  "description": "Find, create, and update Linear issues, projects, and cycles.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://linear.app/docs/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "project-management",
+  "keywords": [
+    "linear",
+    "issues",
+    "project-management",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://linear.app/docs/mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "linear",
+        "transport": "streamable-http",
+        "url": "https://mcp.linear.app/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "bearer"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

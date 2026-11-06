@@ -1,0 +1,25 @@
+{
+  "name": "google-workspace-search",
+  "displayName": "Google Workspace Search",
+  "version": "0.7.0",
+  "description": "Search across Gmail, Drive, Calendar, and other Google Workspace content in one place.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google workspace",
+    "search",
+    "enterprise search",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-workspace-search": {
+      "type": "http",
+      "url": "https://workspacemcp.googleapis.com/mcp/v1"
+    }
+  }
+}

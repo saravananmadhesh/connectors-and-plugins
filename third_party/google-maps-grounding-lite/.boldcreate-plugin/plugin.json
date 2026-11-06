@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-maps-grounding-lite",
+  "displayName": "Google Maps Grounding Lite",
+  "version": "0.7.0",
+  "description": "Ground agents in Google Maps data: places, routes, and weather.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/maps/ai/grounding-lite",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "data",
+  "keywords": [
+    "google maps",
+    "places",
+    "routes",
+    "weather",
+    "geo",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "ga",
+  "docs": "https://developers.google.com/maps/ai/grounding-lite",
+  "rollout": {
+    "phase": 2,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "GOOGLE_MAPS_API_KEY": {
+      "title": "Google Maps API key",
+      "description": "Google Maps Platform API key with the Maps Grounding Lite API enabled.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-maps-grounding-lite",
+        "transport": "streamable-http",
+        "url": "https://mapstools.googleapis.com/mcp",
+        "headers": {
+          "X-Goog-Api-Key": "${GOOGLE_MAPS_API_KEY}"
+        },
+        "auth": {
+          "type": "header",
+          "alternatives": [
+            "oauth"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

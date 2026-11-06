@@ -1,0 +1,326 @@
+{
+  "name": "boldcreate-plugins",
+  "owner": {
+    "name": "Syncfusion"
+  },
+  "metadata": {
+    "description": "Reviewed AI-agent plugins for BoldCreate Connect: remote MCP servers developers use every day, a toolkit for the whole software delivery lifecycle, Syncfusion component skills, and community skill and agent packs."
+  },
+  "plugins": [
+    {
+      "name": "android-management",
+      "source": "./third_party/android-management",
+      "description": "Manage enterprise Android devices, policies, and apps with the Android Management API."
+    },
+    {
+      "name": "atlassian",
+      "source": "./third_party/atlassian",
+      "description": "Search and update Jira issues and Confluence pages."
+    },
+    {
+      "name": "aws-knowledge",
+      "source": "./third_party/aws-knowledge",
+      "description": "Search AWS documentation, API references, and regional availability."
+    },
+    {
+      "name": "boldcreate-toolkit",
+      "source": "./boldcreate-toolkit",
+      "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests."
+    },
+    {
+      "name": "context7",
+      "source": "./third_party/context7",
+      "description": "Pull up-to-date, version-specific library docs and code examples into the prompt."
+    },
+    {
+      "name": "deepwiki",
+      "source": "./third_party/deepwiki",
+      "description": "Ask questions about any public GitHub repository and read its generated wiki."
+    },
+    {
+      "name": "figma",
+      "source": "./third_party/figma",
+      "description": "Turn Figma frames into code and read design tokens, components, and variables."
+    },
+    {
+      "name": "gitea",
+      "source": "./third_party/gitea",
+      "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server."
+    },
+    {
+      "name": "github",
+      "source": "./third_party/github",
+      "description": "Manage repos, issues, pull requests, and Actions."
+    },
+    {
+      "name": "gitlab",
+      "source": "./third_party/gitlab",
+      "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search."
+    },
+    {
+      "name": "gmail",
+      "source": "./third_party/gmail",
+      "description": "Search, read, and draft Gmail messages and threads."
+    },
+    {
+      "name": "google-calendar",
+      "source": "./third_party/google-calendar",
+      "description": "List calendars, read events, and check free/busy time."
+    },
+    {
+      "name": "google-chat",
+      "source": "./third_party/google-chat",
+      "description": "Read Google Chat spaces and messages, and post messages."
+    },
+    {
+      "name": "google-cloud-agent-platform",
+      "source": "./third_party/google-cloud-agent-platform",
+      "description": "Generate content, run predictions, and manage models, endpoints, tuning, and evaluation on Vertex AI."
+    },
+    {
+      "name": "google-cloud-bigquery",
+      "source": "./third_party/google-cloud-bigquery",
+      "description": "Explore datasets and tables and run SQL queries."
+    },
+    {
+      "name": "google-cloud-cli",
+      "source": "./third_party/google-cloud-cli",
+      "description": "Run gcloud commands through Google's hosted Cloud CLI server."
+    },
+    {
+      "name": "google-cloud-firestore",
+      "source": "./third_party/google-cloud-firestore",
+      "description": "Read and write Firestore documents and collections."
+    },
+    {
+      "name": "google-cloud-iam",
+      "source": "./third_party/google-cloud-iam",
+      "description": "Review IAM roles, policies, and service accounts."
+    },
+    {
+      "name": "google-cloud-resource-manager",
+      "source": "./third_party/google-cloud-resource-manager",
+      "description": "Browse Google Cloud organizations, folders, and projects."
+    },
+    {
+      "name": "google-cloud-run",
+      "source": "./third_party/google-cloud-run",
+      "description": "Deploy and manage Cloud Run services and jobs."
+    },
+    {
+      "name": "google-cloud-sql",
+      "source": "./third_party/google-cloud-sql",
+      "description": "Manage Cloud SQL for MySQL, PostgreSQL, and SQL Server instances and run queries."
+    },
+    {
+      "name": "google-cloud-storage",
+      "source": "./third_party/google-cloud-storage",
+      "description": "List, read, and manage Cloud Storage buckets and objects."
+    },
+    {
+      "name": "google-compute-engine",
+      "source": "./third_party/google-compute-engine",
+      "description": "Manage Compute Engine VMs, disks, and networks."
+    },
+    {
+      "name": "google-contacts",
+      "source": "./third_party/google-contacts",
+      "description": "Look up contacts and people in your Google Workspace directory."
+    },
+    {
+      "name": "google-design",
+      "source": "./third_party/google-design",
+      "description": "Get Google design guidance and assets, such as Material Design, while you build UI."
+    },
+    {
+      "name": "google-developer-knowledge",
+      "source": "./third_party/google-developer-knowledge",
+      "description": "Search official Google developer documentation for Android, Firebase, Google Cloud, and Maps."
+    },
+    {
+      "name": "google-docs",
+      "source": "./third_party/google-docs",
+      "description": "Read, create, and edit Google Docs."
+    },
+    {
+      "name": "google-drive",
+      "source": "./third_party/google-drive",
+      "description": "Search, read, and create files in Google Drive."
+    },
+    {
+      "name": "google-gemini-cloud-assist",
+      "source": "./third_party/google-gemini-cloud-assist",
+      "description": "Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resources."
+    },
+    {
+      "name": "google-kubernetes-engine",
+      "source": "./third_party/google-kubernetes-engine",
+      "description": "Inspect and manage GKE clusters and workloads."
+    },
+    {
+      "name": "google-maps-code-assist",
+      "source": "./third_party/google-maps-code-assist",
+      "description": "Get up-to-date Google Maps Platform docs and code samples while you write Maps code."
+    },
+    {
+      "name": "google-maps-grounding-lite",
+      "source": "./third_party/google-maps-grounding-lite",
+      "description": "Ground agents in Google Maps data: places, routes, and weather."
+    },
+    {
+      "name": "google-sheets",
+      "source": "./third_party/google-sheets",
+      "description": "Read, create, and update Google Sheets spreadsheets."
+    },
+    {
+      "name": "google-slides",
+      "source": "./third_party/google-slides",
+      "description": "Read, create, and edit Google Slides presentations."
+    },
+    {
+      "name": "google-stitch",
+      "source": "./third_party/google-stitch",
+      "description": "Generate UI designs and front-end code with Google Stitch."
+    },
+    {
+      "name": "google-workspace-search",
+      "source": "./third_party/google-workspace-search",
+      "description": "Search across Gmail, Drive, Calendar, and other Google Workspace content in one place."
+    },
+    {
+      "name": "linear",
+      "source": "./third_party/linear",
+      "description": "Find, create, and update Linear issues, projects, and cycles."
+    },
+    {
+      "name": "microsoft-learn",
+      "source": "./third_party/microsoft-learn",
+      "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more."
+    },
+    {
+      "name": "neon",
+      "source": "./third_party/neon",
+      "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations."
+    },
+    {
+      "name": "notion",
+      "source": "./third_party/notion",
+      "description": "Search, read, and update Notion pages and databases."
+    },
+    {
+      "name": "posthog",
+      "source": "./third_party/posthog",
+      "description": "Query product analytics, manage feature flags, and investigate errors in PostHog."
+    },
+    {
+      "name": "sentry",
+      "source": "./third_party/sentry",
+      "description": "Investigate Sentry errors, stack traces, and issues for a project."
+    },
+    {
+      "name": "stripe",
+      "source": "./third_party/stripe",
+      "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs."
+    },
+    {
+      "name": "supabase",
+      "source": "./third_party/supabase",
+      "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project."
+    },
+    {
+      "name": "syncfusion-angular",
+      "source": "./syncfusion/component-skills/angular",
+      "description": "Skills for building Angular apps with Syncfusion Angular UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-aspnet-core",
+      "source": "./syncfusion/component-skills/aspnet-core",
+      "description": "Skills for building ASP.NET Core apps with Syncfusion ASP.NET Core UI controls and Tag Helpers: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-aspnet-mvc",
+      "source": "./syncfusion/component-skills/aspnet-mvc",
+      "description": "Skills for building ASP.NET MVC apps with Syncfusion ASP.NET MVC UI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-blazor",
+      "source": "./syncfusion/component-skills/blazor",
+      "description": "Skills for building Blazor apps with Syncfusion Blazor components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-document-sdk",
+      "source": "./syncfusion/sdk-skills/document-sdk",
+      "description": "Skills for creating, editing and converting PDF, Word, Excel and PowerPoint files with the Syncfusion Document SDK in .NET, JavaScript, Flutter and Java."
+    },
+    {
+      "name": "syncfusion-docx-editor-sdk",
+      "source": "./syncfusion/sdk-skills/docx-editor-sdk",
+      "description": "Skills for adding the Syncfusion DOCX Editor (Word processor) to web and desktop apps: opening, editing, formatting and saving Word documents on each supported platform."
+    },
+    {
+      "name": "syncfusion-flutter",
+      "source": "./syncfusion/component-skills/flutter",
+      "description": "Skills for building Flutter apps with Syncfusion Flutter widgets: charts, data grid, calendar, gauges, maps and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-javascript",
+      "source": "./syncfusion/component-skills/javascript",
+      "description": "Skills for building JavaScript and TypeScript apps with Syncfusion Essential JS 2 controls: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-maui",
+      "source": "./syncfusion/component-skills/maui",
+      "description": "Skills for building .NET MAUI apps with Syncfusion .NET MAUI controls: data grid, charts, scheduler, inputs, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-maui-toolkit",
+      "source": "./syncfusion/component-skills/maui-toolkit",
+      "description": "Skills for building .NET MAUI apps with the free, open-source Syncfusion Toolkit for .NET MAUI: charts, buttons, cards, calendar, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-pdf-viewer-sdk",
+      "source": "./syncfusion/sdk-skills/pdf-viewer-sdk",
+      "description": "Skills for adding the Syncfusion PDF Viewer to web, mobile and desktop apps: viewing, annotating, searching, form filling and more, on each supported platform."
+    },
+    {
+      "name": "syncfusion-react",
+      "source": "./syncfusion/component-skills/react",
+      "description": "Skills for building React apps with Syncfusion React UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-spreadsheet-editor-sdk",
+      "source": "./syncfusion/sdk-skills/spreadsheet-editor-sdk",
+      "description": "Skills for adding the Syncfusion Spreadsheet Editor to web and desktop apps: opening, editing, formulas, formatting and saving Excel files on each supported platform."
+    },
+    {
+      "name": "syncfusion-vue",
+      "source": "./syncfusion/component-skills/vue",
+      "description": "Skills for building Vue apps with Syncfusion Vue UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-winforms",
+      "source": "./syncfusion/component-skills/winforms",
+      "description": "Skills for building Windows Forms desktop apps with Syncfusion WinForms controls: data grid, charts, ribbon, docking, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-winui",
+      "source": "./syncfusion/component-skills/winui",
+      "description": "Skills for building WinUI 3 desktop apps with Syncfusion WinUI controls: data grid, charts, scheduler, editors and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-wpf",
+      "source": "./syncfusion/component-skills/wpf",
+      "description": "Skills for building WPF desktop apps with Syncfusion WPF controls: data grid, charts, scheduler, docking, ribbon and more, with setup, APIs, theming and examples."
+    },
+    {
+      "name": "syncfusion-xamarin-to-maui",
+      "source": "./syncfusion/migration-skills/xamarin-to-maui",
+      "description": "Skills for moving Xamarin.Forms apps to .NET MAUI: project and framework changes, platform-specific code, renderers to handlers, and Syncfusion Xamarin controls to their .NET MAUI equivalents."
+    },
+    {
+      "name": "vercel",
+      "source": "./third_party/vercel",
+      "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs."
+    }
+  ]
+}

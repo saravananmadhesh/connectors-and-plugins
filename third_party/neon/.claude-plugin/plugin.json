@@ -1,0 +1,35 @@
+{
+  "name": "neon",
+  "displayName": "Neon",
+  "version": "0.7.1",
+  "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/neondatabase-labs/mcp-server-neon",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "neon",
+    "postgres",
+    "database",
+    "serverless",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "NEON_READ_ONLY": {
+      "type": "string",
+      "title": "Read-only mode",
+      "description": "\"true\" disables write tools. Set \"false\" to allow writes.",
+      "default": "true",
+      "sensitive": false
+    }
+  },
+  "mcpServers": {
+    "neon": {
+      "type": "http",
+      "url": "https://mcp.neon.tech/mcp?readonly=${user_config.NEON_READ_ONLY}"
+    }
+  }
+}

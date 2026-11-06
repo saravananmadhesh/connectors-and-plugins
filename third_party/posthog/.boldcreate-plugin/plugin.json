@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "posthog",
+  "displayName": "PostHog",
+  "version": "0.7.1",
+  "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://posthog.com/docs/model-context-protocol",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "analytics",
+  "keywords": [
+    "posthog",
+    "analytics",
+    "feature-flags",
+    "errors",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://posthog.com/docs/model-context-protocol",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "posthog",
+        "transport": "streamable-http",
+        "url": "https://mcp.posthog.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "bearer"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

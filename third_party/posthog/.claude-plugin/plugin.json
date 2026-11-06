@@ -1,0 +1,26 @@
+{
+  "name": "posthog",
+  "displayName": "PostHog",
+  "version": "0.7.1",
+  "description": "Query product analytics, manage feature flags, and investigate errors in PostHog.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://posthog.com/docs/model-context-protocol",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "posthog",
+    "analytics",
+    "feature-flags",
+    "errors",
+    "mcp"
+  ],
+  "icon": "./assets/logo.png",
+  "mcpServers": {
+    "posthog": {
+      "type": "http",
+      "url": "https://mcp.posthog.com/mcp"
+    }
+  }
+}

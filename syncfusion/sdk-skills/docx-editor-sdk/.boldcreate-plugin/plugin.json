@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
+  "name": "syncfusion-docx-editor-sdk",
+  "displayName": "Syncfusion DOCX Editor SDK",
+  "version": "1.0.1",
+  "description": "Skills for adding the Syncfusion DOCX Editor (Word processor) to web and desktop apps: opening, editing, formatting and saving Word documents on each supported platform.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/sdk-skills/docx-editor-sdk",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "developer-tools",
+  "keywords": [
+    "syncfusion",
+    "word",
+    "docx",
+    "editor",
+    "documents"
+  ],
+  "docs": "https://ai.syncfusion.com/docx-editor-sdk/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/docx-editor-sdk-skills",
+    "path": "skills",
+    "commit": "4e5b0bc79a29ed89f92ce59eafac33e5fea22416",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  },
+  "rollout": {
+    "phase": 1
+  },
+  "supportedByGateway": false,
+  "variables": {},
+  "components": {
+    "mcp": [],
+    "skills": [
+      "syncfusion-angular-docx-editor",
+      "syncfusion-aspnetcore-docx-editor",
+      "syncfusion-aspnetmvc-docx-editor",
+      "syncfusion-blazor-docx-editor",
+      "syncfusion-javascript-docx-editor",
+      "syncfusion-react-docx-editor",
+      "syncfusion-uwp-docx-editor",
+      "syncfusion-vue-docx-editor",
+      "syncfusion-wpf-docx-editor"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": null
+}

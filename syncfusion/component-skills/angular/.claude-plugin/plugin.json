@@ -1,0 +1,17 @@
+{
+  "name": "syncfusion-angular",
+  "displayName": "Syncfusion Angular UI Components",
+  "version": "1.0.1",
+  "description": "Skills for building Angular apps with Syncfusion Angular UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/angular",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "angular"
+  ],
+  "icon": "./assets/logo.png"
+}

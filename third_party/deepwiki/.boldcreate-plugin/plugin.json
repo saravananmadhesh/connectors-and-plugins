@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "deepwiki",
+  "displayName": "DeepWiki",
+  "version": "0.7.0",
+  "description": "Ask questions about any public GitHub repository and read its generated wiki.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.devin.ai/work-with-devin/deepwiki-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "documentation",
+  "keywords": [
+    "github",
+    "docs",
+    "codebase",
+    "wiki",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.devin.ai/work-with-devin/deepwiki-mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "deepwiki",
+        "transport": "streamable-http",
+        "url": "https://mcp.deepwiki.com/mcp",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

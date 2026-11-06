@@ -1,0 +1,73 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-gemini-cloud-assist",
+  "displayName": "Gemini Cloud Assist",
+  "version": "0.7.0",
+  "description": "Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resources.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/cloud-assist/use-gemini-cloud-assist-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "ai",
+  "keywords": [
+    "gemini cloud assist",
+    "gemini",
+    "troubleshooting",
+    "google cloud",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "preview",
+  "docs": "https://docs.cloud.google.com/cloud-assist/use-gemini-cloud-assist-mcp",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "A Google OAuth client your team created. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The secret for that OAuth client. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-gemini-cloud-assist",
+        "transport": "streamable-http",
+        "url": "https://geminicloudassist.googleapis.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "figma",
+  "displayName": "Figma",
+  "version": "0.7.0",
+  "minClientVersions": {
+    "cursor": "3.13.0"
+  },
+  "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "figma",
+    "design",
+    "design-to-code",
+    "ui",
+    "mcp"
+  ],
+  "category": "design",
+  "tags": [
+    "design",
+    "mcp",
+    "http"
+  ],
+  "mcpServers": "./mcp.json"
+}

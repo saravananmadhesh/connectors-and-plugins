@@ -1,0 +1,26 @@
+{
+  "name": "google-docs",
+  "displayName": "Google Docs",
+  "version": "0.7.0",
+  "description": "Read, create, and edit Google Docs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google docs",
+    "documents",
+    "writing",
+    "google workspace",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-docs": {
+      "type": "http",
+      "url": "https://docsmcp.googleapis.com/mcp/v1"
+    }
+  }
+}

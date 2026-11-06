@@ -1,0 +1,72 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-compute-engine",
+  "displayName": "Google Compute Engine",
+  "version": "0.7.0",
+  "description": "Manage Compute Engine VMs, disks, and networks.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/compute/docs/use-compute-engine-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "hosting",
+  "keywords": [
+    "compute engine",
+    "vm",
+    "infrastructure",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "ga",
+  "docs": "https://docs.cloud.google.com/compute/docs/use-compute-engine-mcp",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "A Google OAuth client your team created. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The secret for that OAuth client. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-compute-engine",
+        "transport": "streamable-http",
+        "url": "https://compute.googleapis.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

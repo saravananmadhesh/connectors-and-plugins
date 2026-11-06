@@ -1,0 +1,55 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "github",
+  "displayName": "GitHub",
+  "version": "0.7.1",
+  "description": "Manage repos, issues, pull requests, and Actions.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.github.com/en/copilot/how-tos/context/use-mcp/use-the-github-mcp-server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "source-control",
+  "keywords": [
+    "github",
+    "git",
+    "pull-requests",
+    "issues",
+    "actions",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.github.com/en/copilot/how-tos/context/use-mcp/use-the-github-mcp-server",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "github",
+        "transport": "streamable-http",
+        "url": "https://api.githubcopilot.com/mcp/",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "bearer"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

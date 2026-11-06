@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-cli",
+  "displayName": "Google Cloud CLI",
+  "version": "0.7.0",
+  "description": "Run gcloud commands through Google's hosted Cloud CLI server.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/sdk/use-gcloud-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "gcloud",
+    "cli",
+    "google cloud",
+    "automation",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-cli": {
+      "type": "http",
+      "url": "https://cloudcli.googleapis.com/mcp"
+    }
+  }
+}

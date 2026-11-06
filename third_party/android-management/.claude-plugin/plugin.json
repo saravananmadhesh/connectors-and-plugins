@@ -1,0 +1,26 @@
+{
+  "name": "android-management",
+  "displayName": "Android Management",
+  "version": "0.7.0",
+  "description": "Manage enterprise Android devices, policies, and apps with the Android Management API.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/android/management/use-android-management-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "android",
+    "device management",
+    "mdm",
+    "enterprise",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "android-management": {
+      "type": "http",
+      "url": "https://androidmanagement.googleapis.com/mcp"
+    }
+  }
+}

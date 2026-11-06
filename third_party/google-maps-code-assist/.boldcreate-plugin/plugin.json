@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-maps-code-assist",
+  "displayName": "Google Maps Code Assist",
+  "version": "0.7.0",
+  "description": "Get up-to-date Google Maps Platform docs and code samples while you write Maps code.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/maps/ai/code-assist",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "documentation",
+  "keywords": [
+    "google maps",
+    "maps platform",
+    "code samples",
+    "documentation",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "preview",
+  "docs": "https://developers.google.com/maps/ai/code-assist",
+  "rollout": {
+    "phase": 2,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "google-maps-code-assist",
+        "transport": "streamable-http",
+        "url": "https://mapscodeassist.googleapis.com/mcp",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

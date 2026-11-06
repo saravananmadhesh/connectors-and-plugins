@@ -1,0 +1,69 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "gitea",
+  "displayName": "Gitea",
+  "version": "0.7.0",
+  "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://gitea.com/gitea/gitea-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "source-control",
+  "keywords": [
+    "gitea",
+    "git",
+    "self-hosted",
+    "pull requests",
+    "issues",
+    "mcp"
+  ],
+  "hostedBy": "customer",
+  "docs": "https://gitea.com/gitea/gitea-mcp",
+  "rollout": {
+    "phase": 2,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "GITEA_MCP_HOST": {
+      "title": "gitea-mcp host",
+      "description": "Host name (and port, if any) where your team runs gitea-mcp in HTTP mode, such as gitea-mcp.example.com.",
+      "required": true,
+      "secret": false
+    },
+    "GITEA_ACCESS_TOKEN": {
+      "title": "Gitea access token",
+      "description": "Personal access token from your Gitea user settings (Settings, Applications) with the scopes the agent needs.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "gitea",
+        "transport": "streamable-http",
+        "url": "https://${GITEA_MCP_HOST}/mcp",
+        "headers": {
+          "Authorization": "Bearer ${GITEA_ACCESS_TOKEN}"
+        },
+        "auth": {
+          "type": "bearer",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

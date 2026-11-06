@@ -1,0 +1,42 @@
+{
+  "name": "sentry",
+  "displayName": "Sentry",
+  "version": "0.7.0",
+  "description": "Investigate Sentry errors, stack traces, and issues for a project.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://mcp.sentry.dev/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "sentry",
+    "errors",
+    "monitoring",
+    "debugging",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "SENTRY_ORG": {
+      "type": "string",
+      "title": "Organization slug",
+      "description": "Your Sentry organization slug. Scopes the server to this organization.",
+      "required": true,
+      "sensitive": false
+    },
+    "SENTRY_PROJECT": {
+      "type": "string",
+      "title": "Project slug",
+      "description": "Your Sentry project slug. Scopes the server to this project.",
+      "required": true,
+      "sensitive": false
+    }
+  },
+  "mcpServers": {
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp/${user_config.SENTRY_ORG}/${user_config.SENTRY_PROJECT}"
+    }
+  }
+}

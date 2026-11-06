@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "figma",
+  "displayName": "Figma",
+  "version": "0.7.0",
+  "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "design",
+  "keywords": [
+    "figma",
+    "design",
+    "design-to-code",
+    "ui",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "figma",
+        "transport": "streamable-http",
+        "url": "https://mcp.figma.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

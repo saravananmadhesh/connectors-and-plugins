@@ -1,0 +1,25 @@
+{
+  "name": "gmail",
+  "displayName": "Gmail",
+  "version": "0.7.1",
+  "description": "Search, read, and draft Gmail messages and threads.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "gmail",
+    "email",
+    "google workspace",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "gmail": {
+      "type": "http",
+      "url": "https://gmailmcp.googleapis.com/mcp/v1"
+    }
+  }
+}

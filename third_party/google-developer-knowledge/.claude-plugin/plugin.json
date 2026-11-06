@@ -1,0 +1,39 @@
+{
+  "name": "google-developer-knowledge",
+  "displayName": "Google Developer Knowledge",
+  "version": "0.7.0",
+  "description": "Search official Google developer documentation for Android, Firebase, Google Cloud, and Maps.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/knowledge/api",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google",
+    "documentation",
+    "android",
+    "firebase",
+    "google cloud",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "GOOGLE_API_KEY": {
+      "type": "string",
+      "title": "Google API key",
+      "description": "API key from a Google Cloud project with the Developer Knowledge API enabled.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "google-developer-knowledge": {
+      "type": "http",
+      "url": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${user_config.GOOGLE_API_KEY}"
+      }
+    }
+  }
+}

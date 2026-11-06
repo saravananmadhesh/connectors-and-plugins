@@ -1,0 +1,26 @@
+{
+  "name": "google-kubernetes-engine",
+  "displayName": "Google Kubernetes Engine",
+  "version": "0.7.0",
+  "description": "Inspect and manage GKE clusters and workloads.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/kubernetes-engine/docs/how-to/use-gke-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "gke",
+    "kubernetes",
+    "containers",
+    "clusters",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-kubernetes-engine": {
+      "type": "http",
+      "url": "https://container.googleapis.com/mcp"
+    }
+  }
+}

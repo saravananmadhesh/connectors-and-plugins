@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
+  "name": "syncfusion-document-sdk",
+  "displayName": "Syncfusion Document SDK",
+  "version": "1.0.1",
+  "description": "Skills for creating, editing and converting PDF, Word, Excel and PowerPoint files with the Syncfusion Document SDK in .NET, JavaScript, Flutter and Java.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/sdk-skills/document-sdk",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "developer-tools",
+  "keywords": [
+    "syncfusion",
+    "pdf",
+    "word",
+    "excel",
+    "powerpoint",
+    "documents"
+  ],
+  "docs": "https://ai.syncfusion.com/document-sdk/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/document-sdk-skills",
+    "path": "skills",
+    "commit": "c46c067f22c222deb824093f51a235c0bf2f4832",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  },
+  "rollout": {
+    "phase": 1
+  },
+  "supportedByGateway": false,
+  "variables": {},
+  "components": {
+    "mcp": [],
+    "skills": [
+      "syncfusion-dotnet-calculate",
+      "syncfusion-dotnet-document-chunking",
+      "syncfusion-dotnet-excel",
+      "syncfusion-dotnet-markdown",
+      "syncfusion-dotnet-pdf",
+      "syncfusion-dotnet-pdf-to-image",
+      "syncfusion-dotnet-powerpoint",
+      "syncfusion-dotnet-smart-data-extraction",
+      "syncfusion-dotnet-word",
+      "syncfusion-flutter-excel",
+      "syncfusion-flutter-pdf",
+      "syncfusion-java-word",
+      "syncfusion-javascript-excel",
+      "syncfusion-javascript-pdf",
+      "syncfusion-javascript-powerpoint",
+      "syncfusion-javascript-word"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": null
+}

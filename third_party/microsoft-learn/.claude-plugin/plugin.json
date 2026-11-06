@@ -1,0 +1,28 @@
+{
+  "name": "microsoft-learn",
+  "displayName": "Microsoft Learn",
+  "version": "0.7.0",
+  "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://learn.microsoft.com/training/support/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "microsoft",
+    "dotnet",
+    "azure",
+    "maui",
+    "csharp",
+    "docs",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    }
+  }
+}

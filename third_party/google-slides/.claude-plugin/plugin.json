@@ -1,0 +1,26 @@
+{
+  "name": "google-slides",
+  "displayName": "Google Slides",
+  "version": "0.7.0",
+  "description": "Read, create, and edit Google Slides presentations.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google slides",
+    "presentations",
+    "slides",
+    "google workspace",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-slides": {
+      "type": "http",
+      "url": "https://slidesmcp.googleapis.com/mcp/v1"
+    }
+  }
+}

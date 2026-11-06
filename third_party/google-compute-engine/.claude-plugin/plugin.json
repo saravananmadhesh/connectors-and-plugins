@@ -1,0 +1,25 @@
+{
+  "name": "google-compute-engine",
+  "displayName": "Google Compute Engine",
+  "version": "0.7.0",
+  "description": "Manage Compute Engine VMs, disks, and networks.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/compute/docs/use-compute-engine-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "compute engine",
+    "vm",
+    "infrastructure",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-compute-engine": {
+      "type": "http",
+      "url": "https://compute.googleapis.com/mcp"
+    }
+  }
+}

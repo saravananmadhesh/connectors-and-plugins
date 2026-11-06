@@ -1,0 +1,57 @@
+{
+  "$schema": "../../../../schemas/boldcreate-plugin.schema.json",
+  "name": "syncfusion-pdf-viewer-sdk",
+  "displayName": "Syncfusion PDF Viewer SDK",
+  "version": "1.0.1",
+  "description": "Skills for adding the Syncfusion PDF Viewer to web, mobile and desktop apps: viewing, annotating, searching, form filling and more, on each supported platform.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/sdk-skills/pdf-viewer-sdk",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "developer-tools",
+  "keywords": [
+    "syncfusion",
+    "pdf",
+    "pdf-viewer",
+    "documents"
+  ],
+  "docs": "https://ai.syncfusion.com/pdf-viewer-sdk/llms.txt",
+  "upstream": {
+    "repository": "https://github.com/syncfusion/pdf-viewer-sdk-skills",
+    "path": "skills",
+    "commit": "99fa2b43419904bfe0c6c9d31acb23e30fe8be19",
+    "author": "Syncfusion Inc",
+    "license": "Syncfusion Inc"
+  },
+  "rollout": {
+    "phase": 1
+  },
+  "supportedByGateway": false,
+  "variables": {},
+  "components": {
+    "mcp": [],
+    "skills": [
+      "syncfusion-angular-pdf-viewer",
+      "syncfusion-aspnetcore-pdf-viewer",
+      "syncfusion-aspnetmvc-pdf-viewer",
+      "syncfusion-blazor-pdf-viewer",
+      "syncfusion-blazor-smart-pdf-viewer",
+      "syncfusion-flutter-pdf-viewer",
+      "syncfusion-javascript-pdf-viewer",
+      "syncfusion-maui-pdf-viewer",
+      "syncfusion-react-pdf-viewer",
+      "syncfusion-uwp-pdf-viewer",
+      "syncfusion-vue-pdf-viewer",
+      "syncfusion-winforms-pdf-viewer",
+      "syncfusion-wpf-pdf-viewer"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": null
+}

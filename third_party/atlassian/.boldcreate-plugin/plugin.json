@@ -1,0 +1,55 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "atlassian",
+  "displayName": "Atlassian (Jira + Confluence)",
+  "version": "0.7.0",
+  "description": "Search and update Jira issues and Confluence pages.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/atlassian/atlassian-mcp-server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "project-management",
+  "keywords": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "issues",
+    "wiki",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://github.com/atlassian/atlassian-mcp-server",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "atlassian",
+        "transport": "streamable-http",
+        "url": "https://mcp.atlassian.com/v1/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "basic-api-token"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

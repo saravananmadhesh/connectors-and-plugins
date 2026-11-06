@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-bigquery",
+  "displayName": "Google Cloud BigQuery",
+  "version": "0.7.0",
+  "description": "Explore datasets and tables and run SQL queries.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "bigquery",
+    "sql",
+    "analytics",
+    "data warehouse",
+    "mcp"
+  ],
+  "icon": "./assets/logo.png",
+  "mcpServers": {
+    "google-cloud-bigquery": {
+      "type": "http",
+      "url": "https://bigquery.googleapis.com/mcp"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "google-drive",
+  "displayName": "Google Drive",
+  "version": "0.7.0",
+  "description": "Search, read, and create files in Google Drive.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google drive",
+    "files",
+    "documents",
+    "google workspace",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-drive": {
+      "type": "http",
+      "url": "https://drivemcp.googleapis.com/mcp/v1"
+    }
+  }
+}

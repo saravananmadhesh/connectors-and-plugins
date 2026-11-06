@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "vercel",
+  "displayName": "Vercel",
+  "version": "0.7.0",
+  "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://vercel.com/docs/agent-resources/vercel-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "hosting",
+  "keywords": [
+    "vercel",
+    "deployments",
+    "hosting",
+    "nextjs",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://vercel.com/docs/agent-resources/vercel-mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "vercel",
+        "transport": "streamable-http",
+        "url": "https://mcp.vercel.com",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

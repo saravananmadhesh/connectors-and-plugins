@@ -1,0 +1,19 @@
+{
+  "name": "syncfusion-maui-toolkit",
+  "displayName": "Syncfusion Toolkit for .NET MAUI",
+  "version": "1.0.1",
+  "description": "Skills for building .NET MAUI apps with the free, open-source Syncfusion Toolkit for .NET MAUI: charts, buttons, cards, calendar, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/maui-toolkit",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "dotnet-maui",
+    "maui",
+    "toolkit"
+  ],
+  "icon": "./assets/logo.png"
+}

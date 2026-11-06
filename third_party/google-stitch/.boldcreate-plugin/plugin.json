@@ -1,0 +1,63 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-stitch",
+  "displayName": "Stitch",
+  "version": "0.7.0",
+  "description": "Generate UI designs and front-end code with Google Stitch.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://stitch.withgoogle.com/docs/mcp/setup/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "design",
+  "keywords": [
+    "stitch",
+    "ui design",
+    "front-end",
+    "google",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "beta",
+  "docs": "https://stitch.withgoogle.com/docs/mcp/setup/",
+  "rollout": {
+    "phase": 2,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "STITCH_API_KEY": {
+      "title": "Stitch API key",
+      "description": "API key created in Stitch settings.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-stitch",
+        "transport": "streamable-http",
+        "url": "https://stitch.googleapis.com/mcp",
+        "headers": {
+          "X-Goog-Api-Key": "${STITCH_API_KEY}"
+        },
+        "auth": {
+          "type": "header",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

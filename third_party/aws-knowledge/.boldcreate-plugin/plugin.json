@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "aws-knowledge",
+  "displayName": "AWS Knowledge",
+  "version": "0.7.0",
+  "description": "Search AWS documentation, API references, and regional availability.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "documentation",
+  "keywords": [
+    "aws",
+    "cloud",
+    "docs",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "aws-knowledge",
+        "transport": "streamable-http",
+        "url": "https://knowledge-mcp.global.api.aws",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-10-24",
+    "source": "live initialize call"
+  }
+}

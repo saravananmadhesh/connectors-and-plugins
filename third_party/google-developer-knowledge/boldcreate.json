@@ -1,0 +1,15 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "wave": "A",
+  "transport": "streamable-http",
+  "auth": "header",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://developers.google.com/knowledge/api",
+  "stage": "ga",
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "supabase",
+  "displayName": "Supabase",
+  "version": "0.7.0",
+  "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://supabase.com/docs/guides/getting-started/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "database",
+  "keywords": [
+    "supabase",
+    "postgres",
+    "database",
+    "auth",
+    "storage",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://supabase.com/docs/guides/getting-started/mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "SUPABASE_ACCESS_TOKEN": {
+      "title": "Supabase personal access token",
+      "description": "Create one at https://supabase.com/dashboard/account/tokens.",
+      "required": true,
+      "secret": true
+    },
+    "SUPABASE_PROJECT_REF": {
+      "title": "Project ref",
+      "description": "The project ID from your project URL. Limits the agent to this one project.",
+      "required": true,
+      "secret": false
+    },
+    "SUPABASE_READ_ONLY": {
+      "title": "Read-only mode",
+      "description": "\"true\" runs queries as a read-only Postgres user and hides write tools. Set \"false\" to allow writes.",
+      "required": false,
+      "secret": false,
+      "default": "true"
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "supabase",
+        "transport": "streamable-http",
+        "url": "https://mcp.supabase.com/mcp?project_ref=${SUPABASE_PROJECT_REF}&read_only=${SUPABASE_READ_ONLY}",
+        "headers": {
+          "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}"
+        },
+        "auth": {
+          "type": "bearer",
+          "alternatives": [
+            "oauth"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

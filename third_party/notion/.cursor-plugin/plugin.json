@@ -1,0 +1,30 @@
+{
+  "name": "notion",
+  "displayName": "Notion",
+  "version": "0.7.0",
+  "minClientVersions": {
+    "cursor": "3.13.0"
+  },
+  "description": "Search, read, and update Notion pages and databases.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.notion.com/docs/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "notion",
+    "docs",
+    "wiki",
+    "knowledge-base",
+    "mcp"
+  ],
+  "category": "documentation",
+  "tags": [
+    "documentation",
+    "mcp",
+    "http"
+  ],
+  "mcpServers": "./mcp.json"
+}

@@ -1,0 +1,54 @@
+{
+  "name": "google-cloud-iam",
+  "displayName": "Google Cloud IAM",
+  "version": "0.7.0",
+  "minClientVersions": {
+    "cursor": "3.19.0"
+  },
+  "description": "Review IAM roles, policies, and service accounts.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/iam/docs/use-iam-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "iam",
+    "access",
+    "roles",
+    "security",
+    "mcp"
+  ],
+  "category": "security",
+  "tags": [
+    "security",
+    "google cloud",
+    "mcp",
+    "http"
+  ],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "CLIENT_ID": {
+        "type": "string",
+        "title": "Client ID",
+        "description": "A Google OAuth client your team created. Every team member signs in under it.",
+        "x-sensitive": false
+      },
+      "CLIENT_SECRET": {
+        "type": "string",
+        "title": "Client secret",
+        "description": "The secret for that OAuth client. Stored encrypted.",
+        "writeOnly": true,
+        "format": "password",
+        "x-sensitive": true
+      }
+    },
+    "required": [
+      "CLIENT_ID",
+      "CLIENT_SECRET"
+    ]
+  },
+  "mcpServers": "./mcp.json"
+}

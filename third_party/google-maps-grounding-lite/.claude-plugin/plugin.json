@@ -1,0 +1,39 @@
+{
+  "name": "google-maps-grounding-lite",
+  "displayName": "Google Maps Grounding Lite",
+  "version": "0.7.0",
+  "description": "Ground agents in Google Maps data: places, routes, and weather.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/maps/ai/grounding-lite",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google maps",
+    "places",
+    "routes",
+    "weather",
+    "geo",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "GOOGLE_MAPS_API_KEY": {
+      "type": "string",
+      "title": "Google Maps API key",
+      "description": "Google Maps Platform API key with the Maps Grounding Lite API enabled.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "google-maps-grounding-lite": {
+      "type": "http",
+      "url": "https://mapstools.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${user_config.GOOGLE_MAPS_API_KEY}"
+      }
+    }
+  }
+}

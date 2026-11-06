@@ -1,0 +1,73 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-cloud-iam",
+  "displayName": "Google Cloud IAM",
+  "version": "0.7.0",
+  "description": "Review IAM roles, policies, and service accounts.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/iam/docs/use-iam-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "security",
+  "keywords": [
+    "iam",
+    "access",
+    "roles",
+    "security",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "ga",
+  "docs": "https://docs.cloud.google.com/iam/docs/use-iam-mcp",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "A Google OAuth client your team created. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The secret for that OAuth client. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "google-cloud-iam",
+        "transport": "streamable-http",
+        "url": "https://iam.googleapis.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

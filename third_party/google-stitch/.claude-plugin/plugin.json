@@ -1,0 +1,38 @@
+{
+  "name": "google-stitch",
+  "displayName": "Stitch",
+  "version": "0.7.0",
+  "description": "Generate UI designs and front-end code with Google Stitch.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://stitch.withgoogle.com/docs/mcp/setup/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "stitch",
+    "ui design",
+    "front-end",
+    "google",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "STITCH_API_KEY": {
+      "type": "string",
+      "title": "Stitch API key",
+      "description": "API key created in Stitch settings.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "google-stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${user_config.STITCH_API_KEY}"
+      }
+    }
+  }
+}

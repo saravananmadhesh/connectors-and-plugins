@@ -1,0 +1,65 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "sentry",
+  "displayName": "Sentry",
+  "version": "0.7.0",
+  "description": "Investigate Sentry errors, stack traces, and issues for a project.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://mcp.sentry.dev/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "observability",
+  "keywords": [
+    "sentry",
+    "errors",
+    "monitoring",
+    "debugging",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://mcp.sentry.dev/",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "SENTRY_ORG": {
+      "title": "Organization slug",
+      "description": "Your Sentry organization slug. Scopes the server to this organization.",
+      "required": true,
+      "secret": false
+    },
+    "SENTRY_PROJECT": {
+      "title": "Project slug",
+      "description": "Your Sentry project slug. Scopes the server to this project.",
+      "required": true,
+      "secret": false
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "sentry",
+        "transport": "streamable-http",
+        "url": "https://mcp.sentry.dev/mcp/${SENTRY_ORG}/${SENTRY_PROJECT}",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

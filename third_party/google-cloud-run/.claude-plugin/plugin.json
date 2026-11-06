@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-run",
+  "displayName": "Google Cloud Run",
+  "version": "0.7.0",
+  "description": "Deploy and manage Cloud Run services and jobs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/run/docs/use-cloud-run-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "cloud run",
+    "serverless",
+    "containers",
+    "deploy",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-run": {
+      "type": "http",
+      "url": "https://run.googleapis.com/mcp"
+    }
+  }
+}

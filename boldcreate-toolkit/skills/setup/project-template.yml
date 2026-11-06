@@ -1,0 +1,26 @@
+version: 1
+commands:
+  build: <build command>
+  typecheck: <type-check command>
+  lint: <lint command>
+  test: <test command>
+  run: <run command>
+thresholds:
+  quick_fix_lines: 100
+  quick_fix_core_files: 3
+  small_app_features: 5
+  large_doc_words: 2500
+  slice_review_files: 8
+  pr_split_lines: 800
+git:
+  host: github            # github | gitlab | other
+  default_branch: main
+  protected_branches: [main]
+docs:
+  glossary: GLOSSARY.md
+  adr: docs/adr
+  product: docs/product
+  architecture: docs/architecture
+  specs: docs/specs
+  learnings: docs/learnings
+  reports: docs/reports

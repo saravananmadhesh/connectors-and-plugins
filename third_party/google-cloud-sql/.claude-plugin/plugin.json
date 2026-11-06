@@ -1,0 +1,27 @@
+{
+  "name": "google-cloud-sql",
+  "displayName": "Google Cloud SQL",
+  "version": "0.7.0",
+  "description": "Manage Cloud SQL for MySQL, PostgreSQL, and SQL Server instances and run queries.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/sql/docs/postgres/use-cloudsql-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "cloud sql",
+    "mysql",
+    "postgresql",
+    "sql server",
+    "database",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-sql": {
+      "type": "http",
+      "url": "https://sqladmin.googleapis.com/mcp"
+    }
+  }
+}

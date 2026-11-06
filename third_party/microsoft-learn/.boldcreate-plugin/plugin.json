@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "microsoft-learn",
+  "displayName": "Microsoft Learn",
+  "version": "0.7.0",
+  "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://learn.microsoft.com/training/support/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "documentation",
+  "keywords": [
+    "microsoft",
+    "dotnet",
+    "azure",
+    "maui",
+    "csharp",
+    "docs",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://learn.microsoft.com/training/support/mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "microsoft-learn",
+        "transport": "streamable-http",
+        "url": "https://learn.microsoft.com/api/mcp",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

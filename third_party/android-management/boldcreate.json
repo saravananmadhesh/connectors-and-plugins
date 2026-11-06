@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "wave": "B",
+  "transport": "streamable-http",
+  "auth": "oauth",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://developers.google.com/android/management/use-android-management-mcp",
+  "stage": "ga",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/androidmanagement"
+  ],
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "gitea",
+  "displayName": "Gitea",
+  "version": "0.7.0",
+  "minClientVersions": {
+    "cursor": "3.13.0"
+  },
+  "description": "Work with Gitea repositories, issues, pull requests, and releases through your own gitea-mcp server.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://gitea.com/gitea/gitea-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "gitea",
+    "git",
+    "self-hosted",
+    "pull requests",
+    "issues",
+    "mcp"
+  ],
+  "category": "source-control",
+  "tags": [
+    "source-control",
+    "git",
+    "mcp",
+    "http"
+  ],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "GITEA_MCP_HOST": {
+        "type": "string",
+        "title": "gitea-mcp host",
+        "description": "Host name (and port, if any) where your team runs gitea-mcp in HTTP mode, such as gitea-mcp.example.com.",
+        "x-sensitive": false
+      },
+      "GITEA_ACCESS_TOKEN": {
+        "type": "string",
+        "title": "Gitea access token",
+        "description": "Personal access token from your Gitea user settings (Settings, Applications) with the scopes the agent needs.",
+        "x-sensitive": true
+      }
+    },
+    "required": [
+      "GITEA_MCP_HOST",
+      "GITEA_ACCESS_TOKEN"
+    ]
+  },
+  "mcpServers": "./mcp.json"
+}

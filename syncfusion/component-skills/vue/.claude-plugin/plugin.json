@@ -1,0 +1,17 @@
+{
+  "name": "syncfusion-vue",
+  "displayName": "Syncfusion Vue UI Components",
+  "version": "1.0.1",
+  "description": "Skills for building Vue apps with Syncfusion Vue UI components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/vue",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "syncfusion",
+    "vue"
+  ],
+  "icon": "./assets/logo.png"
+}

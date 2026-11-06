@@ -1,0 +1,56 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "gmail",
+  "displayName": "Gmail",
+  "version": "0.7.1",
+  "description": "Search, read, and draft Gmail messages and threads.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "productivity",
+  "keywords": [
+    "gmail",
+    "email",
+    "google workspace",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "preview",
+  "docs": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "gmail",
+        "transport": "streamable-http",
+        "url": "https://gmailmcp.googleapis.com/mcp/v1",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "scopes": [
+            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://www.googleapis.com/auth/gmail.compose"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+  }
+}

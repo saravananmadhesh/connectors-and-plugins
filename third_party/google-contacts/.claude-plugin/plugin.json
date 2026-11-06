@@ -1,0 +1,26 @@
+{
+  "name": "google-contacts",
+  "displayName": "Google Contacts",
+  "version": "0.7.0",
+  "description": "Look up contacts and people in your Google Workspace directory.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/workspace/guides/configure-mcp-servers",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "google contacts",
+    "people",
+    "directory",
+    "google workspace",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-contacts": {
+      "type": "http",
+      "url": "https://people.googleapis.com/mcp/v1"
+    }
+  }
+}

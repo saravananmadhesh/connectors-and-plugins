@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "google-design",
+  "displayName": "Google Design",
+  "version": "0.7.0",
+  "description": "Get Google design guidance and assets, such as Material Design, while you build UI.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/design-mcp/overview",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "design",
+  "keywords": [
+    "design",
+    "material design",
+    "ui",
+    "google",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "stage": "preview",
+  "docs": "https://developers.google.com/design-mcp/overview",
+  "rollout": {
+    "phase": 2,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "google-design",
+        "transport": "streamable-http",
+        "url": "https://design.googleapis.com/mcp",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+  }
+}

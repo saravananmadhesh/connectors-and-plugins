@@ -1,0 +1,26 @@
+{
+  "name": "vercel",
+  "displayName": "Vercel",
+  "version": "0.7.0",
+  "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://vercel.com/docs/agent-resources/vercel-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "vercel",
+    "deployments",
+    "hosting",
+    "nextjs",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    }
+  }
+}

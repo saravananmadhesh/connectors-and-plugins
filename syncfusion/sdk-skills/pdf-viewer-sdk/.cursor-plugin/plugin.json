@@ -1,0 +1,26 @@
+{
+  "name": "syncfusion-pdf-viewer-sdk",
+  "displayName": "Syncfusion PDF Viewer SDK",
+  "version": "1.0.1",
+  "description": "Skills for adding the Syncfusion PDF Viewer to web, mobile and desktop apps: viewing, annotating, searching, form filling and more, on each supported platform.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/sdk-skills/pdf-viewer-sdk",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "syncfusion",
+    "pdf",
+    "pdf-viewer",
+    "documents"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "syncfusion",
+    "sdk",
+    "skills"
+  ],
+  "skills": "./skills/"
+}

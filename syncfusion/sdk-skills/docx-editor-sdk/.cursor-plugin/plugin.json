@@ -1,0 +1,27 @@
+{
+  "name": "syncfusion-docx-editor-sdk",
+  "displayName": "Syncfusion DOCX Editor SDK",
+  "version": "1.0.1",
+  "description": "Skills for adding the Syncfusion DOCX Editor (Word processor) to web and desktop apps: opening, editing, formatting and saving Word documents on each supported platform.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/sdk-skills/docx-editor-sdk",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "syncfusion",
+    "word",
+    "docx",
+    "editor",
+    "documents"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "syncfusion",
+    "sdk",
+    "skills"
+  ],
+  "skills": "./skills/"
+}

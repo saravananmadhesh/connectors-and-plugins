@@ -1,0 +1,25 @@
+{
+  "name": "syncfusion-blazor",
+  "displayName": "Syncfusion Blazor Components",
+  "version": "1.0.2",
+  "description": "Skills for building Blazor apps with Syncfusion Blazor components: data grid, charts, scheduler, editors, navigation and more, with setup, APIs, theming and examples.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/syncfusion/BoldCreate-Plugins/tree/main/syncfusion/component-skills/blazor",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "syncfusion",
+    "blazor",
+    "dotnet"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "syncfusion",
+    "ui-components",
+    "skills"
+  ],
+  "skills": "./skills/"
+}

@@ -1,0 +1,59 @@
+{
+  "name": "google-cloud-agent-platform",
+  "displayName": "Gemini Enterprise Agent Platform (Vertex AI)",
+  "version": "0.7.0",
+  "description": "Generate content, run predictions, and manage models, endpoints, tuning, and evaluation on Vertex AI.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/use-agent-platform-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "vertex ai",
+    "gemini",
+    "agent platform",
+    "machine learning",
+    "models",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "agent-platform-generate": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/generate"
+    },
+    "agent-platform-predict": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/predict"
+    },
+    "agent-platform-models": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/models"
+    },
+    "agent-platform-endpoints": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/endpoints"
+    },
+    "agent-platform-tuning": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/tuning"
+    },
+    "agent-platform-evaluation": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/evaluation"
+    },
+    "agent-platform-prompts": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/prompts"
+    },
+    "agent-platform-retrieval": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/retrieval"
+    },
+    "agent-platform-notebook": {
+      "type": "http",
+      "url": "https://aiplatform.googleapis.com/mcp/notebook"
+    }
+  }
+}

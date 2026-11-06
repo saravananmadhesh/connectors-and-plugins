@@ -1,0 +1,26 @@
+{
+  "name": "google-cloud-storage",
+  "displayName": "Google Cloud Storage",
+  "version": "0.7.0",
+  "description": "List, read, and manage Cloud Storage buckets and objects.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/storage/docs/use-cloud-storage-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "cloud storage",
+    "gcs",
+    "buckets",
+    "objects",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-cloud-storage": {
+      "type": "http",
+      "url": "https://storage.googleapis.com/storage/mcp"
+    }
+  }
+}

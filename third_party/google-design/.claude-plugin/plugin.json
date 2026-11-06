@@ -1,0 +1,26 @@
+{
+  "name": "google-design",
+  "displayName": "Google Design",
+  "version": "0.7.0",
+  "description": "Get Google design guidance and assets, such as Material Design, while you build UI.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.google.com/design-mcp/overview",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "material design",
+    "ui",
+    "google",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-design": {
+      "type": "http",
+      "url": "https://design.googleapis.com/mcp"
+    }
+  }
+}

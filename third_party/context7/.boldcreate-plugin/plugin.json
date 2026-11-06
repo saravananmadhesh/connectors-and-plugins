@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "context7",
+  "displayName": "Context7",
+  "version": "0.7.1",
+  "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://context7.com/docs/resources/all-clients",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "documentation",
+  "keywords": [
+    "docs",
+    "libraries",
+    "frameworks",
+    "code-examples",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://context7.com/docs/resources/all-clients",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "context7",
+        "transport": "streamable-http",
+        "url": "https://mcp.context7.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "bearer"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "google-gemini-cloud-assist",
+  "displayName": "Gemini Cloud Assist",
+  "version": "0.7.0",
+  "description": "Ask Gemini Cloud Assist to design, troubleshoot, and optimize Google Cloud resources.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.cloud.google.com/cloud-assist/use-gemini-cloud-assist-mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "gemini cloud assist",
+    "gemini",
+    "troubleshooting",
+    "google cloud",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "google-gemini-cloud-assist": {
+      "type": "http",
+      "url": "https://geminicloudassist.googleapis.com/mcp"
+    }
+  }
+}

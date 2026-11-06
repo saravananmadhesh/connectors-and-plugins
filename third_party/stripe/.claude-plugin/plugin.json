@@ -1,0 +1,26 @@
+{
+  "name": "stripe",
+  "displayName": "Stripe",
+  "version": "0.7.1",
+  "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.stripe.com/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "stripe",
+    "payments",
+    "billing",
+    "subscriptions",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com"
+    }
+  }
+}
