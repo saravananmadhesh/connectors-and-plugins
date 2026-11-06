@@ -96,8 +96,9 @@ python3 control_panel.py
 ```
 
 Open http://127.0.0.1:8090. Fill in the web and gateway addresses, the load-test account, the round
-and the number of projects, tick the confirmation and click **Run**. The page shows each step as it
-finishes and links to Locust's live charts while the test runs. **Stop** ends the test early; the
+(organizations and projects per organization; an optional test name labels the run in the list),
+tick the confirmation and click **Run**. The page shows each step as it finishes and links to
+Locust's live charts while the test runs. **Stop** ends the test early; the
 test data is still removed. Every run is saved in `results/<time>-<round>/` next to the script
 (settings without the password, the log, `summary.json`, `steps.csv`, `projects.csv` and the Locust
 report), and the page lists past runs with their capacity and the 70% figure. The panel only
@@ -157,19 +158,20 @@ open during the run.
 
 ### Round 1: total capacity
 
-On the admin **Limits** page, set **Project requests per window** to `100000`, so the run measures
-the service and not that limit. Then run:
+On the admin **Limits** page, set both **Project requests per window** and **Gateway requests per
+key per minute** to `100000`, so the run measures the service and not those limits (the key limit
+is 600 a minute by default, and each test project has one key). Then run:
 
 PowerShell (Windows):
 
 ```powershell
-python run_staging.py --projects=3
+python run_staging.py --orgs=3
 ```
 
 Terminal (macOS):
 
 ```sh
-python3 run_staging.py --projects=3
+python3 run_staging.py --orgs=3
 ```
 
 The users are spread evenly over 3 projects, each in its own organization (projects of one
@@ -189,18 +191,19 @@ Write down the **70% per minute** figure (12,986 in this example).
 
 Work out the per-project limit: the 70% per-minute figure divided by the number of customers you
 expect to be busy at the same time. With 12,986 a minute and three busy customers, about 4,300.
-Set **Project requests per window** to that value on the Limits page, then run:
+Set **Project requests per window** to that value on the Limits page and leave **Gateway requests
+per key per minute** at `100000`, so only the project limit slows project 1 down. Then run:
 
 PowerShell (Windows):
 
 ```powershell
-python run_staging.py --projects=3 --busy-share=60
+python run_staging.py --orgs=3 --busy-share=60
 ```
 
 Terminal (macOS):
 
 ```sh
-python3 run_staging.py --projects=3 --busy-share=60
+python3 run_staging.py --orgs=3 --busy-share=60
 ```
 
 60% of the users now call with project 1. The result is good when project 1 gets `429` answers
@@ -243,7 +246,7 @@ Each run writes to `reports/load-locust/capacity/` (two folders above this one):
 PowerShell (Windows):
 
 ```powershell
-python test_data.py setup --web=https://connect-staging.boldcreate.ai --projects=3
+python test_data.py setup --web=https://connect-staging.boldcreate.ai --orgs=3
 python run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai --project-keys-file=keys.txt
 python test_data.py cleanup --web=https://connect-staging.boldcreate.ai
 ```
@@ -251,14 +254,14 @@ python test_data.py cleanup --web=https://connect-staging.boldcreate.ai
 Terminal (macOS):
 
 ```sh
-python3 test_data.py setup --web=https://connect-staging.boldcreate.ai --projects=3
+python3 test_data.py setup --web=https://connect-staging.boldcreate.ai --orgs=3
 python3 run_capacity.py --target=https://connect-gateway-staging.boldcreate.ai --project-keys-file=keys.txt
 python3 test_data.py cleanup --web=https://connect-staging.boldcreate.ai
 ```
 
-- `setup` makes one organization per project (named `loadtest-<run>-<n>`), a project "Load test"
-  in each, and a key with `sessions:read` and `sessions:write` that ends after 7 days
-  (`--key-days`). Keys go to `keys.txt` and ids to `load-test-state.json`; git ignores both, and
+- `setup` makes `--orgs` organizations (named `loadtest-<run>-<n>`) with `--projects-per-org`
+  projects in each (default 1, "Load test 1", "Load test 2", ...), and for every project a key
+  with `sessions:read` and `sessions:write` that ends after 7 days (`--key-days`). Keys go to `keys.txt` and ids to `load-test-state.json`; git ignores both, and
   no key is printed.
 - `cleanup` deletes the organizations in `load-test-state.json`, which removes their projects,
   keys, and the users and sessions the run made. `--all` also deletes any other organization of
@@ -270,17 +273,19 @@ python3 test_data.py cleanup --web=https://connect-staging.boldcreate.ai
 
 ### Settings
 
-| Variable                  | Default | Meaning                                                           |
-| ------------------------- | ------- | ----------------------------------------------------------------- |
-| `CAPACITY_START_USERS`    | 20      | Users in the first step                                           |
-| `CAPACITY_STEP_USERS`     | 20      | Users added each step                                             |
-| `CAPACITY_MAX_USERS`      | 600     | The run never goes above this                                     |
-| `CAPACITY_STEP_SECONDS`   | 120     | How long each step lasts                                          |
-| `CAPACITY_WARMUP_SECONDS` | 20      | Start of each step left out of its numbers                        |
-| `CAPACITY_MAX_FAIL_PCT`   | 1       | Failures (any `4xx` but `429`, `5xx`, no answer) that end the run |
-| `CAPACITY_MAX_P95_MS`     | 1000    | p95 that ends the run                                             |
-| `CAPACITY_READ_ONLY`      | unset   | `1` sends only GET calls, so no users or sessions are made        |
-| `CAPACITY_BUSY_SHARE_PCT` | 0       | Share of users on the first key (`--busy-share`); 0 = even        |
+| Variable                    | Default   | Meaning                                                                                                       |
+| --------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+| `CAPACITY_START_USERS`      | 20        | Users in the first step                                                                                       |
+| `CAPACITY_STEP_USERS`       | 20        | Users added each step                                                                                         |
+| `CAPACITY_MAX_USERS`        | 600       | The run never goes above this                                                                                 |
+| `CAPACITY_STEP_SECONDS`     | 120       | How long each step lasts                                                                                      |
+| `CAPACITY_WARMUP_SECONDS`   | 20        | Start of each step left out of its numbers                                                                    |
+| `CAPACITY_MAX_FAIL_PCT`     | 1         | Failures (any `4xx` but `429`, `5xx`, no answer) that end the run                                             |
+| `CAPACITY_MAX_P95_MS`       | 1000      | p95 that ends the run                                                                                         |
+| `CAPACITY_READ_ONLY`        | unset     | `1` sends only GET calls, so no users or sessions are made                                                    |
+| `CAPACITY_BUSY_SHARE_PCT`   | 0         | Share of users on the busy key(s) (`--busy-share`); 0 = even                                                  |
+| `CAPACITY_BUSY_TARGET`      | first-key | `first-key`: one busy project; `first-of-each-org`: the first project of every organization (`--busy-target`) |
+| `CAPACITY_PROJECTS_PER_ORG` | 1         | Projects per organization, so `first-of-each-org` finds them (`--projects-per-org`)                           |
 
 Set one in PowerShell with `$env:CAPACITY_STEP_SECONDS = "60"`, on macOS with
 `export CAPACITY_STEP_SECONDS=60`.
@@ -336,8 +341,8 @@ Then, the first time only:
 
 1. Open http://localhost:3000, sign up, and confirm the mail in Mailpit (linked from the dev
    dashboard, http://localhost:5080).
-2. In the local admin (http://localhost:3004), Limits page, set "Project requests per window" to
-   100000 for the total capacity round.
+2. In the local admin (http://localhost:3004), Limits page, set "Project requests per window" and
+   "Gateway requests per key per minute" to 100000 for the total capacity round.
 
 In a second PowerShell window, start the control panel and fill in:
 
@@ -436,7 +441,8 @@ and Locust then run in Ubuntu too; the Windows browser still opens `http://local
 8. **First time only: account and limit.** In the Windows browser:
    - http://localhost:3000: sign up, then open the confirmation mail in Mailpit
      (http://localhost:8025) and click the link.
-   - http://localhost:3004 (admin), Limits page: set "Project requests per window" to 100000.
+   - http://localhost:3004 (admin), Limits page: set "Project requests per window" and "Gateway
+     requests per key per minute" to 100000.
 
    Both stay saved for later rounds, because the database keeps its data.
 
