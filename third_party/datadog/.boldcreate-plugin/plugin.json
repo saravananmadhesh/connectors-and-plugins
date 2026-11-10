@@ -1,0 +1,73 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "datadog",
+  "displayName": "Datadog",
+  "version": "0.1.0",
+  "description": "Query Datadog logs, metrics, traces, incidents, and monitors.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.datadoghq.com/bits_ai/mcp_server/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "observability",
+  "keywords": [
+    "datadog",
+    "observability",
+    "monitoring",
+    "logs",
+    "metrics",
+    "traces",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.datadoghq.com/bits_ai/mcp_server/",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "DD_API_KEY": {
+      "title": "Datadog API key",
+      "description": "API key from a scoped service account (Organization Settings, API Keys). Grant only the permissions the agent needs.",
+      "required": true,
+      "secret": true
+    },
+    "DD_APPLICATION_KEY": {
+      "title": "Datadog application key",
+      "description": "Application key from the same service account (Organization Settings, Application Keys), scoped to the permissions the agent needs.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "datadog",
+        "transport": "streamable-http",
+        "url": "https://mcp.datadoghq.com/v1/mcp",
+        "headers": {
+          "DD_API_KEY": "${DD_API_KEY}",
+          "DD_APPLICATION_KEY": "${DD_APPLICATION_KEY}"
+        },
+        "auth": {
+          "type": "header",
+          "alternatives": [
+            "oauth"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs"
+  }
+}
