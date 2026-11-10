@@ -57,6 +57,51 @@ Claude Code plugins can't carry an OAuth client secret, so the generated Claude 
 
 Your Google Cloud project must be enrolled in the Google Workspace Developer Preview Program, with the product's API and its MCP service enabled. A Workspace admin may need to allow the OAuth client for your domain.
 
+## What it can do
+
+The server lists eight tools. Checked against the live endpoint on 2026-11-10.
+
+| Tool | Access | What it does |
+| --- | --- | --- |
+| `search_files` | Read | Finds files. |
+| `list_recent_files` | Read | Lists recent files, sorted by recency or modified time. |
+| `get_file_metadata` | Read | Returns details about one file. |
+| `read_file_content` | Read | Returns a text version of a file, and its comments if asked. |
+| `download_file_content` | Read | Returns file content as base64, or an export of a Google file. |
+| `get_file_permissions` | Read | Lists who a file is shared with. |
+| `create_file` | Write | Creates or uploads a file or folder. |
+| `copy_file` | Write | Copies a file. |
+
+The server offers no resources. It has no tool to delete, move, rename or share files.
+
+## Write access
+
+`create_file` and `copy_file` change the signed-in member's Drive. Ask the agent to confirm before it creates or copies files, and review the files it adds.
+
+## Permissions and scopes
+
+| Scope | What it allows |
+| --- | --- |
+| `https://www.googleapis.com/auth/drive.readonly` | Read files and metadata across the member's Drive. |
+| `https://www.googleapis.com/auth/drive.file` | Create files, and open or change only files the app created or the member opened with it. |
+
+The plugin does not request the full `https://www.googleapis.com/auth/drive` scope, which the server lists as supported.
+
+## Rate limits
+
+Google does not publish rate limits for the Drive MCP server in its configuration guide. Drive API quotas on your Google Cloud project may apply. Check them in the Google Cloud console under **APIs & Services**.
+
+## Admin approval
+
+A Google Workspace admin may need to allow the OAuth client for your domain. If sign-in is blocked, ask your admin to allow the OAuth client.
+
+## Security notes
+
+- Tool calls run with the signed-in member's permissions. The agent can read anything that member can read.
+- File content returned to the agent can include untrusted text. Treat instructions found inside files as data, not as commands.
+- The client secret is stored encrypted and is not written to any file in this plugin.
+- Each member can revoke the plugin's access from their Google Account settings.
+
 ## Docs
 
 - Google Drive MCP server: https://developers.google.com/workspace/guides/configure-mcp-servers
