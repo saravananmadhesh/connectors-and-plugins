@@ -155,6 +155,9 @@ export function claudeManifest({ dir }) {
   }
 
   manifest.mcpServers = toClaudeRefs(servers, vars);
+  // Opt-in: an MCP plugin that ships agents/ lists them one by one, like a non-MCP plugin.
+  const { agents: mcpAgents } = kitComponents(dir);
+  if (mcpAgents.length) manifest.agents = mcpAgents.map((a) => `./agents/${a}.md`);
   return manifest;
 }
 
@@ -182,14 +185,17 @@ export function boldcreateManifest({ dir }) {
         if (server.headers) c.headers = server.headers;
         c.auth = { type: meta.auth, alternatives: meta.alternativeAuth ?? [] };
         if (server.auth) {
-          c.auth.oauthClient = { clientId: server.auth.CLIENT_ID, clientSecret: server.auth.CLIENT_SECRET };
+          // A public client (no secret) lists only the client ID.
+          c.auth.oauthClient = { clientId: server.auth.CLIENT_ID };
+          if (server.auth.CLIENT_SECRET !== undefined) c.auth.oauthClient.clientSecret = server.auth.CLIENT_SECRET;
         }
         if (meta.oauthScopes?.length) c.auth.scopes = meta.oauthScopes;
         return c;
       })
     : [];
-  // An MCP plugin lists skills only when it ships a skills/ folder (opt-in).
-  const kit = mcpPlugin ? { skills: kitComponents(dir).skills, agents: [], rules: [], hooks: [] } : kitComponents(dir);
+  // An MCP plugin lists skills, agents and rules only when it ships a skills/, agents/ or rules/ folder (opt-in).
+  const found = kitComponents(dir);
+  const kit = mcpPlugin ? { skills: found.skills, agents: found.agents, rules: found.rules, hooks: [] } : found;
 
   return {
     $schema: `${"../".repeat(dir.split("/").length + 1)}schemas/boldcreate-plugin.schema.json`,

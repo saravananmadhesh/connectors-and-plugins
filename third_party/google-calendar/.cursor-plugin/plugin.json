@@ -1,11 +1,11 @@
 {
   "name": "google-calendar",
   "displayName": "Google Calendar",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "minClientVersions": {
     "cursor": "3.19.0"
   },
-  "description": "List calendars, read events, and check free/busy time.",
+  "description": "List calendars, search and read events, suggest meeting times, and create, update, delete or respond to events.",
   "author": {
     "name": "Syncfusion"
   },

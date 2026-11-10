@@ -1,0 +1,71 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "zapier",
+  "displayName": "Zapier",
+  "version": "0.1.0",
+  "description": "Connect 9,000+ apps to your AI workflow. Discover, enable, and execute Zapier actions directly from your client.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.zapier.com/mcp/home",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "productivity",
+  "keywords": [
+    "zapier",
+    "automation",
+    "integrations",
+    "workflow",
+    "ai-actions",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.zapier.com/mcp/home",
+  "upstream": {
+    "repository": "https://github.com/zapier/zapier-mcp",
+    "path": "plugins/zapier",
+    "commit": "54a12277a12c60df51ec16cf4e4ef0b27b166649",
+    "author": "Zapier",
+    "license": "MIT"
+  },
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "zapier",
+        "transport": "streamable-http",
+        "url": "https://mcp.zapier.com/api/v1/connect",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "bearer"
+          ]
+        }
+      }
+    ],
+    "skills": [
+      "zapier-demo",
+      "zapier-explore",
+      "zapier-onboard",
+      "zapier-status"
+    ],
+    "rules": [
+      "zapier-lifecycle"
+    ],
+    "hooks": [],
+    "agents": [
+      "zapier-mcp.agent"
+    ],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "vendor docs (docs.zapier.com/mcp)"
+  }
+}

@@ -2,7 +2,7 @@
 
 BoldCreate plugin that connects agents to Google Docs through Google's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
-Read, create, and edit Google Docs.
+Read and update Google Docs.
 
 > **Developer Preview.** Google's Workspace MCP servers are part of the Google Workspace Developer Preview Program and may change before general availability.
 
@@ -58,6 +58,43 @@ Claude Code plugins can't carry an OAuth client secret, so the generated Claude 
 ## Before you connect
 
 Your Google Cloud project must be enrolled in the Google Workspace Developer Preview Program, with the product's API and its MCP service enabled. A Workspace admin may need to allow the OAuth client for your domain.
+
+## What it can do
+
+The server lists two tools. Descriptions and markings are taken from the server's `tools/list` response, checked on 2026-11-10.
+
+| Tool | Marked by the server | What the server says it does |
+| --- | --- | --- |
+| `read_doc` | Read-only | Retrieves a JSON representation of the Google Doc for a document ID. The JSON includes the text and structural information, and comments if requested. Corresponds to `documents.get` in the REST API. |
+| `update_doc` | Not read-only | Updates a document using batch update requests. It accepts a `documents.batchUpdate` request as JSON. |
+
+The server returns no resources. Neither tool is marked destructive. The server lists no tool that creates a new document.
+
+## Write access
+
+The server marks `update_doc` as not read-only, so it changes the signed-in member's documents.
+
+The description of `update_doc` lists 48 update types. 15 of them delete or replace content: `replaceAllText`, `deleteParagraphBullets`, `deleteNamedRange`, `deleteContentRange`, `deleteTableRow`, `deleteTableColumn`, `deletePositionedObject`, `replaceNamedRangeContent`, `deleteHeader`, `deleteFooter`, `deleteTab`, `deleteComment`, `deleteCommentReply`, `rejectSuggestion`, `deleteSuggestion`. The server marks the tool as not destructive, so the marking does not tell you whether a call deletes anything.
+
+## Scopes
+
+The plugin requests these scopes, which are the Docs scopes in Google's guide:
+
+- `https://www.googleapis.com/auth/drive.readonly`
+- `https://www.googleapis.com/auth/drive.file`
+- `https://www.googleapis.com/auth/documents.readonly`
+- `https://www.googleapis.com/auth/documents`
+
+The server's OAuth metadata also lists `https://www.googleapis.com/auth/drive` as supported. The plugin does not request it.
+
+## Rate limits
+
+Google's guide for the Workspace MCP servers lists no rate limits for the Docs server.
+
+## Security notes
+
+- Google's guide says the Workspace MCP servers inherit the same permissions and data governance controls as the user.
+- The client secret is stored encrypted, as described in the Setup section.
 
 ## Docs
 

@@ -10,11 +10,12 @@
   "stage": "preview",
   "oauthScopes": [
     "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+    "https://www.googleapis.com/auth/calendar.events",
     "https://www.googleapis.com/auth/calendar.events.freebusy",
     "https://www.googleapis.com/auth/calendar.events.readonly"
   ],
   "endpointCheck": {
-    "lastLiveCheck": null,
+    "lastLiveCheck": "2026-11-10",
     "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }

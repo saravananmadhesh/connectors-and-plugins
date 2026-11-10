@@ -2,7 +2,7 @@
   "name": "linear",
   "displayName": "Linear",
   "version": "0.7.1",
-  "description": "Find, create, and update Linear issues, projects, and cycles.",
+  "description": "Find, create, and update Linear objects such as issues, projects, and comments.",
   "author": {
     "name": "Syncfusion"
   },

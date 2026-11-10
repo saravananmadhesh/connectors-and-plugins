@@ -114,10 +114,15 @@ for (const { name, dir: base } of plugins) {
   }
 
   if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
-  // Opt-in: an MCP plugin with a skills/ folder must declare it, record its source, and pass the skill checks.
-  if (existsSync(join(root, base, "skills"))) {
-    if (manifest.skills !== "./skills/") fail(`${base}: skills must be "./skills/"`);
-    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required when an MCP plugin ships skills`);
+  // Opt-in: an MCP plugin with a skills/, agents/ or rules/ folder must declare it, record its source, and pass the component checks.
+  const shipsSkills = existsSync(join(root, base, "skills"));
+  const shipsAgents = existsSync(join(root, base, "agents"));
+  const shipsRules = existsSync(join(root, base, "rules"));
+  if (shipsSkills || shipsAgents || shipsRules) {
+    if (shipsSkills && manifest.skills !== "./skills/") fail(`${base}: skills must be "./skills/"`);
+    if (shipsAgents && manifest.agents !== "./agents/") fail(`${base}: agents must be "./agents/"`);
+    if (shipsRules && manifest.rules !== "./rules/") fail(`${base}: rules must be "./rules/"`);
+    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required when an MCP plugin ships skills, agents or rules`);
     const { errors: skillErrors, warnings: skillWarnings } = checkCommunity(base);
     skillErrors.forEach(fail);
     warnings.push(...skillWarnings);
