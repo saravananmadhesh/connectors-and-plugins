@@ -10,6 +10,30 @@
   },
   "plugins": [
     {
+      "name": "amplitude",
+      "displayName": "Amplitude",
+      "version": "0.1.0",
+      "description": "Query Amplitude product analytics, charts, and experiments.",
+      "source": "third_party/amplitude",
+      "logo": "third_party/amplitude/assets/logo.png",
+      "category": "analytics",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "android-management",
       "displayName": "Android Management",
       "version": "0.7.0",
@@ -122,6 +146,30 @@
         "oauth"
       ],
       "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "datadog",
+      "displayName": "Datadog",
+      "version": "0.1.0",
+      "description": "Query Datadog logs, metrics, traces, incidents, and monitors.",
+      "source": "third_party/datadog",
+      "logo": "third_party/datadog/assets/logo.svg",
+      "category": "observability",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "header"
+      ],
+      "requiresSecrets": true,
       "rollout": {
         "phase": 1,
         "wave": "A"
@@ -947,6 +995,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "mixpanel",
+      "displayName": "Mixpanel",
+      "version": "0.1.0",
+      "description": "Analyze, query, and manage your Mixpanel data.",
+      "source": "third_party/mixpanel",
+      "logo": "third_party/mixpanel/assets/logo.svg",
+      "category": "analytics",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "neon",
       "displayName": "Neon",
       "version": "0.7.1",
@@ -991,6 +1063,30 @@
       "rollout": {
         "phase": 1,
         "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "pagerduty",
+      "displayName": "PagerDuty",
+      "version": "0.1.0",
+      "description": "Browse PagerDuty services, incidents, and change events.",
+      "source": "third_party/pagerduty",
+      "logo": "third_party/pagerduty/assets/logo.svg",
+      "category": "incident-management",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "header"
+      ],
+      "requiresSecrets": true,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
       },
       "supportedByGateway": true
     },
