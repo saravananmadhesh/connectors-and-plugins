@@ -5,6 +5,7 @@
   "transport": "streamable-http",
   "auth": "oauth",
   "alternativeAuth": [],
+  "publicOAuthClient": true,
   "hostedBy": "vendor",
   "docs": "https://shopify.dev/docs/apps/build/ai-toolkit",
   "endpointCheck": {
