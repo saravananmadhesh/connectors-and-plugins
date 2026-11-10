@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "render",
+  "displayName": "Render",
+  "version": "0.1.0",
+  "description": "Inspect Render services, deploys, and logs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/render-oss/render-plugin-claude-code",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "hosting",
+  "keywords": [
+    "render",
+    "hosting",
+    "deploy",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://github.com/render-oss/render-plugin-claude-code",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "render",
+        "transport": "streamable-http",
+        "url": "https://mcp.render.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://mcp.render.com/mcp: initialize returned HTTP 401 Bearer with oauth-protected-resource metadata; also in vendor repository (render-oss/render-plugin-claude-code at 2df0bc0)"
+  }
+}

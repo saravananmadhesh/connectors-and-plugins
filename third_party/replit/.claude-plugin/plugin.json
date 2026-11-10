@@ -1,0 +1,24 @@
+{
+  "name": "replit",
+  "displayName": "Replit",
+  "version": "0.1.0",
+  "description": "Turn ideas into apps and websites instantly.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://replit.com/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "replit",
+    "developer-tools",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "replit": {
+      "type": "http",
+      "url": "https://replit-mcp.com/anthropic/mcp"
+    }
+  }
+}

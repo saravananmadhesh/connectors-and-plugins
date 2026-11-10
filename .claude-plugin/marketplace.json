@@ -203,6 +203,11 @@
       "description": "Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more."
     },
     {
+      "name": "huggingface",
+      "source": "./third_party/huggingface",
+      "description": "Search Hugging Face for models, datasets, and spaces."
+    },
+    {
       "name": "linear",
       "source": "./third_party/linear",
       "description": "Find, create, and update Linear objects such as issues, projects, and comments."
@@ -233,9 +238,29 @@
       "description": "Browse PagerDuty services, incidents, and change events."
     },
     {
+      "name": "pipedrive",
+      "source": "./third_party/pipedrive",
+      "description": "Find deals, update records, manage activities and work with your live CRM data using natural language."
+    },
+    {
       "name": "posthog",
       "source": "./third_party/posthog",
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog."
+    },
+    {
+      "name": "railway",
+      "source": "./third_party/railway",
+      "description": "Deploy, manage, and debug your apps and infrastructure on Railway."
+    },
+    {
+      "name": "render",
+      "source": "./third_party/render",
+      "description": "Inspect Render services, deploys, and logs."
+    },
+    {
+      "name": "replit",
+      "source": "./third_party/replit",
+      "description": "Turn ideas into apps and websites instantly."
     },
     {
       "name": "sentry",
@@ -356,6 +381,11 @@
       "name": "vercel",
       "source": "./third_party/vercel",
       "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics."
+    },
+    {
+      "name": "xero",
+      "source": "./third_party/xero",
+      "description": "Access your Xero financials from any conversation."
     },
     {
       "name": "zapier",

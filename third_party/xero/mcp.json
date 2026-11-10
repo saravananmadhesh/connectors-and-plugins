@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "xero": {
+      "type": "http",
+      "url": "https://mcp.xero.com/mcp"
+    }
+  }
+}

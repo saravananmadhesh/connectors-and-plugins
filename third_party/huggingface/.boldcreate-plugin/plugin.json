@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "huggingface",
+  "displayName": "Hugging Face",
+  "version": "0.1.0",
+  "description": "Search Hugging Face for models, datasets, and spaces.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://huggingface.co/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "ai",
+  "keywords": [
+    "machine learning",
+    "models",
+    "datasets",
+    "huggingface",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://huggingface.co/mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "huggingface",
+        "transport": "streamable-http",
+        "url": "https://huggingface.co/mcp",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live initialize call"
+  }
+}
