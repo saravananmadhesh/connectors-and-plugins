@@ -114,6 +114,14 @@ for (const { name, dir: base } of plugins) {
   }
 
   if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
+  // Opt-in: an MCP plugin with a skills/ folder must declare it, record its source, and pass the skill checks.
+  if (existsSync(join(root, base, "skills"))) {
+    if (manifest.skills !== "./skills/") fail(`${base}: skills must be "./skills/"`);
+    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required when an MCP plugin ships skills`);
+    const { errors: skillErrors, warnings: skillWarnings } = checkCommunity(base);
+    skillErrors.forEach(fail);
+    warnings.push(...skillWarnings);
+  }
   for (const key of ["transport", "auth", "hostedBy"]) {
     if (meta && meta[key] === undefined) fail(`${base}/boldcreate.json: ${key} is required for MCP plugins`);
   }

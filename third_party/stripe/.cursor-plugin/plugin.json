@@ -26,5 +26,6 @@
     "mcp",
     "http"
   ],
+  "skills": "./skills/",
   "mcpServers": "./mcp.json"
 }

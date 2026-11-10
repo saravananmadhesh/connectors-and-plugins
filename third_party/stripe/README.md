@@ -33,6 +33,25 @@ The first time the agent calls a tool, each member signs in to their own account
 
 - Stripe MCP server: https://docs.stripe.com/mcp
 
+## Skills
+
+The `skills/` folder holds the 10 agent skills published in [stripe/ai](https://github.com/stripe/ai/tree/d8e14797c726086c4376f576f6fb7cbb908e5f15/skills) at commit `d8e14797c726086c4376f576f6fb7cbb908e5f15`, copied unchanged. The source is licensed under MIT, copyright Stripe. Stripe syncs these skills from `docs.stripe.com/.well-known/skills`.
+
+| Skill |
+| --- |
+| `connect-recommend` |
+| `connect-required-verification-information` |
+| `metronome` |
+| `stripe-apps` |
+| `stripe-best-practices` |
+| `stripe-directory` |
+| `stripe-docs` |
+| `stripe-pay` |
+| `stripe-projects` |
+| `upgrade-stripe` |
+
+Some skills list shell commands in their `allowed-tools`, such as `Bash(stripe *)`, and `stripe-directory` and `stripe-projects` list a `curl … | sh` install command for the Stripe CLI. Review these before you enable the skills.
+
 ## Logo
 
 Stripe mark from [Simple Icons](https://simpleicons.org) (CC0) in brand colour #635BFF, on a padded white tile. The mark is a trademark of its owner.
