@@ -9,8 +9,15 @@
   ],
   "hostedBy": "vendor",
   "docs": "https://github.com/atlassian/atlassian-mcp-server",
+  "upstream": {
+    "repository": "https://github.com/atlassian/atlassian-mcp-server",
+    "path": "skills",
+    "commit": "3be55622453304b905f0c0fd5ef96fa4d638627c",
+    "author": "Atlassian",
+    "license": "Apache-2.0"
+  },
   "endpointCheck": {
-    "lastLiveCheck": null,
+    "lastLiveCheck": "2026-11-10",
     "source": "vendor docs"
   }
 }

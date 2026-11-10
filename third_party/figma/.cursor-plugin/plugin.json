@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.13.0"
   },
-  "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+  "description": "Give AI agents the design context to generate code from your Figma files, and write native Figma content back to the canvas.",
   "author": {
     "name": "Syncfusion"
   },

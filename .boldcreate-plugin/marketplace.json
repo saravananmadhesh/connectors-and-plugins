@@ -36,13 +36,14 @@
     {
       "name": "atlassian",
       "displayName": "Atlassian (Jira + Confluence)",
-      "version": "0.7.0",
-      "description": "Search and update Jira issues and Confluence pages.",
+      "version": "0.7.1",
+      "description": "Connect to Atlassian products including Jira and Confluence. Search and create issues, access documentation, manage sprints, and integrate your development workflow with Atlassian's collaboration tools.",
       "source": "third_party/atlassian",
       "logo": "third_party/atlassian/assets/logo.svg",
       "category": "project-management",
       "components": [
-        "mcp"
+        "mcp",
+        "skills"
       ],
       "transports": [
         "streamable-http"
@@ -155,7 +156,7 @@
       "name": "figma",
       "displayName": "Figma",
       "version": "0.7.0",
-      "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+      "description": "Give AI agents the design context to generate code from your Figma files, and write native Figma content back to the canvas.",
       "source": "third_party/figma",
       "logo": "third_party/figma/assets/logo.svg",
       "category": "design",
@@ -227,7 +228,7 @@
       "name": "gitlab",
       "displayName": "GitLab",
       "version": "0.7.1",
-      "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search.",
+      "description": "Access GitLab project information, retrieve issue and merge request data, and interact with GitLab APIs.",
       "source": "third_party/gitlab",
       "logo": "third_party/gitlab/assets/logo.svg",
       "category": "source-control",
@@ -251,7 +252,7 @@
       "name": "gmail",
       "displayName": "Gmail",
       "version": "0.7.1",
-      "description": "Search, read, and draft Gmail messages and threads.",
+      "description": "Search, read, and draft Gmail messages and threads, and manage labels, Trash and Spam.",
       "source": "third_party/gmail",
       "logo": "third_party/gmail/assets/logo.svg",
       "category": "productivity",
@@ -274,8 +275,8 @@
     {
       "name": "google-calendar",
       "displayName": "Google Calendar",
-      "version": "0.7.0",
-      "description": "List calendars, read events, and check free/busy time.",
+      "version": "0.7.1",
+      "description": "List calendars, search and read events, suggest meeting times, and create, update, delete or respond to events.",
       "source": "third_party/google-calendar",
       "logo": "third_party/google-calendar/assets/logo.svg",
       "category": "productivity",
@@ -635,7 +636,7 @@
       "name": "google-docs",
       "displayName": "Google Docs",
       "version": "0.7.0",
-      "description": "Read, create, and edit Google Docs.",
+      "description": "Read and update Google Docs.",
       "source": "third_party/google-docs",
       "logo": "third_party/google-docs/assets/logo.svg",
       "category": "productivity",
@@ -659,7 +660,7 @@
       "name": "google-drive",
       "displayName": "Google Drive",
       "version": "0.7.0",
-      "description": "Search, read, and create files in Google Drive.",
+      "description": "Search, read, create, download and copy files in Google Drive, and view file metadata and permissions.",
       "source": "third_party/google-drive",
       "logo": "third_party/google-drive/assets/logo.svg",
       "category": "productivity",
@@ -779,7 +780,7 @@
       "name": "google-sheets",
       "displayName": "Google Sheets",
       "version": "0.7.0",
-      "description": "Read, create, and update Google Sheets spreadsheets.",
+      "description": "Read and update Google Sheets spreadsheets, including values, formulas, and rows and columns.",
       "source": "third_party/google-sheets",
       "logo": "third_party/google-sheets/assets/logo.svg",
       "category": "productivity",
@@ -872,10 +873,36 @@
       "supportedByGateway": true
     },
     {
+      "name": "hubspot",
+      "displayName": "HubSpot",
+      "version": "0.1.0",
+      "description": "Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more.",
+      "source": "third_party/hubspot",
+      "logo": "third_party/hubspot/assets/logo.svg",
+      "category": "crm",
+      "components": [
+        "mcp",
+        "skills",
+        "agents"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": true,
+      "rollout": {
+        "phase": 2,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "linear",
       "displayName": "Linear",
       "version": "0.7.1",
-      "description": "Find, create, and update Linear issues, projects, and cycles.",
+      "description": "Find, create, and update Linear objects such as issues, projects, and comments.",
       "source": "third_party/linear",
       "logo": "third_party/linear/assets/logo.svg",
       "category": "project-management",
@@ -947,7 +974,7 @@
       "name": "notion",
       "displayName": "Notion",
       "version": "0.7.0",
-      "description": "Search, read, and update Notion pages and databases.",
+      "description": "Search your Notion workspace, create and edit pages, and manage databases.",
       "source": "third_party/notion",
       "logo": "third_party/notion/assets/logo.svg",
       "category": "documentation",
@@ -995,12 +1022,13 @@
       "name": "sentry",
       "displayName": "Sentry",
       "version": "0.7.0",
-      "description": "Investigate Sentry errors, stack traces, and issues for a project.",
+      "description": "Search errors, analyze performance, triage issues, read documentation, and manage projects in Sentry.",
       "source": "third_party/sentry",
       "logo": "third_party/sentry/assets/logo.svg",
       "category": "observability",
       "components": [
-        "mcp"
+        "mcp",
+        "skills"
       ],
       "transports": [
         "streamable-http"
@@ -1016,10 +1044,59 @@
       "supportedByGateway": true
     },
     {
+      "name": "shopify",
+      "displayName": "Shopify",
+      "version": "0.1.0",
+      "description": "Create and manage your store with Shopify.",
+      "source": "third_party/shopify",
+      "logo": "third_party/shopify/assets/logo.svg",
+      "category": "business-operations",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 2,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "slack",
+      "displayName": "Slack",
+      "version": "0.1.0",
+      "description": "Slack AI tools for users and developers: interact with your workspace via the Slack MCP server and use skills to develop Slack apps.",
+      "source": "third_party/slack",
+      "logo": "third_party/slack/assets/logo.svg",
+      "category": "productivity",
+      "components": [
+        "mcp",
+        "skills"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": true,
+      "rollout": {
+        "phase": 2,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "stripe",
       "displayName": "Stripe",
-      "version": "0.7.1",
-      "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
+      "version": "0.7.2",
+      "description": "Interact with the Stripe API and search the Stripe knowledge base, including documentation and support articles.",
       "source": "third_party/stripe",
       "logo": "third_party/stripe/assets/logo.svg",
       "category": "payments",
@@ -1043,21 +1120,22 @@
     {
       "name": "supabase",
       "displayName": "Supabase",
-      "version": "0.7.0",
-      "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
+      "version": "0.7.1",
+      "description": "Connect AI assistants to your Supabase project to manage tables, fetch config, and query data.",
       "source": "third_party/supabase",
       "logo": "third_party/supabase/assets/logo.svg",
       "category": "database",
       "components": [
-        "mcp"
+        "mcp",
+        "skills"
       ],
       "transports": [
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 1,
         "wave": "A"
@@ -1410,12 +1488,14 @@
       "name": "vercel",
       "displayName": "Vercel",
       "version": "0.7.0",
-      "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+      "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics.",
       "source": "third_party/vercel",
       "logo": "third_party/vercel/assets/logo.svg",
       "category": "hosting",
       "components": [
-        "mcp"
+        "mcp",
+        "skills",
+        "agents"
       ],
       "transports": [
         "streamable-http"
@@ -1426,6 +1506,58 @@
       "requiresSecrets": false,
       "rollout": {
         "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "zapier",
+      "displayName": "Zapier",
+      "version": "0.1.0",
+      "description": "Connect 9,000+ apps to your AI workflow. Discover, enable, and execute Zapier actions directly from your client.",
+      "source": "third_party/zapier",
+      "logo": "third_party/zapier/assets/logo.svg",
+      "category": "productivity",
+      "components": [
+        "mcp",
+        "skills",
+        "rules",
+        "agents"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "zoom",
+      "displayName": "Zoom",
+      "version": "0.1.0",
+      "description": "Search, ask and act on your Zoom meetings, recordings, notes and docs",
+      "source": "third_party/zoom",
+      "logo": "third_party/zoom/assets/logo.svg",
+      "category": "productivity",
+      "components": [
+        "mcp",
+        "skills"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": true,
+      "rollout": {
+        "phase": 2,
         "wave": "B"
       },
       "supportedByGateway": true

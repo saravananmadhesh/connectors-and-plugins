@@ -1,0 +1,44 @@
+{
+  "name": "shopify",
+  "displayName": "Shopify",
+  "version": "0.1.0",
+  "minClientVersions": {
+    "cursor": "3.13.0"
+  },
+  "description": "Create and manage your store with Shopify.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://shopify.dev/docs/apps/build/ai-toolkit",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "shopify",
+    "ecommerce",
+    "store",
+    "products",
+    "orders",
+    "mcp"
+  ],
+  "category": "business-operations",
+  "tags": [
+    "business-operations",
+    "ecommerce",
+    "mcp",
+    "http"
+  ],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "CLIENT_ID": {
+        "type": "string",
+        "title": "Client ID",
+        "description": "The OAuth client ID Shopify publishes in its own Shopify AI Toolkit plugin for Cursor. It is not a secret. Replace it with your own client ID if your team registers one.",
+        "default": "2a457b21c946d5bc8d1675d1b3b8c2d6",
+        "x-sensitive": false
+      }
+    }
+  },
+  "mcpServers": "./mcp.json"
+}

@@ -2,7 +2,7 @@
 
 BoldCreate plugin that connects agents to Google Drive through Google's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
-Search, read, and create files in Google Drive.
+Search, read, create, download and copy files in Google Drive, and view file metadata and permissions.
 
 > **Developer Preview.** Google's Workspace MCP servers are part of the Google Workspace Developer Preview Program and may change before general availability.
 

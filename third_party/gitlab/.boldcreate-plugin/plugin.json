@@ -3,7 +3,7 @@
   "name": "gitlab",
   "displayName": "GitLab",
   "version": "0.7.1",
-  "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search.",
+  "description": "Access GitLab project information, retrieve issue and merge request data, and interact with GitLab APIs.",
   "author": {
     "name": "Syncfusion"
   },

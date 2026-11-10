@@ -7,6 +7,13 @@
   "alternativeAuth": [],
   "hostedBy": "vendor",
   "docs": "https://vercel.com/docs/agent-resources/vercel-mcp",
+  "upstream": {
+    "repository": "https://github.com/vercel/vercel-plugin",
+    "path": ".",
+    "commit": "39e5102c79293b91a02d84543c197940fa383852",
+    "author": "Vercel",
+    "license": "Apache-2.0"
+  },
   "endpointCheck": {
     "lastLiveCheck": null,
     "source": "vendor docs"

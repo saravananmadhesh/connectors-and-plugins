@@ -3,7 +3,7 @@
   "name": "vercel",
   "displayName": "Vercel",
   "version": "0.7.0",
-  "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+  "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics.",
   "author": {
     "name": "Syncfusion"
   },
@@ -21,6 +21,13 @@
   ],
   "hostedBy": "vendor",
   "docs": "https://vercel.com/docs/agent-resources/vercel-mcp",
+  "upstream": {
+    "repository": "https://github.com/vercel/vercel-plugin",
+    "path": ".",
+    "commit": "39e5102c79293b91a02d84543c197940fa383852",
+    "author": "Vercel",
+    "license": "Apache-2.0"
+  },
   "rollout": {
     "phase": 1,
     "wave": "B"
@@ -39,10 +46,50 @@
         }
       }
     ],
-    "skills": [],
+    "skills": [
+      "access-protected-vercel-deployment",
+      "ai-gateway",
+      "auth",
+      "bootstrap",
+      "build-agents",
+      "cdn-caching",
+      "chat-sdk",
+      "create-a-backend",
+      "custom-metrics",
+      "daemons",
+      "deployments-cicd",
+      "domains",
+      "env-vars",
+      "eve",
+      "flags-sdk",
+      "knowledge-update",
+      "marketplace",
+      "microfrontends",
+      "offload-to-sandbox",
+      "queues",
+      "routing-middleware",
+      "runtime-cache",
+      "vercel-agent",
+      "vercel-cli",
+      "vercel-connect",
+      "vercel-firewall",
+      "vercel-flags",
+      "vercel-functions",
+      "vercel-sandbox",
+      "vercel-schedules",
+      "vercel-services",
+      "vercel-storage",
+      "vercel-tracing",
+      "verification",
+      "workflow"
+    ],
     "rules": [],
     "hooks": [],
-    "agents": [],
+    "agents": [
+      "ai-architect",
+      "deployment-expert",
+      "performance-optimizer"
+    ],
     "commands": []
   },
   "endpointCheck": {

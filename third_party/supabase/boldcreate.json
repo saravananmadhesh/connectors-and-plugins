@@ -3,14 +3,21 @@
   "phase": 1,
   "wave": "A",
   "transport": "streamable-http",
-  "auth": "bearer",
+  "auth": "oauth",
   "alternativeAuth": [
-    "oauth"
+    "bearer"
   ],
   "hostedBy": "vendor",
   "docs": "https://supabase.com/docs/guides/getting-started/mcp",
+  "upstream": {
+    "repository": "https://github.com/supabase/agent-skills",
+    "path": "skills",
+    "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+    "author": "Supabase",
+    "license": "MIT"
+  },
   "endpointCheck": {
-    "lastLiveCheck": null,
+    "lastLiveCheck": "2026-11-10",
     "source": "vendor docs"
   }
 }

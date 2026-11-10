@@ -1,11 +1,11 @@
 {
   "name": "stripe",
   "displayName": "Stripe",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "minClientVersions": {
     "cursor": "3.13.0"
   },
-  "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
+  "description": "Interact with the Stripe API and search the Stripe knowledge base, including documentation and support articles.",
   "author": {
     "name": "Syncfusion"
   },
