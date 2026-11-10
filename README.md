@@ -87,19 +87,25 @@ The platform and SDK skill packs listed on [ai.syncfusion.com](https://ai.syncfu
 | `google-stitch` | [Stitch](third_party/google-stitch/) | Design | Generate UI designs and front-end code with Google Stitch. |
 | `google-workspace-search` | [Google Workspace Search](third_party/google-workspace-search/) | Productivity | Search across Gmail, Drive, Calendar, and other Google Workspace content in one place. |
 | `hubspot` | [HubSpot](third_party/hubspot/) | CRM | Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more. |
+| `huggingface` | [Hugging Face](third_party/huggingface/) | AI | Search Hugging Face for models, datasets, and spaces. |
 | `linear` | [Linear](third_party/linear/) | Project Management | Find, create, and update Linear objects such as issues, projects, and comments. |
 | `microsoft-learn` | [Microsoft Learn](third_party/microsoft-learn/) | Documentation | Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more. |
 | `mixpanel` | [Mixpanel](third_party/mixpanel/) | Analytics | Analyze, query, and manage your Mixpanel data. |
 | `neon` | [Neon](third_party/neon/) | Database | Manage Neon serverless Postgres projects, branches, queries, and migrations. |
 | `notion` | [Notion](third_party/notion/) | Documentation | Search your Notion workspace, create and edit pages, and manage databases. |
 | `pagerduty` | [PagerDuty](third_party/pagerduty/) | Incident Management | Browse PagerDuty services, incidents, and change events. |
+| `pipedrive` | [Pipedrive](third_party/pipedrive/) | CRM | Find deals, update records, manage activities and work with your live CRM data using natural language. |
 | `posthog` | [PostHog](third_party/posthog/) | Analytics | Query product analytics, manage feature flags, and investigate errors in PostHog. |
+| `railway` | [Railway](third_party/railway/) | Developer Tools | Deploy, manage, and debug your apps and infrastructure on Railway. |
+| `render` | [Render](third_party/render/) | Hosting | Inspect Render services, deploys, and logs. |
+| `replit` | [Replit](third_party/replit/) | Developer Tools | Turn ideas into apps and websites instantly. |
 | `sentry` | [Sentry](third_party/sentry/) | Observability | Search errors, analyze performance, triage issues, read documentation, and manage projects in Sentry. |
 | `shopify` | [Shopify](third_party/shopify/) | Business Operations | Create and manage your store with Shopify. |
 | `slack` | [Slack](third_party/slack/) | Productivity | Slack AI tools for users and developers: interact with your workspace via the Slack MCP server and use skills to develop Slack apps. |
 | `stripe` | [Stripe](third_party/stripe/) | Payments | Interact with the Stripe API and search the Stripe knowledge base, including documentation and support articles. |
-| `supabase` | [Supabase](third_party/supabase/) | Database | Connect AI assistants to your Supabase project to manage tables, fetch config, and query data. |
+| `supabase` | [Supabase](third_party/supabase/) | Database | Connect AI assistants to your Supabase project to manage tables, fetch config, and query them. |
 | `vercel` | [Vercel](third_party/vercel/) | Hosting | Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics. |
+| `xero` | [Xero](third_party/xero/) | Finance | Access your Xero financials from any conversation. |
 | `zapier` | [Zapier](third_party/zapier/) | Productivity | Connect 9,000+ apps to your AI workflow. Discover, enable, and execute Zapier actions directly from your client. |
 | `zoom` | [Zoom](third_party/zoom/) | Productivity | Search, ask and act on your Zoom meetings, recordings, notes and docs |
 

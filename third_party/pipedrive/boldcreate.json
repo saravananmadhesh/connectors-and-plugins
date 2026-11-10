@@ -1,0 +1,14 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "wave": "B",
+  "transport": "streamable-http",
+  "auth": "oauth",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://developers.pipedrive.com/mcp",
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://mcp.pipedrive.ai/mcp: initialize returned HTTP 401 Bearer challenge; oauth-protected-resource metadata lists authorization_servers https://oauth.pipedrive.com"
+  }
+}

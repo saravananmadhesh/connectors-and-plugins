@@ -947,6 +947,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "huggingface",
+      "displayName": "Hugging Face",
+      "version": "0.1.0",
+      "description": "Search Hugging Face for models, datasets, and spaces.",
+      "source": "third_party/huggingface",
+      "logo": "third_party/huggingface/assets/logo.png",
+      "category": "ai",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "none"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "linear",
       "displayName": "Linear",
       "version": "0.7.1",
@@ -1091,6 +1115,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "pipedrive",
+      "displayName": "Pipedrive",
+      "version": "0.1.0",
+      "description": "Find deals, update records, manage activities and work with your live CRM data using natural language.",
+      "source": "third_party/pipedrive",
+      "logo": "third_party/pipedrive/assets/logo.png",
+      "category": "crm",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "posthog",
       "displayName": "PostHog",
       "version": "0.7.1",
@@ -1111,6 +1159,78 @@
       "rollout": {
         "phase": 1,
         "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "railway",
+      "displayName": "Railway",
+      "version": "0.1.0",
+      "description": "Deploy, manage, and debug your apps and infrastructure on Railway.",
+      "source": "third_party/railway",
+      "logo": "third_party/railway/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "render",
+      "displayName": "Render",
+      "version": "0.1.0",
+      "description": "Inspect Render services, deploys, and logs.",
+      "source": "third_party/render",
+      "logo": "third_party/render/assets/logo.svg",
+      "category": "hosting",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "replit",
+      "displayName": "Replit",
+      "version": "0.1.0",
+      "description": "Turn ideas into apps and websites instantly.",
+      "source": "third_party/replit",
+      "logo": "third_party/replit/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
       },
       "supportedByGateway": true
     },
@@ -1592,6 +1712,30 @@
         "mcp",
         "skills",
         "agents"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "xero",
+      "displayName": "Xero",
+      "version": "0.1.0",
+      "description": "Access your Xero financials from any conversation.",
+      "source": "third_party/xero",
+      "logo": "third_party/xero/assets/logo.svg",
+      "category": "finance",
+      "components": [
+        "mcp"
       ],
       "transports": [
         "streamable-http"
