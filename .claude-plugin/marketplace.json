@@ -8,6 +8,11 @@
   },
   "plugins": [
     {
+      "name": "amplitude",
+      "source": "./third_party/amplitude",
+      "description": "Query Amplitude product analytics, charts, and experiments."
+    },
+    {
       "name": "android-management",
       "source": "./third_party/android-management",
       "description": "Manage enterprise Android devices, policies, and apps with the Android Management API."
@@ -31,6 +36,11 @@
       "name": "context7",
       "source": "./third_party/context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt."
+    },
+    {
+      "name": "datadog",
+      "source": "./third_party/datadog",
+      "description": "Query Datadog logs, metrics, traces, incidents, and monitors."
     },
     {
       "name": "deepwiki",
@@ -203,6 +213,11 @@
       "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more."
     },
     {
+      "name": "mixpanel",
+      "source": "./third_party/mixpanel",
+      "description": "Analyze, query, and manage your Mixpanel data."
+    },
+    {
       "name": "neon",
       "source": "./third_party/neon",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations."
@@ -211,6 +226,11 @@
       "name": "notion",
       "source": "./third_party/notion",
       "description": "Search your Notion workspace, create and edit pages, and manage databases."
+    },
+    {
+      "name": "pagerduty",
+      "source": "./third_party/pagerduty",
+      "description": "Browse PagerDuty services, incidents, and change events."
     },
     {
       "name": "posthog",
