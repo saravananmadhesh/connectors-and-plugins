@@ -11,6 +11,6 @@
   "docs": "https://posthog.com/docs/model-context-protocol",
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs"
+    "source": "official docs"
   }
 }

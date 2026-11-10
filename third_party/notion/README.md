@@ -1,6 +1,6 @@
 # Notion
 
-BoldCreate plugin that connects agents to Notion through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Notion through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Search your Notion workspace, create and edit pages, and manage databases.
 

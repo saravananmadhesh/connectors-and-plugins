@@ -1,6 +1,6 @@
 # Sentry
 
-BoldCreate plugin that connects agents to Sentry through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Sentry through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Search errors, analyze performance, triage issues, read documentation, and manage projects in Sentry.
 

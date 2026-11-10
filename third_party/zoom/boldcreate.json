@@ -37,6 +37,6 @@
   ],
   "endpointCheck": {
     "lastLiveCheck": "2026-11-10",
-    "source": "vendor docs (developers.zoom.us/docs/mcp/zoom) and the source plugin's TOOLS.md"
+    "source": "official docs (developers.zoom.us/docs/mcp/zoom) and the source plugin's TOOLS.md"
   }
 }
