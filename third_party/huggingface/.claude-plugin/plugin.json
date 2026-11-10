@@ -1,0 +1,26 @@
+{
+  "name": "huggingface",
+  "displayName": "Hugging Face",
+  "version": "0.1.0",
+  "description": "Search Hugging Face for models, datasets, and spaces.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://huggingface.co/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "machine learning",
+    "models",
+    "datasets",
+    "huggingface",
+    "mcp"
+  ],
+  "icon": "./assets/logo.png",
+  "mcpServers": {
+    "huggingface": {
+      "type": "http",
+      "url": "https://huggingface.co/mcp"
+    }
+  }
+}

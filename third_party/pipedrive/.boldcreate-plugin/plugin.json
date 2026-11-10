@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "pipedrive",
+  "displayName": "Pipedrive",
+  "version": "0.1.0",
+  "description": "Find deals, update records, manage activities and work with your live CRM data using natural language.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.pipedrive.com/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "crm",
+  "keywords": [
+    "pipedrive",
+    "crm",
+    "sales",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developers.pipedrive.com/mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "pipedrive",
+        "transport": "streamable-http",
+        "url": "https://mcp.pipedrive.ai/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://mcp.pipedrive.ai/mcp: initialize returned HTTP 401 Bearer challenge; oauth-protected-resource metadata lists authorization_servers https://oauth.pipedrive.com"
+  }
+}

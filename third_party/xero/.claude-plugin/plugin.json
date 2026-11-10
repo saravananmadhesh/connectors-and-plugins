@@ -1,0 +1,24 @@
+{
+  "name": "xero",
+  "displayName": "Xero",
+  "version": "0.1.0",
+  "description": "Access your Xero financials from any conversation.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developer.xero.com/documentation/guides/mcp/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "xero",
+    "finance",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "xero": {
+      "type": "http",
+      "url": "https://mcp.xero.com/mcp"
+    }
+  }
+}
