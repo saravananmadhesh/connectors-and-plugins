@@ -682,7 +682,7 @@
     {
       "name": "google-drive",
       "displayName": "Google Drive",
-      "version": "0.7.1",
+      "version": "0.7.0",
       "description": "Search, read, and create files in Google Drive.",
       "source": "third_party/google-drive",
       "logo": "third_party/google-drive/assets/logo.svg",
