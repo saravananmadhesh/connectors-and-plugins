@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-drive",
   "displayName": "Google Drive",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Search, read, and create files in Google Drive.",
   "author": {
     "name": "Syncfusion"
@@ -68,7 +68,7 @@
     "commands": []
   },
   "endpointCheck": {
-    "lastLiveCheck": null,
+    "lastLiveCheck": "2026-11-10",
     "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }
