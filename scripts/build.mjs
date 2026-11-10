@@ -8,7 +8,7 @@
 //
 // <plugin> is <name> at the repo root for Syncfusion plugins, syncfusion/<group>/<name> for
 // Syncfusion skill packs (copied from Syncfusion's skill repositories), and third_party/<name>
-// for vendor MCP plugins and community plugins (skills, agents, rules and hooks copied from
+// for MCP plugins and community plugins (skills, agents, rules and hooks copied from
 // another marketplace). Sources per plugin: .cursor-plugin/plugin.json, boldcreate.json,
 // and either mcp.json or the skills/, agents/, rules/ and hooks/ folders.
 // Usage: node scripts/build.mjs          write the files
@@ -55,8 +55,8 @@ export function listPlugins() {
       .filter((n) => existsSync(join(root, SKILL_PACKS_DIR, group, n, ".cursor-plugin/plugin.json")))
       .map((n) => ({ name: `syncfusion-${n}`, dir: `${SKILL_PACKS_DIR}/${group}/${n}` }))
   );
-  const vendor = subdirs(join(root, PLUGINS_DIR)).map((name) => ({ name, dir: `${PLUGINS_DIR}/${name}` }));
-  return [...firstParty, ...packs, ...vendor].sort((a, b) => a.name.localeCompare(b.name));
+  const mcpPlugins = subdirs(join(root, PLUGINS_DIR)).map((name) => ({ name, dir: `${PLUGINS_DIR}/${name}` }));
+  return [...firstParty, ...packs, ...mcpPlugins].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // Cursor auto-loads hooks/hooks.json in its own format, so Claude Code hooks live in a separate file.

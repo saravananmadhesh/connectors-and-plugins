@@ -10,6 +10,6 @@
   "docs": "https://shopify.dev/docs/apps/build/ai-toolkit",
   "endpointCheck": {
     "lastLiveCheck": "2026-11-10",
-    "source": "vendor docs and live check (setup.shopify.com/mcp)"
+    "source": "official docs and live check (setup.shopify.com/mcp)"
   }
 }

@@ -1,6 +1,6 @@
 # Vercel
 
-BoldCreate plugin that connects agents to Vercel through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Vercel through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics.
 

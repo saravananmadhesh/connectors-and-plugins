@@ -1,6 +1,6 @@
 # Stripe
 
-BoldCreate plugin that connects agents to Stripe through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Stripe through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Interact with the Stripe API and search the Stripe knowledge base, including documentation and support articles.
 

@@ -1,6 +1,6 @@
 # Linear
 
-BoldCreate plugin that connects agents to Linear through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Linear through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Find, create, and update Linear objects such as issues, projects, and comments.
 

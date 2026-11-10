@@ -1,6 +1,6 @@
 # Supabase
 
-BoldCreate plugin that connects agents to Supabase through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Supabase through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Connect AI assistants to your Supabase project to manage tables, fetch config, and query data.
 
