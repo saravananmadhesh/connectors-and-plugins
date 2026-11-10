@@ -1,0 +1,30 @@
+{
+  "name": "zapier",
+  "displayName": "Zapier",
+  "version": "0.1.0",
+  "description": "Connect 9,000+ apps to your AI workflow. Discover, enable, and execute Zapier actions directly from your client.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.zapier.com/mcp/home",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "zapier",
+    "automation",
+    "integrations",
+    "workflow",
+    "ai-actions",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "zapier": {
+      "type": "http",
+      "url": "https://mcp.zapier.com/api/v1/connect"
+    }
+  },
+  "agents": [
+    "./agents/zapier-mcp.agent.md"
+  ]
+}

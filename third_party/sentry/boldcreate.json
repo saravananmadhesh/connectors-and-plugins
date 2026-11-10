@@ -7,6 +7,13 @@
   "alternativeAuth": [],
   "hostedBy": "vendor",
   "docs": "https://mcp.sentry.dev/",
+  "upstream": {
+    "repository": "https://github.com/getsentry/agent-plugin",
+    "path": "skills",
+    "commit": "2eee4ec823972c222aae89c9213c64c056b64048",
+    "author": "Sentry",
+    "license": "MIT AND Apache-2.0"
+  },
   "endpointCheck": {
     "lastLiveCheck": null,
     "source": "vendor docs"

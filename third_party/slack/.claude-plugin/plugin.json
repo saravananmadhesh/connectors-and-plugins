@@ -1,0 +1,27 @@
+{
+  "name": "slack",
+  "displayName": "Slack",
+  "version": "0.1.0",
+  "description": "Slack AI tools for users and developers: interact with your workspace via the Slack MCP server and use skills to develop Slack apps.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.slack.dev/ai/slack-mcp-server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "slack",
+    "messaging",
+    "channels",
+    "canvas",
+    "search",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com/mcp"
+    }
+  }
+}

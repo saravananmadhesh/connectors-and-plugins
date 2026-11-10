@@ -2,7 +2,7 @@
   "name": "vercel",
   "displayName": "Vercel",
   "version": "0.7.0",
-  "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+  "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics.",
   "author": {
     "name": "Syncfusion"
   },
@@ -22,5 +22,10 @@
       "type": "http",
       "url": "https://mcp.vercel.com"
     }
-  }
+  },
+  "agents": [
+    "./agents/ai-architect.md",
+    "./agents/deployment-expert.md",
+    "./agents/performance-optimizer.md"
+  ]
 }

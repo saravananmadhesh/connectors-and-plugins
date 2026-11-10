@@ -1,0 +1,119 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "slack",
+  "displayName": "Slack",
+  "version": "0.1.0",
+  "description": "Slack AI tools for users and developers: interact with your workspace via the Slack MCP server and use skills to develop Slack apps.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.slack.dev/ai/slack-mcp-server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "productivity",
+  "keywords": [
+    "slack",
+    "messaging",
+    "channels",
+    "canvas",
+    "search",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.slack.dev/ai/slack-mcp-server",
+  "upstream": {
+    "repository": "https://github.com/slackapi/slack-skills-plugin",
+    "path": "skills",
+    "commit": "99e027a47c065223ac719a1b291997d4fc23cec0",
+    "author": "Slack",
+    "license": "MIT"
+  },
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "The client ID of a Slack app your team created. The app must be internal or published in the Slack Marketplace. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The client secret of that Slack app. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "slack",
+        "transport": "streamable-http",
+        "url": "https://mcp.slack.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "canvases:read",
+            "canvases:write",
+            "channels:history",
+            "channels:read",
+            "channels:write",
+            "chat:write",
+            "emoji:read",
+            "files:read",
+            "files:write",
+            "groups:history",
+            "groups:read",
+            "groups:write",
+            "im:history",
+            "im:read",
+            "im:write",
+            "lists:read",
+            "lists:write",
+            "mpim:history",
+            "mpim:read",
+            "mpim:write",
+            "reactions:read",
+            "reactions:write",
+            "search:read.files",
+            "search:read.im",
+            "search:read.mpim",
+            "search:read.private",
+            "search:read.public",
+            "search:read.users",
+            "users:read",
+            "users:read.email"
+          ]
+        }
+      }
+    ],
+    "skills": [
+      "block-kit",
+      "create-slack-app",
+      "deploy-slack-app",
+      "slack-api",
+      "slack-cli",
+      "slack-docs",
+      "slack-messaging",
+      "slack-search",
+      "test-slack-app"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "vendor docs and live check (https://docs.slack.dev/ai/slack-mcp-server, https://mcp.slack.com/.well-known/oauth-protected-resource)"
+  }
+}
