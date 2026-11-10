@@ -188,7 +188,8 @@ export function boldcreateManifest({ dir }) {
         return c;
       })
     : [];
-  const kit = mcpPlugin ? { skills: [], agents: [], rules: [], hooks: [] } : kitComponents(dir);
+  // An MCP plugin lists skills only when it ships a skills/ folder (opt-in).
+  const kit = mcpPlugin ? { skills: kitComponents(dir).skills, agents: [], rules: [], hooks: [] } : kitComponents(dir);
 
   return {
     $schema: `${"../".repeat(dir.split("/").length + 1)}schemas/boldcreate-plugin.schema.json`,

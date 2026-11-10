@@ -1048,7 +1048,8 @@
       "logo": "third_party/stripe/assets/logo.svg",
       "category": "payments",
       "components": [
-        "mcp"
+        "mcp",
+        "skills"
       ],
       "transports": [
         "streamable-http"
