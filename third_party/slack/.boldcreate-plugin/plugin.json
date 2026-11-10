@@ -114,6 +114,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": "2026-11-10",
-    "source": "vendor docs and live check (https://docs.slack.dev/ai/slack-mcp-server, https://mcp.slack.com/.well-known/oauth-protected-resource)"
+    "source": "official docs and live check (https://docs.slack.dev/ai/slack-mcp-server, https://mcp.slack.com/.well-known/oauth-protected-resource)"
   }
 }

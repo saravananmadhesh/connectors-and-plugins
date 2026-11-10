@@ -1,6 +1,6 @@
 # Atlassian (Jira + Confluence)
 
-BoldCreate plugin that connects agents to Atlassian (Jira + Confluence) through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Atlassian (Jira + Confluence) through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Connect to Atlassian products including Jira and Confluence. Search and create issues, access documentation, manage sprints, and integrate your development workflow with Atlassian's collaboration tools.
 

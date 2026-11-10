@@ -4,7 +4,7 @@ Syncfusion's BoldCreate plugins for BoldCreate Connect, Cursor and Claude Code. 
 
 - **Syncfusion plugins** at the repository root, made of skills, agents and rules. `boldcreate-toolkit/` gives agents one software delivery lifecycle on any stack.
 - **Syncfusion skill packs** under `syncfusion/`, one plugin per platform. Each is copied from Syncfusion's skill repository for that platform and teaches agents to build with Syncfusion components.
-- **MCP plugins** under `third_party/`. Each connects agents to a vendor's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+- **MCP plugins** under `third_party/`. Each connects agents to a service's remote [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 ## Install
 
@@ -16,7 +16,7 @@ Secrets such as API keys are never stored in this repository. Each MCP plugin de
 
 ## Syncfusion plugins
 
-| `name` | Plugin | Category | `description` (from marketplace) |
+| `name` | Plugin | Category | `description` |
 |:-------|:-------|:---------|:-------------------------------------|
 | `boldcreate-toolkit` | [BoldCreate Toolkit](boldcreate-toolkit/) | Developer Tools | Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests. |
 
@@ -47,9 +47,7 @@ The platform and SDK skill packs listed on [ai.syncfusion.com](https://ai.syncfu
 
 ## MCP plugins
 
-Each plugin connects to the vendor's own server. Descriptions, setup steps, scopes and tool lists in each plugin's README come from the vendor's documentation. Some plugins also include skills, agents or rules copied unchanged from the vendor's repository. The plugin's `boldcreate.json` records the source repository, commit and licence, and the original licence is in the plugin's `skills/LICENSE`.
-
-| `name` | Plugin | Category | `description` (from marketplace) |
+| `name` | Plugin | Category | `description` |
 |:-------|:-------|:---------|:-------------------------------------|
 | `android-management` | [Android Management](third_party/android-management/) | Devices | Manage enterprise Android devices, policies, and apps with the Android Management API. |
 | `atlassian` | [Atlassian (Jira + Confluence)](third_party/atlassian/) | Project Management | Connect to Atlassian products including Jira and Confluence. Search and create issues, access documentation, manage sprints, and integrate your development workflow with Atlassian's collaboration tools. |
@@ -142,7 +140,7 @@ third_party/
     ├── .boldcreate-plugin/plugin.json  # BoldCreate Connect manifest (generated)
     ├── boldcreate.json                 # Transport, auth, OAuth scopes, docs and upstream source
     ├── mcp.json                        # MCP server definitions
-    ├── skills/, agents/, rules/        # Optional. Copied from the vendor's repository, with skills/LICENSE
+    ├── skills/, agents/, rules/
     ├── assets/logo.svg                 # Logo
     ├── README.md
     ├── CHANGELOG.md
@@ -154,12 +152,6 @@ scripts/                              # build.mjs, validate.mjs and check-kit.mj
 ## Contributing
 
 1. Edit the source files: `.cursor-plugin/plugin.json`, `boldcreate.json`, `README.md` and `CHANGELOG.md`, plus `mcp.json` for an MCP plugin or the skills, agents, rules and hooks for a Syncfusion plugin. Don't edit generated files by hand.
-
-   For an MCP plugin:
-   - Take the description, setup steps, scopes and tool list from the vendor's documentation or from the server's own responses, and name what you could not check.
-   - Declare any secret as an install-time variable in `mcp.json`. Never write a key or token into a file.
-   - If the server has no dynamic client registration, set `CLIENT_ID` and `CLIENT_SECRET` in the `auth` block of `mcp.json`. If it accepts public clients only, set `CLIENT_ID` alone and add `"publicOAuthClient": true` to `boldcreate.json`. Validation fails on a missing secret without that flag.
-   - To include skills, agents or rules, copy them unchanged from the vendor's repository. Add an `upstream` entry (repository, path, commit and licence) to `boldcreate.json`, and put the original licence text in `skills/LICENSE`.
 2. Run `npm ci`, then `npm run build` and `npm run validate`. Community plugins and Syncfusion skill packs are checked only for loadable components and an `upstream` entry in `boldcreate.json`. Validation also checks Syncfusion plugins against their context budgets: auto-skill descriptions, agent descriptions and always-on rules under 600 tokens, each `SKILL.md` at most 150 lines, each agent file at most 80 lines, and a scenario file for every skill.
 3. Open a pull request. CI runs the same checks and the Claude Code plugin validator.
 

@@ -1,6 +1,6 @@
 # Figma
 
-BoldCreate plugin that connects agents to Figma through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Figma through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Give AI agents the design context to generate code from your Figma files, and write native Figma content back to the canvas.
 
