@@ -13,7 +13,7 @@
     "https://www.googleapis.com/auth/drive.file"
   ],
   "endpointCheck": {
-    "lastLiveCheck": "2026-11-10",
+    "lastLiveCheck": null,
     "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }
