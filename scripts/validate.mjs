@@ -166,6 +166,15 @@ for (const { name, dir: base } of plugins) {
       if (refs.length === 0) fail(`${where}: auth.${k} must be a \${VARIABLE}, not a literal`);
       refs.forEach((r) => used.add(r));
     }
+    if (server.auth) {
+      const hasId = "CLIENT_ID" in server.auth;
+      const hasSecret = "CLIENT_SECRET" in server.auth;
+      if (!hasId) fail(`${where}: auth must set CLIENT_ID`);
+      if (hasId && !hasSecret && !meta?.publicOAuthClient) {
+        fail(`${where}: auth sets CLIENT_ID without CLIENT_SECRET; set publicOAuthClient: true in boldcreate.json only if the server accepts public clients`);
+      }
+      if (hasSecret && meta?.publicOAuthClient) fail(`${where}: publicOAuthClient is true but auth sets CLIENT_SECRET`);
+    }
   }
 
   for (const v of used) if (!declared.has(v)) fail(`${base}: \${${v}} is used in mcp.json but not declared in variables`);
