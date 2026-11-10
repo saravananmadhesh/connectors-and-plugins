@@ -1,7 +1,7 @@
 {
   "name": "google-drive",
   "displayName": "Google Drive",
-  "version": "0.7.1",
+  "version": "0.7.0",
   "minClientVersions": {
     "cursor": "3.19.0"
   },
