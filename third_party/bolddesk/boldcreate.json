@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "wave": "B",
+  "transport": "streamable-http",
+  "auth": "oauth",
+  "alternativeAuth": [
+    "header"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developer.bolddesk.com/mcp-server/",
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (developer.bolddesk.com/mcp-server). The endpoint is per account, so it was not called."
+  }
+}

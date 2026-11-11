@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bolddesk": {
+      "type": "http",
+      "url": "https://${BOLDDESK_HOST}/mcp"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "bolddesk",
+  "displayName": "BoldDesk",
+  "version": "0.7.1",
+  "description": "Create, update and route support tickets, reply to conversations, log work, and search the Knowledge Base in BoldDesk.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developer.bolddesk.com/mcp-server/",
+  "repository": "https://github.com/SF3922-Shreedhar/BoldCreate-Connectors",
+  "license": "MIT",
+  "keywords": [
+    "bolddesk",
+    "help desk",
+    "support",
+    "tickets",
+    "knowledge base",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "BOLDDESK_HOST": {
+      "type": "string",
+      "title": "BoldDesk host",
+      "description": "Your BoldDesk host name, such as yourcompany.bolddesk.com, or your mapped custom domain. It must match your account, or BoldDesk rejects the request.",
+      "required": true,
+      "sensitive": false
+    }
+  },
+  "mcpServers": {
+    "bolddesk": {
+      "type": "http",
+      "url": "https://${user_config.BOLDDESK_HOST}/mcp"
+    }
+  }
+}

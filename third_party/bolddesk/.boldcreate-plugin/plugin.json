@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "bolddesk",
+  "displayName": "BoldDesk",
+  "version": "0.7.1",
+  "description": "Create, update and route support tickets, reply to conversations, log work, and search the Knowledge Base in BoldDesk.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developer.bolddesk.com/mcp-server/",
+  "repository": "https://github.com/SF3922-Shreedhar/BoldCreate-Connectors",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "customer-support",
+  "keywords": [
+    "bolddesk",
+    "help desk",
+    "support",
+    "tickets",
+    "knowledge base",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developer.bolddesk.com/mcp-server/",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "BOLDDESK_HOST": {
+      "title": "BoldDesk host",
+      "description": "Your BoldDesk host name, such as yourcompany.bolddesk.com, or your mapped custom domain. It must match your account, or BoldDesk rejects the request.",
+      "required": true,
+      "secret": false
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "bolddesk",
+        "transport": "streamable-http",
+        "url": "https://${BOLDDESK_HOST}/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [
+            "header"
+          ]
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor docs (developer.bolddesk.com/mcp-server). The endpoint is per account, so it was not called."
+  }
+}
