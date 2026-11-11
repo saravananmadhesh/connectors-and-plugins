@@ -1,0 +1,64 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "shopify",
+  "displayName": "Shopify",
+  "version": "0.1.0",
+  "description": "Create and manage your store with Shopify.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://shopify.dev/docs/apps/build/ai-toolkit",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "business-operations",
+  "keywords": [
+    "shopify",
+    "ecommerce",
+    "store",
+    "products",
+    "orders",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://shopify.dev/docs/apps/build/ai-toolkit",
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "The OAuth client ID Shopify publishes in its own Shopify AI Toolkit plugin for Cursor. It is not a secret. Replace it with your own client ID if your team registers one.",
+      "required": false,
+      "secret": false,
+      "default": "2a457b21c946d5bc8d1675d1b3b8c2d6"
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "shopify",
+        "transport": "streamable-http",
+        "url": "https://setup.shopify.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}"
+          }
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs and live check (setup.shopify.com/mcp)"
+  }
+}

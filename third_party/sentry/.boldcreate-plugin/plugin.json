@@ -3,7 +3,7 @@
   "name": "sentry",
   "displayName": "Sentry",
   "version": "0.7.0",
-  "description": "Investigate Sentry errors, stack traces, and issues for a project.",
+  "description": "Search errors, analyze performance, triage issues, read documentation, and manage projects in Sentry.",
   "author": {
     "name": "Syncfusion"
   },
@@ -21,6 +21,13 @@
   ],
   "hostedBy": "vendor",
   "docs": "https://mcp.sentry.dev/",
+  "upstream": {
+    "repository": "https://github.com/getsentry/agent-plugin",
+    "path": "skills",
+    "commit": "2eee4ec823972c222aae89c9213c64c056b64048",
+    "author": "Sentry",
+    "license": "MIT AND Apache-2.0"
+  },
   "rollout": {
     "phase": 1,
     "wave": "B"
@@ -52,7 +59,16 @@
         }
       }
     ],
-    "skills": [],
+    "skills": [
+      "sentry-create-alert",
+      "sentry-debug-issue",
+      "sentry-fix-stack-traces",
+      "sentry-get-started",
+      "sentry-instrument",
+      "sentry-otel-exporter-setup",
+      "sentry-setup-releases",
+      "sentry-snapshots-cocoa"
+    ],
     "rules": [],
     "hooks": [],
     "agents": [],
@@ -60,6 +76,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs"
+    "source": "official docs"
   }
 }

@@ -2,7 +2,7 @@
 
 BoldCreate plugin that connects agents to Google Drive through Google's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
-Search, read, and create files in Google Drive.
+Search, read, create, download and copy files in Google Drive, and view file metadata and permissions.
 
 > **Developer Preview.** Google's Workspace MCP servers are part of the Google Workspace Developer Preview Program and may change before general availability.
 
@@ -56,6 +56,45 @@ Claude Code plugins can't carry an OAuth client secret, so the generated Claude 
 ## Before you connect
 
 Your Google Cloud project must be enrolled in the Google Workspace Developer Preview Program, with the product's API and its MCP service enabled. A Workspace admin may need to allow the OAuth client for your domain.
+
+## What it can do
+
+The server lists eight tools. Descriptions are taken from the server's `tools/list` response, checked on 2026-11-10.
+
+| Tool | Marked by the server | What the server says it does |
+| --- | --- | --- |
+| `search_files` | Read-only | Searches Drive files with a structured query. |
+| `list_recent_files` | Read-only | Finds recent files. Sort orders are `recency`, `lastModified` and `lastModifiedByMe`. |
+| `get_file_metadata` | Read-only | Returns general metadata about a file. |
+| `read_file_content` | Read-only | Returns a natural language representation of a file, and its comments if requested. |
+| `download_file_content` | Read-only | Returns file content as a base64 string. Google file types can be exported to a chosen MIME type. |
+| `get_file_permissions` | Read-only | Lists the permissions of a file. |
+| `create_file` | Not read-only | Creates or uploads a file. Folders are created with the folder MIME type. |
+| `copy_file` | Not read-only | Copies a file, with an optional new title and parent folder. |
+
+The server returns no resources.
+
+## Write access
+
+The server marks `create_file` and `copy_file` as not read-only. They can add files to the signed-in member's Drive. Neither is marked destructive.
+
+## Scopes
+
+The plugin requests these scopes:
+
+- `https://www.googleapis.com/auth/drive.readonly`
+- `https://www.googleapis.com/auth/drive.file`
+
+The server's OAuth metadata also lists `https://www.googleapis.com/auth/drive` as supported. The plugin does not request it.
+
+## Rate limits
+
+Google's guide for the Workspace MCP servers lists no rate limits for the Drive server.
+
+## Security notes
+
+- Google's guide says the Workspace MCP servers inherit the same permissions and data governance controls as the user.
+- The client secret is stored encrypted, as described in the Setup section.
 
 ## Docs
 

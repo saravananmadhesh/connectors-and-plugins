@@ -2,8 +2,8 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "google-calendar",
   "displayName": "Google Calendar",
-  "version": "0.7.0",
-  "description": "List calendars, read events, and check free/busy time.",
+  "version": "0.7.1",
+  "description": "List calendars, search and read events, suggest meeting times, and create, update, delete or respond to events.",
   "author": {
     "name": "Syncfusion"
   },
@@ -56,6 +56,7 @@
           },
           "scopes": [
             "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+            "https://www.googleapis.com/auth/calendar.events",
             "https://www.googleapis.com/auth/calendar.events.freebusy",
             "https://www.googleapis.com/auth/calendar.events.readonly"
           ]
@@ -69,7 +70,7 @@
     "commands": []
   },
   "endpointCheck": {
-    "lastLiveCheck": null,
-    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }

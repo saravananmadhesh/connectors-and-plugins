@@ -1,0 +1,27 @@
+{
+  "name": "zoom",
+  "displayName": "Zoom",
+  "version": "0.1.0",
+  "description": "Search, ask and act on your Zoom meetings, recordings, notes and docs",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.zoom.us/docs/mcp/zoom/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "zoom",
+    "meetings",
+    "recordings",
+    "docs",
+    "notes",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "zoom": {
+      "type": "http",
+      "url": "https://mcp.zoom.us/mcp/zoom/streamable"
+    }
+  }
+}

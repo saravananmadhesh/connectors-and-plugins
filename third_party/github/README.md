@@ -1,6 +1,6 @@
 # GitHub
 
-BoldCreate plugin that connects agents to GitHub through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to GitHub through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Manage repos, issues, pull requests, and Actions.
 

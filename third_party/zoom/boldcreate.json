@@ -1,0 +1,42 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "wave": "B",
+  "transport": "streamable-http",
+  "auth": "oauth",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://developers.zoom.us/docs/mcp/zoom/",
+  "upstream": {
+    "repository": "https://github.com/zoom/zoom-mcp-plugin-for-claude",
+    "path": "skills",
+    "commit": "da551f5d122712a9cc38e63ca938021c78fef7f7",
+    "author": "Zoom",
+    "license": "MIT"
+  },
+  "oauthScopes": [
+    "agentic_search:read:ask",
+    "agentic_search:read:search",
+    "cloud_recording:read:content",
+    "cloud_recording:read:list_user_recordings",
+    "docs:delete:collaborator",
+    "docs:read:export",
+    "docs:read:list_file_collaborators",
+    "docs:update:collaborator",
+    "docs:write:collaborator",
+    "docs:write:import",
+    "hub:read:content",
+    "hub:write:content",
+    "meeting:delete:meeting",
+    "meeting:read:assets",
+    "meeting:read:search",
+    "meeting:update:in_meeting_controls",
+    "meeting:update:meeting",
+    "meeting:write:meeting",
+    "my_notes:read:content"
+  ],
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs (developers.zoom.us/docs/mcp/zoom) and the source plugin's TOOLS.md"
+  }
+}

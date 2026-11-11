@@ -2,8 +2,8 @@
   "$schema": "../../../schemas/boldcreate-plugin.schema.json",
   "name": "stripe",
   "displayName": "Stripe",
-  "version": "0.7.1",
-  "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs.",
+  "version": "0.7.2",
+  "description": "Interact with the Stripe API and search the Stripe knowledge base, including documentation and support articles.",
   "author": {
     "name": "Syncfusion"
   },
@@ -21,6 +21,13 @@
   ],
   "hostedBy": "vendor",
   "docs": "https://docs.stripe.com/mcp",
+  "upstream": {
+    "repository": "https://github.com/stripe/ai",
+    "path": "skills",
+    "commit": "d8e14797c726086c4376f576f6fb7cbb908e5f15",
+    "author": "Stripe",
+    "license": "MIT"
+  },
   "rollout": {
     "phase": 1,
     "wave": "A"
@@ -41,14 +48,25 @@
         }
       }
     ],
-    "skills": [],
+    "skills": [
+      "connect-recommend",
+      "connect-required-verification-information",
+      "metronome",
+      "stripe-apps",
+      "stripe-best-practices",
+      "stripe-directory",
+      "stripe-docs",
+      "stripe-pay",
+      "stripe-projects",
+      "upgrade-stripe"
+    ],
     "rules": [],
     "hooks": [],
     "agents": [],
     "commands": []
   },
   "endpointCheck": {
-    "lastLiveCheck": null,
-    "source": "vendor docs"
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs"
   }
 }
