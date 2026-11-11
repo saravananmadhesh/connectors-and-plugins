@@ -1,0 +1,50 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "clickhouse",
+  "displayName": "ClickHouse",
+  "version": "0.1.0",
+  "description": "Query and explore your ClickHouse Cloud data.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://clickhouse.com/docs/use-cases/AI/MCP",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "analytics",
+  "keywords": [
+    "clickhouse",
+    "analytics",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://clickhouse.com/docs/use-cases/AI/MCP",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "clickhouse",
+        "transport": "streamable-http",
+        "url": "https://mcp.clickhouse.cloud/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://mcp.clickhouse.cloud/mcp: initialize returned HTTP 401 Bearer; oauth-protected-resource metadata lists authorization_servers https://mcp.clickhouse.cloud (scopes mcp:access)"
+  }
+}

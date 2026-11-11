@@ -33,6 +33,11 @@
       "source": "boldcreate-toolkit"
     },
     {
+      "name": "clickhouse",
+      "description": "Query and explore your ClickHouse Cloud data.",
+      "source": "third_party/clickhouse"
+    },
+    {
       "name": "context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
       "source": "third_party/context7"
@@ -208,6 +213,11 @@
       "source": "third_party/linear"
     },
     {
+      "name": "mdn",
+      "description": "Search & retrieval of MDN docs & browser compat data.",
+      "source": "third_party/mdn"
+    },
+    {
       "name": "microsoft-learn",
       "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.",
       "source": "third_party/microsoft-learn"
@@ -221,6 +231,11 @@
       "name": "neon",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations.",
       "source": "third_party/neon"
+    },
+    {
+      "name": "netlify",
+      "description": "Create, deploy, manage, and secure websites on Netlify.",
+      "source": "third_party/netlify"
     },
     {
       "name": "notion",
@@ -361,6 +376,11 @@
       "name": "syncfusion-xamarin-to-maui",
       "description": "Skills for moving Xamarin.Forms apps to .NET MAUI: project and framework changes, platform-specific code, renderers to handlers, and Syncfusion Xamarin controls to their .NET MAUI equivalents.",
       "source": "syncfusion/migration-skills/xamarin-to-maui"
+    },
+    {
+      "name": "twilio",
+      "description": "Build powerful communications and customer engagement.",
+      "source": "third_party/twilio"
     },
     {
       "name": "vercel",
