@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.19.0"
   },
-  "description": "Read, create, and edit Google Docs.",
+  "description": "Read and update Google Docs.",
   "author": {
     "name": "Syncfusion"
   },

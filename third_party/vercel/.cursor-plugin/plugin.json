@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.13.0"
   },
-  "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs.",
+  "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics.",
   "author": {
     "name": "Syncfusion"
   },
@@ -26,5 +26,7 @@
     "mcp",
     "http"
   ],
+  "skills": "./skills/",
+  "agents": "./agents/",
   "mcpServers": "./mcp.json"
 }

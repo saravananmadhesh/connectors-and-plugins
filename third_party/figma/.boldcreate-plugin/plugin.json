@@ -3,7 +3,7 @@
   "name": "figma",
   "displayName": "Figma",
   "version": "0.7.0",
-  "description": "Turn Figma frames into code and read design tokens, components, and variables.",
+  "description": "Give AI agents the design context to generate code from your Figma files, and write native Figma content back to the canvas.",
   "author": {
     "name": "Syncfusion"
   },
@@ -47,6 +47,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs"
+    "source": "official docs"
   }
 }

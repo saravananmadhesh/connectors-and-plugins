@@ -1,6 +1,6 @@
 # AWS Knowledge
 
-BoldCreate plugin that connects agents to AWS Knowledge through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to AWS Knowledge through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Search AWS documentation, API references, and regional availability.
 

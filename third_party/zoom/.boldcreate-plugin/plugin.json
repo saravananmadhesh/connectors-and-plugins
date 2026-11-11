@@ -1,0 +1,101 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "zoom",
+  "displayName": "Zoom",
+  "version": "0.1.0",
+  "description": "Search, ask and act on your Zoom meetings, recordings, notes and docs",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.zoom.us/docs/mcp/zoom/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "productivity",
+  "keywords": [
+    "zoom",
+    "meetings",
+    "recordings",
+    "docs",
+    "notes",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developers.zoom.us/docs/mcp/zoom/",
+  "upstream": {
+    "repository": "https://github.com/zoom/zoom-mcp-plugin-for-claude",
+    "path": "skills",
+    "commit": "da551f5d122712a9cc38e63ca938021c78fef7f7",
+    "author": "Zoom",
+    "license": "MIT"
+  },
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "The client ID of a Zoom General app your team created, with user-level OAuth. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The client secret of that Zoom app. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "zoom",
+        "transport": "streamable-http",
+        "url": "https://mcp.zoom.us/mcp/zoom/streamable",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          },
+          "scopes": [
+            "agentic_search:read:ask",
+            "agentic_search:read:search",
+            "cloud_recording:read:content",
+            "cloud_recording:read:list_user_recordings",
+            "docs:delete:collaborator",
+            "docs:read:export",
+            "docs:read:list_file_collaborators",
+            "docs:update:collaborator",
+            "docs:write:collaborator",
+            "docs:write:import",
+            "hub:read:content",
+            "hub:write:content",
+            "meeting:delete:meeting",
+            "meeting:read:assets",
+            "meeting:read:search",
+            "meeting:update:in_meeting_controls",
+            "meeting:update:meeting",
+            "meeting:write:meeting",
+            "my_notes:read:content"
+          ]
+        }
+      }
+    ],
+    "skills": [
+      "zoom-flagship-mcp",
+      "zoom-search"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs (developers.zoom.us/docs/mcp/zoom) and the source plugin's TOOLS.md"
+  }
+}

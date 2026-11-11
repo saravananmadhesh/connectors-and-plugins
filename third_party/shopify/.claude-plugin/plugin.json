@@ -1,0 +1,27 @@
+{
+  "name": "shopify",
+  "displayName": "Shopify",
+  "version": "0.1.0",
+  "description": "Create and manage your store with Shopify.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://shopify.dev/docs/apps/build/ai-toolkit",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "shopify",
+    "ecommerce",
+    "store",
+    "products",
+    "orders",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "shopify": {
+      "type": "http",
+      "url": "https://setup.shopify.com/mcp"
+    }
+  }
+}

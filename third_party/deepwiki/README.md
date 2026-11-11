@@ -1,6 +1,6 @@
 # DeepWiki
 
-BoldCreate plugin that connects agents to DeepWiki through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to DeepWiki through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Ask questions about any public GitHub repository and read its generated wiki.
 

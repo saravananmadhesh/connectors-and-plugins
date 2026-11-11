@@ -1,0 +1,53 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 2,
+  "wave": "B",
+  "transport": "streamable-http",
+  "auth": "oauth",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://docs.slack.dev/ai/slack-mcp-server",
+  "upstream": {
+    "repository": "https://github.com/slackapi/slack-skills-plugin",
+    "path": "skills",
+    "commit": "99e027a47c065223ac719a1b291997d4fc23cec0",
+    "author": "Slack",
+    "license": "MIT"
+  },
+  "oauthScopes": [
+    "canvases:read",
+    "canvases:write",
+    "channels:history",
+    "channels:read",
+    "channels:write",
+    "chat:write",
+    "emoji:read",
+    "files:read",
+    "files:write",
+    "groups:history",
+    "groups:read",
+    "groups:write",
+    "im:history",
+    "im:read",
+    "im:write",
+    "lists:read",
+    "lists:write",
+    "mpim:history",
+    "mpim:read",
+    "mpim:write",
+    "reactions:read",
+    "reactions:write",
+    "search:read.files",
+    "search:read.im",
+    "search:read.mpim",
+    "search:read.private",
+    "search:read.public",
+    "search:read.users",
+    "users:read",
+    "users:read.email"
+  ],
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs and live check (https://docs.slack.dev/ai/slack-mcp-server, https://mcp.slack.com/.well-known/oauth-protected-resource)"
+  }
+}

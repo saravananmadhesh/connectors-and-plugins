@@ -1,0 +1,31 @@
+{
+  "name": "hubspot",
+  "displayName": "HubSpot",
+  "version": "0.1.0",
+  "description": "Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.hubspot.com/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "hubspot",
+    "crm",
+    "contacts",
+    "deals",
+    "sales",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "agents": [
+    "./agents/account-research.md",
+    "./agents/brief-fetcher.md"
+  ],
+  "mcpServers": {
+    "hubspot": {
+      "type": "http",
+      "url": "https://mcp.hubspot.com"
+    }
+  }
+}

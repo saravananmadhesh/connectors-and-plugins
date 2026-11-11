@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.19.0"
   },
-  "description": "Search, read, and create files in Google Drive.",
+  "description": "Search, read, create, download and copy files in Google Drive, and view file metadata and permissions.",
   "author": {
     "name": "Syncfusion"
   },

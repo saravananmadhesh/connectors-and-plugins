@@ -3,7 +3,7 @@
   "name": "google-docs",
   "displayName": "Google Docs",
   "version": "0.7.0",
-  "description": "Read, create, and edit Google Docs.",
+  "description": "Read and update Google Docs.",
   "author": {
     "name": "Syncfusion"
   },
@@ -71,6 +71,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+    "source": "official docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }
