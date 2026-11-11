@@ -1,6 +1,6 @@
 # Neon
 
-BoldCreate plugin that connects agents to Neon through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Neon through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Manage Neon serverless Postgres projects, branches, queries, and migrations.
 

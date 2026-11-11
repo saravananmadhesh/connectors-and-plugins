@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.19.0"
   },
-  "description": "Search, read, and draft Gmail messages and threads.",
+  "description": "Search, read, and draft Gmail messages and threads, and manage labels, Trash and Spam.",
   "author": {
     "name": "Syncfusion"
   },

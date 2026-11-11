@@ -13,6 +13,6 @@
   ],
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs (docs.cloud.google.com/mcp/supported-products)"
+    "source": "official docs (docs.cloud.google.com/mcp/supported-products)"
   }
 }

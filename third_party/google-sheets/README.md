@@ -2,7 +2,7 @@
 
 BoldCreate plugin that connects agents to Google Sheets through Google's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
-Read, create, and update Google Sheets spreadsheets.
+Read and update Google Sheets spreadsheets, including values, formulas, and rows and columns.
 
 > **Developer Preview.** Google's Workspace MCP servers are part of the Google Workspace Developer Preview Program and may change before general availability.
 
@@ -58,6 +58,47 @@ Claude Code plugins can't carry an OAuth client secret, so the generated Claude 
 ## Before you connect
 
 Your Google Cloud project must be enrolled in the Google Workspace Developer Preview Program, with the product's API and its MCP service enabled. A Workspace admin may need to allow the OAuth client for your domain.
+
+## What it can do
+
+The server lists six tools. Descriptions and markings are taken from the server's `tools/list` response, checked on 2026-11-10.
+
+| Tool | Marked by the server | What the server says it does |
+| --- | --- | --- |
+| `get_values` | Read-only | Returns a range of values from a spreadsheet. |
+| `get_spreadsheet` | Read-only | Returns titles, sheet names, grid properties and other metadata for a spreadsheet. Returns full grid data if requested. |
+| `update_values` | Not read-only | Sets values in a range of a spreadsheet. |
+| `update_formulas` | Not read-only | Sets formulas in a range of a spreadsheet. |
+| `insert_dimension` | Not read-only | Inserts rows or columns in a sheet at a particular index. |
+| `update_spreadsheet` | Not read-only | Applies one or more updates to the spreadsheet. Corresponds to `spreadsheets.batchUpdate` in the REST API. |
+
+The server returns no resources. None of the six tools is marked destructive.
+
+## Write access
+
+The server marks the four write tools as not read-only. They change the signed-in member's spreadsheets.
+
+The description of `update_spreadsheet` lists 74 update types. Several of them delete data: `deleteNamedRange`, `deleteSheet`, `deleteDimension`, `deleteEmbeddedObject`, `deleteFilterView`, `deleteRange`, `deleteConditionalFormatRule`, `deleteProtectedRange`, `deleteBanding`, `deleteDeveloperMetadata`, `deleteDimensionGroup`, `deleteDuplicates`, `deleteDataSource`, `deleteTable`, `deleteComment`, `deleteCommentReply`. Others include `findReplace`, `addSheet` and `duplicateSheet`. The server marks the tool as not destructive, so the marking does not tell you whether a call deletes anything.
+
+## Scopes
+
+The plugin requests these scopes:
+
+- `https://www.googleapis.com/auth/drive.readonly`
+- `https://www.googleapis.com/auth/drive.file`
+- `https://www.googleapis.com/auth/spreadsheets.readonly`
+- `https://www.googleapis.com/auth/spreadsheets`
+
+The server's OAuth metadata also lists `https://www.googleapis.com/auth/drive` as supported. The plugin does not request it.
+
+## Rate limits
+
+Google's guide for the Workspace MCP servers lists no rate limits for the Sheets server.
+
+## Security notes
+
+- Google's guide says the Workspace MCP servers inherit the same permissions and data governance controls as the user.
+- The client secret is stored encrypted, as described in the Setup section.
 
 ## Docs
 

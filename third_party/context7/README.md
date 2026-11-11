@@ -1,6 +1,6 @@
 # Context7
 
-BoldCreate plugin that connects agents to Context7 through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Context7 through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Pull up-to-date, version-specific library docs and code examples into the prompt.
 

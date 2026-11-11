@@ -22,7 +22,8 @@
       "description": "Other auth methods the server supports."
     },
     "hostedBy": { "enum": ["vendor", "customer", "boldcreate", "local"], "description": "Who runs the MCP server. Required for MCP plugins. customer = the customer hosts it (for example gitea-mcp next to their Gitea)." },
-    "stage": { "enum": ["ga", "preview", "beta", "early-access"], "description": "Launch stage: the vendor's stage for an MCP server, or the plugin's own stage for a first-party plugin." },
+    "stage": { "enum": ["ga", "preview", "beta", "early-access"], "description": "Launch stage: the server's stage for an MCP server, or the plugin's own stage for a first-party plugin." },
+    "publicOAuthClient": { "type": "boolean", "description": "true when the server accepts public OAuth clients only, so the plugin sets CLIENT_ID and no CLIENT_SECRET. Without this, an mcp.json auth block must set both." },
     "oauthScopes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "description": "OAuth scopes to request, for servers that need them (Google)." },
     "docs": { "type": "string", "format": "uri", "pattern": "^https://" },
     "upstream": {

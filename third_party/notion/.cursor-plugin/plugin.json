@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.13.0"
   },
-  "description": "Search, read, and update Notion pages and databases.",
+  "description": "Search your Notion workspace, create and edit pages, and manage databases.",
   "author": {
     "name": "Syncfusion"
   },
