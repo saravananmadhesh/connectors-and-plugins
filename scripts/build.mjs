@@ -68,7 +68,7 @@ export const CURSOR_HOOKS = "hooks/hooks.json";
 export const isMcpPlugin = (cursor) => cursor.mcpServers !== undefined;
 
 // A community plugin is a non-MCP plugin under third_party/, copied from another marketplace.
-export const isCommunityPlugin = (dir, cursor) => dir.startsWith(`${PLUGINS_DIR}/`) && !isMcpPlugin(cursor);
+export const isCommunityPlugin = (dir) => dir.startsWith(`${PLUGINS_DIR}/`);
 
 // A skill pack under syncfusion/ is copied from one of Syncfusion's skill repositories.
 export const isSkillPack = (dir) => dir.startsWith(`${SKILL_PACKS_DIR}/`);
@@ -118,46 +118,45 @@ export function claudeManifest({ dir }) {
   };
   if (cursor.logo) manifest.icon = `./${cursor.logo}`;
 
-  if (!isMcpPlugin(cursor)) {
-    // Claude Code scans skills/ by default. Agents are listed one by one so that
-    // only top-level agent files load. Claude Code has no rule component; the
-    // session-start hook prints the always-on rules instead.
-    const { agents } = kitComponents(dir);
-    if (agents.length) manifest.agents = agents.map((a) => `./agents/${a}.md`);
-    if (existsSync(join(base, CLAUDE_HOOKS))) manifest.hooks = `./${CLAUDE_HOOKS}`;
-    return manifest;
-  }
+  // Claude Code scans skills/ by default. Agents are listed one by one so that
+  // only top-level agent files load. Claude Code has no rule component; the
+  // session-start hook prints the always-on rules instead.
+  const { agents } = kitComponents(dir);
+  if (agents.length) manifest.agents = agents.map((a) => `./agents/${a}.md`);
+  if (existsSync(join(base, CLAUDE_HOOKS))) manifest.hooks = `./${CLAUDE_HOOKS}`;
 
-  const mcp = readJSON(join(base, "mcp.json"));
-  const props = cursor.variables?.properties ?? {};
-  const required = new Set(cursor.variables?.required ?? []);
+  if (isMcpPlugin(cursor)) {
+    const mcp = readJSON(join(base, "mcp.json"));
+    const props = cursor.variables?.properties ?? {};
+    const required = new Set(cursor.variables?.required ?? []);
 
-  // Cursor's "auth" block (OAuth client ID and secret, used by Google servers)
-  // has no Claude Code equivalent in a plugin, so it is dropped here, along
-  // with any variable used only inside it.
-  const servers = Object.fromEntries(
-    Object.entries(mcp.mcpServers).map(([k, { auth, ...rest }]) => [k, rest])
-  );
-  const usedText = JSON.stringify(servers);
-  const vars = Object.keys(props).filter((v) => usedText.includes(`\${${v}}`));
-
-  if (vars.length) {
-    manifest.userConfig = Object.fromEntries(
-      vars.map((key) => {
-        const p = props[key];
-        const opt = { type: "string", title: p.title, description: p.description };
-        if (required.has(key)) opt.required = true;
-        if (p.default !== undefined) opt.default = p.default;
-        opt.sensitive = p["x-sensitive"] !== false;
-        return [key, opt];
-      })
+    // Cursor's "auth" block (OAuth client ID and secret, used by Google servers)
+    // has no Claude Code equivalent in a plugin, so it is dropped here, along
+    // with any variable used only inside it.
+    const servers = Object.fromEntries(
+      Object.entries(mcp.mcpServers).map(([k, { auth, ...rest }]) => [k, rest])
     );
-  }
+    const usedText = JSON.stringify(servers);
+    const vars = Object.keys(props).filter((v) => usedText.includes(`\${${v}}`));
 
-  manifest.mcpServers = toClaudeRefs(servers, vars);
-  // Opt-in: an MCP plugin that ships agents/ lists them one by one, like a non-MCP plugin.
-  const { agents: mcpAgents } = kitComponents(dir);
-  if (mcpAgents.length) manifest.agents = mcpAgents.map((a) => `./agents/${a}.md`);
+    if (vars.length) {
+      manifest.userConfig = Object.fromEntries(
+        vars.map((key) => {
+          const p = props[key];
+          const opt = { type: "string", title: p.title, description: p.description };
+          if (required.has(key)) opt.required = true;
+          if (p.default !== undefined) opt.default = p.default;
+          opt.sensitive = p["x-sensitive"] !== false;
+          return [key, opt];
+        })
+      );
+    }
+
+    manifest.mcpServers = toClaudeRefs(servers, vars);
+    // Opt-in: an MCP plugin that ships agents/ lists them one by one, like a non-MCP plugin.
+    const { agents: mcpAgents } = kitComponents(dir);
+    if (mcpAgents.length) manifest.agents = mcpAgents.map((a) => `./agents/${a}.md`);
+  }
   return manifest;
 }
 

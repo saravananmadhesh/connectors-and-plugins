@@ -33,6 +33,11 @@
       "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests."
     },
     {
+      "name": "clickhouse",
+      "source": "./third_party/clickhouse",
+      "description": "Query and explore your ClickHouse Cloud data."
+    },
+    {
       "name": "context7",
       "source": "./third_party/context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt."
@@ -213,6 +218,11 @@
       "description": "Find, create, and update Linear objects such as issues, projects, and comments."
     },
     {
+      "name": "mdn",
+      "source": "./third_party/mdn",
+      "description": "Search & retrieval of MDN docs & browser compat data."
+    },
+    {
       "name": "microsoft-learn",
       "source": "./third_party/microsoft-learn",
       "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more."
@@ -226,6 +236,11 @@
       "name": "neon",
       "source": "./third_party/neon",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations."
+    },
+    {
+      "name": "netlify",
+      "source": "./third_party/netlify",
+      "description": "Create, deploy, manage, and secure websites on Netlify."
     },
     {
       "name": "notion",
@@ -376,6 +391,11 @@
       "name": "syncfusion-xamarin-to-maui",
       "source": "./syncfusion/migration-skills/xamarin-to-maui",
       "description": "Skills for moving Xamarin.Forms apps to .NET MAUI: project and framework changes, platform-specific code, renderers to handlers, and Syncfusion Xamarin controls to their .NET MAUI equivalents."
+    },
+    {
+      "name": "twilio",
+      "source": "./third_party/twilio",
+      "description": "Build powerful communications and customer engagement."
     },
     {
       "name": "vercel",

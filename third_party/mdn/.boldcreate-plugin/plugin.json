@@ -1,0 +1,50 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "mdn",
+  "displayName": "MDN",
+  "version": "0.1.0",
+  "description": "Search & retrieval of MDN docs & browser compat data.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Howto/MDN_Web_Docs_MCP_server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "developer-tools",
+  "keywords": [
+    "mdn",
+    "developer-tools",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developer.mozilla.org/",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "mdn",
+        "transport": "streamable-http",
+        "url": "https://mcp.mdn.mozilla.net/",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-05",
+    "source": "live probe of https://mcp.mdn.mozilla.net/: initialize returned HTTP 200, serverInfo name mdn, tools search/get-doc/get-compat, no sign-in asked"
+  }
+}

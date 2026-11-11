@@ -73,36 +73,16 @@ for (const { name, dir: base } of plugins) {
     fail(`${base}/CHANGELOG.md has no entry for version ${manifest.version}`);
   }
 
-  if (isCommunityPlugin(base, manifest) || (isSkillPack(base) && !isMcpPlugin(manifest))) {
-    // Copied from another marketplace or a Syncfusion skill repository: keep it as
-    // published, check that it loads, and record where it came from.
+  const isVendor = isCommunityPlugin(base) || isSkillPack(base);
+  if (!isMcpPlugin(manifest)) {
     if (existsSync(join(root, base, "mcp.json"))) fail(`${base}/mcp.json exists but the manifest declares no mcpServers`);
-    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required for community plugins and skill packs`);
     for (const key of ["transport", "auth", "alternativeAuth", "oauthScopes", "wave", "hostedBy"]) {
       if (meta && meta[key] !== undefined) fail(`${base}/boldcreate.json: ${key} applies only to MCP plugins`);
     }
     if (manifest.variables) fail(`${base}: variables apply only to MCP plugins`);
-    for (const [key, path] of [["skills", "./skills/"], ["agents", "./agents/"], ["rules", "./rules/"]]) {
-      const has = existsSync(join(root, base, key));
-      if (has && manifest[key] !== path) fail(`${base}: ${key} must be "${path}"`);
-      if (!has && manifest[key] !== undefined) fail(`${base}: ${key} is set but there is no ${key}/ folder`);
-    }
-    const hasHooks = existsSync(join(root, base, CURSOR_HOOKS));
-    if (hasHooks && manifest.hooks !== `./${CURSOR_HOOKS}`) fail(`${base}: hooks must be "./${CURSOR_HOOKS}"`);
-    if (!hasHooks && manifest.hooks !== undefined) fail(`${base}: hooks is set but ${CURSOR_HOOKS} is missing`);
-    const { errors: kitErrors, warnings: kitWarnings, summary } = checkCommunity(base);
-    kitErrors.forEach(fail);
-    warnings.push(...kitWarnings);
-    summaries.push(summary);
-    continue;
   }
 
-  if (!isMcpPlugin(manifest)) {
-    if (existsSync(join(root, base, "mcp.json"))) fail(`${base}/mcp.json exists but the manifest declares no mcpServers`);
-    for (const key of ["transport", "auth", "alternativeAuth", "oauthScopes", "wave"]) {
-      if (meta && meta[key] !== undefined) fail(`${base}/boldcreate.json: ${key} applies only to MCP plugins`);
-    }
-    if (manifest.variables) fail(`${base}: variables apply only to MCP plugins`);
+  if (!isVendor) {
     for (const [key, path] of [["skills", "./skills/"], ["agents", "./agents/"], ["rules", "./rules/"]]) {
       if (manifest[key] !== path) fail(`${base}: ${key} must be "${path}"`);
     }
@@ -110,8 +90,21 @@ for (const { name, dir: base } of plugins) {
     const { errors: kitErrors, summary } = checkKit(base);
     kitErrors.forEach(fail);
     summaries.push(summary);
-    continue;
+  } else {
+    if (meta && !meta.upstream && !isMcpPlugin(manifest)) fail(`${base}/boldcreate.json: upstream is required for community plugins and skill packs`);
+    for (const [key, path] of [["skills", "./skills/"], ["agents", "./agents/"], ["rules", "./rules/"]]) {
+      const has = existsSync(join(root, base, key));
+      if (has && manifest[key] !== path) fail(`${base}: ${key} must be "${path}"`);
+      if (!has && manifest[key] !== undefined) fail(`${base}: ${key} is set but there is no ${key}/ folder`);
+    }
+    if (existsSync(join(root, base, CURSOR_HOOKS)) && manifest.hooks !== `./${CURSOR_HOOKS}`) fail(`${base}: hooks must be "./${CURSOR_HOOKS}"`);
+    const { errors: kitErrors, warnings: kitWarnings, summary } = checkCommunity(base);
+    kitErrors.forEach(fail);
+    warnings.push(...kitWarnings);
+    summaries.push(summary);
   }
+
+  if (!isMcpPlugin(manifest)) continue;
 
   if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
   // Opt-in: an MCP plugin with a skills/, agents/ or rules/ folder must declare it, record its source, and pass the component checks.

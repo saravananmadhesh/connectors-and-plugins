@@ -17,15 +17,15 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
+  "agents": [
+    "./agents/ai-architect.md",
+    "./agents/deployment-expert.md",
+    "./agents/performance-optimizer.md"
+  ],
   "mcpServers": {
     "vercel": {
       "type": "http",
       "url": "https://mcp.vercel.com"
     }
-  },
-  "agents": [
-    "./agents/ai-architect.md",
-    "./agents/deployment-expert.md",
-    "./agents/performance-optimizer.md"
-  ]
+  }
 }

@@ -129,6 +129,30 @@
       "supportedByGateway": false
     },
     {
+      "name": "clickhouse",
+      "displayName": "ClickHouse",
+      "version": "0.1.0",
+      "description": "Query and explore your ClickHouse Cloud data.",
+      "source": "third_party/clickhouse",
+      "logo": "third_party/clickhouse/assets/logo.png",
+      "category": "analytics",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "context7",
       "displayName": "Context7",
       "version": "0.7.1",
@@ -995,6 +1019,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "mdn",
+      "displayName": "MDN",
+      "version": "0.1.0",
+      "description": "Search & retrieval of MDN docs & browser compat data.",
+      "source": "third_party/mdn",
+      "logo": "third_party/mdn/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "none"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "microsoft-learn",
       "displayName": "Microsoft Learn",
       "version": "0.7.0",
@@ -1063,6 +1111,30 @@
       "rollout": {
         "phase": 1,
         "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "netlify",
+      "displayName": "Netlify",
+      "version": "0.1.0",
+      "description": "Create, deploy, manage, and secure websites on Netlify.",
+      "source": "third_party/netlify",
+      "logo": "third_party/netlify/assets/logo.svg",
+      "category": "hosting",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
       },
       "supportedByGateway": true
     },
@@ -1699,6 +1771,31 @@
         "phase": 1
       },
       "supportedByGateway": false
+    },
+    {
+      "name": "twilio",
+      "displayName": "Twilio",
+      "version": "0.1.0",
+      "description": "Build powerful communications and customer engagement.",
+      "source": "third_party/twilio",
+      "logo": "third_party/twilio/assets/logo.png",
+      "category": "communication",
+      "components": [
+        "mcp",
+        "skills"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "none"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
     },
     {
       "name": "vercel",
