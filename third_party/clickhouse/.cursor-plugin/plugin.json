@@ -1,0 +1,28 @@
+{
+  "name": "clickhouse",
+  "displayName": "ClickHouse",
+  "version": "0.1.0",
+  "minClientVersions": {
+    "cursor": "3.13.0"
+  },
+  "description": "Query and explore your ClickHouse Cloud data.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://clickhouse.com/docs/use-cases/AI/MCP",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "clickhouse",
+    "analytics",
+    "mcp"
+  ],
+  "category": "analytics",
+  "tags": [
+    "analytics",
+    "mcp",
+    "http"
+  ],
+  "mcpServers": "./mcp.json"
+}

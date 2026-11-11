@@ -1,0 +1,24 @@
+{
+  "name": "netlify",
+  "displayName": "Netlify",
+  "version": "0.1.0",
+  "description": "Create, deploy, manage, and secure websites on Netlify.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "netlify",
+    "hosting",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "netlify": {
+      "type": "http",
+      "url": "https://mcp.netlify.com/mcp"
+    }
+  }
+}
