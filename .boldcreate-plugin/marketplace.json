@@ -104,6 +104,30 @@
       "supportedByGateway": false
     },
     {
+      "name": "bolddesk",
+      "displayName": "BoldDesk",
+      "version": "0.7.1",
+      "description": "Create, update and route support tickets, reply to conversations, log work, and search the Knowledge Base in BoldDesk.",
+      "source": "third_party/bolddesk",
+      "logo": "third_party/bolddesk/assets/logo.svg",
+      "category": "customer-support",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 2,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "context7",
       "displayName": "Context7",
       "version": "0.7.1",

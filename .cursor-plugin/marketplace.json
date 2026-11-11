@@ -28,6 +28,11 @@
       "source": "boldcreate-toolkit"
     },
     {
+      "name": "bolddesk",
+      "description": "Create, update and route support tickets, reply to conversations, log work, and search the Knowledge Base in BoldDesk.",
+      "source": "third_party/bolddesk"
+    },
+    {
       "name": "context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt.",
       "source": "third_party/context7"
