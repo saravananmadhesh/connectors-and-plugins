@@ -9,8 +9,15 @@
   ],
   "hostedBy": "vendor",
   "docs": "https://docs.stripe.com/mcp",
+  "upstream": {
+    "repository": "https://github.com/stripe/ai",
+    "path": "skills",
+    "commit": "d8e14797c726086c4376f576f6fb7cbb908e5f15",
+    "author": "Stripe",
+    "license": "MIT"
+  },
   "endpointCheck": {
-    "lastLiveCheck": null,
-    "source": "vendor docs"
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs"
   }
 }

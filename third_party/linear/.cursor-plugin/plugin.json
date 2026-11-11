@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.13.0"
   },
-  "description": "Find, create, and update Linear issues, projects, and cycles.",
+  "description": "Find, create, and update Linear objects such as issues, projects, and comments.",
   "author": {
     "name": "Syncfusion"
   },

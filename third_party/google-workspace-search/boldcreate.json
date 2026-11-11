@@ -10,6 +10,6 @@
   "stage": "preview",
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+    "source": "official docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }

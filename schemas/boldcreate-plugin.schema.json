@@ -89,8 +89,8 @@
                   "oauthClient": {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["clientId", "clientSecret"],
-                    "description": "Pre-registered OAuth client, as ${VARIABLE} references.",
+                    "required": ["clientId"],
+                    "description": "Pre-registered OAuth client, as ${VARIABLE} references. A public client has no clientSecret.",
                     "properties": { "clientId": { "type": "string" }, "clientSecret": { "type": "string" } }
                   },
                   "scopes": { "type": "array", "items": { "type": "string" } }

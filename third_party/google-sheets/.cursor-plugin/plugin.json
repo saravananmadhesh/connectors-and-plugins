@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.19.0"
   },
-  "description": "Read, create, and update Google Sheets spreadsheets.",
+  "description": "Read and update Google Sheets spreadsheets, including values, formulas, and rows and columns.",
   "author": {
     "name": "Syncfusion"
   },

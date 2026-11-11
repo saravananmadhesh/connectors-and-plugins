@@ -114,6 +114,19 @@ for (const { name, dir: base } of plugins) {
   }
 
   if (manifest.mcpServers !== "./mcp.json") fail(`${base}: mcpServers must be "./mcp.json"`);
+  // Opt-in: an MCP plugin with a skills/, agents/ or rules/ folder must declare it, record its source, and pass the component checks.
+  const shipsSkills = existsSync(join(root, base, "skills"));
+  const shipsAgents = existsSync(join(root, base, "agents"));
+  const shipsRules = existsSync(join(root, base, "rules"));
+  if (shipsSkills || shipsAgents || shipsRules) {
+    if (shipsSkills && manifest.skills !== "./skills/") fail(`${base}: skills must be "./skills/"`);
+    if (shipsAgents && manifest.agents !== "./agents/") fail(`${base}: agents must be "./agents/"`);
+    if (shipsRules && manifest.rules !== "./rules/") fail(`${base}: rules must be "./rules/"`);
+    if (meta && !meta.upstream) fail(`${base}/boldcreate.json: upstream is required when an MCP plugin ships skills, agents or rules`);
+    const { errors: skillErrors, warnings: skillWarnings } = checkCommunity(base);
+    skillErrors.forEach(fail);
+    warnings.push(...skillWarnings);
+  }
   for (const key of ["transport", "auth", "hostedBy"]) {
     if (meta && meta[key] === undefined) fail(`${base}/boldcreate.json: ${key} is required for MCP plugins`);
   }
@@ -152,6 +165,15 @@ for (const { name, dir: base } of plugins) {
       const refs = [...String(value).matchAll(VAR_REF)].map((m) => m[1]);
       if (refs.length === 0) fail(`${where}: auth.${k} must be a \${VARIABLE}, not a literal`);
       refs.forEach((r) => used.add(r));
+    }
+    if (server.auth) {
+      const hasId = "CLIENT_ID" in server.auth;
+      const hasSecret = "CLIENT_SECRET" in server.auth;
+      if (!hasId) fail(`${where}: auth must set CLIENT_ID`);
+      if (hasId && !hasSecret && !meta?.publicOAuthClient) {
+        fail(`${where}: auth sets CLIENT_ID without CLIENT_SECRET; set publicOAuthClient: true in boldcreate.json only if the server accepts public clients`);
+      }
+      if (hasSecret && meta?.publicOAuthClient) fail(`${where}: publicOAuthClient is true but auth sets CLIENT_SECRET`);
     }
   }
 

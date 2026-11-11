@@ -1,0 +1,93 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "hubspot",
+  "displayName": "HubSpot",
+  "version": "0.1.0",
+  "description": "Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.hubspot.com/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "crm",
+  "keywords": [
+    "hubspot",
+    "crm",
+    "contacts",
+    "deals",
+    "sales",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server",
+  "upstream": {
+    "repository": "https://github.com/HubSpot/hubspot-mcp-plugins",
+    "path": "HubSpot-Sales/skills and HubSpot-Partner/skills",
+    "commit": "032d294bc91577cb1b9c4a61372567266ca8524e",
+    "author": "HubSpot",
+    "license": "Apache-2.0"
+  },
+  "rollout": {
+    "phase": 2,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "CLIENT_ID": {
+      "title": "Client ID",
+      "description": "The client ID of an MCP connector your team created in HubSpot. Every team member signs in under it.",
+      "required": true,
+      "secret": false
+    },
+    "CLIENT_SECRET": {
+      "title": "Client secret",
+      "description": "The client secret of that MCP connector. Stored encrypted.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "hubspot",
+        "transport": "streamable-http",
+        "url": "https://mcp.hubspot.com",
+        "auth": {
+          "type": "oauth",
+          "alternatives": [],
+          "oauthClient": {
+            "clientId": "${CLIENT_ID}",
+            "clientSecret": "${CLIENT_SECRET}"
+          }
+        }
+      }
+    ],
+    "skills": [
+      "book-pulse",
+      "call-prep",
+      "contact-lookup",
+      "daily-brief",
+      "expansion-opportunities",
+      "follow-up",
+      "hubspot",
+      "import-contacts",
+      "log-call",
+      "onboarding",
+      "pipeline-pulse",
+      "renewal-radar"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [
+      "account-research",
+      "brief-fetcher"
+    ],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-10",
+    "source": "official docs (developers.hubspot.com)"
+  }
+}

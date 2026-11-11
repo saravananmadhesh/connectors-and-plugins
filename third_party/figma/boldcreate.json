@@ -9,6 +9,6 @@
   "docs": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation",
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs"
+    "source": "official docs"
   }
 }

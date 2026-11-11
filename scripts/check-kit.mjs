@@ -246,7 +246,7 @@ export function checkCommunity(dir) {
 
   const known = new Set([
     ".boldcreate-plugin", ".claude-plugin", ".cursor-plugin", "boldcreate.json",
-    "skills", "agents", "rules", "hooks", "assets", "README.md", "CHANGELOG.md", "LICENSE",
+    "skills", "agents", "rules", "hooks", "assets", "README.md", "CHANGELOG.md", "LICENSE", "mcp.json",
   ]);
   const extra = readdirSync(base).filter((e) => !known.has(e));
   if (extra.length) warnings.push(`${dir}: BoldCreate Connect does not deliver plugin-level files (${extra.join(", ")})`);

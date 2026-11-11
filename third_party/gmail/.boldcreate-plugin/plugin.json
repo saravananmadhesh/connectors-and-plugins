@@ -3,7 +3,7 @@
   "name": "gmail",
   "displayName": "Gmail",
   "version": "0.7.1",
-  "description": "Search, read, and draft Gmail messages and threads.",
+  "description": "Search, read, and draft Gmail messages and threads, and manage labels, Trash and Spam.",
   "author": {
     "name": "Syncfusion"
   },
@@ -51,6 +51,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+    "source": "official docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }

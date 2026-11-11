@@ -1,6 +1,6 @@
 # PostHog
 
-BoldCreate plugin that connects agents to PostHog through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to PostHog through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Query product analytics, manage feature flags, and investigate errors in PostHog.
 

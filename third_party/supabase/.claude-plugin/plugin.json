@@ -1,8 +1,8 @@
 {
   "name": "supabase",
   "displayName": "Supabase",
-  "version": "0.7.0",
-  "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project.",
+  "version": "0.7.1",
+  "description": "Connect AI assistants to your Supabase project to manage tables, fetch config, and query data.",
   "author": {
     "name": "Syncfusion"
   },
@@ -19,24 +19,10 @@
   ],
   "icon": "./assets/logo.svg",
   "userConfig": {
-    "SUPABASE_ACCESS_TOKEN": {
-      "type": "string",
-      "title": "Supabase personal access token",
-      "description": "Create one at https://supabase.com/dashboard/account/tokens.",
-      "required": true,
-      "sensitive": true
-    },
-    "SUPABASE_PROJECT_REF": {
-      "type": "string",
-      "title": "Project ref",
-      "description": "The project ID from your project URL. Limits the agent to this one project.",
-      "required": true,
-      "sensitive": false
-    },
     "SUPABASE_READ_ONLY": {
       "type": "string",
       "title": "Read-only mode",
-      "description": "\"true\" runs queries as a read-only Postgres user and hides write tools. Set \"false\" to allow writes.",
+      "description": "\"true\" runs queries as a read-only Postgres user. Set \"false\" to allow writes.",
       "default": "true",
       "sensitive": false
     }
@@ -44,10 +30,7 @@
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=${user_config.SUPABASE_PROJECT_REF}&read_only=${user_config.SUPABASE_READ_ONLY}",
-      "headers": {
-        "Authorization": "Bearer ${user_config.SUPABASE_ACCESS_TOKEN}"
-      }
+      "url": "https://mcp.supabase.com/mcp?read_only=${user_config.SUPABASE_READ_ONLY}"
     }
   }
 }
