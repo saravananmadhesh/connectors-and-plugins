@@ -2,7 +2,10 @@
   "mcpServers": {
     "bolddesk": {
       "type": "http",
-      "url": "https://${BOLDDESK_HOST}/mcp"
+      "url": "https://${BOLDDESK_HOST}/mcp",
+      "headers": {
+        "x-api-key": "${BOLDDESK_API_KEY}"
+      }
     }
   }
 }
