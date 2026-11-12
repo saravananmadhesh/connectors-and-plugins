@@ -18,13 +18,13 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
+  "agents": [
+    "./agents/zapier-mcp.agent.md"
+  ],
   "mcpServers": {
     "zapier": {
       "type": "http",
       "url": "https://mcp.zapier.com/api/v1/connect"
     }
-  },
-  "agents": [
-    "./agents/zapier-mcp.agent.md"
-  ]
+  }
 }

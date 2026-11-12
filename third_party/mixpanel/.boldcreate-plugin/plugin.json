@@ -1,0 +1,50 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "mixpanel",
+  "displayName": "Mixpanel",
+  "version": "0.1.0",
+  "description": "Analyze, query, and manage your Mixpanel data.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.mixpanel.com/docs/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "analytics",
+  "keywords": [
+    "mixpanel",
+    "analytics",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.mixpanel.com/docs/mcp",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "mixpanel",
+        "transport": "streamable-http",
+        "url": "https://mcp.mixpanel.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "vendor docs (docs.mixpanel.com/docs/mcp): US endpoint https://mcp.mixpanel.com/mcp, OAuth sign-in supported"
+  }
+}

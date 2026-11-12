@@ -1,0 +1,14 @@
+{
+  "$schema": "../../schemas/boldcreate.schema.json",
+  "phase": 1,
+  "wave": "A",
+  "transport": "streamable-http",
+  "auth": "none",
+  "alternativeAuth": [],
+  "hostedBy": "vendor",
+  "docs": "https://developer.mozilla.org/",
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-05",
+    "source": "live probe of https://mcp.mdn.mozilla.net/: initialize returned HTTP 200, serverInfo name mdn, tools search/get-doc/get-compat, no sign-in asked"
+  }
+}

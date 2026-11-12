@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "amplitude",
+  "displayName": "Amplitude",
+  "version": "0.1.0",
+  "description": "Query Amplitude product analytics, charts, and experiments.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/amplitude/mcp-marketplace",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "analytics",
+  "keywords": [
+    "amplitude",
+    "analytics",
+    "product",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://github.com/amplitude/mcp-marketplace",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "amplitude",
+        "transport": "streamable-http",
+        "url": "https://mcp.amplitude.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor plugin repository (amplitude/mcp-marketplace at 94f58cc)"
+  }
+}

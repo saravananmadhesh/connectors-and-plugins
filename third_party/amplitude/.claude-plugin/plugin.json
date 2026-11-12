@@ -1,0 +1,25 @@
+{
+  "name": "amplitude",
+  "displayName": "Amplitude",
+  "version": "0.1.0",
+  "description": "Query Amplitude product analytics, charts, and experiments.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/amplitude/mcp-marketplace",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "amplitude",
+    "analytics",
+    "product",
+    "mcp"
+  ],
+  "icon": "./assets/logo.png",
+  "mcpServers": {
+    "amplitude": {
+      "type": "http",
+      "url": "https://mcp.amplitude.com/mcp"
+    }
+  }
+}

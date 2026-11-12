@@ -1,0 +1,50 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "xero",
+  "displayName": "Xero",
+  "version": "0.1.0",
+  "description": "Access your Xero financials from any conversation.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developer.xero.com/documentation/guides/mcp/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "finance",
+  "keywords": [
+    "xero",
+    "finance",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://developer.xero.com/documentation/guides/mcp/",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "xero",
+        "transport": "streamable-http",
+        "url": "https://mcp.xero.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://mcp.xero.com/mcp: initialize returned HTTP 401 Bearer; oauth-protected-resource metadata lists authorization_servers https://identity.xero.com/"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "render",
+  "displayName": "Render",
+  "version": "0.1.0",
+  "description": "Inspect Render services, deploys, and logs.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/render-oss/render-plugin-claude-code",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "render",
+    "hosting",
+    "deploy",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "render": {
+      "type": "http",
+      "url": "https://mcp.render.com/mcp"
+    }
+  }
+}

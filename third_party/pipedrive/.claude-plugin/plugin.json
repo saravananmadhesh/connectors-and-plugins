@@ -1,0 +1,25 @@
+{
+  "name": "pipedrive",
+  "displayName": "Pipedrive",
+  "version": "0.1.0",
+  "description": "Find deals, update records, manage activities and work with your live CRM data using natural language.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developers.pipedrive.com/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "pipedrive",
+    "crm",
+    "sales",
+    "mcp"
+  ],
+  "icon": "./assets/logo.png",
+  "mcpServers": {
+    "pipedrive": {
+      "type": "http",
+      "url": "https://mcp.pipedrive.ai/mcp"
+    }
+  }
+}

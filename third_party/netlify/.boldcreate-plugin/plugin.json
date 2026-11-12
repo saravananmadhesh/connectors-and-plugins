@@ -1,0 +1,50 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "netlify",
+  "displayName": "Netlify",
+  "version": "0.1.0",
+  "description": "Create, deploy, manage, and secure websites on Netlify.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "hosting",
+  "keywords": [
+    "netlify",
+    "hosting",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "netlify",
+        "transport": "streamable-http",
+        "url": "https://mcp.netlify.com/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "endpoint on Netlify's own domain, documented at docs.netlify.com/build/build-with-ai/netlify-mcp-server; earlier anonymous probe returned HTTP 401 Bearer with OAuth metadata. A re-probe from the build environment was blocked at the TLS layer by Netlify's edge, so it was not re-checked live this session."
+  }
+}
