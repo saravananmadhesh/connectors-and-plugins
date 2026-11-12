@@ -35,6 +35,11 @@
         "title": "BoldDesk host",
         "description": "Your BoldDesk host name, such as yourcompany.bolddesk.com, or your mapped custom domain. It must match your account, or BoldDesk rejects the request.",
         "x-sensitive": false
+      },
+      "BOLDDESK_API_KEY": {
+        "type": "string",
+        "title": "BoldDesk API key (optional)",
+        "description": "Leave empty to sign in with OAuth 2.0 in the browser. To use an API key instead, enter a BoldDesk API key. It acts with the permissions of its user."
       }
     },
     "required": [
