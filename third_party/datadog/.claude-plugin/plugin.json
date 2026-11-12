@@ -1,0 +1,48 @@
+{
+  "name": "datadog",
+  "displayName": "Datadog",
+  "version": "0.1.0",
+  "description": "Query Datadog logs, metrics, traces, incidents, and monitors.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.datadoghq.com/bits_ai/mcp_server/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "datadog",
+    "observability",
+    "monitoring",
+    "logs",
+    "metrics",
+    "traces",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "DD_API_KEY": {
+      "type": "string",
+      "title": "Datadog API key",
+      "description": "API key from a scoped service account (Organization Settings, API Keys). Grant only the permissions the agent needs.",
+      "required": true,
+      "sensitive": true
+    },
+    "DD_APPLICATION_KEY": {
+      "type": "string",
+      "title": "Datadog application key",
+      "description": "Application key from the same service account (Organization Settings, Application Keys), scoped to the permissions the agent needs.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "datadog": {
+      "type": "http",
+      "url": "https://mcp.datadoghq.com/v1/mcp",
+      "headers": {
+        "DD_API_KEY": "${user_config.DD_API_KEY}",
+        "DD_APPLICATION_KEY": "${user_config.DD_APPLICATION_KEY}"
+      }
+    }
+  }
+}

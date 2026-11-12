@@ -1,0 +1,121 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "twilio",
+  "displayName": "Twilio",
+  "version": "0.1.0",
+  "description": "Build powerful communications and customer engagement.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://www.twilio.com/docs/ai/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "category": "communication",
+  "keywords": [
+    "twilio",
+    "communication",
+    "sms",
+    "voice",
+    "whatsapp",
+    "verify",
+    "sendgrid",
+    "skills"
+  ],
+  "hostedBy": "vendor",
+  "stage": "beta",
+  "docs": "https://www.twilio.com/docs/ai/mcp",
+  "upstream": {
+    "repository": "https://github.com/twilio/ai",
+    "path": "skills",
+    "commit": "803790a281f0ef11d2928ffb41bc8422237fb434",
+    "author": "Twilio",
+    "license": "MIT"
+  },
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "twilio",
+        "transport": "streamable-http",
+        "url": "https://mcp.twilio.com/docs",
+        "auth": {
+          "type": "none",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [
+      "twilio-account-setup",
+      "twilio-agent-augmentation-architect",
+      "twilio-agent-connect",
+      "twilio-ai-agent-architect",
+      "twilio-call-recordings",
+      "twilio-cli-reference",
+      "twilio-compliance-onboarding",
+      "twilio-compliance-traffic",
+      "twilio-conference-calls",
+      "twilio-content-template-builder",
+      "twilio-conversation-intelligence",
+      "twilio-conversation-memory",
+      "twilio-conversation-orchestrator",
+      "twilio-conversations-classic-api",
+      "twilio-customer-support-architect",
+      "twilio-debugging-observability",
+      "twilio-email-deliverability-advisor",
+      "twilio-email-send",
+      "twilio-enterprise-knowledge",
+      "twilio-iam-auth-setup",
+      "twilio-identity-verification-advisor",
+      "twilio-lookup-phone-intelligence",
+      "twilio-marketing-promotions-advisor",
+      "twilio-messaging-channel-advisor",
+      "twilio-messaging-overview",
+      "twilio-messaging-services",
+      "twilio-messaging-webhooks",
+      "twilio-migrate-messaging-to-verify",
+      "twilio-notifications-alerts-advisor",
+      "twilio-numbers-senders",
+      "twilio-organizations-setup",
+      "twilio-rcs-messaging",
+      "twilio-regulatory-compliance-bundles",
+      "twilio-reliability-patterns",
+      "twilio-security-api-auth",
+      "twilio-security-compliance-hipaa",
+      "twilio-security-hardening",
+      "twilio-send-message",
+      "twilio-sendgrid-account-setup",
+      "twilio-sendgrid-deliverability-advisor",
+      "twilio-sendgrid-email-send",
+      "twilio-sendgrid-email-settings",
+      "twilio-sendgrid-engagement-quality",
+      "twilio-sendgrid-inbound-parse",
+      "twilio-sendgrid-suppressions",
+      "twilio-sendgrid-webhooks",
+      "twilio-sms-isv-setup",
+      "twilio-sms-send-message",
+      "twilio-studio-flows",
+      "twilio-taskrouter-routing",
+      "twilio-verify-send-otp",
+      "twilio-voice-conversation-relay",
+      "twilio-voice-outbound-calls",
+      "twilio-voice-twiml",
+      "twilio-webhook-architecture",
+      "twilio-whatsapp-manage-senders",
+      "twilio-whatsapp-send-message"
+    ],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://mcp.twilio.com/docs: initialize returned HTTP 200, serverInfo name twilio-docs-mcp v0.1.0, no sign-in requested"
+  }
+}

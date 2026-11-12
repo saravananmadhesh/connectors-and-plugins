@@ -1,0 +1,29 @@
+{
+  "name": "twilio",
+  "displayName": "Twilio",
+  "version": "0.1.0",
+  "description": "Build powerful communications and customer engagement.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://www.twilio.com/docs/ai/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "twilio",
+    "communication",
+    "sms",
+    "voice",
+    "whatsapp",
+    "verify",
+    "sendgrid",
+    "skills"
+  ],
+  "icon": "./assets/logo.png",
+  "mcpServers": {
+    "twilio": {
+      "type": "http",
+      "url": "https://mcp.twilio.com/docs"
+    }
+  }
+}

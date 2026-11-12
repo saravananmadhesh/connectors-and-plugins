@@ -1,0 +1,24 @@
+{
+  "name": "mdn",
+  "displayName": "MDN",
+  "version": "0.1.0",
+  "description": "Search & retrieval of MDN docs & browser compat data.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Howto/MDN_Web_Docs_MCP_server",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "mdn",
+    "developer-tools",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "mdn": {
+      "type": "http",
+      "url": "https://mcp.mdn.mozilla.net/"
+    }
+  }
+}

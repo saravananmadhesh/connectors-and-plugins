@@ -1,0 +1,37 @@
+{
+  "name": "pagerduty",
+  "displayName": "PagerDuty",
+  "version": "0.1.0",
+  "description": "Browse PagerDuty services, incidents, and change events.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/PagerDuty/claude-code-plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "pagerduty",
+    "incidents",
+    "on-call",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "userConfig": {
+    "PAGERDUTY_API_KEY": {
+      "type": "string",
+      "title": "PagerDuty API key",
+      "description": "API user token from PagerDuty: User Profile, User Settings, API Access, Create API User Token.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "pagerduty": {
+      "type": "http",
+      "url": "https://mcp.pagerduty.com/mcp",
+      "headers": {
+        "Authorization": "Token token=${user_config.PAGERDUTY_API_KEY}"
+      }
+    }
+  }
+}

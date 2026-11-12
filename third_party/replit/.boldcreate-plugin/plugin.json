@@ -1,0 +1,50 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "replit",
+  "displayName": "Replit",
+  "version": "0.1.0",
+  "description": "Turn ideas into apps and websites instantly.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://replit.com/",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "developer-tools",
+  "keywords": [
+    "replit",
+    "developer-tools",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://replit.com/",
+  "rollout": {
+    "phase": 1,
+    "wave": "B"
+  },
+  "supportedByGateway": true,
+  "variables": {},
+  "components": {
+    "mcp": [
+      {
+        "name": "replit",
+        "transport": "streamable-http",
+        "url": "https://replit-mcp.com/anthropic/mcp",
+        "auth": {
+          "type": "oauth",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": "2026-11-04",
+    "source": "live probe of https://replit-mcp.com/anthropic/mcp: initialize returned HTTP 401 Bearer with oauth-protected-resource metadata (resource_name 'Replit MCP Server'); authorization-server metadata delegates to Replit's IdP https://replit.com/oidc"
+  }
+}
