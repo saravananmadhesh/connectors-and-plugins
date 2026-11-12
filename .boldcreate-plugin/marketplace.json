@@ -120,7 +120,7 @@
       "auth": [
         "oauth"
       ],
-      "requiresSecrets": true,
+      "requiresSecrets": false,
       "rollout": {
         "phase": 2,
         "wave": "B"
