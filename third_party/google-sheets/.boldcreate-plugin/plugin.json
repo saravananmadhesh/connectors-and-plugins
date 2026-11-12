@@ -3,7 +3,7 @@
   "name": "google-sheets",
   "displayName": "Google Sheets",
   "version": "0.7.0",
-  "description": "Read, create, and update Google Sheets spreadsheets.",
+  "description": "Read and update Google Sheets spreadsheets, including values, formulas, and rows and columns.",
   "author": {
     "name": "Syncfusion"
   },
@@ -71,6 +71,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs (developers.google.com/workspace/guides/configure-mcp-servers)"
+    "source": "official docs (developers.google.com/workspace/guides/configure-mcp-servers)"
   }
 }

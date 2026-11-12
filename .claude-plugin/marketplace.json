@@ -15,7 +15,7 @@
     {
       "name": "atlassian",
       "source": "./third_party/atlassian",
-      "description": "Search and update Jira issues and Confluence pages."
+      "description": "Connect to Atlassian products including Jira and Confluence. Search and create issues, access documentation, manage sprints, and integrate your development workflow with Atlassian's collaboration tools."
     },
     {
       "name": "aws-knowledge",
@@ -45,7 +45,7 @@
     {
       "name": "figma",
       "source": "./third_party/figma",
-      "description": "Turn Figma frames into code and read design tokens, components, and variables."
+      "description": "Give AI agents the design context to generate code from your Figma files, and write native Figma content back to the canvas."
     },
     {
       "name": "gitea",
@@ -60,17 +60,17 @@
     {
       "name": "gitlab",
       "source": "./third_party/gitlab",
-      "description": "Work with GitLab projects, issues, merge requests, pipelines, and code search."
+      "description": "Access GitLab project information, retrieve issue and merge request data, and interact with GitLab APIs."
     },
     {
       "name": "gmail",
       "source": "./third_party/gmail",
-      "description": "Search, read, and draft Gmail messages and threads."
+      "description": "Search, read, and draft Gmail messages and threads, and manage labels, Trash and Spam."
     },
     {
       "name": "google-calendar",
       "source": "./third_party/google-calendar",
-      "description": "List calendars, read events, and check free/busy time."
+      "description": "List calendars, search and read events, suggest meeting times, and create, update, delete or respond to events."
     },
     {
       "name": "google-chat",
@@ -145,12 +145,12 @@
     {
       "name": "google-docs",
       "source": "./third_party/google-docs",
-      "description": "Read, create, and edit Google Docs."
+      "description": "Read and update Google Docs."
     },
     {
       "name": "google-drive",
       "source": "./third_party/google-drive",
-      "description": "Search, read, and create files in Google Drive."
+      "description": "Search, read, create, download and copy files in Google Drive, and view file metadata and permissions."
     },
     {
       "name": "google-gemini-cloud-assist",
@@ -175,7 +175,7 @@
     {
       "name": "google-sheets",
       "source": "./third_party/google-sheets",
-      "description": "Read, create, and update Google Sheets spreadsheets."
+      "description": "Read and update Google Sheets spreadsheets, including values, formulas, and rows and columns."
     },
     {
       "name": "google-slides",
@@ -193,9 +193,14 @@
       "description": "Search across Gmail, Drive, Calendar, and other Google Workspace content in one place."
     },
     {
+      "name": "hubspot",
+      "source": "./third_party/hubspot",
+      "description": "Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more."
+    },
+    {
       "name": "linear",
       "source": "./third_party/linear",
-      "description": "Find, create, and update Linear issues, projects, and cycles."
+      "description": "Find, create, and update Linear objects such as issues, projects, and comments."
     },
     {
       "name": "microsoft-learn",
@@ -210,7 +215,7 @@
     {
       "name": "notion",
       "source": "./third_party/notion",
-      "description": "Search, read, and update Notion pages and databases."
+      "description": "Search your Notion workspace, create and edit pages, and manage databases."
     },
     {
       "name": "posthog",
@@ -220,17 +225,27 @@
     {
       "name": "sentry",
       "source": "./third_party/sentry",
-      "description": "Investigate Sentry errors, stack traces, and issues for a project."
+      "description": "Search errors, analyze performance, triage issues, read documentation, and manage projects in Sentry."
+    },
+    {
+      "name": "shopify",
+      "source": "./third_party/shopify",
+      "description": "Create and manage your store with Shopify."
+    },
+    {
+      "name": "slack",
+      "source": "./third_party/slack",
+      "description": "Slack AI tools for users and developers: interact with your workspace via the Slack MCP server and use skills to develop Slack apps."
     },
     {
       "name": "stripe",
       "source": "./third_party/stripe",
-      "description": "Work with Stripe customers, payments, subscriptions, and search Stripe docs."
+      "description": "Interact with the Stripe API and search the Stripe knowledge base, including documentation and support articles."
     },
     {
       "name": "supabase",
       "source": "./third_party/supabase",
-      "description": "Query Postgres, manage tables, auth, storage, and edge functions in a Supabase project."
+      "description": "Connect AI assistants to your Supabase project to manage tables, fetch config, and query data."
     },
     {
       "name": "syncfusion-angular",
@@ -325,7 +340,17 @@
     {
       "name": "vercel",
       "source": "./third_party/vercel",
-      "description": "Inspect Vercel projects, deployments, and build logs, and search Vercel docs."
+      "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics."
+    },
+    {
+      "name": "zapier",
+      "source": "./third_party/zapier",
+      "description": "Connect 9,000+ apps to your AI workflow. Discover, enable, and execute Zapier actions directly from your client."
+    },
+    {
+      "name": "zoom",
+      "source": "./third_party/zoom",
+      "description": "Search, ask and act on your Zoom meetings, recordings, notes and docs"
     }
   ]
 }

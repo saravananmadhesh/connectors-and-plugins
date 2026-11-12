@@ -1,6 +1,6 @@
 # Microsoft Learn
 
-BoldCreate plugin that connects agents to Microsoft Learn through the vendor's hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
+BoldCreate plugin that connects agents to Microsoft Learn through its hosted [Model Context Protocol](https://modelcontextprotocol.io/) server over streamable HTTP.
 
 Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more.
 

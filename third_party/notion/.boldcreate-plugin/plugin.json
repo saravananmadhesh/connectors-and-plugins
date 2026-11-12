@@ -3,7 +3,7 @@
   "name": "notion",
   "displayName": "Notion",
   "version": "0.7.0",
-  "description": "Search, read, and update Notion pages and databases.",
+  "description": "Search your Notion workspace, create and edit pages, and manage databases.",
   "author": {
     "name": "Syncfusion"
   },
@@ -47,6 +47,6 @@
   },
   "endpointCheck": {
     "lastLiveCheck": null,
-    "source": "vendor docs"
+    "source": "official docs"
   }
 }
