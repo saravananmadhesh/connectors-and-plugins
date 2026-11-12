@@ -8,6 +8,11 @@
   },
   "plugins": [
     {
+      "name": "amplitude",
+      "source": "./third_party/amplitude",
+      "description": "Query Amplitude product analytics, charts, and experiments."
+    },
+    {
       "name": "android-management",
       "source": "./third_party/android-management",
       "description": "Manage enterprise Android devices, policies, and apps with the Android Management API."
@@ -28,14 +33,19 @@
       "description": "Skills, reviewer agents and rules that take any project from idea to release: specs, test-first builds, two-axis code review and pull requests."
     },
     {
-      "name": "bolddesk",
-      "source": "./third_party/bolddesk",
-      "description": "Create, update and route support tickets, reply to conversations, log work, and search the Knowledge Base in BoldDesk."
+      "name": "clickhouse",
+      "source": "./third_party/clickhouse",
+      "description": "Query and explore your ClickHouse Cloud data."
     },
     {
       "name": "context7",
       "source": "./third_party/context7",
       "description": "Pull up-to-date, version-specific library docs and code examples into the prompt."
+    },
+    {
+      "name": "datadog",
+      "source": "./third_party/datadog",
+      "description": "Query Datadog logs, metrics, traces, incidents, and monitors."
     },
     {
       "name": "deepwiki",
@@ -198,9 +208,19 @@
       "description": "Secure read and write access to your HubSpot CRM data — contacts, deals, engagements, and more."
     },
     {
+      "name": "huggingface",
+      "source": "./third_party/huggingface",
+      "description": "Search Hugging Face for models, datasets, and spaces."
+    },
+    {
       "name": "linear",
       "source": "./third_party/linear",
       "description": "Find, create, and update Linear objects such as issues, projects, and comments."
+    },
+    {
+      "name": "mdn",
+      "source": "./third_party/mdn",
+      "description": "Search & retrieval of MDN docs & browser compat data."
     },
     {
       "name": "microsoft-learn",
@@ -208,9 +228,19 @@
       "description": "Search official Microsoft docs and code samples for .NET, Azure, MAUI, and more."
     },
     {
+      "name": "mixpanel",
+      "source": "./third_party/mixpanel",
+      "description": "Analyze, query, and manage your Mixpanel data."
+    },
+    {
       "name": "neon",
       "source": "./third_party/neon",
       "description": "Manage Neon serverless Postgres projects, branches, queries, and migrations."
+    },
+    {
+      "name": "netlify",
+      "source": "./third_party/netlify",
+      "description": "Create, deploy, manage, and secure websites on Netlify."
     },
     {
       "name": "notion",
@@ -218,9 +248,34 @@
       "description": "Search your Notion workspace, create and edit pages, and manage databases."
     },
     {
+      "name": "pagerduty",
+      "source": "./third_party/pagerduty",
+      "description": "Browse PagerDuty services, incidents, and change events."
+    },
+    {
+      "name": "pipedrive",
+      "source": "./third_party/pipedrive",
+      "description": "Find deals, update records, manage activities and work with your live CRM data using natural language."
+    },
+    {
       "name": "posthog",
       "source": "./third_party/posthog",
       "description": "Query product analytics, manage feature flags, and investigate errors in PostHog."
+    },
+    {
+      "name": "railway",
+      "source": "./third_party/railway",
+      "description": "Deploy, manage, and debug your apps and infrastructure on Railway."
+    },
+    {
+      "name": "render",
+      "source": "./third_party/render",
+      "description": "Inspect Render services, deploys, and logs."
+    },
+    {
+      "name": "replit",
+      "source": "./third_party/replit",
+      "description": "Turn ideas into apps and websites instantly."
     },
     {
       "name": "sentry",
@@ -338,9 +393,19 @@
       "description": "Skills for moving Xamarin.Forms apps to .NET MAUI: project and framework changes, platform-specific code, renderers to handlers, and Syncfusion Xamarin controls to their .NET MAUI equivalents."
     },
     {
+      "name": "twilio",
+      "source": "./third_party/twilio",
+      "description": "Build powerful communications and customer engagement."
+    },
+    {
       "name": "vercel",
       "source": "./third_party/vercel",
       "description": "Search Vercel documentation, manage projects, inspect deployments, and query Web Analytics."
+    },
+    {
+      "name": "xero",
+      "source": "./third_party/xero",
+      "description": "Access your Xero financials from any conversation."
     },
     {
       "name": "zapier",

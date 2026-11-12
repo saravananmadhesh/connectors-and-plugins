@@ -10,6 +10,30 @@
   },
   "plugins": [
     {
+      "name": "amplitude",
+      "displayName": "Amplitude",
+      "version": "0.1.0",
+      "description": "Query Amplitude product analytics, charts, and experiments.",
+      "source": "third_party/amplitude",
+      "logo": "third_party/amplitude/assets/logo.png",
+      "category": "analytics",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "android-management",
       "displayName": "Android Management",
       "version": "0.7.0",
@@ -105,13 +129,13 @@
       "supportedByGateway": false
     },
     {
-      "name": "bolddesk",
-      "displayName": "BoldDesk",
-      "version": "0.7.1",
-      "description": "Create, update and route support tickets, reply to conversations, log work, and search the Knowledge Base in BoldDesk.",
-      "source": "third_party/bolddesk",
-      "logo": "third_party/bolddesk/assets/logo.svg",
-      "category": "customer-support",
+      "name": "clickhouse",
+      "displayName": "ClickHouse",
+      "version": "0.1.0",
+      "description": "Query and explore your ClickHouse Cloud data.",
+      "source": "third_party/clickhouse",
+      "logo": "third_party/clickhouse/assets/logo.png",
+      "category": "analytics",
       "components": [
         "mcp"
       ],
@@ -123,7 +147,7 @@
       ],
       "requiresSecrets": false,
       "rollout": {
-        "phase": 2,
+        "phase": 1,
         "wave": "B"
       },
       "supportedByGateway": true
@@ -146,6 +170,30 @@
         "oauth"
       ],
       "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "datadog",
+      "displayName": "Datadog",
+      "version": "0.1.0",
+      "description": "Query Datadog logs, metrics, traces, incidents, and monitors.",
+      "source": "third_party/datadog",
+      "logo": "third_party/datadog/assets/logo.svg",
+      "category": "observability",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "header"
+      ],
+      "requiresSecrets": true,
       "rollout": {
         "phase": 1,
         "wave": "A"
@@ -923,6 +971,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "huggingface",
+      "displayName": "Hugging Face",
+      "version": "0.1.0",
+      "description": "Search Hugging Face for models, datasets, and spaces.",
+      "source": "third_party/huggingface",
+      "logo": "third_party/huggingface/assets/logo.png",
+      "category": "ai",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "none"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "linear",
       "displayName": "Linear",
       "version": "0.7.1",
@@ -938,6 +1010,30 @@
       ],
       "auth": [
         "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "mdn",
+      "displayName": "MDN",
+      "version": "0.1.0",
+      "description": "Search & retrieval of MDN docs & browser compat data.",
+      "source": "third_party/mdn",
+      "logo": "third_party/mdn/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "none"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -971,6 +1067,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "mixpanel",
+      "displayName": "Mixpanel",
+      "version": "0.1.0",
+      "description": "Analyze, query, and manage your Mixpanel data.",
+      "source": "third_party/mixpanel",
+      "logo": "third_party/mixpanel/assets/logo.svg",
+      "category": "analytics",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "neon",
       "displayName": "Neon",
       "version": "0.7.1",
@@ -995,6 +1115,30 @@
       "supportedByGateway": true
     },
     {
+      "name": "netlify",
+      "displayName": "Netlify",
+      "version": "0.1.0",
+      "description": "Create, deploy, manage, and secure websites on Netlify.",
+      "source": "third_party/netlify",
+      "logo": "third_party/netlify/assets/logo.svg",
+      "category": "hosting",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "notion",
       "displayName": "Notion",
       "version": "0.7.0",
@@ -1002,6 +1146,54 @@
       "source": "third_party/notion",
       "logo": "third_party/notion/assets/logo.svg",
       "category": "documentation",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "pagerduty",
+      "displayName": "PagerDuty",
+      "version": "0.1.0",
+      "description": "Browse PagerDuty services, incidents, and change events.",
+      "source": "third_party/pagerduty",
+      "logo": "third_party/pagerduty/assets/logo.svg",
+      "category": "incident-management",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "header"
+      ],
+      "requiresSecrets": true,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "pipedrive",
+      "displayName": "Pipedrive",
+      "version": "0.1.0",
+      "description": "Find deals, update records, manage activities and work with your live CRM data using natural language.",
+      "source": "third_party/pipedrive",
+      "logo": "third_party/pipedrive/assets/logo.png",
+      "category": "crm",
       "components": [
         "mcp"
       ],
@@ -1039,6 +1231,78 @@
       "rollout": {
         "phase": 1,
         "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "railway",
+      "displayName": "Railway",
+      "version": "0.1.0",
+      "description": "Deploy, manage, and debug your apps and infrastructure on Railway.",
+      "source": "third_party/railway",
+      "logo": "third_party/railway/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "render",
+      "displayName": "Render",
+      "version": "0.1.0",
+      "description": "Inspect Render services, deploys, and logs.",
+      "source": "third_party/render",
+      "logo": "third_party/render/assets/logo.svg",
+      "category": "hosting",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "replit",
+      "displayName": "Replit",
+      "version": "0.1.0",
+      "description": "Turn ideas into apps and websites instantly.",
+      "source": "third_party/replit",
+      "logo": "third_party/replit/assets/logo.svg",
+      "category": "developer-tools",
+      "components": [
+        "mcp"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
       },
       "supportedByGateway": true
     },
@@ -1509,6 +1773,31 @@
       "supportedByGateway": false
     },
     {
+      "name": "twilio",
+      "displayName": "Twilio",
+      "version": "0.1.0",
+      "description": "Build powerful communications and customer engagement.",
+      "source": "third_party/twilio",
+      "logo": "third_party/twilio/assets/logo.png",
+      "category": "communication",
+      "components": [
+        "mcp",
+        "skills"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "none"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "A"
+      },
+      "supportedByGateway": true
+    },
+    {
       "name": "vercel",
       "displayName": "Vercel",
       "version": "0.7.0",
@@ -1520,6 +1809,30 @@
         "mcp",
         "skills",
         "agents"
+      ],
+      "transports": [
+        "streamable-http"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "requiresSecrets": false,
+      "rollout": {
+        "phase": 1,
+        "wave": "B"
+      },
+      "supportedByGateway": true
+    },
+    {
+      "name": "xero",
+      "displayName": "Xero",
+      "version": "0.1.0",
+      "description": "Access your Xero financials from any conversation.",
+      "source": "third_party/xero",
+      "logo": "third_party/xero/assets/logo.svg",
+      "category": "finance",
+      "components": [
+        "mcp"
       ],
       "transports": [
         "streamable-http"

@@ -1,0 +1,61 @@
+{
+  "$schema": "../../../schemas/boldcreate-plugin.schema.json",
+  "name": "pagerduty",
+  "displayName": "PagerDuty",
+  "version": "0.1.0",
+  "description": "Browse PagerDuty services, incidents, and change events.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://github.com/PagerDuty/claude-code-plugins",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "category": "incident-management",
+  "keywords": [
+    "pagerduty",
+    "incidents",
+    "on-call",
+    "mcp"
+  ],
+  "hostedBy": "vendor",
+  "docs": "https://github.com/PagerDuty/claude-code-plugins",
+  "rollout": {
+    "phase": 1,
+    "wave": "A"
+  },
+  "supportedByGateway": true,
+  "variables": {
+    "PAGERDUTY_API_KEY": {
+      "title": "PagerDuty API key",
+      "description": "API user token from PagerDuty: User Profile, User Settings, API Access, Create API User Token.",
+      "required": true,
+      "secret": true
+    }
+  },
+  "components": {
+    "mcp": [
+      {
+        "name": "pagerduty",
+        "transport": "streamable-http",
+        "url": "https://mcp.pagerduty.com/mcp",
+        "headers": {
+          "Authorization": "Token token=${PAGERDUTY_API_KEY}"
+        },
+        "auth": {
+          "type": "header",
+          "alternatives": []
+        }
+      }
+    ],
+    "skills": [],
+    "rules": [],
+    "hooks": [],
+    "agents": [],
+    "commands": []
+  },
+  "endpointCheck": {
+    "lastLiveCheck": null,
+    "source": "vendor plugin repository (PagerDuty/claude-code-plugins)"
+  }
+}

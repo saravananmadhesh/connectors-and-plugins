@@ -1,0 +1,24 @@
+{
+  "name": "mixpanel",
+  "displayName": "Mixpanel",
+  "version": "0.1.0",
+  "description": "Analyze, query, and manage your Mixpanel data.",
+  "author": {
+    "name": "Syncfusion"
+  },
+  "homepage": "https://docs.mixpanel.com/docs/mcp",
+  "repository": "https://github.com/syncfusion/BoldCreate-Plugins",
+  "license": "MIT",
+  "keywords": [
+    "mixpanel",
+    "analytics",
+    "mcp"
+  ],
+  "icon": "./assets/logo.svg",
+  "mcpServers": {
+    "mixpanel": {
+      "type": "http",
+      "url": "https://mcp.mixpanel.com/mcp"
+    }
+  }
+}

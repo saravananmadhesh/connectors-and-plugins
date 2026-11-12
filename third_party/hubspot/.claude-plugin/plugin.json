@@ -18,14 +18,14 @@
     "mcp"
   ],
   "icon": "./assets/logo.svg",
+  "agents": [
+    "./agents/account-research.md",
+    "./agents/brief-fetcher.md"
+  ],
   "mcpServers": {
     "hubspot": {
       "type": "http",
       "url": "https://mcp.hubspot.com"
     }
-  },
-  "agents": [
-    "./agents/account-research.md",
-    "./agents/brief-fetcher.md"
-  ]
+  }
 }
