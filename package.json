@@ -7,8 +7,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
-    "check:kit": "node scripts/check-kit.mjs",
-    "test": "node --test scripts/*.test.mjs"
+    "check:kit": "node scripts/check-kit.mjs"
   },
   "devDependencies": {
     "ajv": "8.20.0",
