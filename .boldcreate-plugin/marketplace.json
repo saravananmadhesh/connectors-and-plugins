@@ -48,7 +48,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "basic-api-token"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -142,7 +143,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -238,7 +240,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -262,7 +265,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -790,7 +794,8 @@
         "streamable-http"
       ],
       "auth": [
-        "header"
+        "header",
+        "oauth"
       ],
       "requiresSecrets": true,
       "rollout": {
@@ -910,7 +915,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -958,7 +964,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -1006,7 +1013,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -1054,7 +1062,8 @@
         "streamable-http"
       ],
       "auth": [
-        "oauth"
+        "oauth",
+        "bearer"
       ],
       "requiresSecrets": false,
       "rollout": {
@@ -1078,7 +1087,8 @@
         "streamable-http"
       ],
       "auth": [
-        "bearer"
+        "bearer",
+        "oauth"
       ],
       "requiresSecrets": true,
       "rollout": {

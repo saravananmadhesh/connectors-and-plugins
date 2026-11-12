@@ -257,7 +257,7 @@ export function marketplaces(plugins) {
         category: m.category,
         components: Object.entries(m.components).filter(([, v]) => v.length).map(([k]) => k),
         transports: [...new Set(mcp.map((c) => c.transport))],
-        auth: [...new Set(mcp.map((c) => c.auth.type))],
+        auth: [...new Set(mcp.flatMap((c) => [c.auth.type, ...(c.auth.alternatives ?? [])]))],
         requiresSecrets: Object.values(m.variables).some((v) => v.secret),
         rollout: m.rollout,
         supportedByGateway: m.supportedByGateway,
