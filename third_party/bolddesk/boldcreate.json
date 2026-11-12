@@ -4,9 +4,6 @@
   "wave": "B",
   "transport": "streamable-http",
   "auth": "oauth",
-  "alternativeAuth": [
-    "header"
-  ],
   "hostedBy": "vendor",
   "docs": "https://developer.bolddesk.com/mcp-server/",
   "endpointCheck": {
